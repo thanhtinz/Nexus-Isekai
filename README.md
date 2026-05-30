@@ -18,6 +18,7 @@ Nexus Isekai là một **bộ khung MMORPG đầy đủ** gồm 4 thành phần 
 |---|---|---|
 | **Game Server** | Java 17 + Netty + HikariCP | TCP game server, xử lý packet nhị phân |
 | **Game Client** | C# Unity 2022 | Client 2D, đầy đủ UI ingame |
+| **J2ME Client** | Java CLDC 1.1 / MIDP 2.0 | Client điện thoại feature phone (Nokia...) |
 | **Webshop** | React 18 + TypeScript + Vite | Cổng nạp game, mua item, gift code |
 | **Admin Panel** | JavaFX 17 | Quản trị toàn bộ game, 30+ panels |
 
@@ -101,6 +102,15 @@ NexusIsekai/
 │       ├── Game/               # GameObjects, PacketHandlers, PlayerController
 │       ├── Network/            # GameClient, PacketBuilder, PacketDispatcher, PacketOpcode
 │       └── UI/                 # ChatUI, InventoryUI, UIScripts (tất cả UI)
+│
+├── client-j2me/               # J2ME client (feature phones)
+│   ├── src/com/nexusisekai/
+│   │   ├── NexusIsekaiMIDlet.java # Main MIDlet
+│   │   ├── net/                   # TCP + PacketWriter/Reader/Opcode
+│   │   ├── game/                  # GameCanvas, LoginCanvas, PacketHandler
+│   │   └── data/                  # GameState
+│   ├── res/                       # Resources, MANIFEST.MF
+│   └── build.xml                  # Ant build (output: dist/*.jar + *.jad)
 │
 ├── webshop/                    # React frontend
 │   ├── src/

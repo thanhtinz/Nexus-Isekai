@@ -1,0 +1,129 @@
+package com.nexusisekai.net;
+
+/**
+ * PacketOpcode.java — J2ME
+ * Sync 1:1 với server PacketOpcode.java
+ * Mọi thay đổi server phải cập nhật file này
+ */
+public interface PacketOpcode {
+
+    // ── AUTH ─────────────────────────────────────────────────
+    short C2S_LOGIN             = 0x0101;
+    short C2S_REGISTER          = 0x0102;
+    short S2C_LOGIN_OK          = 0x0111;
+    short S2C_LOGIN_FAIL        = 0x0112;
+    short S2C_REGISTER_OK       = 0x0113;
+    short S2C_REGISTER_FAIL     = 0x0114;
+
+    // ── CHAR SELECT ───────────────────────────────────────────
+    short C2S_CHAR_LIST         = 0x0201;
+    short C2S_CHAR_CREATE       = 0x0202;
+    short C2S_CHAR_DELETE       = 0x0203;
+    short C2S_CHAR_SELECT       = 0x0204;
+    short S2C_CHAR_LIST         = 0x0211;
+    short S2C_CHAR_CREATE_OK    = 0x0212;
+    short S2C_CHAR_CREATE_FAIL  = 0x0213;
+    short S2C_CHAR_ENTER_GAME   = 0x0215;
+    short S2C_CHAR_ERROR        = 0x0219;
+
+    // ── WORLD / MOVEMENT ─────────────────────────────────────
+    short C2S_MOVE              = 0x0301;
+    short C2S_MAP_CHANGE        = 0x0302;
+    short C2S_MAP_LOAD_DONE     = 0x0303;
+    short S2C_MAP_DATA          = 0x0312;
+    short S2C_NPC_LIST          = 0x0313;
+    short S2C_MONSTER_LIST      = 0x0314;
+    short S2C_PLAYER_ENTER      = 0x0315;
+    short S2C_PLAYER_LEAVE      = 0x0316;
+    short S2C_PLAYERS_IN_ZONE   = 0x0317;
+    short S2C_PLAYER_MOVE       = 0x0311;
+    short S2C_POSITION_CORRECT  = 0x0318;
+    short S2C_MAP_CHANGE_FAILED = 0x0319;
+
+    // ── COMBAT ───────────────────────────────────────────────
+    short C2S_ATTACK            = 0x0401;
+    short C2S_USE_SKILL         = 0x0402;
+    short S2C_ATTACK_RESULT     = 0x0411;
+    short S2C_SKILL_RESULT      = 0x0412;
+    short S2C_MONSTER_DEAD      = 0x0413;
+    short S2C_PLAYER_DEAD       = 0x0414;
+    short S2C_LEVEL_UP          = 0x0415;
+    short S2C_PLAYER_REVIVE     = 0x0416;
+    short S2C_EXP_GAIN          = 0x0417;
+    short S2C_PLAYER_STATS      = 0x041A;
+    short S2C_MONSTER_RESPAWN   = 0x041B;
+    short S2C_MONSTERS_IN_ZONE  = 0x041C;
+    short S2C_MONSTER_MOVE      = 0x041D;
+
+    // ── INVENTORY ────────────────────────────────────────────
+    short C2S_INVENTORY_OPEN    = 0x0501;
+    short C2S_USE_ITEM          = 0x0502;
+    short C2S_EQUIP_ITEM        = 0x0503;
+    short C2S_UNEQUIP_ITEM      = 0x0504;
+    short C2S_SHOP_OPEN         = 0x0505;
+    short C2S_SHOP_BUY          = 0x0506;
+    short C2S_SHOP_SELL         = 0x0507;
+    short C2S_DROP_ITEM         = 0x0508;
+    short S2C_INVENTORY_LIST    = 0x0511;
+    short S2C_SHOP_DATA         = 0x0514;
+
+    // ── QUEST ────────────────────────────────────────────────
+    short C2S_QUEST_LIST        = 0x0601;
+    short C2S_QUEST_ACCEPT      = 0x0602;
+    short C2S_QUEST_COMPLETE    = 0x0603;
+    short C2S_QUEST_ABANDON     = 0x0604;
+    short S2C_QUEST_LIST        = 0x0611;
+    short S2C_QUEST_ACCEPTED    = 0x0612;
+    short S2C_QUEST_COMPLETED   = 0x0613;
+    short S2C_QUEST_PROGRESS    = 0x0615;
+
+    // ── CHAT ─────────────────────────────────────────────────
+    short C2S_CHAT              = 0x0701;
+    short C2S_CHAT_STICKER      = 0x0702;
+    short C2S_CHAT_LOCATION     = 0x0704;
+    short C2S_CHAT_ITEM         = 0x0705;
+    short C2S_CHAT_RED_ENVELOPE = 0x0706;
+    short C2S_CHAT_GRAB_ENVELOPE= 0x0707;
+    short C2S_CHAT_CROSS        = 0x0709;
+    short S2C_CHAT              = 0x0711;
+    short S2C_SYSTEM_MSG        = 0x0712;
+    short S2C_CHAT_RED_ENVELOPE = 0x0721;
+    short S2C_CHAT_GRABBED      = 0x0722;
+    short S2C_CHAT_GRAB_RESULT  = 0x0723;
+
+    // ── GUILD ────────────────────────────────────────────────
+    short C2S_GUILD_INFO        = 0x0801;
+    short C2S_GUILD_CREATE      = 0x0802;
+    short C2S_GUILD_INVITE      = 0x0803;
+    short C2S_GUILD_LEAVE       = 0x0804;
+    short C2S_GUILD_ACCEPT      = 0x0805;
+    short S2C_GUILD_INFO        = 0x0811;
+    short S2C_GUILD_INVITED     = 0x0813;
+
+    // ── SYSTEM ───────────────────────────────────────────────
+    short C2S_PING              = 0x0901;
+    short S2C_PONG              = 0x0911;
+    short S2C_KICK              = 0x0914;
+    short S2C_MAINTENANCE       = 0x0916;
+
+    // ── SKILLS ───────────────────────────────────────────────
+    short C2S_SKILL_LIST        = 0x0920;
+    short C2S_SKILL_LEARN       = 0x0922;
+    short C2S_SKILL_SET_SLOT    = 0x0924;
+    short S2C_SKILL_LIST        = 0x0931;
+
+    // ── GIFTCODE & PASS ──────────────────────────────────────
+    short C2S_GIFTCODE          = (short)0x0A10;
+    short S2C_GIFTCODE_OK       = (short)0x0A11;
+    short S2C_GIFTCODE_FAIL     = (short)0x0A12;
+    short S2C_DIAMOND_UPDATE    = (short)0x0A02;
+    short S2C_TOPUP_OK          = (short)0x0A01;
+
+    // ── PET ──────────────────────────────────────────────────
+    short C2S_PET_LIST          = (short)0x0D01;
+    short S2C_PET_LIST          = (short)0x0D21;
+
+    // ── LEADERBOARD ──────────────────────────────────────────
+    short C2S_LEADERBOARD       = (short)0x0F20;
+    short S2C_LEADERBOARD       = (short)0x0F31;
+}
