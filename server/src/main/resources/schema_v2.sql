@@ -1421,3 +1421,144 @@ INSERT IGNORE INTO farm_animals (id,animal_name,product_item_id,produce_time_min
 INSERT IGNORE INTO furniture_catalog (id,name,furniture_type,price_gold,size) VALUES
 (1,'Ban Go','table',500,2),(2,'Giuong','bed',1000,4),(3,'Tu Quan Ao','wardrobe',800,2),
 (4,'Den Lung','lamp',200,1),(5,'Cay Canh','plant',150,1);
+
+-- ═════════════════════════════════════════════════════════════
+-- 33. OTA ASSET UPDATE — Hệ thống cập nhật client qua mạng
+-- ═════════════════════════════════════════════════════════════
+
+-- Mỗi asset (ảnh, config, data) được track version + hash
+CREATE TABLE IF NOT EXISTS client_assets (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    asset_key       VARCHAR(256) NOT NULL UNIQUE,  -- VD: "Sprites/Items/item_001.png", "Config/skills.json"
+    asset_type      VARCHAR(32) NOT NULL,           -- image,config,audio,data,sprite_atlas,hud,icon,map_tile
+    category        VARCHAR(64) NOT NULL DEFAULT 'general', -- items,monsters,npcs,hud,icons,maps,effects,ui,audio,config
+    file_path       VARCHAR(512) NOT NULL,          -- đường dẫn thực trên server
+    file_size       INT NOT NULL DEFAULT 0,         -- bytes
+    hash_md5        VARCHAR(32) NOT NULL DEFAULT '', -- MD5 hash để client so sánh
+    version         INT NOT NULL DEFAULT 1,         -- tăng mỗi lần upload mới
+    display_name    VARCHAR(128) DEFAULT '',
+    description     VARCHAR(256) DEFAULT '',
+    mime_type       VARCHAR(64) DEFAULT 'image/png',
+    width           INT DEFAULT 0,                  -- cho ảnh
+    height          INT DEFAULT 0,
+    is_required     TINYINT NOT NULL DEFAULT 1,     -- 1=phải tải, 0=optional
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    uploaded_by     VARCHAR(64) DEFAULT 'admin',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_type_cat (asset_type, category),
+    INDEX idx_version (version)
+);
+
+-- Bundle: nhóm asset để cập nhật đồng thời
+CREATE TABLE IF NOT EXISTS asset_bundles (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    bundle_name     VARCHAR(128) NOT NULL,          -- "HUD Pack v2", "Monster Sprites v3"
+    description     TEXT,
+    version         INT NOT NULL DEFAULT 1,
+    total_size      BIGINT NOT NULL DEFAULT 0,      -- tổng kích thước
+    asset_count     INT NOT NULL DEFAULT 0,
+    status          VARCHAR(16) NOT NULL DEFAULT 'draft', -- draft,published,archived
+    published_at    DATETIME DEFAULT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS asset_bundle_items (
+    bundle_id       INT NOT NULL,
+    asset_id        INT NOT NULL,
+    PRIMARY KEY (bundle_id, asset_id),
+    FOREIGN KEY (bundle_id) REFERENCES asset_bundles(id) ON DELETE CASCADE,
+    FOREIGN KEY (asset_id) REFERENCES client_assets(id) ON DELETE CASCADE
+);
+
+-- Client version tracking
+CREATE TABLE IF NOT EXISTS client_versions (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    platform        VARCHAR(16) NOT NULL,           -- android,ios,pc,webgl,j2me
+    version_code    INT NOT NULL,                   -- 1,2,3... (tăng dần)
+    version_name    VARCHAR(32) NOT NULL,            -- "1.0.0", "1.1.0"
+    min_asset_version INT NOT NULL DEFAULT 1,       -- asset version tối thiểu cần có
+    download_url    VARCHAR(512) DEFAULT '',         -- link tải APK/IPA/JAR mới
+    release_notes   TEXT,
+    is_force_update TINYINT NOT NULL DEFAULT 0,     -- 1=bắt buộc cập nhật
+    is_latest       TINYINT NOT NULL DEFAULT 1,
+    published_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_platform (platform, is_latest)
+);
+
+INSERT IGNORE INTO client_versions (id,platform,version_code,version_name,download_url) VALUES
+(1,'android',1,'1.0.0','/download/NexusIsekai.apk'),
+(2,'ios',1,'1.0.0',''),
+(3,'pc',1,'1.0.0','/download/NexusIsekai-PC.jar'),
+(4,'webgl',1,'1.0.0','/play');
+
+-- Config hot-reload (key-value, client poll định kỳ)
+CREATE TABLE IF NOT EXISTS hot_config (
+    config_key      VARCHAR(128) NOT NULL PRIMARY KEY,
+    config_value    TEXT NOT NULL,
+    config_type     VARCHAR(16) NOT NULL DEFAULT 'string', -- string,int,float,json,bool
+    category        VARCHAR(64) NOT NULL DEFAULT 'game',
+    description     VARCHAR(256) DEFAULT '',
+    version         INT NOT NULL DEFAULT 1,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT IGNORE INTO hot_config VALUES
+('server_notice','','string','system','Thông báo trên màn hình login',1,NOW()),
+('maintenance_mode','false','bool','system','Chế độ bảo trì',1,NOW()),
+('double_exp_active','false','bool','event','Double EXP đang bật',1,NOW()),
+('max_enhance_level','10','int','game','Cấp cường hoá tối đa',1,NOW()),
+('pvp_enabled','true','bool','game','PvP có bật không',1,NOW()),
+('auction_enabled','true','bool','game','Nhà đấu giá có bật không',1,NOW()),
+('trade_enabled','true','bool','game','Giao dịch có bật không',1,NOW());
+
+-- ═════════════════════════════════════════════════════════════
+-- 34. STORY EDITOR — Quản lý cốt truyện + AI
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS story_chapters (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    chapter_order   INT NOT NULL DEFAULT 0,
+    title           VARCHAR(128) NOT NULL,
+    synopsis        TEXT,                           -- tóm tắt
+    full_text       LONGTEXT,                       -- nội dung đầy đủ
+    region_id       INT DEFAULT NULL,               -- vùng đất liên quan
+    min_level       INT NOT NULL DEFAULT 1,
+    max_level       INT NOT NULL DEFAULT 99,
+    prev_chapter_id INT DEFAULT NULL,
+    next_chapter_id INT DEFAULT NULL,
+    status          VARCHAR(16) NOT NULL DEFAULT 'draft', -- draft,published,archived
+    cutscene_data   TEXT,                           -- JSON: cấu hình cutscene
+    ai_generated    TINYINT NOT NULL DEFAULT 0,     -- 1=được AI tạo
+    created_by      VARCHAR(64) DEFAULT 'admin',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS story_quest_links (
+    chapter_id      INT NOT NULL,
+    quest_id        INT NOT NULL,
+    quest_order     INT NOT NULL DEFAULT 0,         -- thứ tự quest trong chapter
+    PRIMARY KEY (chapter_id, quest_id),
+    FOREIGN KEY (chapter_id) REFERENCES story_chapters(id) ON DELETE CASCADE
+);
+
+-- AI generation log
+CREATE TABLE IF NOT EXISTS ai_generation_log (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    gen_type        VARCHAR(32) NOT NULL,            -- quest,dialog,story,item_desc,event_desc,announcement
+    prompt          TEXT NOT NULL,
+    result          LONGTEXT,
+    model           VARCHAR(64) DEFAULT 'claude-sonnet-4-20250514',
+    tokens_used     INT DEFAULT 0,
+    created_by      VARCHAR(64) DEFAULT 'admin',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Seed story chapters
+INSERT IGNORE INTO story_chapters (id,chapter_order,title,synopsis,min_level,status) VALUES
+(1,1,'Thức Tỉnh','Lưu Dân tỉnh dậy tại Làng Khải Nguyên, không nhớ gì về quá khứ. Trưởng làng hướng dẫn những bước đầu tiên.',1,'published'),
+(2,2,'Sương Mù Bí Ẩn','Tin đồn về quái vật xuất hiện ở Đồng Bằng Sương Mù. Lưu Dân nhận nhiệm vụ điều tra.',10,'published'),
+(3,3,'Rừng Ám Ảnh','Ma khí nhiễm vào khu rừng phía Bắc. Cần tìm nguồn gốc sức mạnh tà ác.',25,'published'),
+(4,4,'Liên Minh Thiên Quang','Đến thủ phủ, gia nhập liên minh. Tiết lộ về Giáo Phái Vọng Linh.',35,'draft'),
+(5,5,'Phong Ấn Rung Chuyển','Phong ấn Azaroth bắt đầu yếu đi. Cuộc đua với thời gian.',50,'draft');

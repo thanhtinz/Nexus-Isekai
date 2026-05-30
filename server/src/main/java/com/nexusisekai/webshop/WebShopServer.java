@@ -61,6 +61,12 @@ public class WebShopServer {
         httpServer.createContext("/api/pass/active",this::handlePassActive);
         httpServer.createContext("/api/voice/upload",this::handleVoiceUpload);
         httpServer.createContext("/api/voice/",      this::handleVoiceServe);
+
+        // ── OTA Asset Update ──────────────────────────────────────
+        httpServer.createContext("/api/client/manifest",   this::handleManifest);
+        httpServer.createContext("/api/client/asset/",     this::handleAssetDownload);
+        httpServer.createContext("/api/client/version",    this::handleClientVersion);
+        httpServer.createContext("/api/client/config",     this::handleHotConfig);
         httpServer.createContext("/payment/webhook",this::handleWebhook);
         httpServer.setExecutor(Executors.newFixedThreadPool(8));
         httpServer.start();
@@ -311,6 +317,178 @@ public class WebShopServer {
                 }
                 sendJson(ex, 200, Map.of("success",true,"orders",orders));
             }
+        } catch (Exception e) { sendError(ex, 500, e.getMessage()); }
+    }
+
+    // ─────────────────────────────────────────
+    // OTA — Client Asset Update System
+    // ─────────────────────────────────────────
+
+    private static final java.nio.file.Path ASSETS_DIR;
+    static {
+        java.nio.file.Path ap = java.nio.file.Paths.get("client-assets");
+        try { java.nio.file.Files.createDirectories(ap); } catch (Exception ignored) {}
+        ASSETS_DIR = ap;
+    }
+
+    /**
+     * GET /api/client/manifest?since_version=N
+     * Trả về danh sách tất cả asset với hash, version, size.
+     * Client so sánh hash → chỉ tải file khác.
+     */
+    private void handleManifest(HttpExchange ex) throws IOException {
+        if (!ex.getRequestMethod().equals("GET")) { send405(ex); return; }
+        try {
+            String query = ex.getRequestURI().getQuery();
+            int sinceVersion = 0;
+            if (query != null) for (String p : query.split("&"))
+                if (p.startsWith("since_version=")) sinceVersion = Integer.parseInt(p.split("=")[1]);
+
+            List<Map<String, Object>> assets = new java.util.ArrayList<>();
+            try (Connection c = DatabaseManager.getInstance().getConnection();
+                 PreparedStatement ps = c.prepareStatement(
+                     "SELECT id,asset_key,asset_type,category,file_size,hash_md5,version,mime_type,is_required " +
+                     "FROM client_assets WHERE is_active=1 AND version>? ORDER BY category,asset_key")) {
+                ps.setInt(1, sinceVersion);
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    Map<String, Object> a = new java.util.LinkedHashMap<>();
+                    a.put("id", rs.getInt("id"));
+                    a.put("key", rs.getString("asset_key"));
+                    a.put("type", rs.getString("asset_type"));
+                    a.put("category", rs.getString("category"));
+                    a.put("size", rs.getInt("file_size"));
+                    a.put("hash", rs.getString("hash_md5"));
+                    a.put("version", rs.getInt("version"));
+                    a.put("required", rs.getInt("is_required") == 1);
+                    a.put("url", "/api/client/asset/" + rs.getInt("id"));
+                    assets.add(a);
+                }
+            }
+
+            // Thêm tổng version hiện tại
+            int maxVersion = assets.stream().mapToInt(a -> (int) a.get("version")).max().orElse(0);
+
+            sendJson(ex, 200, Map.of(
+                "success", true,
+                "asset_version", maxVersion,
+                "total_assets", assets.size(),
+                "total_size", assets.stream().mapToLong(a -> (long)(int) a.get("size")).sum(),
+                "assets", assets
+            ));
+        } catch (Exception e) { sendError(ex, 500, e.getMessage()); }
+    }
+
+    /**
+     * GET /api/client/asset/{id}
+     * Tải asset file theo ID. Client cache bằng ETag (hash_md5).
+     */
+    private void handleAssetDownload(HttpExchange ex) throws IOException {
+        if (!ex.getRequestMethod().equals("GET")) { send405(ex); return; }
+        String path = ex.getRequestURI().getPath();
+        String idStr = path.substring("/api/client/asset/".length()).replace("/","");
+        try {
+            int assetId = Integer.parseInt(idStr);
+            try (Connection c = DatabaseManager.getInstance().getConnection();
+                 PreparedStatement ps = c.prepareStatement(
+                     "SELECT file_path,hash_md5,mime_type FROM client_assets WHERE id=? AND is_active=1")) {
+                ps.setInt(1, assetId);
+                ResultSet rs = ps.executeQuery();
+                if (!rs.next()) { ex.sendResponseHeaders(404, -1); ex.close(); return; }
+
+                String filePath = rs.getString("file_path");
+                String hash     = rs.getString("hash_md5");
+                String mime     = rs.getString("mime_type");
+
+                // ETag cache
+                String ifNoneMatch = ex.getRequestHeaders().getFirst("If-None-Match");
+                if (hash.equals(ifNoneMatch)) {
+                    ex.sendResponseHeaders(304, -1); ex.close(); return; // Not Modified
+                }
+
+                java.nio.file.Path file = ASSETS_DIR.resolve(filePath);
+                if (!java.nio.file.Files.isReadable(file)) {
+                    ex.sendResponseHeaders(404, -1); ex.close(); return;
+                }
+
+                byte[] bytes = java.nio.file.Files.readAllBytes(file);
+                ex.getResponseHeaders().set("Content-Type", mime);
+                ex.getResponseHeaders().set("ETag", hash);
+                ex.getResponseHeaders().set("Cache-Control", "public, max-age=86400");
+                ex.sendResponseHeaders(200, bytes.length);
+                ex.getResponseBody().write(bytes);
+                ex.getResponseBody().close();
+            }
+        } catch (Exception e) { sendError(ex, 400, e.getMessage()); }
+    }
+
+    /**
+     * GET /api/client/version?platform=android
+     * Trả về phiên bản mới nhất + có cần force update không.
+     */
+    private void handleClientVersion(HttpExchange ex) throws IOException {
+        if (!ex.getRequestMethod().equals("GET")) { send405(ex); return; }
+        try {
+            String query = ex.getRequestURI().getQuery();
+            String platform = "android";
+            int currentVersion = 0;
+            if (query != null) for (String p : query.split("&")) {
+                if (p.startsWith("platform=")) platform = p.split("=")[1];
+                if (p.startsWith("current="))  currentVersion = Integer.parseInt(p.split("=")[1]);
+            }
+
+            try (Connection c = DatabaseManager.getInstance().getConnection();
+                 PreparedStatement ps = c.prepareStatement(
+                     "SELECT * FROM client_versions WHERE platform=? AND is_latest=1 LIMIT 1")) {
+                ps.setString(1, platform);
+                ResultSet rs = ps.executeQuery();
+                if (!rs.next()) {
+                    sendJson(ex, 200, Map.of("success", true, "update_available", false));
+                    return;
+                }
+
+                int latestCode = rs.getInt("version_code");
+                boolean needUpdate = latestCode > currentVersion;
+                boolean forceUpdate = rs.getInt("is_force_update") == 1 && needUpdate;
+
+                sendJson(ex, 200, Map.of(
+                    "success", true,
+                    "update_available", needUpdate,
+                    "force_update", forceUpdate,
+                    "latest_version", rs.getString("version_name"),
+                    "latest_code", latestCode,
+                    "download_url", rs.getString("download_url"),
+                    "release_notes", rs.getString("release_notes") != null ? rs.getString("release_notes") : "",
+                    "min_asset_version", rs.getInt("min_asset_version")
+                ));
+            }
+        } catch (Exception e) { sendError(ex, 500, e.getMessage()); }
+    }
+
+    /**
+     * GET /api/client/config
+     * Hot config — client poll định kỳ (mỗi 5 phút) để lấy config mới nhất.
+     */
+    private void handleHotConfig(HttpExchange ex) throws IOException {
+        if (!ex.getRequestMethod().equals("GET")) { send405(ex); return; }
+        try {
+            Map<String, Object> config = new java.util.LinkedHashMap<>();
+            try (Connection c = DatabaseManager.getInstance().getConnection();
+                 PreparedStatement ps = c.prepareStatement("SELECT config_key,config_value,config_type FROM hot_config")) {
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    String key   = rs.getString("config_key");
+                    String value = rs.getString("config_value");
+                    String type  = rs.getString("config_type");
+                    switch (type) {
+                        case "int"   -> config.put(key, Integer.parseInt(value));
+                        case "float" -> config.put(key, Double.parseDouble(value));
+                        case "bool"  -> config.put(key, Boolean.parseBoolean(value));
+                        default      -> config.put(key, value);
+                    }
+                }
+            }
+            sendJson(ex, 200, Map.of("success", true, "config", config));
         } catch (Exception e) { sendError(ex, 500, e.getMessage()); }
     }
 

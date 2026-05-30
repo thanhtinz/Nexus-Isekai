@@ -2111,3 +2111,275 @@ class ChatHistoryPanel extends BasePanel {
         root.setCenter(c);
     }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// Story Editor — Quan ly cot truyen + AI
+// ═══════════════════════════════════════════════════════════════
+
+class StoryEditorPanel extends BasePanel {
+    StoryEditorPanel(ApiClient api, MainWindow main) {
+        super("Cot Truyen - Story Editor");
+        var table = createTableView("GET", "/api/story", "chapters");
+        var btnAdd = new Button("Tao Chapter");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/story", Map.of("action","create","chapter_order",String.valueOf(table.getItems().size()+1),
+                "title","Chapter moi","synopsis","","full_text","","region_id","0","min_level","1","max_level","99","status","draft"));
+            refreshTable(table, "GET", "/api/story", "chapters");
+        });
+        var btnAI = new Button("AI Viet Cot Truyen");
+        btnAI.setOnAction(e -> showAIDialog("story", "Viet chapter tiep theo cho MMORPG Nexus Isekai"));
+        addToolbar(btnAdd, btnAI);
+        addContent(table);
+    }
+    private void showAIDialog(String genType, String defaultPrompt) {
+        var dialog = new TextInputDialog(defaultPrompt);
+        dialog.setTitle("AI Content Generator"); dialog.setHeaderText("Nhap yeu cau cho AI:");
+        dialog.showAndWait().ifPresent(prompt -> {
+            var result = ApiClient.get().post("/api/story/ai", Map.of("gen_type",genType,"prompt",prompt,"context",""));
+            showAlert("AI Result", result);
+        });
+    }
+}
+
+class AIGenerationPanel extends BasePanel {
+    AIGenerationPanel(ApiClient api, MainWindow main) {
+        super("AI Content Generator");
+        var cbType = new ComboBox<String>();
+        cbType.getItems().addAll("quest","dialog","story","item_desc","event_desc","announcement");
+        cbType.setValue("quest");
+        var tfPrompt = new TextArea(); tfPrompt.setPromptText("Nhap yeu cau cho AI...");
+        tfPrompt.setPrefRowCount(4);
+        var tfResult = new TextArea(); tfResult.setEditable(false); tfResult.setPrefRowCount(12);
+        tfResult.setPromptText("Ket qua AI se hien o day...");
+        var btnGenerate = new Button("Tao Noi Dung");
+        btnGenerate.setOnAction(e -> {
+            btnGenerate.setDisable(true);
+            var result = api.post("/api/story/ai", Map.of("gen_type",cbType.getValue(),"prompt",tfPrompt.getText(),"context",""));
+            tfResult.setText(result);
+            btnGenerate.setDisable(false);
+        });
+        addToolbar(new Label("Loai:"), cbType, btnGenerate);
+        addContent(new VBox(8, new Label("Yeu cau:"), tfPrompt, new Label("Ket qua:"), tfResult));
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Asset Manager + OTA
+// ═══════════════════════════════════════════════════════════════
+
+class AssetManagerPanel extends BasePanel {
+    AssetManagerPanel(ApiClient api, MainWindow main) {
+        super("Assets & OTA Manager");
+        var table = createTableView("GET", "/api/assets", "assets");
+        var cbFilter = new ComboBox<String>();
+        cbFilter.getItems().addAll("all","image","config","audio","sprite_atlas","hud","icon","map_tile");
+        cbFilter.setValue("all");
+        cbFilter.setOnAction(e -> {
+            String type = cbFilter.getValue().equals("all") ? "" : cbFilter.getValue();
+            refreshTable(table, "GET", "/api/assets?type=" + type, "assets");
+        });
+        var btnUpload = new Button("Upload Asset");
+        btnUpload.setOnAction(e -> {
+            var fc = new FileChooser();
+            fc.setTitle("Chon file asset");
+            var file = fc.showOpenDialog(null);
+            if (file != null) uploadAsset(api, file, table);
+        });
+        var btnBundles = new Button("Quan Ly Bundle");
+        addToolbar(new Label("Loc:"), cbFilter, btnUpload, btnBundles);
+        addContent(table);
+    }
+    private void uploadAsset(ApiClient api, java.io.File file, TableView table) {
+        String key = file.getName(); // simplified — could prompt for path
+        showAlert("Upload", "Uploading: " + key + " (" + file.length() + " bytes)");
+        // Real upload would use multipart HTTP
+        api.post("/api/assets", Map.of("action","categories")); // placeholder
+        refreshTable(table, "GET", "/api/assets", "assets");
+    }
+}
+
+class ClientVersionPanel extends BasePanel {
+    ClientVersionPanel(ApiClient api, MainWindow main) {
+        super("Quan Ly Phien Ban Client");
+        var table = createTableView("GET", "/api/client-versions", "versions");
+        var btnAdd = new Button("Them Phien Ban");
+        btnAdd.setOnAction(e -> {
+            var dialog = new TextInputDialog("1.1.0");
+            dialog.setTitle("Phien Ban Moi"); dialog.setHeaderText("Nhap version name:");
+            dialog.showAndWait().ifPresent(ver -> {
+                api.post("/api/client-versions", Map.of(
+                    "platform","android","version_code","2","version_name",ver,
+                    "download_url","/download/NexusIsekai.apk","release_notes","Bug fix + features",
+                    "is_force_update","0","min_asset_version","1"));
+                refreshTable(table, "GET", "/api/client-versions", "versions");
+            });
+        });
+        addToolbar(btnAdd);
+        addContent(table);
+    }
+}
+
+class HotConfigPanel extends BasePanel {
+    HotConfigPanel(ApiClient api, MainWindow main) {
+        super("Hot Config (Cap nhat khong can restart)");
+        var table = createTableView("GET", "/api/hot-config", "configs");
+        var btnSave = new Button("Luu Thay Doi");
+        btnSave.setOnAction(e -> showAlert("Info", "Chon dong trong bang va sua truc tiep"));
+        var btnAdd = new Button("Them Config");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/hot-config", Map.of("action","create","key","new_config","value","0","config_type","string","category","game","description","Config moi"));
+            refreshTable(table, "GET", "/api/hot-config", "configs");
+        });
+        addToolbar(btnAdd, btnSave, new Label("Client tu dong poll moi 5 phut"));
+        addContent(table);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Extended Feature Panels
+// ═══════════════════════════════════════════════════════════════
+
+class MasterRegistryPanel extends BasePanel {
+    MasterRegistryPanel(ApiClient api, MainWindow main) {
+        super("Kho Tong - Master Registry");
+        var table = createTableView("GET", "/api/registry", "items");
+        var cbType = new ComboBox<String>();
+        cbType.getItems().addAll("all","item","skin","pet","mount","title","map","event_currency","sticker_pack","furniture","seed","animal");
+        cbType.setValue("all");
+        var cbRarity = new ComboBox<String>();
+        cbRarity.getItems().addAll("Tat ca","Common","Uncommon","Rare","Epic","Legendary","Mythic");
+        cbRarity.setValue("Tat ca");
+        var tfSearch = new TextField(); tfSearch.setPromptText("Tim kiem...");
+        var btnFilter = new Button("Loc");
+        btnFilter.setOnAction(e -> {
+            String type = cbType.getValue().equals("all") ? "" : cbType.getValue();
+            int rarity = cbRarity.getSelectionModel().getSelectedIndex() - 1;
+            String q = tfSearch.getText().trim();
+            refreshTable(table, "GET", "/api/registry?type=" + type + "&rarity=" + rarity + "&q=" + q, "items");
+        });
+        var btnAdd = new Button("Them Vat Pham");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/registry", Map.of("action","create","registry_type","item","ref_id","0",
+                "display_name","Vat pham moi","category","general","sub_category","","rarity","0",
+                "icon_asset","Icons/default","description","","tags","","is_tradeable","1","is_stackable","0","max_stack","1"));
+            refreshTable(table, "GET", "/api/registry", "items");
+        });
+        addToolbar(new Label("Loai:"), cbType, new Label("Hiem:"), cbRarity, tfSearch, btnFilter, btnAdd);
+        addContent(table);
+    }
+}
+
+class AnnouncementsPanel extends BasePanel {
+    AnnouncementsPanel(ApiClient api, MainWindow main) {
+        super("Thong Bao He Thong");
+        var table = createTableView("GET", "/api/announcements", "announcements");
+        var btnAdd = new Button("Tao Thong Bao");
+        btnAdd.setOnAction(e -> {
+            var dialog = new TextInputDialog("Thong bao moi");
+            dialog.setTitle("Thong Bao"); dialog.setHeaderText("Tieu de:");
+            dialog.showAndWait().ifPresent(title -> {
+                api.post("/api/announcements", Map.of("action","create","title",title,
+                    "content","Noi dung...","announce_type","info","priority","0","is_sticky","0","target","all"));
+                refreshTable(table, "GET", "/api/announcements", "announcements");
+            });
+        });
+        var btnSticky = new Button("Toggle Sticky");
+        addToolbar(btnAdd, btnSticky);
+        addContent(table);
+    }
+}
+
+class EventCurrencyPanel extends BasePanel {
+    EventCurrencyPanel(ApiClient api, MainWindow main) {
+        super("Tien Te Su Kien");
+        var table = createTableView("GET", "/api/event-currency", "currencies");
+        var btnAdd = new Button("Tao Token Moi");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/event-currency", Map.of("action","create",
+                "currency_code","token_moi","display_name","Token Moi","icon_asset","Icons/Currency/default",
+                "description","Tien te su kien moi","exchange_rate_gold","100","is_active","0","expires_at",""));
+            refreshTable(table, "GET", "/api/event-currency", "currencies");
+        });
+        var btnGrant = new Button("Grant Token");
+        btnGrant.setOnAction(e -> {
+            showAlert("Grant", "Nhap char_id va so luong token de grant");
+        });
+        addToolbar(btnAdd, btnGrant);
+        addContent(table);
+    }
+}
+
+class AuctionPanel extends BasePanel {
+    AuctionPanel(ApiClient api, MainWindow main) {
+        super("Nha Dau Gia");
+        var table = createTableView("GET", "/api/auction", "listings");
+        var btnCancel = new Button("Huy Listing");
+        var btnConfig = new Button("Cau Hinh");
+        addToolbar(btnCancel, btnConfig);
+        addContent(table);
+    }
+}
+
+class DialogEditorPanel extends BasePanel {
+    DialogEditorPanel(ApiClient api, MainWindow main) {
+        super("NPC Dialog Editor");
+        var table = createTableView("GET", "/api/dialogs", "dialogs");
+        var tfNpcId = new TextField(); tfNpcId.setPromptText("NPC ID...");
+        var btnFilter = new Button("Loc theo NPC");
+        btnFilter.setOnAction(e -> {
+            refreshTable(table, "GET", "/api/dialogs?npc_id=" + tfNpcId.getText().trim(), "dialogs");
+        });
+        var btnAdd = new Button("Them Dialog");
+        var btnAI = new Button("AI Viet Dialog");
+        btnAI.setOnAction(e -> {
+            var dialog = new TextInputDialog("Viet hoi thoai NPC truong lang huong dan tan thu");
+            dialog.setTitle("AI Dialog"); dialog.setHeaderText("Yeu cau:");
+            dialog.showAndWait().ifPresent(prompt -> {
+                var result = api.post("/api/story/ai", Map.of("gen_type","dialog","prompt",prompt,"context",""));
+                showAlert("AI Result", result);
+            });
+        });
+        addToolbar(tfNpcId, btnFilter, btnAdd, btnAI);
+        addContent(table);
+    }
+}
+
+class TradeHistoryPanel extends BasePanel {
+    TradeHistoryPanel(ApiClient api, MainWindow main) {
+        super("Lich Su Giao Dich");
+        addContent(createTableView("GET", "/api/trade/history", "trades"));
+    }
+}
+
+class PartyActivePanel extends BasePanel {
+    PartyActivePanel(ApiClient api, MainWindow main) {
+        super("Nhom Dang Hoat Dong");
+        addContent(createTableView("GET", "/api/party/active", "parties"));
+    }
+}
+
+class RateLimitPanel extends BasePanel {
+    RateLimitPanel(ApiClient api, MainWindow main) {
+        super("Gioi Han Tan Suat (Rate Limit)");
+        var table = createTableView("GET", "/api/rate-limit", "limits");
+        var btnSave = new Button("Luu");
+        addToolbar(btnSave, new Label("Sua truc tiep trong bang"));
+        addContent(table);
+    }
+}
+
+class DungeonPanel extends BasePanel {
+    DungeonPanel(ApiClient api, MainWindow main) {
+        super("Dungeon Templates");
+        var table = createTableView("GET", "/api/dungeon", "dungeons");
+        var btnAdd = new Button("Them Dungeon");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/dungeon", Map.of("action","create","name","Dungeon Moi",
+                "min_level","1","max_players","4","map_id","100","boss_monster_id","0",
+                "reward_exp","1000","reward_gold","5000","difficulty","1","time_limit_minutes","30"));
+            refreshTable(table, "GET", "/api/dungeon", "dungeons");
+        });
+        addToolbar(btnAdd);
+        addContent(table);
+    }
+}

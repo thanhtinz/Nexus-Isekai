@@ -139,6 +139,14 @@ public class AdminApiServer {
         httpServer.createContext("/api/farming/animals",      ex -> handleAuth(ex, this::handleFarmingAnimals));
         httpServer.createContext("/api/housing/catalog",      ex -> handleAuth(ex, this::handleHousingCatalog));
         
+        
+        httpServer.createContext("/api/assets/upload",    ex -> handleAuth(ex, this::handleAssetUpload));
+        httpServer.createContext("/api/assets",           ex -> handleAuth(ex, this::handleAssets));
+        httpServer.createContext("/api/assets/bundles",   ex -> handleAuth(ex, this::handleAssetBundles));
+        httpServer.createContext("/api/story",            ex -> handleAuth(ex, this::handleStory));
+        httpServer.createContext("/api/story/ai",         ex -> handleAuth(ex, this::handleStoryAI));
+        httpServer.createContext("/api/hot-config",       ex -> handleAuth(ex, this::handleHotConfigAdmin));
+        httpServer.createContext("/api/client-versions",  ex -> handleAuth(ex, this::handleClientVersions));
         httpServer.createContext("/api/registry",           ex -> handleAuth(ex, this::handleMasterRegistry));
         httpServer.createContext("/api/announcements",      ex -> handleAuth(ex, this::handleAnnouncements));
         httpServer.createContext("/api/event-currency",     ex -> handleAuth(ex, this::handleEventCurrencyAdmin));
@@ -1461,6 +1469,332 @@ public class AdminApiServer {
                 c.prepareStatement("UPDATE rate_limit_config SET max_per_second=" + num(body,"max_per_second") +
                     ",max_per_minute=" + num(body,"max_per_minute") +
                     " WHERE config_key='" + str(body,"config_key").replace("'","") + "'").executeUpdate();
+                sendJson(ex,200,Map.of("success",true));
+            }
+        }
+    }
+
+
+    // ═════════════════════════════════════════════════════════════
+    // ASSET MANAGEMENT — Upload, quản lý, bundle
+    // ═════════════════════════════════════════════════════════════
+
+    private static final java.nio.file.Path ADMIN_ASSETS_DIR;
+    static {
+        java.nio.file.Path p = java.nio.file.Paths.get("client-assets");
+        try { java.nio.file.Files.createDirectories(p); } catch (Exception ignored) {}
+        ADMIN_ASSETS_DIR = p;
+    }
+
+    /** POST /api/assets/upload — Upload file asset (multipart hoặc raw bytes) */
+    private void handleAssetUpload(HttpExchange ex) throws Exception {
+        if (!ex.getRequestMethod().equals("POST")) { send405(ex); return; }
+
+        String assetKey  = ex.getRequestHeaders().getFirst("X-Asset-Key");   // VD: "Sprites/Items/item_001.png"
+        String assetType = ex.getRequestHeaders().getFirst("X-Asset-Type");  // image,config,audio,...
+        String category  = ex.getRequestHeaders().getFirst("X-Category");    // items,monsters,hud,...
+        String displayName = ex.getRequestHeaders().getFirst("X-Display-Name");
+        String mimeType  = ex.getRequestHeaders().getFirst("Content-Type");
+        if (assetKey == null || assetKey.isEmpty()) { sendJson(ex,400,Map.of("success",false,"message","X-Asset-Key required")); return; }
+        if (assetType == null) assetType = "image";
+        if (category == null)  category = "general";
+        if (displayName == null) displayName = assetKey;
+
+        byte[] fileBytes = ex.getRequestBody().readAllBytes();
+        if (fileBytes.length == 0) { sendJson(ex,400,Map.of("success",false,"message","Empty file")); return; }
+        if (fileBytes.length > 20 * 1024 * 1024) { sendJson(ex,400,Map.of("success",false,"message","File too large (max 20MB)")); return; }
+
+        // Lưu file
+        String safePath = assetKey.replace("..", "").replace("\\", "/");
+        java.nio.file.Path filePath = ADMIN_ASSETS_DIR.resolve(safePath);
+        java.nio.file.Files.createDirectories(filePath.getParent());
+        java.nio.file.Files.write(filePath, fileBytes);
+
+        // MD5 hash
+        java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+        byte[] digest = md.digest(fileBytes);
+        StringBuilder hashSb = new StringBuilder();
+        for (byte b : digest) hashSb.append(String.format("%02x", b));
+        String hash = hashSb.toString();
+
+        // Insert/Update DB
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement(
+                "INSERT INTO client_assets (asset_key,asset_type,category,file_path,file_size,hash_md5,display_name,mime_type,version) " +
+                "VALUES (?,?,?,?,?,?,?,?,1) " +
+                "ON DUPLICATE KEY UPDATE file_path=?,file_size=?,hash_md5=?,display_name=?,mime_type=?,version=version+1,updated_at=NOW()");
+            ps.setString(1, assetKey); ps.setString(2, assetType); ps.setString(3, category);
+            ps.setString(4, safePath); ps.setInt(5, fileBytes.length); ps.setString(6, hash);
+            ps.setString(7, displayName); ps.setString(8, mimeType);
+            // ON DUPLICATE KEY params
+            ps.setString(9, safePath); ps.setInt(10, fileBytes.length); ps.setString(11, hash);
+            ps.setString(12, displayName); ps.setString(13, mimeType);
+            ps.executeUpdate();
+        }
+
+        sendJson(ex, 200, Map.of("success", true, "asset_key", assetKey, "hash", hash, "size", fileBytes.length));
+        log.info("[ASSET] Uploaded: {} ({} bytes, hash={})", assetKey, fileBytes.length, hash);
+    }
+
+    /** GET/POST /api/assets — Danh sách + CRUD */
+    private void handleAssets(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String type = params.getOrDefault("type", "");
+                String cat  = params.getOrDefault("category", "");
+                String q    = params.getOrDefault("q", "");
+                String where = "WHERE is_active=1";
+                if (!type.isEmpty()) where += " AND asset_type='" + type.replace("'","") + "'";
+                if (!cat.isEmpty())  where += " AND category='" + cat.replace("'","") + "'";
+                if (!q.isEmpty())    where += " AND (asset_key LIKE '%" + q.replace("'","") + "%' OR display_name LIKE '%" + q.replace("'","") + "%')";
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT * FROM client_assets " + where + " ORDER BY category,asset_key LIMIT 500"), "assets");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "delete" -> {
+                        c.prepareStatement("UPDATE client_assets SET is_active=0 WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update" -> {
+                        c.prepareStatement("UPDATE client_assets SET display_name='" + str(body,"display_name").replace("'","") +
+                            "',category='" + str(body,"category").replace("'","") +
+                            "',asset_type='" + str(body,"asset_type").replace("'","") +
+                            "',is_required=" + num(body,"is_required") +
+                            " WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "categories" -> {
+                        sendTableResult(ex, c.prepareStatement(
+                            "SELECT category, asset_type, COUNT(*) as cnt, SUM(file_size) as total_size " +
+                            "FROM client_assets WHERE is_active=1 GROUP BY category, asset_type ORDER BY category"), "categories");
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** GET/POST /api/assets/bundles — Quản lý bundle */
+    private void handleAssetBundles(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM asset_bundles ORDER BY created_at DESC"), "bundles");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO asset_bundles (bundle_name,description) VALUES (?,?)", Statement.RETURN_GENERATED_KEYS);
+                        ps.setString(1, str(body,"bundle_name")); ps.setString(2, str(body,"description"));
+                        ps.executeUpdate(); sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "publish" -> {
+                        int bundleId = num(body, "id");
+                        // Đếm assets và tổng size
+                        c.prepareStatement("UPDATE asset_bundles SET status='published',published_at=NOW()," +
+                            "asset_count=(SELECT COUNT(*) FROM asset_bundle_items WHERE bundle_id=" + bundleId + ")," +
+                            "total_size=(SELECT COALESCE(SUM(ca.file_size),0) FROM asset_bundle_items abi JOIN client_assets ca ON ca.id=abi.asset_id WHERE abi.bundle_id=" + bundleId + ")" +
+                            " WHERE id=" + bundleId).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "add_asset" -> {
+                        c.prepareStatement("INSERT IGNORE INTO asset_bundle_items (bundle_id,asset_id) VALUES (" +
+                            num(body,"bundle_id") + "," + num(body,"asset_id") + ")").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    // ═════════════════════════════════════════════════════════════
+    // STORY EDITOR + AI
+    // ═════════════════════════════════════════════════════════════
+
+    /** GET/POST /api/story — CRUD cốt truyện */
+    private void handleStory(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT sc.*, (SELECT COUNT(*) FROM story_quest_links sql WHERE sql.chapter_id=sc.id) as quest_count " +
+                    "FROM story_chapters sc ORDER BY sc.chapter_order"), "chapters");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO story_chapters (chapter_order,title,synopsis,full_text,region_id,min_level,max_level,status) VALUES (?,?,?,?,?,?,?,?)");
+                        ps.setInt(1, num(body,"chapter_order")); ps.setString(2, str(body,"title"));
+                        ps.setString(3, str(body,"synopsis")); ps.setString(4, str(body,"full_text"));
+                        ps.setInt(5, num(body,"region_id")); ps.setInt(6, num(body,"min_level"));
+                        ps.setInt(7, num(body,"max_level")); ps.setString(8, str(body,"status"));
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "UPDATE story_chapters SET title=?,synopsis=?,full_text=?,min_level=?,max_level=?,status=?,chapter_order=?,updated_at=NOW() WHERE id=?");
+                        ps.setString(1, str(body,"title")); ps.setString(2, str(body,"synopsis"));
+                        ps.setString(3, str(body,"full_text")); ps.setInt(4, num(body,"min_level"));
+                        ps.setInt(5, num(body,"max_level")); ps.setString(6, str(body,"status"));
+                        ps.setInt(7, num(body,"chapter_order")); ps.setInt(8, num(body,"id"));
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "link_quest" -> {
+                        c.prepareStatement("INSERT IGNORE INTO story_quest_links (chapter_id,quest_id,quest_order) VALUES (" +
+                            num(body,"chapter_id") + "," + num(body,"quest_id") + "," + num(body,"quest_order") + ")").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM story_chapters WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** POST /api/story/ai — Gọi AI tạo nội dung */
+    private void handleStoryAI(HttpExchange ex) throws Exception {
+        if (!ex.getRequestMethod().equals("POST")) { send405(ex); return; }
+        var body = parseBody(ex);
+        String genType = str(body, "gen_type"); // quest,dialog,story,item_desc,event_desc,announcement
+        String prompt  = str(body, "prompt");
+        String context = str(body, "context"); // thêm context cho AI
+
+        if (prompt.isEmpty()) { sendJson(ex,400,Map.of("success",false,"message","prompt required")); return; }
+
+        // Build system prompt theo genType
+        String systemPrompt = switch (genType) {
+            case "quest" -> "Bạn là game designer cho MMORPG Nexus Isekai (bối cảnh fantasy Vọng Linh Giới). " +
+                "Tạo nhiệm vụ game với format JSON: {title, description, objectives: [{type, target, count}], rewards: {exp, gold, items: [{id, qty}]}, dialog_start, dialog_complete}. " +
+                "Viết bằng tiếng Việt, phong cách hấp dẫn.";
+            case "dialog" -> "Bạn là nhà biên kịch cho MMORPG Nexus Isekai. " +
+                "Tạo hội thoại NPC với format JSON: [{speaker, text, options: [{text, goto_index}]}]. " +
+                "Viết tiếng Việt, nhân vật có tính cách riêng.";
+            case "story" -> "Bạn là nhà văn fantasy cho MMORPG Nexus Isekai (Vọng Linh Giới). " +
+                "Viết chapter cốt truyện với: title, synopsis (1-2 câu), full_text (3-5 đoạn). " +
+                "Bối cảnh: Tiểu Thần Azaroth bị phong ấn, Giáo Phái Vọng Linh muốn phục sinh. Viết tiếng Việt.";
+            case "item_desc" -> "Viết mô tả vật phẩm game fantasy MMORPG, 1-2 câu, tiếng Việt, bí ẩn và hấp dẫn.";
+            case "event_desc" -> "Tạo mô tả sự kiện game MMORPG, bao gồm: tên sự kiện, mô tả, phần thưởng. Tiếng Việt.";
+            case "announcement" -> "Viết thông báo game MMORPG cho người chơi. Ngắn gọn, rõ ràng, tiếng Việt.";
+            default -> "Bạn là trợ lý game design cho MMORPG Nexus Isekai. Trả lời bằng tiếng Việt.";
+        };
+
+        String fullPrompt = prompt + (context.isEmpty() ? "" : "\n\nContext: " + context);
+
+        // Gọi Anthropic API
+        try {
+            String apiKey = System.getenv("ANTHROPIC_API_KEY");
+            if (apiKey == null || apiKey.isEmpty()) apiKey = ServerConfig.getInstance().get("anthropic.api.key", "");
+            if (apiKey.isEmpty()) {
+                sendJson(ex, 400, Map.of("success", false, "message", "ANTHROPIC_API_KEY chưa cấu hình. Thêm vào application.properties: anthropic.api.key=sk-ant-..."));
+                return;
+            }
+
+            // Build request
+            String requestBody = "{" +
+                ""model":"claude-sonnet-4-20250514"," +
+                ""max_tokens":2000," +
+                ""system":"" + systemPrompt.replace(""", "\\"") + ""," +
+                ""messages":[{"role":"user","content":"" + fullPrompt.replace(""", "\\"").replace("\n","\\n") + ""}]" +
+            "}";
+
+            java.net.URL url = new java.net.URL("https://api.anthropic.com/v1/messages");
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("x-api-key", apiKey);
+            conn.setRequestProperty("anthropic-version", "2023-06-01");
+            conn.setDoOutput(true);
+            conn.getOutputStream().write(requestBody.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            conn.getOutputStream().flush();
+
+            int responseCode = conn.getResponseCode();
+            java.io.InputStream is = responseCode == 200 ? conn.getInputStream() : conn.getErrorStream();
+            String response = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+
+            if (responseCode == 200) {
+                // Parse response — lấy text từ content[0].text
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                var json = mapper.readTree(response);
+                String resultText = json.path("content").get(0).path("text").asText();
+                int tokensUsed = json.path("usage").path("output_tokens").asInt();
+
+                // Log vào DB
+                try (Connection c = DatabaseManager.getInstance().getConnection();
+                     PreparedStatement ps = c.prepareStatement(
+                         "INSERT INTO ai_generation_log (gen_type,prompt,result,tokens_used) VALUES (?,?,?,?)")) {
+                    ps.setString(1, genType); ps.setString(2, fullPrompt);
+                    ps.setString(3, resultText); ps.setInt(4, tokensUsed);
+                    ps.executeUpdate();
+                }
+
+                sendJson(ex, 200, Map.of("success", true, "result", resultText, "tokens_used", tokensUsed, "gen_type", genType));
+            } else {
+                sendJson(ex, 500, Map.of("success", false, "message", "AI API error: " + response));
+            }
+        } catch (Exception e) {
+            log.error("[AI] Generation error: {}", e.getMessage());
+            sendJson(ex, 500, Map.of("success", false, "message", "AI error: " + e.getMessage()));
+        }
+    }
+
+    /** GET/POST /api/hot-config — Quản lý hot config */
+    private void handleHotConfigAdmin(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM hot_config ORDER BY category,config_key"), "configs");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "update" -> {
+                        c.prepareStatement("UPDATE hot_config SET config_value='" + str(body,"value").replace("'","") +
+                            "',version=version+1,updated_at=NOW() WHERE config_key='" + str(body,"key").replace("'","") + "'").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO hot_config (config_key,config_value,config_type,category,description) VALUES (?,?,?,?,?)");
+                        ps.setString(1, str(body,"key")); ps.setString(2, str(body,"value"));
+                        ps.setString(3, str(body,"config_type")); ps.setString(4, str(body,"category"));
+                        ps.setString(5, str(body,"description"));
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** GET/POST /api/client-versions — Quản lý phiên bản client */
+    private void handleClientVersions(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM client_versions ORDER BY platform,version_code DESC"), "versions");
+            } else {
+                var body = parseBody(ex);
+                PreparedStatement ps = c.prepareStatement(
+                    "INSERT INTO client_versions (platform,version_code,version_name,download_url,release_notes,is_force_update,min_asset_version) " +
+                    "VALUES (?,?,?,?,?,?,?)");
+                ps.setString(1, str(body,"platform")); ps.setInt(2, num(body,"version_code"));
+                ps.setString(3, str(body,"version_name")); ps.setString(4, str(body,"download_url"));
+                ps.setString(5, str(body,"release_notes")); ps.setInt(6, num(body,"is_force_update"));
+                ps.setInt(7, num(body,"min_asset_version"));
+                ps.executeUpdate();
+                // Set old versions is_latest=0
+                c.prepareStatement("UPDATE client_versions SET is_latest=0 WHERE platform='" + str(body,"platform") +
+                    "' AND version_code<" + num(body,"version_code")).executeUpdate();
                 sendJson(ex,200,Map.of("success",true));
             }
         }

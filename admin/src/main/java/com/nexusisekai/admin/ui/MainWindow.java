@@ -96,30 +96,51 @@ public class MainWindow {
         sidebar.getStyleClass().add("sidebar");
 
         String[][] navItems = {
-            {"Dashboard",   "Dashboard"},
-            {"Players",     "Players"},
-            {"Maps",        "Maps"},
-            {"Monsters",    "Monsters"},
-            {"NPCs",        "NPCs"},
-            {"Items",       "Items"},
-            {"Shop",        "Shop"},
-            {"Events",      "Events"},
-            {"Quests",      "Quests"},
-            {"Accounts",    "Accounts"},
-            // ── Hệ thống mới ──────────────────
-            {"Servers",     "Servers"},
-            {"Maintenance", "Maintenance"},
-            {"SePay",       "SePay"},
-            {"Gift Code",   "GiftCode"},
-            {"Danh Hieu",   "Titles"},
-            {"So Su Menh",  "MissionPass"},
-            {"Class",       "Classes"},
-            {"Pet & Mount", "Pets"},
-            {"Webshop",     "WebshopAdmin"},
-            {"Kho Item",    "Warehouse"},
-            // ── System ─────────────────────────
-            {"Logs",        "Logs"},
-            {"Settings",    "Settings"},
+            {"Dashboard",      "Dashboard"},
+            {"Players",        "Players"},
+            // ── Noi dung game ────────────────────
+            {"Cot Truyen",     "Story"},
+            {"Nhiem Vu",       "Quests"},
+            {"NPC & Dialog",   "Dialogs"},
+            {"Maps",           "Maps"},
+            {"Monsters",       "Monsters"},
+            {"NPCs",           "NPCs"},
+            {"Items & Kho",    "Registry"},
+            {"Class",          "Classes"},
+            // ── Kinh te ──────────────────────────
+            {"Shop",           "Shop"},
+            {"Webshop",        "WebshopAdmin"},
+            {"Dau Gia",        "Auction"},
+            {"Giao Dich",      "TradeHistory"},
+            {"SePay",          "SePay"},
+            {"Gift Code",      "GiftCode"},
+            {"So Su Menh",     "MissionPass"},
+            {"Kho Item",       "Warehouse"},
+            {"Cuong Hoa",      "EnhancementConfig"},
+            // ── Xa hoi ───────────────────────────
+            {"Guilds",         "Guilds"},
+            {"Party",          "PartyActive"},
+            {"PvP",            "PvP"},
+            {"BXH",            "Leaderboard"},
+            {"Chat History",   "ChatHistory"},
+            {"Danh Hieu",      "Titles"},
+            {"Pet & Mount",    "Pets"},
+            // ── He thong ─────────────────────────
+            {"Thong Bao",      "Announcements"},
+            {"Tien Te SK",     "EventCurrency"},
+            {"Assets & OTA",   "Assets"},
+            {"Phien Ban",      "ClientVersions"},
+            {"Hot Config",     "HotConfig"},
+            {"AI Content",     "AIGeneration"},
+            {"Nong Trai",      "Farming"},
+            {"Nha O",          "Housing"},
+            {"Minigame",       "Minigame"},
+            {"Rate Limit",     "RateLimit"},
+            {"Servers",        "Servers"},
+            {"Tai Khoan",      "Accounts"},
+            {"Events",         "Events"},
+            {"Logs",           "Logs"},
+            {"Cai Dat",        "Settings"},
         };
 
         for (String[] item : navItems) {
@@ -169,7 +190,6 @@ public class MainWindow {
             case "Accounts"    -> new AccountsPanel().getRoot();
             // ── Hệ thống mới ──────────────────────────────
             case "Servers"     -> new ServerPanel(api, this).getRoot();
-            case "Maintenance" -> new ServerPanel(api, this).getRoot();
             case "SePay"       -> new SePayPanel(api, this).getRoot();
             case "GiftCode"    -> new GiftCodePanel(api, this).getRoot();
             case "Titles"      -> new TitlePanel(api, this).getRoot();
@@ -186,10 +206,26 @@ public class MainWindow {
             case "EnhancementConfig" -> new EnhancementConfigPanel(api, this).getRoot();
             case "ChatHistory"       -> new ChatHistoryPanel(api, this).getRoot();
             case "Guilds"            -> new GuildPanel(api, this).getRoot();
-            // ── System ─────────────────────────────────────
+            // ── Story, AI, Assets, OTA ───────────────────
+            case "Story"             -> new StoryEditorPanel(api, this).getRoot();
+            case "AIGeneration"      -> new AIGenerationPanel(api, this).getRoot();
+            case "Assets"            -> new AssetManagerPanel(api, this).getRoot();
+            case "ClientVersions"    -> new ClientVersionPanel(api, this).getRoot();
+            case "HotConfig"         -> new HotConfigPanel(api, this).getRoot();
+            // ── Extended features ────────────────────────
+            case "Registry"          -> new MasterRegistryPanel(api, this).getRoot();
+            case "Announcements"     -> new AnnouncementsPanel(api, this).getRoot();
+            case "EventCurrency"     -> new EventCurrencyPanel(api, this).getRoot();
+            case "Auction"           -> new AuctionPanel(api, this).getRoot();
+            case "Dialogs"           -> new DialogEditorPanel(api, this).getRoot();
+            case "TradeHistory"      -> new TradeHistoryPanel(api, this).getRoot();
+            case "PartyActive"       -> new PartyActivePanel(api, this).getRoot();
+            case "RateLimit"         -> new RateLimitPanel(api, this).getRoot();
+            case "Dungeon"           -> new DungeonPanel(api, this).getRoot();
+            // ── System ───────────────────────────────────
             case "Logs"        -> new LogsPanel().getRoot();
             case "Settings"    -> new SettingsPanel(this).getRoot();
-            default            -> new Label("Panel chưa có: " + name);
+            default            -> new Label("Panel chua co: " + name);
         };
     }
 
