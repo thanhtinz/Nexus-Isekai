@@ -1,0 +1,685 @@
+// NexusIsekai Client - PacketBuilder.cs & PacketReader.cs
+// Tương đương ByteBuf Netty ở server
+
+using System;
+using System.IO;
+using System.Text;
+
+namespace NexusIsekai.Network
+{
+    /// <summary>
+    /// Build binary packet theo protocol NexusIsekai.
+    /// Format: [4 byte big-endian length][2 byte opcode][payload...]
+    /// </summary>
+    public class PacketBuilder
+    {
+        private readonly MemoryStream _ms;
+        private readonly BinaryWriter _w;
+        private readonly short        _opcode;
+
+        public PacketBuilder(short opcode)
+        {
+            _opcode = opcode;
+            _ms = new MemoryStream();
+            _w  = new BinaryWriter(_ms);
+        }
+
+        // ── Primitive writes ────────────────────────────────────
+
+        public PacketBuilder WriteByte(byte v)  { _w.Write(v); return this; }
+        public PacketBuilder WriteBool(bool v)  { _w.Write(v ? (byte)1 : (byte)0); return this; }
+
+        /// Big-endian short
+        public PacketBuilder WriteShort(short v)
+        {
+            _w.Write((byte)(v >> 8));
+            _w.Write((byte)(v & 0xFF));
+            return this;
+        }
+
+        /// Big-endian int
+        public PacketBuilder WriteInt(int v)
+        {
+            _w.Write((byte)((v >> 24) & 0xFF));
+            _w.Write((byte)((v >> 16) & 0xFF));
+            _w.Write((byte)((v >>  8) & 0xFF));
+            _w.Write((byte)( v        & 0xFF));
+            return this;
+        }
+
+        /// Big-endian long
+        public PacketBuilder WriteLong(long v)
+        {
+            WriteInt((int)(v >> 32));
+            WriteInt((int)(v & 0xFFFFFFFFL));
+            return this;
+        }
+
+        /// Big-endian float (IEEE 754)
+        public PacketBuilder WriteFloat(float v)
+        {
+            WriteInt(BitConverter.SingleToInt32Bits(v));
+            return this;
+        }
+
+        /// UTF-8 string với 2-byte length prefix
+        public PacketBuilder WriteString(string s)
+        {
+            byte[] b = Encoding.UTF8.GetBytes(s ?? "");
+            WriteShort((short)b.Length);
+            _w.Write(b);
+            return this;
+        }
+
+        public PacketBuilder WriteBytes(byte[] b) { _w.Write(b); return this; }
+
+        // ── Finalize ────────────────────────────────────────────
+
+        /// Build packet hoàn chỉnh: [4 len][2 opcode][payload]
+        public byte[] Build()
+        {
+            byte[] payload = _ms.ToArray();
+            int bodyLen = 2 + payload.Length;
+
+            using var result = new MemoryStream(4 + bodyLen);
+            using var rw     = new BinaryWriter(result);
+
+            rw.Write((byte)((bodyLen >> 24) & 0xFF));
+            rw.Write((byte)((bodyLen >> 16) & 0xFF));
+            rw.Write((byte)((bodyLen >>  8) & 0xFF));
+            rw.Write((byte)( bodyLen        & 0xFF));
+            rw.Write((byte)((_opcode >> 8) & 0xFF));
+            rw.Write((byte)( _opcode       & 0xFF));
+            rw.Write(payload);
+            return result.ToArray();
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // Static Send helpers — gọi từ UI/Handler để gửi packet
+        // Mỗi method tương ứng 1 C2S opcode
+        // ══════════════════════════════════════════════════════════
+
+        private static void Send(PacketBuilder pb)
+            => GameClient.Instance?.Send(pb);
+
+        // ── AUTH ─────────────────────────────────────────────────
+
+        public static void SendLogin(string username, string password)
+            => Send(new PacketBuilder(PacketOpcode.C2S_LOGIN)
+                .WriteString(username).WriteString(password));
+
+        public static void SendRegister(string username, string password, string email)
+            => Send(new PacketBuilder(PacketOpcode.C2S_REGISTER)
+                .WriteString(username).WriteString(password).WriteString(email));
+
+        // ── CHAR SELECT ───────────────────────────────────────────
+
+        public static void SendCharList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
+
+        public static void SendCharCreate(string name, int classId, int gender)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_CREATE)
+                .WriteString(name).WriteInt(classId).WriteByte((byte)gender));
+
+        public static void SendCharDelete(long charId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_DELETE).WriteLong(charId));
+
+        public static void SendCharSelect(long charId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_SELECT).WriteLong(charId));
+
+        // ── WORLD / MOVEMENT ─────────────────────────────────────
+
+        public static void SendMove(float x, float y, byte direction)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MOVE)
+                .WriteFloat(x).WriteFloat(y).WriteByte(direction));
+
+        public static void SendMapChange(int portalId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MAP_CHANGE).WriteInt(portalId));
+
+        public static void SendMapLoadDone()
+            => Send(new PacketBuilder(PacketOpcode.C2S_MAP_LOAD_DONE));
+
+        // ── COMBAT ───────────────────────────────────────────────
+
+        public static void SendAttack(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_ATTACK).WriteLong(targetId));
+
+        public static void SendUseSkill(int skillId, long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_USE_SKILL)
+                .WriteInt(skillId).WriteLong(targetId));
+
+        // ── INVENTORY ────────────────────────────────────────────
+
+        public static void SendInventoryList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INVENTORY_OPEN));
+
+        public static void SendUseItem(long instanceId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_USE_ITEM).WriteLong(instanceId));
+
+        public static void SendEquipItem(long instanceId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_EQUIP_ITEM).WriteLong(instanceId));
+
+        public static void SendUnequipItem(int slot)
+            => Send(new PacketBuilder(PacketOpcode.C2S_UNEQUIP_ITEM).WriteInt(slot));
+
+        public static void SendShopOpen(int shopId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SHOP_OPEN).WriteInt(shopId));
+
+        public static void SendShopBuy(int itemId, int qty)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SHOP_BUY)
+                .WriteInt(itemId).WriteInt(qty));
+
+        public static void SendShopSell(long instanceId, int qty)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SHOP_SELL)
+                .WriteLong(instanceId).WriteInt(qty));
+
+        // ── QUEST ────────────────────────────────────────────────
+
+        public static void SendQuestList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_QUEST_LIST));
+
+        public static void SendQuestAccept(int questId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_QUEST_ACCEPT).WriteInt(questId));
+
+        public static void SendQuestComplete(int questId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_QUEST_COMPLETE).WriteInt(questId));
+
+        public static void SendQuestAbandon(int questId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_QUEST_ABANDON).WriteInt(questId));
+
+        // ── CHAT BASE ────────────────────────────────────────────
+
+        public static void SendChat(string channel, string message)
+        {
+            byte ch = ChannelByte(channel);
+            Send(new PacketBuilder(PacketOpcode.C2S_CHAT)
+                .WriteByte(ch)
+                .WriteString(message));
+        }
+
+        // ── CHAT STICKER ──────────────────────────────────────────
+
+        public static void SendSticker(string channel, int stickerId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAT_STICKER)
+                .WriteByte(ChannelByte(channel))
+                .WriteInt(stickerId));
+
+        // ── CHAT EMOJI ────────────────────────────────────────────
+
+        public static void SendEmoji(string channel, int emojiUnicodeCode)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAT_EMOJI)
+                .WriteByte(ChannelByte(channel))
+                .WriteInt(emojiUnicodeCode));
+
+        // ── CHAT LOCATION ─────────────────────────────────────────
+
+        public static void SendLocation(string channel, int mapId, float x, float y)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAT_LOCATION)
+                .WriteByte(ChannelByte(channel))
+                .WriteInt(mapId)
+                .WriteFloat(x)
+                .WriteFloat(y));
+
+        // ── CHAT ITEM SHOWCASE ────────────────────────────────────
+
+        public static void SendItemShowcase(string channel, long instanceId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAT_ITEM)
+                .WriteByte(ChannelByte(channel))
+                .WriteLong(instanceId));
+
+        // ── RED ENVELOPE (Lì xì) ──────────────────────────────────
+
+        /// <param name="currency">0=gold, 1=diamond</param>
+        public static void SendRedEnvelope(string channel, int totalAmount, byte maxGrabbers,
+                                            byte currency, string message)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAT_RED_ENVELOPE)
+                .WriteByte(ChannelByte(channel))
+                .WriteInt(totalAmount)
+                .WriteByte(maxGrabbers)
+                .WriteByte(currency)
+                .WriteString(message));
+
+        public static void SendGrabEnvelope(long envelopeId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAT_GRAB_ENVELOPE)
+                .WriteLong(envelopeId));
+
+        // ── VOICE ────────────────────────────────────────────────
+
+        /// <summary>Gửi URL của voice message sau khi đã upload lên server</summary>
+        public static void SendVoiceUrl(string channel, int durationMs, string url)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAT_VOICE)
+                .WriteByte(ChannelByte(channel))
+                .WriteInt(durationMs)
+                .WriteString(url));
+
+        // ── CROSS-SERVER ──────────────────────────────────────────
+
+        public static void SendCrossChat(string message)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAT_CROSS)
+                .WriteString(message));
+
+        // ── Channel byte helper ───────────────────────────────────
+
+        public static byte ChannelByte(string channel) => channel switch
+        {
+            "map"    => 0,
+            "world"  => 1,
+            "guild"  => 2,
+            "pm"     => 3,
+            "system" => 4,
+            "cross"  => 5,
+            _        => 1  // default: world
+        };
+
+        // ── SYSTEM ───────────────────────────────────────────────
+
+        public static void SendPing()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PING));
+
+        // ── GIFT CODE (Axx) ──────────────────────────────────────
+
+        public static void SendGiftCode(string code)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GIFTCODE).WriteString(code));
+
+        // ── MISSION PASS (Bxx) ───────────────────────────────────
+
+        public static void SendPassInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PASS_INFO));
+
+        /// <param name="tier">0=free, 1=premium</param>
+        public static void SendPassClaim(int level, byte tier)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PASS_CLAIM)
+                .WriteInt(level).WriteByte(tier));
+
+        public static void SendBuyPremiumPass()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PASS_BUY_PREMIUM));
+
+        // ── TITLE (Cxx) ──────────────────────────────────────────
+
+        public static void SendTitleList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_TITLE_LIST));
+
+        public static void SendTitleEquip(int titleId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TITLE_EQUIP).WriteInt(titleId));
+
+        // ── PET (Dxx) ─────────────────────────────────────────────
+
+        public static void SendPetList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PET_LIST));
+
+        public static void SendPetSetActive(long petId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PET_SET_ACTIVE).WriteLong(petId));
+
+        public static void SendPetFeed(long petId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PET_FEED).WriteLong(petId));
+
+        // ── MOUNT (Dxx) ───────────────────────────────────────────
+
+        public static void SendMountList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_MOUNT_LIST));
+
+        public static void SendMountSetActive(long mountId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MOUNT_SET_ACTIVE).WriteLong(mountId));
+
+        // ── SOCIAL / MARRIAGE (Exx) ───────────────────────────────
+
+        public static void SendAddFriend(long targetCharId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_ADD_FRIEND).WriteLong(targetCharId));
+
+        public static void SendStartDating(long targetCharId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_START_DATING).WriteLong(targetCharId));
+
+        public static void SendPropose(long targetCharId, int ringItemId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PROPOSE)
+                .WriteLong(targetCharId).WriteInt(ringItemId));
+
+        public static void SendWedding(long targetCharId, int weddingMapId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_WEDDING)
+                .WriteLong(targetCharId).WriteInt(weddingMapId));
+
+        public static void SendChildList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHILD_LIST));
+
+        public static void SendChildFeed(long childId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHILD_FEED).WriteLong(childId));
+
+        public static void SendChildToggle(long childId, bool active)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHILD_TOGGLE)
+                .WriteLong(childId).WriteBool(active));
+
+        // ── MENTOR (Fxx) ──────────────────────────────────────────
+
+        public static void SendMentorInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_MENTOR_INFO));
+
+        /// <param name="mentorId">charId (>0) hoặc NPC id (<0)</param>
+        public static void SendMentorAccept(long mentorId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MENTOR_ACCEPT).WriteLong(mentorId));
+
+        public static void SendMentorGraduate()
+            => Send(new PacketBuilder(PacketOpcode.C2S_MENTOR_GRADUATE));
+
+        public static void SendStudentList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_STUDENT_LIST));
+
+        // ── Guild ────────────────────────────────────────────────
+
+        public static void SendGuildInfo(long guildId = 0)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_INFO).WriteLong(guildId));
+        public static void SendGuildCreate(string name)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_CREATE).WriteString(name));
+        public static void SendGuildInvite(long targetCharId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_INVITE).WriteLong(targetCharId));
+        public static void SendGuildLeave()
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_LEAVE));
+        public static void SendGuildAccept(long guildId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_ACCEPT).WriteLong(guildId));
+        public static void SendGuildKick(long targetCharId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_KICK).WriteLong(targetCharId));
+        public static void SendGuildPromote(long targetCharId, byte role)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_PROMOTE).WriteLong(targetCharId).WriteByte(role));
+        public static void SendGuildDisband()
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_DISBAND));
+
+        // ── Skill ────────────────────────────────────────────────
+
+        public static void SendSkillList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_SKILL_LIST));
+        public static void SendClassSkillList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_SKILL_CLASS_LIST));
+        public static void SendSkillLearn(int skillId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SKILL_LEARN).WriteInt(skillId));
+        public static void SendSkillUpgrade(int skillId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SKILL_UPGRADE).WriteInt(skillId));
+        public static void SendSkillSetSlot(byte slot, int skillId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SKILL_SET_SLOT).WriteByte(slot).WriteInt(skillId));
+
+        // ── Enhancement ──────────────────────────────────────────
+
+        public static void SendEnhanceItem(long instanceId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_ENHANCE_ITEM).WriteLong(instanceId));
+
+        // ── PvP ──────────────────────────────────────────────────
+
+        public static void SendPvpChallenge(long targetCharId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_CHALLENGE).WriteLong(targetCharId));
+        public static void SendPvpRespond(long challengerId, bool accept)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_RESPOND).WriteLong(challengerId).WriteBool(accept));
+        public static void SendPvpAttack(long targetCharId, int skillId = 0)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_ATTACK_PVP).WriteLong(targetCharId).WriteInt(skillId));
+        public static void SendPvpSurrender()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_SURRENDER));
+
+        // ── Minigame ─────────────────────────────────────────────
+
+        public static void SendMinigameRoomList(string gameType)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_ROOM_LIST).WriteString(gameType));
+        public static void SendMinigameCreate(string gameType, int minBet, int maxBet, byte currency)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_CREATE)
+                .WriteString(gameType).WriteInt(minBet).WriteInt(maxBet).WriteByte(currency));
+        public static void SendMinigameJoin(long roomId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_JOIN).WriteLong(roomId));
+        public static void SendMinigameLeave(long roomId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_LEAVE).WriteLong(roomId));
+        public static void SendMinigameBet(long roomId, int symbol, int amount)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_BET)
+                .WriteLong(roomId).WriteInt(symbol).WriteInt(amount));
+        public static void SendMinigameAnswer(long roomId, byte answerIdx)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_ANSWER)
+                .WriteLong(roomId).WriteByte(answerIdx));
+
+        // ── Farming ──────────────────────────────────────────────
+
+        public static void SendFarmState()
+            => Send(new PacketBuilder(PacketOpcode.C2S_FARM_STATE));
+        public static void SendFarmPlant(int plotIndex, int seedItemId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_FARM_PLANT).WriteInt(plotIndex).WriteInt(seedItemId));
+        public static void SendFarmWater(int plotIndex)
+            => Send(new PacketBuilder(PacketOpcode.C2S_FARM_WATER).WriteInt(plotIndex));
+        public static void SendFarmHarvest(int plotIndex)
+            => Send(new PacketBuilder(PacketOpcode.C2S_FARM_HARVEST).WriteInt(plotIndex));
+        public static void SendAnimalFeed(int penIndex)
+            => Send(new PacketBuilder(PacketOpcode.C2S_ANIMAL_FEED).WriteInt(penIndex));
+        public static void SendAnimalCollect(int penIndex)
+            => Send(new PacketBuilder(PacketOpcode.C2S_ANIMAL_COLLECT).WriteInt(penIndex));
+
+        // ── Housing ───────────────────────────────────────────────
+
+        public static void SendHouseInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_HOUSE_INFO));
+        public static void SendHouseFurnitureList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_HOUSE_FURNITURE));
+        public static void SendHousePlace(int furnitureId, float x, float y, int rotation)
+            => Send(new PacketBuilder(PacketOpcode.C2S_HOUSE_PLACE)
+                .WriteInt(furnitureId).WriteFloat(x).WriteFloat(y).WriteInt(rotation));
+        public static void SendHouseRemove(long instanceId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_HOUSE_REMOVE).WriteLong(instanceId));
+        public static void SendHouseCatalog()
+            => Send(new PacketBuilder(PacketOpcode.C2S_HOUSE_CATALOG));
+
+        // ── Leaderboard ──────────────────────────────────────────
+
+        public static void SendLeaderboard(string rankType)
+            => Send(new PacketBuilder(PacketOpcode.C2S_LEADERBOARD).WriteString(rankType));
+
+        // ── Drop item ────────────────────────────────────────────
+
+        public static void SendDropItem(long instanceId, int qty = 1)
+            => Send(new PacketBuilder(PacketOpcode.C2S_DROP_ITEM).WriteLong(instanceId).WriteInt(qty));
+
+    /// <summary>
+    /// Đọc payload của packet (sau khi opcode đã tách ra)
+    /// </summary>
+    public class PacketReader
+    {
+        private readonly byte[] _data;
+        private int _pos;
+
+        public PacketReader(byte[] payload)
+        {
+            _data = payload;
+            _pos  = 0;
+        }
+
+        public int Remaining => _data.Length - _pos;
+
+        public byte ReadByte() => _data[_pos++];
+        public bool ReadBool() => _data[_pos++] != 0;
+
+        public short ReadShort()
+        {
+            short v = (short)((_data[_pos] << 8) | _data[_pos + 1]);
+            _pos += 2;
+            return v;
+        }
+
+        public int ReadInt()
+        {
+            int v = (_data[_pos]     << 24) | (_data[_pos + 1] << 16)
+                  | (_data[_pos + 2] <<  8) |  _data[_pos + 3];
+            _pos += 4;
+            return v;
+        }
+
+        public long ReadLong()
+        {
+            long hi = (uint)ReadInt();
+            long lo = (uint)ReadInt();
+            return (hi << 32) | lo;
+        }
+
+        public float ReadFloat()
+        {
+            return BitConverter.Int32BitsToSingle(ReadInt());
+        }
+
+        public string ReadString()
+        {
+            int len = ReadShort() & 0xFFFF;
+            string s = Encoding.UTF8.GetString(_data, _pos, len);
+            _pos += len;
+            return s;
+        }
+
+        public byte[] ReadBytes(int count)
+        {
+            byte[] b = new byte[count];
+            Buffer.BlockCopy(_data, _pos, b, 0, count);
+            _pos += count;
+            return b;
+        }
+    }
+}
+
+        private readonly MemoryStream _ms;
+        private readonly BinaryWriter _w;
+        private readonly short        _opcode;
+
+        public PacketBuilder(short opcode)
+        {
+            _opcode = opcode;
+            _ms = new MemoryStream();
+            _w  = new BinaryWriter(_ms);
+        }
+
+        // ── Primitive writes ────────────────────────────────────
+
+        public PacketBuilder WriteByte(byte v)  { _w.Write(v); return this; }
+        public PacketBuilder WriteBool(bool v)  { _w.Write(v); return this; }
+
+        /// Big-endian short
+        public PacketBuilder WriteShort(short v)
+        {
+            _w.Write((byte)(v >> 8));
+            _w.Write((byte)(v & 0xFF));
+            return this;
+        }
+
+        /// Big-endian int
+        public PacketBuilder WriteInt(int v)
+        {
+            _w.Write((byte)((v >> 24) & 0xFF));
+            _w.Write((byte)((v >> 16) & 0xFF));
+            _w.Write((byte)((v >>  8) & 0xFF));
+            _w.Write((byte)( v        & 0xFF));
+            return this;
+        }
+
+        /// Big-endian long
+        public PacketBuilder WriteLong(long v)
+        {
+            WriteInt((int)(v >> 32));
+            WriteInt((int)(v & 0xFFFFFFFFL));
+            return this;
+        }
+
+        /// Big-endian float (IEEE 754)
+        public PacketBuilder WriteFloat(float v)
+        {
+            int bits = BitConverter.SingleToInt32Bits(v);
+            WriteInt(bits);
+            return this;
+        }
+
+        /// UTF-8 string với 2-byte length prefix
+        public PacketBuilder WriteString(string s)
+        {
+            byte[] b = Encoding.UTF8.GetBytes(s ?? "");
+            WriteShort((short)b.Length);
+            _w.Write(b);
+            return this;
+        }
+
+        public PacketBuilder WriteBytes(byte[] b) { _w.Write(b); return this; }
+
+        // ── Finalize ────────────────────────────────────────────
+
+        /// Build packet hoàn chỉnh: [4 len][2 opcode][payload]
+        public byte[] Build()
+        {
+            byte[] payload = _ms.ToArray();
+            int bodyLen = 2 + payload.Length; // opcode + payload
+
+            using var result = new MemoryStream(4 + bodyLen);
+            using var rw     = new BinaryWriter(result);
+
+            // 4-byte big-endian length
+            rw.Write((byte)((bodyLen >> 24) & 0xFF));
+            rw.Write((byte)((bodyLen >> 16) & 0xFF));
+            rw.Write((byte)((bodyLen >>  8) & 0xFF));
+            rw.Write((byte)( bodyLen        & 0xFF));
+
+            // 2-byte opcode
+            rw.Write((byte)((_opcode >> 8) & 0xFF));
+            rw.Write((byte)( _opcode       & 0xFF));
+
+            // Payload
+            rw.Write(payload);
+            return result.ToArray();
+        }
+    }
+
+    /// <summary>
+    /// Đọc payload của packet (sau khi opcode đã bị tách ra)
+    /// </summary>
+    public class PacketReader
+    {
+        private readonly byte[] _data;
+        private int _pos;
+
+        public PacketReader(byte[] payload)
+        {
+            _data = payload;
+            _pos  = 0;
+        }
+
+        public int Remaining => _data.Length - _pos;
+
+        public byte ReadByte() => _data[_pos++];
+        public bool ReadBool() => _data[_pos++] != 0;
+
+        public short ReadShort()
+        {
+            short v = (short)((_data[_pos] << 8) | _data[_pos + 1]);
+            _pos += 2;
+            return v;
+        }
+
+        public int ReadInt()
+        {
+            int v = (_data[_pos]     << 24) | (_data[_pos + 1] << 16)
+                  | (_data[_pos + 2] <<  8) |  _data[_pos + 3];
+            _pos += 4;
+            return v;
+        }
+
+        public long ReadLong()
+        {
+            long hi = (uint)ReadInt();
+            long lo = (uint)ReadInt();
+            return (hi << 32) | lo;
+        }
+
+        public float ReadFloat()
+        {
+            int bits = ReadInt();
+            return BitConverter.Int32BitsToSingle(bits);
+        }
+
+        public string ReadString()
+        {
+            int len = ReadShort() & 0xFFFF;
+            string s = Encoding.UTF8.GetString(_data, _pos, len);
+            _pos += len;
+            return s;
+        }
+
+        public byte[] ReadBytes(int count)
+        {
+            byte[] b = new byte[count];
+            Buffer.BlockCopy(_data, _pos, b, 0, count);
+            _pos += count;
+            return b;
+        }
+    }
+}

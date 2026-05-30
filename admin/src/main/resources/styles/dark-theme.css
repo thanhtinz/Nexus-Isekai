@@ -1,0 +1,144 @@
+/* Nexus Isekai Admin Panel - Dark Theme */
+
+.root {
+    -fx-background-color: #1a1a2e;
+    -fx-text-fill: #e0e0e0;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* Top bar */
+.top-bar {
+    -fx-background-color: #16213e;
+    -fx-border-color: #0f3460;
+    -fx-border-width: 0 0 1 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.title-label {
+    -fx-text-fill: #e94560;
+    -fx-font-size: 16px;
+}
+
+.status-label {
+    -fx-text-fill: #aaaaaa;
+    -fx-font-size: 12px;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #16213e;
+    -fx-border-color: #0f3460;
+    -fx-border-width: 0 1 0 0;
+}
+
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c0c0c0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 12;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+    -fx-background-radius: 4;
+}
+
+.nav-btn:hover {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #ffffff;
+}
+
+.nav-btn-active {
+    -fx-background-color: #e94560;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+/* Tables */
+.table-view {
+    -fx-background-color: #16213e;
+    -fx-border-color: #0f3460;
+    -fx-table-cell-border-color: #0f3460;
+}
+
+.table-view .column-header {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #e0e0e0;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: #16213e;
+    -fx-text-fill: #d0d0d0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #1a2744;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #e9456060;
+}
+
+/* Buttons */
+.button {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+    -fx-padding: 6 14;
+}
+
+.button:hover {
+    -fx-background-color: #1a4a80;
+}
+
+.button:pressed {
+    -fx-background-color: #e94560;
+}
+
+/* Input fields */
+.text-field, .text-area, .password-field {
+    -fx-background-color: #0d1b2a;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #0f3460;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-prompt-text-fill: #666688;
+}
+
+.text-field:focused, .text-area:focused {
+    -fx-border-color: #e94560;
+}
+
+/* Labels */
+.label {
+    -fx-text-fill: #d0d0d0;
+}
+
+/* Scroll pane */
+.scroll-pane {
+    -fx-background-color: #1a1a2e;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: #1a1a2e;
+}
+
+/* Dialog */
+.dialog-pane {
+    -fx-background-color: #1a1a2e;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #16213e;
+}
+
+/* Slider (hp/mp bar dùng ở client nhưng có thể dùng trong stats panel) */
+.slider .track {
+    -fx-background-color: #0f3460;
+}
+
+.slider .thumb {
+    -fx-background-color: #e94560;
+}
