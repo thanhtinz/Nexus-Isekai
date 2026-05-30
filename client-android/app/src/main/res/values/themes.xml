@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.NexusIsekai" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#6c3ef3</item>
+        <item name="colorPrimaryVariant">#4820b8</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#f0c050</item>
+        <item name="android:windowBackground">#0d0d24</item>
+        <item name="android:textColor">#E8E8FF</item>
+    </style>
+</resources>

@@ -1,0 +1,55 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.nexusisekai'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.nexusisekai"
+        minSdk 21          // Android 5.0+
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "String", "SERVER_HOST", '"your-server-ip"'
+            buildConfigField "int",    "SERVER_PORT", '7777'
+            buildConfigField "String", "WEBSHOP_URL", '"http://your-server-ip:9090"'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "SERVER_HOST", '"your-server-ip"'
+            buildConfigField "int",    "SERVER_PORT", '7777'
+            buildConfigField "String", "WEBSHOP_URL", '"https://nexusisekai.vn"'
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+        viewBinding true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // AndroidX
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.8.3'
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.8.3'
+    implementation 'androidx.fragment:fragment:1.8.1'
+
+    // JSON (lightweight)
+    implementation 'org.json:json:20240303'
+}

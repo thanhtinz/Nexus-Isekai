@@ -1,0 +1,68 @@
+/* dark.css — Nexus Isekai PC client dark theme */
+
+.root {
+    -fx-base: #0D0D24;
+    -fx-background: #0D0D24;
+    -fx-control-inner-background: #1A1A35;
+    -fx-text-fill: #DDDDFF;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 13px;
+}
+
+.label      { -fx-text-fill: #CCCCEE; }
+.button     { -fx-background-color: #1A2A4A; -fx-text-fill: #AAAADD; -fx-background-radius: 6; -fx-cursor: hand; }
+.button:hover { -fx-background-color: #2A3A5A; }
+.button:focused { -fx-background-color: #2A3A5A; -fx-border-color: #6C3EF3; -fx-border-radius:6; -fx-border-width:1; }
+
+.text-field, .password-field {
+    -fx-background-color: #1A1A35;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #555566;
+    -fx-border-color: #2A2A4A;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 10 12;
+}
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #6C3EF3;
+}
+
+.list-view  { -fx-background-color: #0A0A1E; -fx-border-color: #1A1A2E; }
+.list-cell  { -fx-background-color: transparent; -fx-text-fill: #CCCCEE; -fx-padding: 6 8; }
+.list-cell:selected { -fx-background-color: #2A1A4A; -fx-text-fill: white; }
+.list-cell:hover    { -fx-background-color: #1A1A35; }
+
+.tab-pane   { -fx-background-color: #0A0A1E; -fx-tab-min-height: 30px; }
+.tab        { -fx-background-color: #0D0D24; -fx-text-fill: #888899; }
+.tab:selected { -fx-background-color: #1A1A35; -fx-text-fill: #CCCCFF; }
+.tab-header-area .tab-header-background { -fx-background-color: #0A0A1E; }
+
+.menu-bar   { -fx-background-color: #0A0A1E; }
+.menu       { -fx-text-fill: #CCCCEE; }
+.menu:hover { -fx-background-color: #1A1A35; }
+.menu-item  { -fx-background-color: #0D0D24; -fx-text-fill: #CCCCEE; }
+.menu-item:focused { -fx-background-color: #2A1A4A; -fx-text-fill: white; }
+
+.context-menu { -fx-background-color: #0D0D24; -fx-border-color: #2A2A4A; }
+
+.scroll-bar { -fx-background-color: #0A0A1E; }
+.scroll-bar .thumb { -fx-background-color: #2A2A4A; }
+
+.progress-bar > .track { -fx-background-color: #2A2A4A; -fx-background-radius: 4; }
+.progress-bar > .bar   { -fx-background-radius: 4; }
+
+.spinner { -fx-background-color: #1A1A35; }
+.combo-box { -fx-background-color: #1A1A35; -fx-text-fill: white; }
+.combo-box .list-cell { -fx-background-color: #1A1A35; -fx-text-fill: white; }
+
+/* Alert dialogs */
+.dialog-pane {
+    -fx-background-color: #1A1A35;
+    -fx-border-color: #2A2A4A;
+}
+.dialog-pane .content.label { -fx-text-fill: #CCCCEE; }
+.dialog-pane .header-panel  { -fx-background-color: #0D0D24; }
+.dialog-pane .header-panel .label { -fx-text-fill: white; }
+
+/* Text input dialog */
+.text-input-dialog .text-field { -fx-background-color: #1A1A35; }

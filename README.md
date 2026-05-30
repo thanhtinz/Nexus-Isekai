@@ -18,7 +18,10 @@ Nexus Isekai là một **bộ khung MMORPG đầy đủ** gồm 4 thành phần 
 |---|---|---|
 | **Game Server** | Java 17 + Netty + HikariCP | TCP game server, xử lý packet nhị phân |
 | **Game Client** | C# Unity 2022 | Client 2D, đầy đủ UI ingame |
-| **J2ME Client** | Java CLDC 1.1 / MIDP 2.0 | Client điện thoại feature phone (Nokia...) |
+| **J2ME Client**     | Java CLDC 1.1 / MIDP 2.0 | Client điện thoại feature phone (Nokia, Samsung...) |
+| **Android Client**  | Java, Android 5.0+ (SDK 21) | Native Android, SurfaceView 60fps, virtual D-pad |
+| **iOS Client**      | Swift, SwiftUI + SpriteKit, iOS 14+ | NWConnection TCP, SpriteKit canvas |
+| **PC Client**       | Java 17 + JavaFX 21          | Windows/Linux/macOS, Canvas 2D, WASD controls |
 | **Webshop** | React 18 + TypeScript + Vite | Cổng nạp game, mua item, gift code |
 | **Admin Panel** | JavaFX 17 | Quản trị toàn bộ game, 30+ panels |
 
