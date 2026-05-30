@@ -1101,3 +1101,323 @@ VALUES
 (1,'hoa_sen','Hoa Sen','Icons/Currency/hoa_sen','Tien te su kien Tet Nguyen Dan',100,0),
 (2,'sao_bang','Sao Bang','Icons/Currency/sao_bang','Tien te su kien He',50,0),
 (3,'la_phong','La Phong','Icons/Currency/la_phong','Tien te su kien Thu',80,0);
+
+-- ═════════════════════════════════════════════════════════════
+-- 25. MASTER ITEM REGISTRY — Kho tong, moi thu trong game
+-- ═════════════════════════════════════════════════════════════
+
+-- Phan loai chinh cua moi "thing" trong game
+-- Dung cho admin: khi can chon item (event, pass, giftcode) chi can nhap ID
+CREATE TABLE IF NOT EXISTS master_registry (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    registry_type   VARCHAR(32) NOT NULL,   -- 'item','skin','pet','mount','title','map','event_currency','sticker_pack','furniture','seed','animal'
+    ref_id          INT NOT NULL,           -- ID trong bang goc (items.id, pet_templates.id,...)
+    display_name    VARCHAR(128) NOT NULL,
+    category        VARCHAR(64) NOT NULL DEFAULT 'general', -- 'weapon','armor','consumable','material','cosmetic','mount','pet','title','map','currency','sticker','furniture','seed','animal'
+    sub_category    VARCHAR(64) DEFAULT '',  -- 'sword','staff','hp_potion','cape_skin',...
+    rarity          TINYINT NOT NULL DEFAULT 0,  -- 0=common,1=uncommon,2=rare,3=epic,4=legendary,5=mythic
+    icon_asset      VARCHAR(256) DEFAULT 'Icons/default',
+    description     TEXT,
+    tags            VARCHAR(256) DEFAULT '', -- 'event_tet,limited,tradeable,stackable'
+    is_tradeable    TINYINT NOT NULL DEFAULT 1,
+    is_stackable    TINYINT NOT NULL DEFAULT 0,
+    max_stack       INT NOT NULL DEFAULT 1,
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    added_by        VARCHAR(64) DEFAULT 'system',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_type (registry_type),
+    INDEX idx_category (category, sub_category),
+    INDEX idx_rarity (rarity),
+    INDEX idx_tags (tags),
+    UNIQUE KEY uk_type_ref (registry_type, ref_id)
+);
+
+-- Populate tu cac bang hien co (chay 1 lan khi setup)
+-- INSERT IGNORE INTO master_registry (registry_type,ref_id,display_name,category,rarity)
+--   SELECT 'item', id, name, CASE type WHEN 0 THEN 'weapon' ... END, rarity FROM items;
+
+-- ═════════════════════════════════════════════════════════════
+-- 26. TRADING — Giao dich giua player
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS trade_sessions (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    player_a_id     BIGINT NOT NULL,
+    player_b_id     BIGINT NOT NULL,
+    status          VARCHAR(16) NOT NULL DEFAULT 'pending', -- pending,confirmed_a,confirmed_b,completed,cancelled
+    gold_a          BIGINT NOT NULL DEFAULT 0,  -- vang player A dua
+    gold_b          BIGINT NOT NULL DEFAULT 0,  -- vang player B dua
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at    DATETIME DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS trade_items (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    trade_id        BIGINT NOT NULL,
+    from_char_id    BIGINT NOT NULL,  -- nguoi dua item
+    inventory_id    BIGINT NOT NULL,  -- character_inventory.id
+    item_id         INT NOT NULL,
+    qty             INT NOT NULL DEFAULT 1,
+    FOREIGN KEY (trade_id) REFERENCES trade_sessions(id) ON DELETE CASCADE
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 27. AUCTION HOUSE — Nha dau gia
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS auction_listings (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    seller_char_id  BIGINT NOT NULL,
+    seller_name     VARCHAR(32) NOT NULL,
+    inventory_id    BIGINT NOT NULL,       -- item dang ban
+    item_id         INT NOT NULL,
+    item_name       VARCHAR(64) NOT NULL,
+    qty             INT NOT NULL DEFAULT 1,
+    enhance_level   INT NOT NULL DEFAULT 0,
+    rarity          INT NOT NULL DEFAULT 0,
+    start_price     BIGINT NOT NULL,       -- gia khoi diem
+    buyout_price    BIGINT DEFAULT NULL,   -- gia mua ngay (NULL = ko co)
+    current_bid     BIGINT NOT NULL DEFAULT 0,
+    bidder_char_id  BIGINT DEFAULT NULL,   -- nguoi dau gia cao nhat hien tai
+    bidder_name     VARCHAR(32) DEFAULT NULL,
+    currency        TINYINT NOT NULL DEFAULT 0, -- 0=gold,1=diamond
+    status          VARCHAR(16) NOT NULL DEFAULT 'active', -- active,sold,expired,cancelled
+    expires_at      DATETIME NOT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_status_expires (status, expires_at),
+    INDEX idx_item (item_id, rarity),
+    INDEX idx_seller (seller_char_id)
+);
+
+CREATE TABLE IF NOT EXISTS auction_bids (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    listing_id      BIGINT NOT NULL,
+    bidder_char_id  BIGINT NOT NULL,
+    amount          BIGINT NOT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES auction_listings(id)
+);
+
+-- Admin config cho auction
+CREATE TABLE IF NOT EXISTS auction_config (
+    config_key      VARCHAR(64) PRIMARY KEY,
+    config_value    VARCHAR(256) NOT NULL,
+    description     VARCHAR(256) DEFAULT ''
+);
+INSERT IGNORE INTO auction_config VALUES
+('tax_rate','5','Thue ban hang (%)'),
+('max_duration_hours','48','Thoi gian dang toi da (gio)'),
+('min_price','100','Gia toi thieu'),
+('max_listings_per_player','20','So luong dang ban toi da/player'),
+('is_enabled','1','Bat/tat auction house');
+
+-- ═════════════════════════════════════════════════════════════
+-- 28. PARTY — Nhom chien dau
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS parties (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    leader_char_id  BIGINT NOT NULL,
+    name            VARCHAR(32) DEFAULT '',
+    max_members     INT NOT NULL DEFAULT 4,
+    status          VARCHAR(16) NOT NULL DEFAULT 'active', -- active,disbanded,in_dungeon
+    dungeon_id      INT DEFAULT NULL,         -- NULL = khong trong dungeon
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS party_members (
+    party_id        BIGINT NOT NULL,
+    char_id         BIGINT NOT NULL,
+    role            TINYINT NOT NULL DEFAULT 0, -- 0=member,1=leader
+    joined_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (party_id, char_id),
+    FOREIGN KEY (party_id) REFERENCES parties(id) ON DELETE CASCADE
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 29. DUNGEON — Instance dungeon
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS dungeon_templates (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    name            VARCHAR(64) NOT NULL,
+    description     TEXT,
+    min_level       INT NOT NULL DEFAULT 1,
+    max_players     INT NOT NULL DEFAULT 4,
+    map_id          INT NOT NULL,              -- map rieng cho dungeon
+    boss_monster_id INT DEFAULT NULL,          -- boss cuoi
+    reward_exp      INT NOT NULL DEFAULT 0,
+    reward_gold     INT NOT NULL DEFAULT 0,
+    reward_items    TEXT,                       -- JSON: [{"item_id":1,"qty":1,"drop_rate":0.5}]
+    cooldown_minutes INT NOT NULL DEFAULT 60,  -- thoi gian cho giua cac lan vao
+    time_limit_minutes INT NOT NULL DEFAULT 30,
+    difficulty      TINYINT NOT NULL DEFAULT 1, -- 1=normal,2=hard,3=hell
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    sort_order      INT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS dungeon_instances (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    template_id     INT NOT NULL,
+    party_id        BIGINT NOT NULL,
+    status          VARCHAR(16) NOT NULL DEFAULT 'active', -- active,completed,failed,expired
+    started_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ended_at        DATETIME DEFAULT NULL,
+    boss_killed     TINYINT NOT NULL DEFAULT 0,
+    FOREIGN KEY (template_id) REFERENCES dungeon_templates(id)
+);
+
+CREATE TABLE IF NOT EXISTS dungeon_cooldowns (
+    char_id         BIGINT NOT NULL,
+    template_id     INT NOT NULL,
+    next_entry_at   DATETIME NOT NULL,
+    PRIMARY KEY (char_id, template_id)
+);
+
+-- Seed dungeon templates
+INSERT IGNORE INTO dungeon_templates (id,name,min_level,max_players,map_id,reward_exp,reward_gold,difficulty) VALUES
+(1,'Hang Doi Am U',10,4,101,500,2000,1),
+(2,'Lau Dai Bi Mat',25,4,102,2000,8000,1),
+(3,'Than Dien Co Dai',40,4,103,5000,20000,2),
+(4,'Dia Nguc Tang 1',60,4,104,15000,50000,3);
+
+-- ═════════════════════════════════════════════════════════════
+-- 30. NPC DIALOG — Hoi thoai NPC (cay hoi thoai)
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS npc_dialogs (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    npc_id          INT NOT NULL,
+    dialog_key      VARCHAR(64) NOT NULL,      -- 'greeting','quest_1_start','shop_intro'
+    text            TEXT NOT NULL,              -- Noi dung hoi thoai
+    speaker         VARCHAR(32) DEFAULT '',     -- Ten nguoi noi (NPC name, hoac 'Player')
+    next_dialog_id  INT DEFAULT NULL,           -- Dialog tiep theo (NULL = ket thuc)
+    options         TEXT DEFAULT NULL,           -- JSON: [{"text":"Chap nhan","goto":5},{"text":"Tu choi","goto":null}]
+    condition       TEXT DEFAULT NULL,           -- JSON: {"min_level":10,"has_item":5,"quest_completed":2}
+    action          TEXT DEFAULT NULL,           -- JSON: {"give_item":1,"start_quest":3,"open_shop":2}
+    sort_order      INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (npc_id) REFERENCES npcs(id) ON DELETE CASCADE,
+    INDEX idx_npc_key (npc_id, dialog_key)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 31. SYSTEM ANNOUNCEMENTS — Thong bao he thong (sticky)
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS system_announcements (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    title           VARCHAR(128) NOT NULL,
+    content         TEXT NOT NULL,
+    announce_type   VARCHAR(32) NOT NULL DEFAULT 'info', -- info,warning,event,maintenance,achievement
+    priority        INT NOT NULL DEFAULT 0,    -- 0=normal,1=important,2=critical (sticky)
+    is_sticky       TINYINT NOT NULL DEFAULT 0, -- 1 = luon hien tren dau
+    target          VARCHAR(32) DEFAULT 'all', -- 'all','server_1','guild_123','char_456'
+    start_at        DATETIME DEFAULT NULL,     -- NULL = ngay lap tuc
+    expires_at      DATETIME DEFAULT NULL,     -- NULL = khong het han
+    created_by      VARCHAR(64) DEFAULT 'admin',
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_active_priority (is_active, priority DESC, created_at DESC)
+);
+
+-- Log su kien quan trong (tu dong insert boi server)
+CREATE TABLE IF NOT EXISTS system_event_log (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    event_type      VARCHAR(32) NOT NULL,   -- 'leaderboard_top','boss_kill','wedding','level_cap','first_clear','guild_war'
+    char_id         BIGINT DEFAULT NULL,
+    char_name       VARCHAR(32) DEFAULT '',
+    message         TEXT NOT NULL,
+    data_json       TEXT DEFAULT NULL,       -- extra data
+    server_id       INT NOT NULL DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_type_time (event_type, created_at DESC)
+);
+
+-- Seed announcements
+INSERT IGNORE INTO system_announcements (id,title,content,announce_type,priority,is_sticky) VALUES
+(1,'Chao mung den Nexus Isekai!','Chuc cac Luu Dan co nhung trai nghiem tuyet voi tai Vong Linh Gioi.','info',0,1),
+(2,'Luu y bao mat','Khong chia se mat khau voi bat ky ai. Admin khong bao gio hoi mat khau.','warning',1,1);
+
+-- ═════════════════════════════════════════════════════════════
+-- 32. RATE LIMITING — Gioi han tan suat goi
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS rate_limit_config (
+    config_key      VARCHAR(64) PRIMARY KEY,
+    max_per_second  INT NOT NULL DEFAULT 10,
+    max_per_minute  INT NOT NULL DEFAULT 100,
+    description     VARCHAR(256) DEFAULT ''
+);
+INSERT IGNORE INTO rate_limit_config VALUES
+('chat',5,60,'Gioi han chat'),
+('move',20,600,'Gioi han di chuyen'),
+('attack',10,200,'Gioi han tan cong'),
+('trade',3,30,'Gioi han giao dich'),
+('shop',5,60,'Gioi han mua ban');
+
+-- Guild invites table (da tham chieu trong GuildHandler)
+CREATE TABLE IF NOT EXISTS guild_invites (
+    guild_id        BIGINT NOT NULL,
+    char_id         BIGINT NOT NULL,
+    invited_by      BIGINT NOT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (guild_id, char_id)
+);
+
+-- PvP duels table
+CREATE TABLE IF NOT EXISTS pvp_duels (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id_a       BIGINT NOT NULL,
+    char_id_b       BIGINT NOT NULL,
+    winner_char_id  BIGINT DEFAULT NULL,
+    status          VARCHAR(16) NOT NULL DEFAULT 'pending',
+    map_id          INT DEFAULT NULL,
+    elo_change      INT DEFAULT 0,
+    started_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ended_at        DATETIME DEFAULT NULL
+);
+
+-- Farm seeds/animals config
+CREATE TABLE IF NOT EXISTS farm_seeds (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    seed_name       VARCHAR(64) NOT NULL,
+    grow_time_min   INT NOT NULL DEFAULT 60,
+    harvest_item_id INT NOT NULL,
+    harvest_qty     INT NOT NULL DEFAULT 1,
+    buy_price       INT NOT NULL DEFAULT 100,
+    exp_reward      INT NOT NULL DEFAULT 10,
+    is_active       TINYINT NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS farm_animals (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    animal_name     VARCHAR(64) NOT NULL,
+    feed_item_id    INT NOT NULL DEFAULT 0,
+    product_item_id INT NOT NULL,
+    produce_time_min INT NOT NULL DEFAULT 120,
+    buy_price       INT NOT NULL DEFAULT 500,
+    is_active       TINYINT NOT NULL DEFAULT 1
+);
+
+-- Furniture catalog
+CREATE TABLE IF NOT EXISTS furniture_catalog (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    name            VARCHAR(64) NOT NULL,
+    furniture_type  VARCHAR(32) NOT NULL DEFAULT 'decoration',
+    price_gold      INT NOT NULL DEFAULT 1000,
+    size            INT NOT NULL DEFAULT 1,
+    icon_id         INT NOT NULL DEFAULT 0,
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    sort_order      INT NOT NULL DEFAULT 0
+);
+
+INSERT IGNORE INTO farm_seeds (id,seed_name,grow_time_min,harvest_item_id,harvest_qty,buy_price) VALUES
+(1,'Hat Lua',30,1001,5,50),(2,'Hat Ngo',45,1002,3,80),(3,'Hat Ca Chua',60,1003,4,100);
+
+INSERT IGNORE INTO farm_animals (id,animal_name,product_item_id,produce_time_min,buy_price) VALUES
+(1,'Ga',1010,60,200),(2,'Bo',1011,180,500),(3,'Ca',1012,90,300);
+
+INSERT IGNORE INTO furniture_catalog (id,name,furniture_type,price_gold,size) VALUES
+(1,'Ban Go','table',500,2),(2,'Giuong','bed',1000,4),(3,'Tu Quan Ao','wardrobe',800,2),
+(4,'Den Lung','lamp',200,1),(5,'Cay Canh','plant',150,1);

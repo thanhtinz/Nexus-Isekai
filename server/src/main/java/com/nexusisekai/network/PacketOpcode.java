@@ -6,7 +6,72 @@ package com.nexusisekai.network;
  */
 public final class PacketOpcode {
 
-    private PacketOpcode() {}
+    private PacketOpcode() {
+    // ── TRADE (10xx) ──────────────────────────────────────────
+    public static final short C2S_TRADE_REQUEST     = (short)0x1001;
+    public static final short C2S_TRADE_RESPOND     = (short)0x1002;
+    public static final short C2S_TRADE_ADD_ITEM    = (short)0x1003;
+    public static final short C2S_TRADE_SET_GOLD    = (short)0x1004;
+    public static final short C2S_TRADE_CONFIRM     = (short)0x1005;
+    public static final short C2S_TRADE_CANCEL      = (short)0x1006;
+    public static final short S2C_TRADE_REQUEST     = (short)0x1011;
+    public static final short S2C_TRADE_UPDATE      = (short)0x1012;
+    public static final short S2C_TRADE_RESULT      = (short)0x1013;
+
+    // ── AUCTION (11xx) ────────────────────────────────────────
+    public static final short C2S_AUCTION_LIST      = (short)0x1101;
+    public static final short C2S_AUCTION_CREATE    = (short)0x1102;
+    public static final short C2S_AUCTION_BID       = (short)0x1103;
+    public static final short C2S_AUCTION_BUYOUT    = (short)0x1104;
+    public static final short C2S_AUCTION_CANCEL    = (short)0x1105;
+    public static final short C2S_AUCTION_MY_ITEMS  = (short)0x1106;
+    public static final short S2C_AUCTION_LIST      = (short)0x1111;
+    public static final short S2C_AUCTION_RESULT    = (short)0x1112;
+
+    // ── PARTY (12xx) ──────────────────────────────────────────
+    public static final short C2S_PARTY_CREATE      = (short)0x1201;
+    public static final short C2S_PARTY_INVITE      = (short)0x1202;
+    public static final short C2S_PARTY_ACCEPT      = (short)0x1203;
+    public static final short C2S_PARTY_LEAVE       = (short)0x1204;
+    public static final short C2S_PARTY_KICK        = (short)0x1205;
+    public static final short C2S_PARTY_DISBAND     = (short)0x1206;
+    public static final short S2C_PARTY_INFO        = (short)0x1211;
+    public static final short S2C_PARTY_INVITED     = (short)0x1212;
+    public static final short S2C_PARTY_UPDATE      = (short)0x1213;
+
+    // ── DUNGEON (13xx) ────────────────────────────────────────
+    public static final short C2S_DUNGEON_LIST      = (short)0x1301;
+    public static final short C2S_DUNGEON_ENTER     = (short)0x1302;
+    public static final short C2S_DUNGEON_EXIT      = (short)0x1303;
+    public static final short S2C_DUNGEON_LIST      = (short)0x1311;
+    public static final short S2C_DUNGEON_ENTER_OK  = (short)0x1312;
+    public static final short S2C_DUNGEON_RESULT    = (short)0x1313;
+    public static final short S2C_DUNGEON_TIMER     = (short)0x1314;
+
+    // ── NPC DIALOG (14xx) ─────────────────────────────────────
+    public static final short C2S_DIALOG_START      = (short)0x1401;
+    public static final short C2S_DIALOG_CHOICE     = (short)0x1402;
+    public static final short S2C_DIALOG_SHOW       = (short)0x1411;
+    public static final short S2C_DIALOG_OPTIONS    = (short)0x1412;
+
+    // ── SYSTEM ANNOUNCEMENTS (15xx) ───────────────────────────
+    public static final short C2S_ANNOUNCEMENT_LIST = (short)0x1501;
+    public static final short S2C_ANNOUNCEMENT_LIST = (short)0x1511;
+    public static final short S2C_ANNOUNCEMENT_NEW  = (short)0x1512;
+    public static final short S2C_SYSTEM_EVENT_LOG  = (short)0x1513;
+
+    // ── EVENT CURRENCY (16xx) ─────────────────────────────────
+    public static final short C2S_EVENT_CURRENCY_LIST = (short)0x1601;
+    public static final short C2S_EVENT_CURRENCY_SHOP = (short)0x1602;
+    public static final short C2S_EVENT_CURRENCY_BUY  = (short)0x1603;
+    public static final short C2S_EVENT_CURRENCY_EXCHANGE = (short)0x1604;
+    public static final short S2C_EVENT_CURRENCY_LIST = (short)0x1611;
+    public static final short S2C_EVENT_CURRENCY_SHOP = (short)0x1612;
+    public static final short S2C_EVENT_CURRENCY_UPDATE = (short)0x1613;
+
+    // ── MASTER REGISTRY (admin only, 17xx) ────────────────────
+    // Khong can opcode — admin dung REST API
+}
 
     // ── AUTH (1xx) ────────────────────────────────────────────
     public static final short C2S_LOGIN             = 0x0101;
@@ -254,4 +319,69 @@ public final class PacketOpcode {
     public static final short C2S_STUDENT_LIST      = 0x0F04;
     public static final short S2C_MENTOR_INFO       = 0x0F11;
     public static final short S2C_MENTOR_GRADUATE   = 0x0F12; // xuất sư thành công
+
+    // ── TRADE (10xx) ──────────────────────────────────────────
+    public static final short C2S_TRADE_REQUEST     = (short)0x1001;
+    public static final short C2S_TRADE_RESPOND     = (short)0x1002;
+    public static final short C2S_TRADE_ADD_ITEM    = (short)0x1003;
+    public static final short C2S_TRADE_SET_GOLD    = (short)0x1004;
+    public static final short C2S_TRADE_CONFIRM     = (short)0x1005;
+    public static final short C2S_TRADE_CANCEL      = (short)0x1006;
+    public static final short S2C_TRADE_REQUEST     = (short)0x1011;
+    public static final short S2C_TRADE_UPDATE      = (short)0x1012;
+    public static final short S2C_TRADE_RESULT      = (short)0x1013;
+
+    // ── AUCTION (11xx) ────────────────────────────────────────
+    public static final short C2S_AUCTION_LIST      = (short)0x1101;
+    public static final short C2S_AUCTION_CREATE    = (short)0x1102;
+    public static final short C2S_AUCTION_BID       = (short)0x1103;
+    public static final short C2S_AUCTION_BUYOUT    = (short)0x1104;
+    public static final short C2S_AUCTION_CANCEL    = (short)0x1105;
+    public static final short C2S_AUCTION_MY_ITEMS  = (short)0x1106;
+    public static final short S2C_AUCTION_LIST      = (short)0x1111;
+    public static final short S2C_AUCTION_RESULT    = (short)0x1112;
+
+    // ── PARTY (12xx) ──────────────────────────────────────────
+    public static final short C2S_PARTY_CREATE      = (short)0x1201;
+    public static final short C2S_PARTY_INVITE      = (short)0x1202;
+    public static final short C2S_PARTY_ACCEPT      = (short)0x1203;
+    public static final short C2S_PARTY_LEAVE       = (short)0x1204;
+    public static final short C2S_PARTY_KICK        = (short)0x1205;
+    public static final short C2S_PARTY_DISBAND     = (short)0x1206;
+    public static final short S2C_PARTY_INFO        = (short)0x1211;
+    public static final short S2C_PARTY_INVITED     = (short)0x1212;
+    public static final short S2C_PARTY_UPDATE      = (short)0x1213;
+
+    // ── DUNGEON (13xx) ────────────────────────────────────────
+    public static final short C2S_DUNGEON_LIST      = (short)0x1301;
+    public static final short C2S_DUNGEON_ENTER     = (short)0x1302;
+    public static final short C2S_DUNGEON_EXIT      = (short)0x1303;
+    public static final short S2C_DUNGEON_LIST      = (short)0x1311;
+    public static final short S2C_DUNGEON_ENTER_OK  = (short)0x1312;
+    public static final short S2C_DUNGEON_RESULT    = (short)0x1313;
+    public static final short S2C_DUNGEON_TIMER     = (short)0x1314;
+
+    // ── NPC DIALOG (14xx) ─────────────────────────────────────
+    public static final short C2S_DIALOG_START      = (short)0x1401;
+    public static final short C2S_DIALOG_CHOICE     = (short)0x1402;
+    public static final short S2C_DIALOG_SHOW       = (short)0x1411;
+    public static final short S2C_DIALOG_OPTIONS    = (short)0x1412;
+
+    // ── SYSTEM ANNOUNCEMENTS (15xx) ───────────────────────────
+    public static final short C2S_ANNOUNCEMENT_LIST = (short)0x1501;
+    public static final short S2C_ANNOUNCEMENT_LIST = (short)0x1511;
+    public static final short S2C_ANNOUNCEMENT_NEW  = (short)0x1512;
+    public static final short S2C_SYSTEM_EVENT_LOG  = (short)0x1513;
+
+    // ── EVENT CURRENCY (16xx) ─────────────────────────────────
+    public static final short C2S_EVENT_CURRENCY_LIST = (short)0x1601;
+    public static final short C2S_EVENT_CURRENCY_SHOP = (short)0x1602;
+    public static final short C2S_EVENT_CURRENCY_BUY  = (short)0x1603;
+    public static final short C2S_EVENT_CURRENCY_EXCHANGE = (short)0x1604;
+    public static final short S2C_EVENT_CURRENCY_LIST = (short)0x1611;
+    public static final short S2C_EVENT_CURRENCY_SHOP = (short)0x1612;
+    public static final short S2C_EVENT_CURRENCY_UPDATE = (short)0x1613;
+
+    // ── MASTER REGISTRY (admin only, 17xx) ────────────────────
+    // Khong can opcode — admin dung REST API
 }

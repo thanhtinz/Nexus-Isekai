@@ -1,0 +1,726 @@
+package com.nexusisekai.network.handler;
+
+import com.nexusisekai.database.DatabaseManager;
+import com.nexusisekai.game.entity.Player;
+import com.nexusisekai.network.*;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.nio.charset.StandardCharsets;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * ExtendedHandlers — Trade, Auction, Party, Dungeon, Dialog, Announcement, EventCurrency
+ *
+ * Tat ca method static, goi tu GameSession dispatch.
+ */
+public class ExtendedHandlers {
+    private static final Logger log = LoggerFactory.getLogger(ExtendedHandlers.class);
+
+    // ═══════════════════════════════════════════════════════════
+    // TRADE
+    // ═══════════════════════════════════════════════════════════
+
+    private static final ConcurrentHashMap<Long, TradeSession> activeTrades = new ConcurrentHashMap<>();
+
+    static class TradeSession {
+        long id, playerA, playerB;
+        List<long[]> itemsA = new ArrayList<>(), itemsB = new ArrayList<>(); // [inventoryId, itemId, qty]
+        long goldA, goldB;
+        boolean confirmA, confirmB;
+    }
+
+    public static void handleTradeRequest(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long targetCharId = buf.readLong();
+        GameSession target = GameNetworkServer.getInstance().getSessionByCharId(targetCharId);
+        if (target == null) { msg(session, "Nguoi choi khong online."); return; }
+        if (target.getPlayer().getCharId() == p.getCharId()) return;
+
+        ByteBuf pkt = Unpooled.buffer();
+        pkt.writeShort(PacketOpcode.S2C_TRADE_REQUEST);
+        pkt.writeLong(p.getCharId());
+        writeStr(pkt, p.getName());
+        target.send(pkt);
+        msg(session, "Da gui yeu cau giao dich.");
+    }
+
+    public static void handleTradeRespond(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long fromCharId = buf.readLong();
+        boolean accept  = buf.readBoolean();
+        if (!accept) { msg(session, "Tu choi giao dich."); return; }
+
+        TradeSession trade = new TradeSession();
+        trade.id = System.currentTimeMillis();
+        trade.playerA = fromCharId; trade.playerB = p.getCharId();
+        activeTrades.put(trade.id, trade);
+
+        // Thong bao ca 2 ben
+        sendTradeUpdate(trade, fromCharId);
+        sendTradeUpdate(trade, p.getCharId());
+    }
+
+    public static void handleTradeAddItem(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long tradeId     = buf.readLong();
+        long inventoryId = buf.readLong();
+        int  qty         = buf.readInt();
+
+        TradeSession trade = activeTrades.get(tradeId);
+        if (trade == null) { msg(session, "Giao dich khong ton tai."); return; }
+        List<long[]> items = (p.getCharId() == trade.playerA) ? trade.itemsA : trade.itemsB;
+        items.add(new long[]{inventoryId, 0, qty});
+        trade.confirmA = trade.confirmB = false;
+        sendTradeUpdate(trade, trade.playerA);
+        sendTradeUpdate(trade, trade.playerB);
+    }
+
+    public static void handleTradeSetGold(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long tradeId = buf.readLong();
+        long gold    = buf.readLong();
+        TradeSession trade = activeTrades.get(tradeId);
+        if (trade == null) return;
+        if (p.getCharId() == trade.playerA) trade.goldA = gold;
+        else trade.goldB = gold;
+        trade.confirmA = trade.confirmB = false;
+        sendTradeUpdate(trade, trade.playerA);
+        sendTradeUpdate(trade, trade.playerB);
+    }
+
+    public static void handleTradeConfirm(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long tradeId = buf.readLong();
+        TradeSession trade = activeTrades.get(tradeId);
+        if (trade == null) return;
+        if (p.getCharId() == trade.playerA) trade.confirmA = true;
+        else trade.confirmB = true;
+
+        if (trade.confirmA && trade.confirmB) {
+            executeTrade(trade);
+            activeTrades.remove(tradeId);
+        } else {
+            sendTradeUpdate(trade, trade.playerA);
+            sendTradeUpdate(trade, trade.playerB);
+        }
+    }
+
+    public static void handleTradeCancel(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long tradeId = buf.readLong();
+        TradeSession trade = activeTrades.remove(tradeId);
+        if (trade == null) return;
+        sendTradeResult(trade.playerA, false, "Giao dich bi huy.");
+        sendTradeResult(trade.playerB, false, "Giao dich bi huy.");
+    }
+
+    private static void executeTrade(TradeSession trade) {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            c.setAutoCommit(false);
+            // Transfer items A->B, B->A, gold swap
+            // Simplified: update character_inventory.char_id
+            for (long[] item : trade.itemsA)
+                c.prepareStatement("UPDATE character_inventory SET char_id=" + trade.playerB
+                    + " WHERE id=" + item[0] + " AND char_id=" + trade.playerA).executeUpdate();
+            for (long[] item : trade.itemsB)
+                c.prepareStatement("UPDATE character_inventory SET char_id=" + trade.playerA
+                    + " WHERE id=" + item[0] + " AND char_id=" + trade.playerB).executeUpdate();
+            // Gold swap
+            if (trade.goldA > 0) {
+                c.prepareStatement("UPDATE characters SET gold=gold-" + trade.goldA + " WHERE id=" + trade.playerA + " AND gold>=" + trade.goldA).executeUpdate();
+                c.prepareStatement("UPDATE characters SET gold=gold+" + trade.goldA + " WHERE id=" + trade.playerB).executeUpdate();
+            }
+            if (trade.goldB > 0) {
+                c.prepareStatement("UPDATE characters SET gold=gold-" + trade.goldB + " WHERE id=" + trade.playerB + " AND gold>=" + trade.goldB).executeUpdate();
+                c.prepareStatement("UPDATE characters SET gold=gold+" + trade.goldB + " WHERE id=" + trade.playerA).executeUpdate();
+            }
+            c.commit();
+            c.setAutoCommit(true);
+            sendTradeResult(trade.playerA, true, "Giao dich thanh cong!");
+            sendTradeResult(trade.playerB, true, "Giao dich thanh cong!");
+            log.info("[TRADE] {} <-> {} completed", trade.playerA, trade.playerB);
+        } catch (Exception e) {
+            sendTradeResult(trade.playerA, false, "Loi giao dich: " + e.getMessage());
+            sendTradeResult(trade.playerB, false, "Loi giao dich.");
+            log.error("[TRADE] error: {}", e.getMessage());
+        }
+    }
+
+    private static void sendTradeUpdate(TradeSession t, long charId) {
+        GameSession s = GameNetworkServer.getInstance().getSessionByCharId(charId);
+        if (s == null) return;
+        ByteBuf pkt = Unpooled.buffer();
+        pkt.writeShort(PacketOpcode.S2C_TRADE_UPDATE);
+        pkt.writeLong(t.id);
+        pkt.writeByte(t.confirmA ? 1 : 0);
+        pkt.writeByte(t.confirmB ? 1 : 0);
+        pkt.writeLong(t.goldA); pkt.writeLong(t.goldB);
+        pkt.writeShort(t.itemsA.size()); pkt.writeShort(t.itemsB.size());
+        s.send(pkt);
+    }
+
+    private static void sendTradeResult(long charId, boolean ok, String message) {
+        GameSession s = GameNetworkServer.getInstance().getSessionByCharId(charId);
+        if (s == null) return;
+        ByteBuf pkt = Unpooled.buffer();
+        pkt.writeShort(PacketOpcode.S2C_TRADE_RESULT);
+        pkt.writeBoolean(ok); writeStr(pkt, message);
+        s.send(pkt);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // AUCTION HOUSE
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleAuctionList(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        int page = buf.readableBytes() >= 4 ? buf.readInt() : 0;
+        int perPage = 20;
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM auction_listings WHERE status='active' AND expires_at>NOW() " +
+                 "ORDER BY created_at DESC LIMIT ? OFFSET ?")) {
+            ps.setInt(1, perPage); ps.setInt(2, page * perPage);
+            ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer();
+            pkt.writeShort(PacketOpcode.S2C_AUCTION_LIST);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeLong(rs.getLong("id"));
+                writeStr(tmp, rs.getString("item_name"));
+                tmp.writeInt(rs.getInt("item_id"));
+                tmp.writeInt(rs.getInt("qty"));
+                tmp.writeByte(rs.getInt("rarity"));
+                tmp.writeByte(rs.getInt("enhance_level"));
+                tmp.writeLong(rs.getLong("start_price"));
+                tmp.writeLong(rs.getLong("current_bid"));
+                long buyout = rs.getLong("buyout_price");
+                tmp.writeLong(rs.wasNull() ? -1 : buyout);
+                writeStr(tmp, rs.getString("seller_name"));
+                tmp.writeByte(rs.getInt("currency"));
+                count++;
+            }
+            pkt.writeShort(count);
+            pkt.writeBytes(tmp);
+            session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi: " + e.getMessage()); }
+    }
+
+    public static void handleAuctionCreate(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long inventoryId = buf.readLong();
+        long startPrice  = buf.readLong();
+        long buyoutPrice = buf.readLong(); // -1 = khong co buyout
+        int  hours       = buf.readInt();
+        if (hours < 1 || hours > 48) hours = 24;
+        if (startPrice < 100) { msg(session, "Gia toi thieu 100."); return; }
+
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            // Verify ownership
+            PreparedStatement vps = c.prepareStatement(
+                "SELECT ci.item_id, ci.enhance_level, i.name, i.rarity FROM character_inventory ci " +
+                "JOIN items i ON i.id=ci.item_id WHERE ci.id=? AND ci.char_id=?");
+            vps.setLong(1, inventoryId); vps.setLong(2, p.getCharId());
+            ResultSet vrs = vps.executeQuery();
+            if (!vrs.next()) { msg(session, "Item khong hop le."); return; }
+
+            PreparedStatement ins = c.prepareStatement(
+                "INSERT INTO auction_listings (seller_char_id,seller_name,inventory_id,item_id,item_name,qty,enhance_level,rarity," +
+                "start_price,buyout_price,currency,expires_at) VALUES (?,?,?,?,?,1,?,?,?,?,0,DATE_ADD(NOW(),INTERVAL ? HOUR))");
+            ins.setLong(1, p.getCharId()); ins.setString(2, p.getName());
+            ins.setLong(3, inventoryId); ins.setInt(4, vrs.getInt("item_id"));
+            ins.setString(5, vrs.getString("name")); ins.setInt(6, vrs.getInt("enhance_level"));
+            ins.setInt(7, vrs.getInt("rarity")); ins.setLong(8, startPrice);
+            ins.setObject(9, buyoutPrice > 0 ? buyoutPrice : null); ins.setInt(10, hours);
+            ins.executeUpdate();
+            // Lock item
+            c.prepareStatement("UPDATE character_inventory SET equipped=0 WHERE id=" + inventoryId).executeUpdate();
+            msg(session, "Dang ban thanh cong!");
+        } catch (Exception e) { msg(session, "Loi: " + e.getMessage()); }
+    }
+
+    public static void handleAuctionBid(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long listingId = buf.readLong();
+        long bidAmount = buf.readLong();
+
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement("SELECT * FROM auction_listings WHERE id=? AND status='active'");
+            ps.setLong(1, listingId); ResultSet rs = ps.executeQuery();
+            if (!rs.next()) { msg(session, "Khong tim thay."); return; }
+            if (bidAmount <= rs.getLong("current_bid")) { msg(session, "Gia phai cao hon " + rs.getLong("current_bid")); return; }
+
+            c.prepareStatement("UPDATE auction_listings SET current_bid=" + bidAmount +
+                ",bidder_char_id=" + p.getCharId() + ",bidder_name='" + p.getName() + "' WHERE id=" + listingId).executeUpdate();
+            c.prepareStatement("INSERT INTO auction_bids (listing_id,bidder_char_id,amount) VALUES (" +
+                listingId + "," + p.getCharId() + "," + bidAmount + ")").executeUpdate();
+            msg(session, "Dau gia " + bidAmount + " thanh cong!");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleAuctionBuyout(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long listingId = buf.readLong();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement(
+                "SELECT * FROM auction_listings WHERE id=? AND status='active' AND buyout_price IS NOT NULL");
+            ps.setLong(1, listingId); ResultSet rs = ps.executeQuery();
+            if (!rs.next()) { msg(session, "Khong the mua."); return; }
+            long price = rs.getLong("buyout_price");
+            long sellerId = rs.getLong("seller_char_id");
+            long inventoryId = rs.getLong("inventory_id");
+
+            c.setAutoCommit(false);
+            // Tru gold buyer
+            int rows = c.prepareStatement("UPDATE characters SET gold=gold-" + price +
+                " WHERE id=" + p.getCharId() + " AND gold>=" + price).executeUpdate();
+            if (rows == 0) { c.rollback(); c.setAutoCommit(true); msg(session, "Khong du vang."); return; }
+            // Cong gold seller (tru thue 5%)
+            long tax = price * 5 / 100;
+            c.prepareStatement("UPDATE characters SET gold=gold+" + (price - tax) +
+                " WHERE id=" + sellerId).executeUpdate();
+            // Transfer item
+            c.prepareStatement("UPDATE character_inventory SET char_id=" + p.getCharId() +
+                " WHERE id=" + inventoryId).executeUpdate();
+            // Update listing
+            c.prepareStatement("UPDATE auction_listings SET status='sold',current_bid=" + price +
+                ",bidder_char_id=" + p.getCharId() + ",bidder_name='" + p.getName() + "' WHERE id=" + listingId).executeUpdate();
+            c.commit(); c.setAutoCommit(true);
+            msg(session, "Mua thanh cong!");
+            logSystemEvent("auction_buyout", p.getCharId(), p.getName(),
+                p.getName() + " mua " + rs.getString("item_name") + " gia " + price + " vang");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleAuctionCancel(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long listingId = buf.readLong();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            c.prepareStatement("UPDATE auction_listings SET status='cancelled' WHERE id=" + listingId +
+                " AND seller_char_id=" + p.getCharId() + " AND status='active' AND current_bid=0").executeUpdate();
+            msg(session, "Da huy dang ban.");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleAuctionMyItems(GameSession session, ByteBuf buf) {
+        handleAuctionList(session, buf); // reuse, filter by seller in future
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // PARTY
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handlePartyCreate(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement(
+                "INSERT INTO parties (leader_char_id) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+            ps.setLong(1, p.getCharId()); ps.executeUpdate();
+            ResultSet keys = ps.getGeneratedKeys();
+            if (keys.next()) {
+                long partyId = keys.getLong(1);
+                c.prepareStatement("INSERT INTO party_members (party_id,char_id,role) VALUES (" +
+                    partyId + "," + p.getCharId() + ",1)").executeUpdate();
+                sendPartyInfo(session, partyId);
+                msg(session, "Tao nhom thanh cong!");
+            }
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handlePartyInvite(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long targetCharId = buf.readLong();
+        GameSession target = GameNetworkServer.getInstance().getSessionByCharId(targetCharId);
+        if (target == null) { msg(session, "Nguoi choi khong online."); return; }
+
+        ByteBuf pkt = Unpooled.buffer();
+        pkt.writeShort(PacketOpcode.S2C_PARTY_INVITED);
+        pkt.writeLong(p.getCharId());
+        writeStr(pkt, p.getName());
+        target.send(pkt);
+        msg(session, "Da gui loi moi nhom.");
+    }
+
+    public static void handlePartyAccept(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long leaderCharId = buf.readLong();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement(
+                "SELECT party_id FROM party_members WHERE char_id=? AND role=1");
+            ps.setLong(1, leaderCharId); ResultSet rs = ps.executeQuery();
+            if (!rs.next()) { msg(session, "Nhom khong ton tai."); return; }
+            long partyId = rs.getLong(1);
+            c.prepareStatement("INSERT INTO party_members (party_id,char_id,role) VALUES (" +
+                partyId + "," + p.getCharId() + ",0)").executeUpdate();
+            sendPartyInfo(session, partyId);
+            msg(session, "Gia nhap nhom thanh cong!");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handlePartyLeave(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            c.prepareStatement("DELETE FROM party_members WHERE char_id=" + p.getCharId()).executeUpdate();
+            msg(session, "Da roi nhom.");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handlePartyKick(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long targetId = buf.readLong();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            c.prepareStatement("DELETE FROM party_members WHERE char_id=" + targetId +
+                " AND party_id IN (SELECT party_id FROM (SELECT party_id FROM party_members WHERE char_id=" +
+                p.getCharId() + " AND role=1) AS t)").executeUpdate();
+            msg(session, "Da kick.");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handlePartyDisband(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            c.prepareStatement("DELETE FROM parties WHERE leader_char_id=" + p.getCharId()).executeUpdate();
+            msg(session, "Da giai tan nhom.");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    private static void sendPartyInfo(GameSession session, long partyId) {
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT pm.char_id,pm.role,ch.name,ch.level,ch.class_id FROM party_members pm " +
+                 "JOIN characters ch ON ch.id=pm.char_id WHERE pm.party_id=?")) {
+            ps.setLong(1, partyId); ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer();
+            pkt.writeShort(PacketOpcode.S2C_PARTY_INFO);
+            pkt.writeLong(partyId);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeLong(rs.getLong("char_id"));
+                writeStr(tmp, rs.getString("name"));
+                tmp.writeInt(rs.getInt("level"));
+                tmp.writeByte(rs.getInt("role"));
+                tmp.writeByte(rs.getInt("class_id"));
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp);
+            session.send(pkt);
+        } catch (Exception e) { log.error("sendPartyInfo: {}", e.getMessage()); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // DUNGEON
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleDungeonList(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM dungeon_templates WHERE is_active=1 AND min_level<=? ORDER BY min_level")) {
+            ps.setInt(1, p.getLevel()); ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer();
+            pkt.writeShort(PacketOpcode.S2C_DUNGEON_LIST);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeInt(rs.getInt("id"));
+                writeStr(tmp, rs.getString("name"));
+                tmp.writeInt(rs.getInt("min_level"));
+                tmp.writeInt(rs.getInt("max_players"));
+                tmp.writeByte(rs.getInt("difficulty"));
+                tmp.writeInt(rs.getInt("time_limit_minutes"));
+                tmp.writeInt(rs.getInt("reward_exp"));
+                tmp.writeInt(rs.getInt("reward_gold"));
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp);
+            session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleDungeonEnter(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        int templateId = buf.readInt();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            // Check cooldown
+            PreparedStatement cd = c.prepareStatement(
+                "SELECT next_entry_at FROM dungeon_cooldowns WHERE char_id=? AND template_id=? AND next_entry_at>NOW()");
+            cd.setLong(1, p.getCharId()); cd.setInt(2, templateId);
+            if (cd.executeQuery().next()) { msg(session, "Dungeon dang cooldown!"); return; }
+
+            PreparedStatement ins = c.prepareStatement(
+                "INSERT INTO dungeon_instances (template_id,party_id) VALUES (?,0)", Statement.RETURN_GENERATED_KEYS);
+            ins.setInt(1, templateId); ins.executeUpdate();
+            ResultSet keys = ins.getGeneratedKeys();
+            if (keys.next()) {
+                ByteBuf pkt = Unpooled.buffer();
+                pkt.writeShort(PacketOpcode.S2C_DUNGEON_ENTER_OK);
+                pkt.writeLong(keys.getLong(1));
+                pkt.writeInt(templateId);
+                session.send(pkt);
+                msg(session, "Vao dungeon thanh cong!");
+            }
+        } catch (Exception e) { msg(session, "Loi: " + e.getMessage()); }
+    }
+
+    public static void handleDungeonExit(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        msg(session, "Da roi dungeon.");
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // NPC DIALOG
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleDialogStart(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        int npcId = buf.readInt();
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM npc_dialogs WHERE npc_id=? ORDER BY sort_order LIMIT 1")) {
+            ps.setInt(1, npcId); ResultSet rs = ps.executeQuery();
+            if (rs.next()) sendDialog(session, rs);
+            else msg(session, "NPC khong co gi de noi.");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleDialogChoice(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        int dialogId = buf.readInt();
+        int choiceIdx = buf.readInt();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement("SELECT * FROM npc_dialogs WHERE id=?");
+            ps.setInt(1, dialogId); ResultSet rs = ps.executeQuery();
+            if (!rs.next()) return;
+
+            // Parse options JSON to find goto
+            String optionsJson = rs.getString("options");
+            int nextId = rs.getInt("next_dialog_id");
+            // Simplified: just go to next_dialog_id
+            if (nextId > 0) {
+                PreparedStatement nps = c.prepareStatement("SELECT * FROM npc_dialogs WHERE id=?");
+                nps.setInt(1, nextId); ResultSet nrs = nps.executeQuery();
+                if (nrs.next()) sendDialog(session, nrs);
+            }
+
+            // Execute action if any
+            String actionJson = rs.getString("action");
+            if (actionJson != null && !actionJson.isEmpty()) {
+                // Parse JSON action: give_item, start_quest, open_shop
+                // Simplified: log
+                log.info("[DIALOG] {} chose option {} on dialog {}", p.getName(), choiceIdx, dialogId);
+            }
+        } catch (Exception e) { log.error("dialogChoice: {}", e.getMessage()); }
+    }
+
+    private static void sendDialog(GameSession session, ResultSet rs) throws SQLException {
+        ByteBuf pkt = Unpooled.buffer();
+        pkt.writeShort(PacketOpcode.S2C_DIALOG_SHOW);
+        pkt.writeInt(rs.getInt("id"));
+        pkt.writeInt(rs.getInt("npc_id"));
+        writeStr(pkt, rs.getString("speaker") != null ? rs.getString("speaker") : "");
+        writeStr(pkt, rs.getString("text"));
+        String opts = rs.getString("options");
+        writeStr(pkt, opts != null ? opts : "");
+        pkt.writeInt(rs.getInt("next_dialog_id"));
+        session.send(pkt);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // SYSTEM ANNOUNCEMENTS
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleAnnouncementList(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM system_announcements WHERE is_active=1 " +
+                 "AND (start_at IS NULL OR start_at<=NOW()) " +
+                 "AND (expires_at IS NULL OR expires_at>NOW()) " +
+                 "ORDER BY priority DESC, is_sticky DESC, created_at DESC LIMIT 30")) {
+            ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer();
+            pkt.writeShort(PacketOpcode.S2C_ANNOUNCEMENT_LIST);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeInt(rs.getInt("id"));
+                writeStr(tmp, rs.getString("title"));
+                writeStr(tmp, rs.getString("content"));
+                writeStr(tmp, rs.getString("announce_type"));
+                tmp.writeByte(rs.getInt("priority"));
+                tmp.writeBoolean(rs.getInt("is_sticky") == 1);
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp);
+            session.send(pkt);
+
+            // Also send recent event logs
+            sendEventLogs(session);
+        } catch (Exception e) { log.error("announcementList: {}", e.getMessage()); }
+    }
+
+    private static void sendEventLogs(GameSession session) {
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM system_event_log ORDER BY created_at DESC LIMIT 20")) {
+            ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer();
+            pkt.writeShort(PacketOpcode.S2C_SYSTEM_EVENT_LOG);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                writeStr(tmp, rs.getString("event_type"));
+                writeStr(tmp, rs.getString("char_name"));
+                writeStr(tmp, rs.getString("message"));
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp);
+            session.send(pkt);
+        } catch (Exception e) {}
+    }
+
+    /** Log su kien quan trong (goi tu bat ky handler nao) */
+    public static void logSystemEvent(String type, long charId, String charName, String message) {
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "INSERT INTO system_event_log (event_type,char_id,char_name,message) VALUES (?,?,?,?)")) {
+            ps.setString(1, type); ps.setLong(2, charId);
+            ps.setString(3, charName); ps.setString(4, message);
+            ps.executeUpdate();
+        } catch (Exception ignored) {}
+
+        // Broadcast realtime cho tat ca client
+        ByteBuf pkt = Unpooled.buffer();
+        pkt.writeShort(PacketOpcode.S2C_ANNOUNCEMENT_NEW);
+        writeStr(pkt, type); writeStr(pkt, charName); writeStr(pkt, message);
+        GameNetworkServer.getInstance().broadcastAll(pkt);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // EVENT CURRENCY
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleEventCurrencyList(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT ec.*, COALESCE(pec.amount,0) as player_amount FROM event_currencies ec " +
+                 "LEFT JOIN player_event_currencies pec ON pec.currency_id=ec.id AND pec.char_id=? " +
+                 "WHERE ec.is_active=1 AND (ec.expires_at IS NULL OR ec.expires_at>NOW())")) {
+            ps.setLong(1, p.getCharId()); ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer();
+            pkt.writeShort(PacketOpcode.S2C_EVENT_CURRENCY_LIST);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeInt(rs.getInt("id"));
+                writeStr(tmp, rs.getString("currency_code"));
+                writeStr(tmp, rs.getString("display_name"));
+                writeStr(tmp, rs.getString("icon_asset"));
+                tmp.writeInt(rs.getInt("player_amount"));
+                tmp.writeInt(rs.getInt("exchange_rate_gold"));
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp);
+            session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleEventCurrencyShop(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        int currencyId = buf.readInt();
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM event_currency_shop WHERE currency_id=? AND is_active=1 ORDER BY sort_order")) {
+            ps.setInt(1, currencyId); ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer();
+            pkt.writeShort(PacketOpcode.S2C_EVENT_CURRENCY_SHOP);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeInt(rs.getInt("id"));
+                tmp.writeInt(rs.getInt("item_id"));
+                writeStr(tmp, rs.getString("item_name"));
+                tmp.writeInt(rs.getInt("price"));
+                tmp.writeInt(rs.getInt("stock"));
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp);
+            session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleEventCurrencyBuy(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        int shopItemId = buf.readInt();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement(
+                "SELECT ecs.*, pec.amount as player_amount FROM event_currency_shop ecs " +
+                "JOIN player_event_currencies pec ON pec.currency_id=ecs.currency_id AND pec.char_id=? " +
+                "WHERE ecs.id=? AND ecs.is_active=1");
+            ps.setLong(1, p.getCharId()); ps.setInt(2, shopItemId);
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) { msg(session, "Item khong hop le."); return; }
+            int price = rs.getInt("price");
+            int playerAmt = rs.getInt("player_amount");
+            int currencyId = rs.getInt("currency_id");
+            int itemId = rs.getInt("item_id");
+            if (playerAmt < price) { msg(session, "Khong du token!"); return; }
+
+            c.setAutoCommit(false);
+            c.prepareStatement("UPDATE player_event_currencies SET amount=amount-" + price +
+                " WHERE char_id=" + p.getCharId() + " AND currency_id=" + currencyId).executeUpdate();
+            com.nexusisekai.game.shop.ItemManager.getInstance().giveItem(p.getCharId(), itemId, 1);
+            c.prepareStatement("INSERT INTO event_currency_log (char_id,currency_id,amount,reason) VALUES (" +
+                p.getCharId() + "," + currencyId + ",-" + price + ",'shop_buy')").executeUpdate();
+            c.commit(); c.setAutoCommit(true);
+            msg(session, "Mua thanh cong!");
+            sendEventCurrencyUpdate(session, currencyId, playerAmt - price);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleEventCurrencyExchange(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        int currencyId = buf.readInt();
+        int amount     = buf.readInt();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement(
+                "SELECT ec.exchange_rate_gold, pec.amount FROM event_currencies ec " +
+                "JOIN player_event_currencies pec ON pec.currency_id=ec.id AND pec.char_id=? WHERE ec.id=?");
+            ps.setLong(1, p.getCharId()); ps.setInt(2, currencyId);
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) { msg(session, "Token khong hop le."); return; }
+            int rate = rs.getInt("exchange_rate_gold");
+            int playerAmt = rs.getInt("amount");
+            if (rate <= 0) { msg(session, "Token nay khong doi duoc."); return; }
+            if (playerAmt < amount) { msg(session, "Khong du token."); return; }
+            long goldReceive = (long)amount * rate;
+
+            c.setAutoCommit(false);
+            c.prepareStatement("UPDATE player_event_currencies SET amount=amount-" + amount +
+                " WHERE char_id=" + p.getCharId() + " AND currency_id=" + currencyId).executeUpdate();
+            c.prepareStatement("UPDATE characters SET gold=gold+" + goldReceive +
+                " WHERE id=" + p.getCharId()).executeUpdate();
+            c.prepareStatement("INSERT INTO event_currency_log (char_id,currency_id,amount,reason) VALUES (" +
+                p.getCharId() + "," + currencyId + ",-" + amount + ",'exchange')").executeUpdate();
+            c.commit(); c.setAutoCommit(true);
+            msg(session, "Doi " + amount + " token = " + goldReceive + " vang!");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    private static void sendEventCurrencyUpdate(GameSession session, int currencyId, int newAmount) {
+        ByteBuf pkt = Unpooled.buffer();
+        pkt.writeShort(PacketOpcode.S2C_EVENT_CURRENCY_UPDATE);
+        pkt.writeInt(currencyId); pkt.writeInt(newAmount);
+        session.send(pkt);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // Helpers
+    // ═══════════════════════════════════════════════════════════
+
+    private static void msg(GameSession s, String m) { ChatHandler.sendSystemMessage(s, m); }
+    private static void writeStr(ByteBuf b, String s) {
+        byte[] d = s.getBytes(StandardCharsets.UTF_8);
+        b.writeShort(d.length); b.writeBytes(d);
+    }
+}

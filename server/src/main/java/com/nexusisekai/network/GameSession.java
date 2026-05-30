@@ -193,6 +193,48 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             // ── Drop item ─────────────────────────────────────────────
             case PacketOpcode.C2S_DROP_ITEM -> { requireInGame(); InventoryHandler.handleDropItem(this, toBuf(p)); }
 
+            // ── Trading ────────────────────────────────────────────────
+            case PacketOpcode.C2S_TRADE_REQUEST  -> { requireInGame(); ExtendedHandlers.handleTradeRequest(this, toBuf(p)); }
+            case PacketOpcode.C2S_TRADE_RESPOND  -> { requireInGame(); ExtendedHandlers.handleTradeRespond(this, toBuf(p)); }
+            case PacketOpcode.C2S_TRADE_ADD_ITEM -> { requireInGame(); ExtendedHandlers.handleTradeAddItem(this, toBuf(p)); }
+            case PacketOpcode.C2S_TRADE_SET_GOLD -> { requireInGame(); ExtendedHandlers.handleTradeSetGold(this, toBuf(p)); }
+            case PacketOpcode.C2S_TRADE_CONFIRM  -> { requireInGame(); ExtendedHandlers.handleTradeConfirm(this, toBuf(p)); }
+            case PacketOpcode.C2S_TRADE_CANCEL   -> { requireInGame(); ExtendedHandlers.handleTradeCancel(this, toBuf(p)); }
+
+            // ── Auction House ──────────────────────────────────────────
+            case PacketOpcode.C2S_AUCTION_LIST    -> { requireInGame(); ExtendedHandlers.handleAuctionList(this, toBuf(p)); }
+            case PacketOpcode.C2S_AUCTION_CREATE  -> { requireInGame(); ExtendedHandlers.handleAuctionCreate(this, toBuf(p)); }
+            case PacketOpcode.C2S_AUCTION_BID     -> { requireInGame(); ExtendedHandlers.handleAuctionBid(this, toBuf(p)); }
+            case PacketOpcode.C2S_AUCTION_BUYOUT  -> { requireInGame(); ExtendedHandlers.handleAuctionBuyout(this, toBuf(p)); }
+            case PacketOpcode.C2S_AUCTION_CANCEL  -> { requireInGame(); ExtendedHandlers.handleAuctionCancel(this, toBuf(p)); }
+            case PacketOpcode.C2S_AUCTION_MY_ITEMS-> { requireInGame(); ExtendedHandlers.handleAuctionMyItems(this, toBuf(p)); }
+
+            // ── Party ──────────────────────────────────────────────────
+            case PacketOpcode.C2S_PARTY_CREATE  -> { requireInGame(); ExtendedHandlers.handlePartyCreate(this, toBuf(p)); }
+            case PacketOpcode.C2S_PARTY_INVITE  -> { requireInGame(); ExtendedHandlers.handlePartyInvite(this, toBuf(p)); }
+            case PacketOpcode.C2S_PARTY_ACCEPT  -> { requireInGame(); ExtendedHandlers.handlePartyAccept(this, toBuf(p)); }
+            case PacketOpcode.C2S_PARTY_LEAVE   -> { requireInGame(); ExtendedHandlers.handlePartyLeave(this, toBuf(p)); }
+            case PacketOpcode.C2S_PARTY_KICK    -> { requireInGame(); ExtendedHandlers.handlePartyKick(this, toBuf(p)); }
+            case PacketOpcode.C2S_PARTY_DISBAND -> { requireInGame(); ExtendedHandlers.handlePartyDisband(this, toBuf(p)); }
+
+            // ── Dungeon ────────────────────────────────────────────────
+            case PacketOpcode.C2S_DUNGEON_LIST  -> { requireInGame(); ExtendedHandlers.handleDungeonList(this, toBuf(p)); }
+            case PacketOpcode.C2S_DUNGEON_ENTER -> { requireInGame(); ExtendedHandlers.handleDungeonEnter(this, toBuf(p)); }
+            case PacketOpcode.C2S_DUNGEON_EXIT  -> { requireInGame(); ExtendedHandlers.handleDungeonExit(this, toBuf(p)); }
+
+            // ── NPC Dialog ─────────────────────────────────────────────
+            case PacketOpcode.C2S_DIALOG_START  -> { requireInGame(); ExtendedHandlers.handleDialogStart(this, toBuf(p)); }
+            case PacketOpcode.C2S_DIALOG_CHOICE -> { requireInGame(); ExtendedHandlers.handleDialogChoice(this, toBuf(p)); }
+
+            // ── Announcements ──────────────────────────────────────────
+            case PacketOpcode.C2S_ANNOUNCEMENT_LIST -> { requireInGame(); ExtendedHandlers.handleAnnouncementList(this, toBuf(p)); }
+
+            // ── Event Currency ─────────────────────────────────────────
+            case PacketOpcode.C2S_EVENT_CURRENCY_LIST     -> { requireInGame(); ExtendedHandlers.handleEventCurrencyList(this, toBuf(p)); }
+            case PacketOpcode.C2S_EVENT_CURRENCY_SHOP     -> { requireInGame(); ExtendedHandlers.handleEventCurrencyShop(this, toBuf(p)); }
+            case PacketOpcode.C2S_EVENT_CURRENCY_BUY      -> { requireInGame(); ExtendedHandlers.handleEventCurrencyBuy(this, toBuf(p)); }
+            case PacketOpcode.C2S_EVENT_CURRENCY_EXCHANGE  -> { requireInGame(); ExtendedHandlers.handleEventCurrencyExchange(this, toBuf(p)); }
+
             // Keepalive
             case PacketOpcode.C2S_PING -> send(PacketOpcode.S2C_PONG, new byte[]{});
 

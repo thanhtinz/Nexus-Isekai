@@ -138,6 +138,16 @@ public class AdminApiServer {
         httpServer.createContext("/api/farming/seeds",        ex -> handleAuth(ex, this::handleFarmingSeeds));
         httpServer.createContext("/api/farming/animals",      ex -> handleAuth(ex, this::handleFarmingAnimals));
         httpServer.createContext("/api/housing/catalog",      ex -> handleAuth(ex, this::handleHousingCatalog));
+        
+        httpServer.createContext("/api/registry",           ex -> handleAuth(ex, this::handleMasterRegistry));
+        httpServer.createContext("/api/announcements",      ex -> handleAuth(ex, this::handleAnnouncements));
+        httpServer.createContext("/api/event-currency",     ex -> handleAuth(ex, this::handleEventCurrencyAdmin));
+        httpServer.createContext("/api/auction",            ex -> handleAuth(ex, this::handleAuctionAdmin));
+        httpServer.createContext("/api/dungeon",            ex -> handleAuth(ex, this::handleDungeonAdmin));
+        httpServer.createContext("/api/dialogs",            ex -> handleAuth(ex, this::handleDialogAdmin));
+        httpServer.createContext("/api/trade/history",      ex -> handleAuth(ex, this::handleTradeHistory));
+        httpServer.createContext("/api/party/active",       ex -> handleAuth(ex, this::handlePartyActive));
+        httpServer.createContext("/api/rate-limit",         ex -> handleAuth(ex, this::handleRateLimit));
         httpServer.createContext("/api/chat/history",         ex -> handleAuth(ex, this::handleChatHistory));
         httpServer.createContext("/api/chat/clear",           ex -> handleAuth(ex, this::handleChatClear));
 
@@ -1200,6 +1210,261 @@ public class AdminApiServer {
     }
 
     // ─── Helper: send query result as JSON table ──────────────────────
+
+
+    // ─── Master Registry ─────────────────────────────────────────
+
+    private void handleMasterRegistry(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String typeFilter = params.getOrDefault("type", "");
+                String catFilter  = params.getOrDefault("category", "");
+                String search     = params.getOrDefault("q", "");
+                int    rarity     = Integer.parseInt(params.getOrDefault("rarity", "-1"));
+                int    limit      = Integer.parseInt(params.getOrDefault("limit", "100"));
+                String where = "WHERE 1=1";
+                if (!typeFilter.isEmpty())  where += " AND registry_type='" + typeFilter.replace("'","") + "'";
+                if (!catFilter.isEmpty())   where += " AND category='" + catFilter.replace("'","") + "'";
+                if (!search.isEmpty())      where += " AND (display_name LIKE '%" + search.replace("'","") + "%' OR tags LIKE '%" + search.replace("'","") + "%')";
+                if (rarity >= 0)            where += " AND rarity=" + rarity;
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT * FROM master_registry " + where + " ORDER BY registry_type, category, display_name LIMIT " + limit), "items");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO master_registry (registry_type,ref_id,display_name,category,sub_category,rarity,icon_asset,description,tags,is_tradeable,is_stackable,max_stack) " +
+                            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+                        ps.setString(1, str(body,"registry_type")); ps.setInt(2, num(body,"ref_id"));
+                        ps.setString(3, str(body,"display_name")); ps.setString(4, str(body,"category"));
+                        ps.setString(5, str(body,"sub_category")); ps.setInt(6, num(body,"rarity"));
+                        ps.setString(7, str(body,"icon_asset")); ps.setString(8, str(body,"description"));
+                        ps.setString(9, str(body,"tags")); ps.setInt(10, num(body,"is_tradeable"));
+                        ps.setInt(11, num(body,"is_stackable")); ps.setInt(12, num(body,"max_stack"));
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true,"message","Item added to registry"));
+                    }
+                    case "update" -> {
+                        c.prepareStatement("UPDATE master_registry SET display_name='" + str(body,"display_name").replace("'","") +
+                            "',category='" + str(body,"category").replace("'","") +
+                            "',rarity=" + num(body,"rarity") +
+                            ",icon_asset='" + str(body,"icon_asset").replace("'","") +
+                            "',description='" + str(body,"description").replace("'","") +
+                            "',tags='" + str(body,"tags").replace("'","") +
+                            "',is_active=" + num(body,"is_active") +
+                            " WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM master_registry WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "categories" -> {
+                        sendTableResult(ex, c.prepareStatement(
+                            "SELECT DISTINCT category, COUNT(*) as cnt FROM master_registry GROUP BY category ORDER BY category"), "categories");
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false,"message","Unknown action"));
+                }
+            }
+        }
+    }
+
+    // ─── Announcements ───────────────────────────────────────────
+
+    private void handleAnnouncements(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT * FROM system_announcements ORDER BY priority DESC, created_at DESC LIMIT 50"), "announcements");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO system_announcements (title,content,announce_type,priority,is_sticky,target) VALUES (?,?,?,?,?,?)");
+                        ps.setString(1, str(body,"title")); ps.setString(2, str(body,"content"));
+                        ps.setString(3, str(body,"announce_type")); ps.setInt(4, num(body,"priority"));
+                        ps.setInt(5, num(body,"is_sticky")); ps.setString(6, str(body,"target"));
+                        ps.executeUpdate();
+                        // Broadcast to all online
+                        com.nexusisekai.network.handler.ChatHandler.broadcastSystemMessage("[THONG BAO] " + str(body,"title"));
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("UPDATE system_announcements SET is_active=0 WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "toggle_sticky" -> {
+                        c.prepareStatement("UPDATE system_announcements SET is_sticky=1-is_sticky WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    // ─── Event Currency Admin ────────────────────────────────────
+
+    private void handleEventCurrencyAdmin(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM event_currencies ORDER BY id"), "currencies");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO event_currencies (currency_code,display_name,icon_asset,description,exchange_rate_gold,is_active,expires_at) " +
+                            "VALUES (?,?,?,?,?,?,?)");
+                        ps.setString(1, str(body,"currency_code")); ps.setString(2, str(body,"display_name"));
+                        ps.setString(3, str(body,"icon_asset")); ps.setString(4, str(body,"description"));
+                        ps.setInt(5, num(body,"exchange_rate_gold")); ps.setInt(6, num(body,"is_active"));
+                        ps.setString(7, str(body,"expires_at"));
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "toggle" -> {
+                        c.prepareStatement("UPDATE event_currencies SET is_active=1-is_active WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "grant" -> {
+                        long charId = num(body,"char_id");
+                        int curId   = num(body,"currency_id");
+                        int amount  = num(body,"amount");
+                        c.prepareStatement("INSERT INTO player_event_currencies (char_id,currency_id,amount) VALUES (" +
+                            charId + "," + curId + "," + amount + ") ON DUPLICATE KEY UPDATE amount=amount+" + amount).executeUpdate();
+                        c.prepareStatement("INSERT INTO event_currency_log (char_id,currency_id,amount,reason) VALUES (" +
+                            charId + "," + curId + "," + amount + ",'admin_grant')").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true,"message","Granted " + amount + " tokens"));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    // ─── Auction Admin ───────────────────────────────────────────
+
+    private void handleAuctionAdmin(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT al.*,ca.name as seller_char FROM auction_listings al " +
+                    "LEFT JOIN characters ca ON ca.id=al.seller_char_id ORDER BY al.created_at DESC LIMIT 100"), "listings");
+            } else {
+                var body = parseBody(ex);
+                if ("cancel".equals(str(body,"action"))) {
+                    c.prepareStatement("UPDATE auction_listings SET status='cancelled' WHERE id=" + num(body,"id")).executeUpdate();
+                } else if ("config".equals(str(body,"action"))) {
+                    c.prepareStatement("UPDATE auction_config SET config_value='" + str(body,"value").replace("'","") +
+                        "' WHERE config_key='" + str(body,"key").replace("'","") + "'").executeUpdate();
+                }
+                sendJson(ex,200,Map.of("success",true));
+            }
+        }
+    }
+
+    // ─── Dungeon Admin ──────────────────────────────────────────
+
+    private void handleDungeonAdmin(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM dungeon_templates ORDER BY min_level"), "dungeons");
+            } else {
+                var body = parseBody(ex);
+                if ("create".equals(str(body,"action"))) {
+                    PreparedStatement ps = c.prepareStatement(
+                        "INSERT INTO dungeon_templates (name,min_level,max_players,map_id,boss_monster_id,reward_exp,reward_gold,difficulty,time_limit_minutes) " +
+                        "VALUES (?,?,?,?,?,?,?,?,?)");
+                    ps.setString(1, str(body,"name")); ps.setInt(2, num(body,"min_level"));
+                    ps.setInt(3, num(body,"max_players")); ps.setInt(4, num(body,"map_id"));
+                    ps.setInt(5, num(body,"boss_monster_id")); ps.setInt(6, num(body,"reward_exp"));
+                    ps.setInt(7, num(body,"reward_gold")); ps.setInt(8, num(body,"difficulty"));
+                    ps.setInt(9, num(body,"time_limit_minutes"));
+                    ps.executeUpdate();
+                } else if ("toggle".equals(str(body,"action"))) {
+                    c.prepareStatement("UPDATE dungeon_templates SET is_active=1-is_active WHERE id=" + num(body,"id")).executeUpdate();
+                }
+                sendJson(ex,200,Map.of("success",true));
+            }
+        }
+    }
+
+    // ─── Dialog Admin ───────────────────────────────────────────
+
+    private void handleDialogAdmin(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            var params = parseQuery(ex.getRequestURI().getQuery());
+            int npcId = Integer.parseInt(params.getOrDefault("npc_id", "0"));
+            if (ex.getRequestMethod().equals("GET")) {
+                PreparedStatement ps = npcId > 0
+                    ? c.prepareStatement("SELECT * FROM npc_dialogs WHERE npc_id=" + npcId + " ORDER BY sort_order")
+                    : c.prepareStatement("SELECT * FROM npc_dialogs ORDER BY npc_id, sort_order LIMIT 200");
+                sendTableResult(ex, ps, "dialogs");
+            } else {
+                var body = parseBody(ex);
+                if ("create".equals(str(body,"action"))) {
+                    PreparedStatement ps = c.prepareStatement(
+                        "INSERT INTO npc_dialogs (npc_id,dialog_key,text,speaker,next_dialog_id,options,action,sort_order) " +
+                        "VALUES (?,?,?,?,?,?,?,?)");
+                    ps.setInt(1, num(body,"npc_id")); ps.setString(2, str(body,"dialog_key"));
+                    ps.setString(3, str(body,"text")); ps.setString(4, str(body,"speaker"));
+                    ps.setInt(5, num(body,"next_dialog_id")); ps.setString(6, str(body,"options"));
+                    ps.setString(7, str(body,"action_json")); ps.setInt(8, num(body,"sort_order"));
+                    ps.executeUpdate();
+                } else if ("delete".equals(str(body,"action"))) {
+                    c.prepareStatement("DELETE FROM npc_dialogs WHERE id=" + num(body,"id")).executeUpdate();
+                }
+                sendJson(ex,200,Map.of("success",true));
+            }
+        }
+    }
+
+    // ─── Trade History ──────────────────────────────────────────
+
+    private void handleTradeHistory(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            sendTableResult(ex, c.prepareStatement(
+                "SELECT ts.*,ca.name as player_a_name,cb.name as player_b_name FROM trade_sessions ts " +
+                "LEFT JOIN characters ca ON ca.id=ts.player_a_id " +
+                "LEFT JOIN characters cb ON cb.id=ts.player_b_id " +
+                "WHERE ts.status='completed' ORDER BY ts.completed_at DESC LIMIT 100"), "trades");
+        }
+    }
+
+    // ─── Party Active ──────────────────────────────────────────
+
+    private void handlePartyActive(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            sendTableResult(ex, c.prepareStatement(
+                "SELECT p.*,ch.name as leader_name," +
+                "(SELECT COUNT(*) FROM party_members pm WHERE pm.party_id=p.id) as member_count " +
+                "FROM parties p JOIN characters ch ON ch.id=p.leader_char_id " +
+                "WHERE p.status='active' ORDER BY p.created_at DESC"), "parties");
+        }
+    }
+
+    // ─── Rate Limit Config ─────────────────────────────────────
+
+    private void handleRateLimit(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM rate_limit_config ORDER BY config_key"), "limits");
+            } else {
+                var body = parseBody(ex);
+                c.prepareStatement("UPDATE rate_limit_config SET max_per_second=" + num(body,"max_per_second") +
+                    ",max_per_minute=" + num(body,"max_per_minute") +
+                    " WHERE config_key='" + str(body,"config_key").replace("'","") + "'").executeUpdate();
+                sendJson(ex,200,Map.of("success",true));
+            }
+        }
+    }
 
     private void sendTableResult(HttpExchange ex, PreparedStatement ps, String key) throws Exception {
         ResultSet rs = ps.executeQuery();
