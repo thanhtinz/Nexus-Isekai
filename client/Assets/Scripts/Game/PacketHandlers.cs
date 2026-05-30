@@ -119,6 +119,34 @@ namespace NexusIsekai.Game
             // Leaderboard (Fxx)
             d.Register(PacketOpcode.S2C_LEADERBOARD, OnLeaderboard);
 
+            // Trade
+            d.Register(PacketOpcode.S2C_TRADE_REQUEST,       OnTradeRequest);
+            d.Register(PacketOpcode.S2C_TRADE_UPDATE,        OnTradeUpdate);
+            d.Register(PacketOpcode.S2C_TRADE_RESULT,        OnTradeResult);
+            // Auction
+            d.Register(PacketOpcode.S2C_AUCTION_LIST,        OnAuctionList);
+            d.Register(PacketOpcode.S2C_AUCTION_RESULT,      OnAuctionResult);
+            // Party
+            d.Register(PacketOpcode.S2C_PARTY_INFO,          OnPartyInfo);
+            d.Register(PacketOpcode.S2C_PARTY_INVITED,       OnPartyInvited);
+            d.Register(PacketOpcode.S2C_PARTY_UPDATE,        OnPartyUpdate);
+            // Dungeon
+            d.Register(PacketOpcode.S2C_DUNGEON_LIST,        OnDungeonList);
+            d.Register(PacketOpcode.S2C_DUNGEON_ENTER_OK,    OnDungeonEnterOk);
+            d.Register(PacketOpcode.S2C_DUNGEON_RESULT,      OnDungeonResult);
+            d.Register(PacketOpcode.S2C_DUNGEON_TIMER,       OnDungeonTimer);
+            // Dialog
+            d.Register(PacketOpcode.S2C_DIALOG_SHOW,         OnDialogShow);
+            d.Register(PacketOpcode.S2C_DIALOG_OPTIONS,      OnDialogOptions);
+            // Announcements
+            d.Register(PacketOpcode.S2C_ANNOUNCEMENT_LIST,   OnAnnouncementList);
+            d.Register(PacketOpcode.S2C_ANNOUNCEMENT_NEW,    OnAnnouncementNew);
+            d.Register(PacketOpcode.S2C_SYSTEM_EVENT_LOG,    OnSystemEventLog);
+            // Event Currency
+            d.Register(PacketOpcode.S2C_EVENT_CURRENCY_LIST, OnEventCurrencyList);
+            d.Register(PacketOpcode.S2C_EVENT_CURRENCY_SHOP, OnEventCurrencyShop);
+            d.Register(PacketOpcode.S2C_EVENT_CURRENCY_UPDATE, OnEventCurrencyUpdate);
+
             // System
             d.Register(PacketOpcode.S2C_PONG,            OnPong);
             d.Register(PacketOpcode.S2C_KICK,            OnKick);
@@ -1388,5 +1416,212 @@ namespace NexusIsekai.Game
             });
         }
         NexusIsekai.UI.LeaderboardUI.Instance?.Populate(rankType, myRank, entries);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TRADE
+    // ═══════════════════════════════════════════════════════════════
+
+    private void OnTradeRequest(PacketReader r)
+    {
+        long fromId = r.ReadLong(); string name = r.ReadString();
+        UIManager.Instance?.ShowConfirmDialog(
+            "Yeu cau giao dich", $"{name} muon giao dich voi ban.",
+            onYes: () => PacketBuilder.SendTradeRespond(fromId, true),
+            onNo:  () => PacketBuilder.SendTradeRespond(fromId, false));
+    }
+
+    private void OnTradeUpdate(PacketReader r)
+    {
+        long tradeId = r.ReadLong(); bool confA = r.ReadBool(); bool confB = r.ReadBool();
+        long goldA = r.ReadLong(); long goldB = r.ReadLong();
+        int itemsA = r.ReadShort(); int itemsB = r.ReadShort();
+        // TODO: update TradeUI khi co
+    }
+
+    private void OnTradeResult(PacketReader r)
+    {
+        bool ok = r.ReadBool(); string msg = r.ReadString();
+        UIManager.Instance?.ShowNotification(msg, ok ? UINotificationType.Success : UINotificationType.Error);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // AUCTION
+    // ═══════════════════════════════════════════════════════════════
+
+    private void OnAuctionList(PacketReader r)
+    {
+        int count = r.ReadShort();
+        for (int i = 0; i < count; i++)
+        {
+            long id = r.ReadLong(); string name = r.ReadString(); int itemId = r.ReadInt();
+            int qty = r.ReadInt(); int rarity = r.ReadByte(); int enhance = r.ReadByte();
+            long startPrice = r.ReadLong(); long currentBid = r.ReadLong();
+            long buyout = r.ReadLong(); string seller = r.ReadString(); int currency = r.ReadByte();
+        }
+        // TODO: populate AuctionUI khi co
+    }
+
+    private void OnAuctionResult(PacketReader r)
+    {
+        bool ok = r.ReadBool(); string msg = r.ReadString();
+        UIManager.Instance?.ShowNotification(msg, ok ? UINotificationType.Success : UINotificationType.Warning);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PARTY
+    // ═══════════════════════════════════════════════════════════════
+
+    private void OnPartyInfo(PacketReader r)
+    {
+        long partyId = r.ReadLong(); int count = r.ReadShort();
+        for (int i = 0; i < count; i++)
+        {
+            long charId = r.ReadLong(); string name = r.ReadString();
+            int level = r.ReadInt(); int role = r.ReadByte(); int classId = r.ReadByte();
+        }
+        // TODO: populate PartyUI
+    }
+
+    private void OnPartyInvited(PacketReader r)
+    {
+        long leaderId = r.ReadLong(); string leaderName = r.ReadString();
+        UIManager.Instance?.ShowConfirmDialog(
+            "Moi vao nhom", $"{leaderName} moi ban vao nhom.",
+            onYes: () => PacketBuilder.SendPartyAccept(leaderId));
+    }
+
+    private void OnPartyUpdate(PacketReader r) { /* refresh party UI */ }
+
+    // ═══════════════════════════════════════════════════════════════
+    // DUNGEON
+    // ═══════════════════════════════════════════════════════════════
+
+    private void OnDungeonList(PacketReader r)
+    {
+        int count = r.ReadShort();
+        for (int i = 0; i < count; i++)
+        {
+            int id = r.ReadInt(); string name = r.ReadString(); int minLvl = r.ReadInt();
+            int maxPlayers = r.ReadInt(); int diff = r.ReadByte(); int timeLimit = r.ReadInt();
+            int expReward = r.ReadInt(); int goldReward = r.ReadInt();
+        }
+        // TODO: populate DungeonUI
+    }
+
+    private void OnDungeonEnterOk(PacketReader r)
+    {
+        long instanceId = r.ReadLong(); int templateId = r.ReadInt();
+        UIManager.Instance?.ShowNotification("Vao dungeon thanh cong!", UINotificationType.Success);
+    }
+
+    private void OnDungeonResult(PacketReader r)
+    {
+        bool cleared = r.ReadBool(); int expReward = r.ReadInt(); int goldReward = r.ReadInt();
+        string msg = cleared ? $"Hoan thanh dungeon! +{expReward} EXP +{goldReward}G" : "That bai!";
+        UIManager.Instance?.ShowNotification(msg, cleared ? UINotificationType.Success : UINotificationType.Error);
+    }
+
+    private void OnDungeonTimer(PacketReader r)
+    {
+        int remainingSeconds = r.ReadInt();
+        // TODO: update dungeon timer UI
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // NPC DIALOG
+    // ═══════════════════════════════════════════════════════════════
+
+    private void OnDialogShow(PacketReader r)
+    {
+        int dialogId = r.ReadInt(); int npcId = r.ReadInt();
+        string speaker = r.ReadString(); string text = r.ReadString();
+        string optionsJson = r.ReadString(); int nextId = r.ReadInt();
+        // TODO: hien dialog UI voi cac lua chon
+        ChatUI.Instance?.ReceiveChatMessage(new NexusIsekai.UI.ChatMessage
+        {
+            ContentType = NexusIsekai.UI.ChatContentType.System,
+            Channel = "system", Sender = speaker, Content = text
+        });
+    }
+
+    private void OnDialogOptions(PacketReader r) { /* additional options data */ }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ANNOUNCEMENTS & SYSTEM EVENT LOG
+    // ═══════════════════════════════════════════════════════════════
+
+    private void OnAnnouncementList(PacketReader r)
+    {
+        int count = r.ReadShort();
+        for (int i = 0; i < count; i++)
+        {
+            int id = r.ReadInt(); string title = r.ReadString(); string content = r.ReadString();
+            string type = r.ReadString(); int priority = r.ReadByte(); bool sticky = r.ReadBool();
+            // Sticky announcements hien len chat tab "He Thong"
+            ChatUI.Instance?.ReceiveChatMessage(new NexusIsekai.UI.ChatMessage
+            {
+                ContentType = NexusIsekai.UI.ChatContentType.System,
+                Channel = "system", Sender = "Thong Bao",
+                Content = (sticky ? "[Ghim] " : "") + title + ": " + content
+            });
+        }
+    }
+
+    private void OnAnnouncementNew(PacketReader r)
+    {
+        string type = r.ReadString(); string charName = r.ReadString(); string message = r.ReadString();
+        ChatUI.Instance?.ReceiveChatMessage(new NexusIsekai.UI.ChatMessage
+        {
+            ContentType = NexusIsekai.UI.ChatContentType.System,
+            Channel = "system", Sender = "He Thong", Content = message
+        });
+        UIManager.Instance?.ShowNotification(message, UINotificationType.Info);
+    }
+
+    private void OnSystemEventLog(PacketReader r)
+    {
+        int count = r.ReadShort();
+        for (int i = 0; i < count; i++)
+        {
+            string eventType = r.ReadString(); string charName = r.ReadString(); string msg = r.ReadString();
+            ChatUI.Instance?.ReceiveChatMessage(new NexusIsekai.UI.ChatMessage
+            {
+                ContentType = NexusIsekai.UI.ChatContentType.System,
+                Channel = "system", Sender = "Log", Content = $"[{eventType}] {msg}"
+            });
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // EVENT CURRENCY
+    // ═══════════════════════════════════════════════════════════════
+
+    private void OnEventCurrencyList(PacketReader r)
+    {
+        int count = r.ReadShort();
+        for (int i = 0; i < count; i++)
+        {
+            int id = r.ReadInt(); string code = r.ReadString(); string name = r.ReadString();
+            string icon = r.ReadString(); int amount = r.ReadInt(); int exchangeRate = r.ReadInt();
+        }
+        // TODO: populate EventCurrencyUI
+    }
+
+    private void OnEventCurrencyShop(PacketReader r)
+    {
+        int count = r.ReadShort();
+        for (int i = 0; i < count; i++)
+        {
+            int id = r.ReadInt(); int itemId = r.ReadInt(); string name = r.ReadString();
+            int price = r.ReadInt(); int stock = r.ReadInt();
+        }
+        // TODO: populate EventShopUI
+    }
+
+    private void OnEventCurrencyUpdate(PacketReader r)
+    {
+        int currencyId = r.ReadInt(); int newAmount = r.ReadInt();
+        UIManager.Instance?.ShowNotification($"Token cap nhat: {newAmount}", UINotificationType.Info);
     }
 }

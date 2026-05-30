@@ -467,6 +467,84 @@ namespace NexusIsekai.Network
         public static void SendDropItem(long instanceId, int qty = 1)
             => Send(new PacketBuilder(PacketOpcode.C2S_DROP_ITEM).WriteLong(instanceId).WriteInt(qty));
 
+        // ── TRADE ────────────────────────────────────────────────
+
+        public static void SendTradeRequest(long targetCharId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TRADE_REQUEST).WriteLong(targetCharId));
+        public static void SendTradeRespond(long fromCharId, bool accept)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TRADE_RESPOND).WriteLong(fromCharId).WriteBool(accept));
+        public static void SendTradeAddItem(long tradeId, long inventoryId, int qty)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TRADE_ADD_ITEM).WriteLong(tradeId).WriteLong(inventoryId).WriteInt(qty));
+        public static void SendTradeSetGold(long tradeId, long gold)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TRADE_SET_GOLD).WriteLong(tradeId).WriteLong(gold));
+        public static void SendTradeConfirm(long tradeId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TRADE_CONFIRM).WriteLong(tradeId));
+        public static void SendTradeCancel(long tradeId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TRADE_CANCEL).WriteLong(tradeId));
+
+        // ── AUCTION ──────────────────────────────────────────────
+
+        public static void SendAuctionList(int page = 0)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUCTION_LIST).WriteInt(page));
+        public static void SendAuctionCreate(long inventoryId, long startPrice, long buyoutPrice, int hours)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUCTION_CREATE).WriteLong(inventoryId).WriteLong(startPrice).WriteLong(buyoutPrice).WriteInt(hours));
+        public static void SendAuctionBid(long listingId, long amount)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUCTION_BID).WriteLong(listingId).WriteLong(amount));
+        public static void SendAuctionBuyout(long listingId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUCTION_BUYOUT).WriteLong(listingId));
+        public static void SendAuctionCancel(long listingId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUCTION_CANCEL).WriteLong(listingId));
+        public static void SendAuctionMyItems()
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUCTION_MY_ITEMS));
+
+        // ── PARTY ────────────────────────────────────────────────
+
+        public static void SendPartyCreate()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PARTY_CREATE));
+        public static void SendPartyInvite(long targetCharId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PARTY_INVITE).WriteLong(targetCharId));
+        public static void SendPartyAccept(long leaderCharId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PARTY_ACCEPT).WriteLong(leaderCharId));
+        public static void SendPartyLeave()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PARTY_LEAVE));
+        public static void SendPartyKick(long charId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PARTY_KICK).WriteLong(charId));
+        public static void SendPartyDisband()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PARTY_DISBAND));
+
+        // ── DUNGEON ──────────────────────────────────────────────
+
+        public static void SendDungeonList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_DUNGEON_LIST));
+        public static void SendDungeonEnter(int templateId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_DUNGEON_ENTER).WriteInt(templateId));
+        public static void SendDungeonExit()
+            => Send(new PacketBuilder(PacketOpcode.C2S_DUNGEON_EXIT));
+
+        // ── NPC DIALOG ───────────────────────────────────────────
+
+        public static void SendDialogStart(int npcId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_DIALOG_START).WriteInt(npcId));
+        public static void SendDialogChoice(int dialogId, int choiceIdx)
+            => Send(new PacketBuilder(PacketOpcode.C2S_DIALOG_CHOICE).WriteInt(dialogId).WriteInt(choiceIdx));
+
+        // ── ANNOUNCEMENTS ────────────────────────────────────────
+
+        public static void SendAnnouncementList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_ANNOUNCEMENT_LIST));
+
+        // ── EVENT CURRENCY ───────────────────────────────────────
+
+        public static void SendEventCurrencyList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_EVENT_CURRENCY_LIST));
+        public static void SendEventCurrencyShop(int currencyId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_EVENT_CURRENCY_SHOP).WriteInt(currencyId));
+        public static void SendEventCurrencyBuy(int shopItemId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_EVENT_CURRENCY_BUY).WriteInt(shopItemId));
+        public static void SendEventCurrencyExchange(int currencyId, int amount)
+            => Send(new PacketBuilder(PacketOpcode.C2S_EVENT_CURRENCY_EXCHANGE).WriteInt(currencyId).WriteInt(amount));
+    }
+
     /// <summary>
     /// Đọc payload của packet (sau khi opcode đã tách ra)
     /// </summary>

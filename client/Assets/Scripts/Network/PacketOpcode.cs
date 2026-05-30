@@ -257,4 +257,68 @@ namespace NexusIsekai.Network
         public const short S2C_GUILD_MEMBERS         = 0x0812; // = S2C_GUILD_MSG (alias)
         public const short S2C_PING_FROM_SERVER      = 0x0910;
     }
+
+        // ── TRADE (10xx) ──────────────────────────────────────────
+        public const short C2S_TRADE_REQUEST     = 0x1001;
+        public const short C2S_TRADE_RESPOND     = 0x1002;
+        public const short C2S_TRADE_ADD_ITEM    = 0x1003;
+        public const short C2S_TRADE_SET_GOLD    = 0x1004;
+        public const short C2S_TRADE_CONFIRM     = 0x1005;
+        public const short C2S_TRADE_CANCEL      = 0x1006;
+        public const short S2C_TRADE_REQUEST     = 0x1011;
+        public const short S2C_TRADE_UPDATE      = 0x1012;
+        public const short S2C_TRADE_RESULT      = 0x1013;
+
+        // ── AUCTION (11xx) ────────────────────────────────────────
+        public const short C2S_AUCTION_LIST      = 0x1101;
+        public const short C2S_AUCTION_CREATE    = 0x1102;
+        public const short C2S_AUCTION_BID       = 0x1103;
+        public const short C2S_AUCTION_BUYOUT    = 0x1104;
+        public const short C2S_AUCTION_CANCEL    = 0x1105;
+        public const short C2S_AUCTION_MY_ITEMS  = 0x1106;
+        public const short S2C_AUCTION_LIST      = 0x1111;
+        public const short S2C_AUCTION_RESULT    = 0x1112;
+
+        // ── PARTY (12xx) ──────────────────────────────────────────
+        public const short C2S_PARTY_CREATE      = 0x1201;
+        public const short C2S_PARTY_INVITE      = 0x1202;
+        public const short C2S_PARTY_ACCEPT      = 0x1203;
+        public const short C2S_PARTY_LEAVE       = 0x1204;
+        public const short C2S_PARTY_KICK        = 0x1205;
+        public const short C2S_PARTY_DISBAND     = 0x1206;
+        public const short S2C_PARTY_INFO        = 0x1211;
+        public const short S2C_PARTY_INVITED     = 0x1212;
+        public const short S2C_PARTY_UPDATE      = 0x1213;
+
+        // ── DUNGEON (13xx) ────────────────────────────────────────
+        public const short C2S_DUNGEON_LIST      = 0x1301;
+        public const short C2S_DUNGEON_ENTER     = 0x1302;
+        public const short C2S_DUNGEON_EXIT      = 0x1303;
+        public const short S2C_DUNGEON_LIST      = 0x1311;
+        public const short S2C_DUNGEON_ENTER_OK  = 0x1312;
+        public const short S2C_DUNGEON_RESULT    = 0x1313;
+        public const short S2C_DUNGEON_TIMER     = 0x1314;
+
+        // ── DIALOG (14xx) ─────────────────────────────────────────
+        public const short C2S_DIALOG_START      = 0x1401;
+        public const short C2S_DIALOG_CHOICE     = 0x1402;
+        public const short S2C_DIALOG_SHOW       = 0x1411;
+        public const short S2C_DIALOG_OPTIONS    = 0x1412;
+
+        // ── ANNOUNCEMENTS (15xx) ──────────────────────────────────
+        public const short C2S_ANNOUNCEMENT_LIST = 0x1501;
+        public const short S2C_ANNOUNCEMENT_LIST = 0x1511;
+        public const short S2C_ANNOUNCEMENT_NEW  = 0x1512;
+        public const short S2C_SYSTEM_EVENT_LOG  = 0x1513;
+
+        // ── EVENT CURRENCY (16xx) ─────────────────────────────────
+        public const short C2S_EVENT_CURRENCY_LIST     = 0x1601;
+        public const short C2S_EVENT_CURRENCY_SHOP     = 0x1602;
+        public const short C2S_EVENT_CURRENCY_BUY      = 0x1603;
+        public const short C2S_EVENT_CURRENCY_EXCHANGE  = 0x1604;
+        public const short S2C_EVENT_CURRENCY_LIST     = 0x1611;
+        public const short S2C_EVENT_CURRENCY_SHOP     = 0x1612;
+        public const short S2C_EVENT_CURRENCY_UPDATE   = 0x1613;
+
+    }
 }

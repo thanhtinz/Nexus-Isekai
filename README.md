@@ -1,254 +1,237 @@
 <div align="center">
 
-<!-- Logo placeholder: thay bằng logo thực khi có asset -->
 <img src="docs/assets/logo-placeholder.png" alt="Nexus Isekai" width="360"/>
 
 # NEXUS ISEKAI
 
-### Vong Linh Gioi — The Realm Between Worlds
+### Vọng Linh Giới — The Realm Between Worlds
 
-**Full-stack MMORPG engine** — 5 nền tảng client · Java TCP server · React webshop · JavaFX admin
+**Full-stack MMORPG engine** — Unity client đa nền tảng · Java TCP server · React webshop · JavaFX admin
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Java](https://img.shields.io/badge/Server-Java%2017%20%2B%20Netty-orange.svg)](#)
-[![Platforms](https://img.shields.io/badge/Clients-5%20platforms-green.svg)](#clients)
-[![Opcodes](https://img.shields.io/badge/Protocol-196%20opcodes-purple.svg)](#protocol)
-[![DB](https://img.shields.io/badge/Database-61%2B%20tables-blue.svg)](#database)
-[![Admin](https://img.shields.io/badge/Admin-30%20panels-red.svg)](#admin-panel)
+[![Unity](https://img.shields.io/badge/Client-Unity%202022-black.svg)](#clients)
+[![Opcodes](https://img.shields.io/badge/Protocol-292%20opcodes-purple.svg)](#protocol)
+[![DB](https://img.shields.io/badge/Database-102%20tables-blue.svg)](#database)
 
 </div>
 
 ---
 
-## The Story — Cot Truyen
+## Cốt Truyện
 
-<div align="center">
-<img src="docs/assets/banner-world.png" alt="World of Nexus Isekai" width="100%"/>
-</div>
+> *"Khi ranh giới giữa các thế giới sụp đổ, một cổng thời không xuất hiện trên bầu trời..."*
 
-> *"Khi ranh gioi giua cac the gioi sup do, mot cong thoi khong xuat hien tren bau troi..."*
+### Bối cảnh
 
-### Boi canh
+**Nexus Isekai** lấy bối cảnh tại **Vọng Linh Giới** — một thế giới huyền bí nơi mà các lục địa từ nhiều chiều không gian khác nhau bị kéo vào và hợp nhất thành một. Mỗi vùng đất mang theo văn minh, quái vật, và phép thuật riêng của nó.
 
-**Nexus Isekai** lay boi canh tai **Vong Linh Gioi** — mot the gioi huyen bi noi ma cac luc dia tu nhieu chieu khong gian khac nhau bi keo vao va hop nhat thanh mot. Moi vung dat mang theo van minh, quai vat, va phap thuat rieng cua no.
+**5.000 năm trước**, cuộc chiến **Đại Hoành Điểu** (The Great Convergence) đã xảy ra khi Tiểu Thần *Azaroth* cố gắng phá huỷ bức tường ngăn cách các thế giới để thống trị vạn vật. Cuộc chiến kết thúc khi **Bảy Anh Hùng Thượng Cổ** hy sinh để niêm phong Azaroth, nhưng để lại những vết nứt không gian rải khắp thế giới.
 
-**5.000 nam truoc**, cuoc chien **Dai Hoanh Dieu** (The Great Convergence) da xay ra khi Tieu Than *Azaroth* co gang pha huy buc tuong ngan cach cac the gioi de thong tri van vat. Cuoc chien ket thuc khi **Bay Anh Hung Thuong Co** (Seven Primordial Heroes) hi sinh de niem phong Azaroth, nhung de lai nhung vet nut khong gian ran khap the gioi.
+**Hiện tại**, những vết nứt này đang mở rộng. Quái vật từ các chiều không gian khác tràn vào. Các vùng đất bị nhiễm độc bởi ma khí. Và những kẻ theo Azaroth — **Giáo Phái Vọng Linh** — đang tìm cách phá phong ấn để phục sinh Tiểu Thần.
 
-**Hien tai**, nhung vet nut nay dang mo rong. Quai vat tu cac chieu khong gian khac tran vao. Cac vung dat bi nhiem doc boi ma khi. Va nhung ke theo Azaroth — **Giao Phai Vong Linh** — dang tim cach pha phong an de phuc sinh Tieu Than.
+**Người chơi** là một trong những **Lưu Dân** (Wanderers) — những kẻ đến từ thế giới khác bị cuốn vào Vọng Linh Giới qua một cổng thời không. Với sức mạnh kỳ lạ mà chỉ Lưu Dân mới có — khả năng hấp thu linh lực từ nhiều nguồn — người chơi phải thám hiểm, chiến đấu, và khôi phục lại trật tự cho thế giới này.
 
-**Nguoi choi** la mot trong nhung **Luu Dan** (Wanderers) — nhung ke den tu the gioi khac bi cuon vao Vong Linh Gioi qua mot cong thoi khong. Voi suc manh ky la ma chi Luu Dan moi co — kha nang hap thu linh luc tu nhieu nguon — nguoi choi phai tham hiem, chien dau, va khoi phuc lat lai trat tu cho the gioi nay.
+### Các vùng đất
 
-### Cac vung dat
-
-| Vung | Mo ta | Cap do |
+| Vùng | Mô tả | Cấp độ |
 |---|---|---|
-| **Lang Khai Nguyen** | Ngoi lang nho noi Luu Dan tinh day, duoc bao ve boi ket gioi co dai | 1-10 |
-| **Dong Bang Suong Mu** | Canh dong bao phu suong mu bi an, an giau di tich | 10-25 |
-| **Rung Am Anh** | Khu rung nhiem ma khi, quai vat dang bien di | 25-40 |
-| **Thanh Pho Thien Quang** | Thu phu cua lien minh, trung tam thuong mai va guild | 20+ |
-| **Nui Vong Linh** | Noi phong an cua Azaroth, ma khi day dac | 40-60 |
-| **Hoang Mac Vang** | Sa mac khac nghiet, an giau thanh co va boss the gioi | 50-70 |
-| **Bien Dam Huyen Bi** | Quần dao tren bien, dung cho PvP lien server | 60+ |
-| **Dia Nguc Tham Uyên** | Dungeon cao cap, chi mo khi co su kien | 70-99 |
+| **Làng Khải Nguyên** | Ngôi làng nhỏ nơi Lưu Dân tỉnh dậy, được bảo vệ bởi kết giới cổ đại | 1–10 |
+| **Đồng Bằng Sương Mù** | Cánh đồng bao phủ sương mù bí ẩn, ẩn giấu di tích | 10–25 |
+| **Rừng Ám Ảnh** | Khu rừng nhiễm ma khí, quái vật đang biến dị | 25–40 |
+| **Thành Phố Thiên Quang** | Thủ phủ của liên minh, trung tâm thương mại và guild | 20+ |
+| **Núi Vọng Linh** | Nơi phong ấn của Azaroth, ma khí dày đặc | 40–60 |
+| **Hoàng Mạc Vàng** | Sa mạc khắc nghiệt, ẩn giấu thành cổ và boss thế giới | 50–70 |
+| **Biển Đầm Huyền Bí** | Quần đảo trên biển, dùng cho PvP liên server | 60+ |
+| **Địa Ngục Thâm Uyên** | Dungeon cao cấp, chỉ mở khi có sự kiện | 70–99 |
 
-### 5 nhanh nghe
+### 5 Nhành nghề
 
-<div align="center">
-<img src="docs/assets/classes-banner.png" alt="5 Classes" width="100%"/>
-</div>
-
-| Class | Mo ta | Vai tro |
+| Class | Mô tả | Vai trò |
 |---|---|---|
-| **Kiem Si** (Swordsman) | Chien binh can chien, phong ngu va tan cong can bang | Tank / DPS |
-| **Sat Thu** (Assassin) | Diet dich nhanh chong, ne tranh, chi mang | Burst DPS |
-| **Phap Su** (Mage) | Phap thuat tam xa manh, dien rong | AoE DPS |
-| **Phap Thu** (Guardian) | Ho tro, hoi mau, tang suc manh dong doi | Healer / Support |
-| **Cung Thu** (Archer) | Tan cong tam xa, ban tinh, khu vuc | Ranged DPS |
+| **Kiếm Sĩ** (Swordsman) | Chiến binh cận chiến, phòng ngự và tấn công cân bằng | Tank / DPS |
+| **Sát Thủ** (Assassin) | Diệt địch nhanh chóng, né tránh, chí mạng | Burst DPS |
+| **Pháp Sư** (Mage) | Phép thuật tầm xa mạnh, diện rộng | AoE DPS |
+| **Pháp Thủ** (Guardian) | Hỗ trợ, hồi máu, tăng sức mạnh đồng đội | Healer / Support |
+| **Cung Thủ** (Archer) | Tấn công tầm xa, bắn tỉnh, khu vực | Ranged DPS |
 
-Moi class co **30-40 ky nang doc quyen**, he thong **7 slot skill active**, va cot truyen rieng khi tao nhan vat.
-
----
-
-## Screenshots
-
-<div align="center">
-
-| | | |
-|:---:|:---:|:---:|
-| <img src="docs/assets/ss-login.png" width="250"/> | <img src="docs/assets/ss-game.png" width="250"/> | <img src="docs/assets/ss-chat.png" width="250"/> |
-| Dang nhap | The gioi game | Chat da kenh |
-| <img src="docs/assets/ss-inventory.png" width="250"/> | <img src="docs/assets/ss-pvp.png" width="250"/> | <img src="docs/assets/ss-webshop.png" width="250"/> |
-| Tui do + Cuong hoa | PvP Arena | Webshop |
-
-</div>
-
-> *Thay cac anh placeholder bang screenshot that khi co asset.*
+Mỗi class có **30–40 kỹ năng độc quyền**, hệ thống **7 slot skill active**, và cốt truyện riêng khi tạo nhân vật.
 
 ---
 
-## Architecture
+## Kiến trúc hệ thống
 
 ```
-                    +------------------+
-                    |   Landing Page   |  (React SPA)
-                    |  nexusisekai.vn  |
-                    +--------+---------+
-                             |
-                    +--------+---------+
-                    |   Nginx (HTTPS)  |  Reverse proxy
-                    +--+-----+-----+---+
-                       |     |     |
-          +------------+  +--+--+  +------------+
-          |               |     |               |
-  +-------+-------+ +----+----+ +------+-------+
-  | Webshop HTTP  | | Admin   | | Game Server  |  Java 17 + Netty
-  | :9090 (React) | | API     | | TCP :7777    |  Binary protocol
-  +-------+-------+ | :8080   | +----+---------+
-          |          +----+----+      |
-          |               |          |
-          +-------+-------+----------+
-                  |
-          +-------+-------+
-          |    MySQL 8     |
-          | 61+ tables     |
-          | HikariCP pool  |
-          +----------------+
+                        ┌──────────────────┐
+                        │  Landing + Webshop│  React + Vite + Tailwind
+                        │  nexusisekai.vn   │
+                        └────────┬─────────┘
+                        ┌────────┴─────────┐
+                        │   Nginx (HTTPS)  │  Reverse proxy
+                        └──┬─────┬─────┬───┘
+              ┌────────────┘     │     └────────────┐
+      ┌───────┴───────┐  ┌──────┴─────┐  ┌─────────┴────────┐
+      │ Webshop HTTP  │  │ Admin API  │  │ Game Server TCP  │
+      │ :9090 (React) │  │ :8080      │  │ :7777 (Netty)    │
+      └───────┬───────┘  └──────┬─────┘  └─────────┬────────┘
+              └─────────┬───────┘────────────────────┘
+                  ┌─────┴──────┐
+                  │  MySQL 8   │  102 tables · HikariCP
+                  └────────────┘
 
- Clients:  Unity C#  |  Android  |  iOS Swift  |  PC JavaFX  |  J2ME
-           (2D/3D)   | (SurfaceView)| (SpriteKit) | (Canvas2D) | (GameCanvas)
+      Client: Unity C# → Build ra Android / iOS / PC / WebGL
+              J2ME → Điện thoại feature phone (Nokia...)
 ```
 
 ---
 
 ## Clients
 
-| Platform | Thu muc | Stack | Trang thai |
-|---|---|---|---|
-| **Unity** | `client/` | C# 2022 LTS, 14 files | Day du nhat, dung production |
-| **Android** | `client-android/` | Java, min SDK 21, 20 files | Native, SurfaceView 60fps |
-| **iOS** | `client-ios/` | Swift, SwiftUI+SpriteKit, 5 files | NWConnection TCP, iOS 14+ |
-| **PC** | `client-pc/` | Java 17+JavaFX 21, 8 files | WASD controls, Canvas2D |
-| **J2ME** | `client-j2me/` | CLDC 1.1/MIDP 2.0, 12 files | Feature phone (Nokia...) |
+| Nền tảng | Mô tả | Ghi chú |
+|---|---|---|
+| **Unity (chính)** | C# 2022 LTS — build ra Android, iOS, PC, WebGL | Client chính, đầy đủ nhất |
+| **J2ME** | Java CLDC 1.1 / MIDP 2.0 | Cho feature phone (Nokia, Samsung cũ) |
+| **Android Lite** | Java native (reference) | Client nhẹ, tham khảo protocol |
+| **iOS Lite** | Swift (reference) | Client nhẹ, tham khảo protocol |
+| **PC Lite** | JavaFX (reference) | Client nhẹ, tham khảo protocol |
 
-Tat ca dung chung **binary TCP protocol**: `[4-byte length][2-byte opcode][payload...]`
+> **Khuyến nghị:** Dùng Unity build cho tất cả nền tảng. Các client Lite là reference implementation để hiểu protocol.
 
 ---
 
-## He thong game
+## Hệ thống game
 
-### Tien te
+### Tiền tệ
 
-| Loai | Mo ta | Cach nhan |
+| Loại | Mô tả | Cách nhận |
 |---|---|---|
-| **Vang (Gold)** | Tien te chinh, dung mua item, cuong hoa, tao guild | Farm monster, quest, ban item |
-| **Diamond** | Tien te premium, dung mua VIP item, Mission Pass | Nap the, gift code, event |
-| **Event Token** | Tien te su kien (thay doi tuy event), het han khi event ket thuc | Tham gia event, nhiem vu su kien |
+| **Vàng (Gold)** | Tiền tệ chính, dùng mua item, cường hoá, tạo guild | Farm quái, quest, bán item |
+| **Diamond** | Tiền tệ premium, dùng mua VIP item, Mission Pass | Nạp thẻ, gift code, sự kiện |
+| **Event Token** | Tiền tệ sự kiện (tuỳ event), hết hạn khi event kết thúc | Tham gia event, nhiệm vụ sự kiện |
 
-He thong Event Token ho tro **nhieu loai tien te phu cung luc**, tat ca duoc cau hinh trong Admin panel:
-- Moi event co the tao 1 loai token rieng (VD: "Hoa Sen" cho Tet, "Sao Bang" cho su kien he)
-- Admin cau hinh: ten token, icon, ti le doi, thoi gian het han, shop rieng
-- Khi event ket thuc, token chua dung co the doi sang vang hoac mat
+Hệ thống Event Token hỗ trợ **nhiều loại tiền tệ phụ cùng lúc**, tất cả cấu hình trong Admin:
+- Mỗi event tạo 1 loại token riêng (VD: "Hoa Sen" cho Tết, "Sao Băng" cho sự kiện hè)
+- Admin cấu hình: tên, icon, tỉ lệ đổi, thời gian hết hạn, shop riêng
+- Khi event kết thúc, token chưa dùng có thể đổi sang vàng hoặc mất
 
-### Chien dau
+### Chiến đấu
 
-- **PvE**: Farm monster, boss map, boss su kien, dungeon
-- **PvP**: Duel 1v1 (ELO rating), arena lien server
-- **30-40 skill/class**, 7 slot active, nang cap skill, cooldown
-- **Cuong hoa** vu khi +1 den +10 (ti le that bai tang, tut level khi fail)
+- **PvE**: Farm quái, boss map, boss sự kiện, dungeon instance
+- **PvP**: Duel 1v1 (ELO rating), đấu trường liên server
+- **30–40 skill/class**, 7 slot active, nâng cấp skill, cooldown
+- **Cường hoá** vũ khí +1 đến +10 (tỉ lệ thất bại tăng, tụt level khi fail)
+- **Party**: Nhóm 4 người, vào dungeon instance cùng nhau
+- **Dungeon**: Instance riêng cho party, boss mechanic, phần thưởng, cooldown
 
-### Xa hoi
+### Giao dịch
 
-- **Chat**: Map / World / Guild / PM / Lien server
-- **Noi dung chat**: Text, Sticker pack, Emoji, Gul toa do, Khoe item, Li xi (Gold/Diamond), Voice
-- **Li xi**: Tao bao li xi voi N phan, nguoi khac bam giut, random amount
-- **Guild**: Tao, moi, promote, kick, giai tan, chat guild rieng
-- **Hon nhan**: Hen ho -> Cau hon -> Ket hon -> Con cai (feed, level up)
-- **Su tu (Mentor)**: Player cap cao day player cap thap, nhan thuong khi hoc tro tot nghiep
+- **Trading**: Giao dịch trực tiếp giữa 2 người chơi (item + vàng)
+- **Nhà đấu giá (Auction House)**: Đăng bán item, đặt giá, đấu giá, mua ngay
+- Thuế 5%, cấu hình qua admin (thời gian, giá tối thiểu, giới hạn đăng)
 
-### Kinh te
+### Xã hội
 
-- **Thanh toan SePay**: QR ngan hang, webhook tu dong cong diamond
-- **Webshop**: Gioi han mua/user/ngay/tuan/thang, theo doi stock
-- **Mission Pass**: Free + Premium, 30 level, nhiem vu hang ngay/tuan
-- **Gift code**: Admin tao code, gioi han su dung, thuong item/diamond/vang
-- **Cuong hoa**: +1 den +10, cau hinh ti le/gia trong admin
-- **Kho item admin**: Phat item cho player qua admin panel
+- **Chat**: Map / World / Guild / PM / Liên server / **Hệ thống (sticky)**
+- **Nội dung chat**: Text, Sticker pack, Emoji, Gửi toạ độ, Khoe item, Lì xì, Voice
+- **Tab Hệ thống**: Thông báo admin (sticky), log sự kiện (ai top 1 BXH, giết boss, kết hôn)
+- **Lì xì**: Tạo bao lì xì với N phần, người khác bấm giựt, random amount
+- **Guild**: Tạo, mời, promote, kick, giải tán, chat guild riêng
+- **Hôn nhân**: Hẹn hò → Cầu hôn → Kết hôn → Con cái (feed, level up)
+- **Sư tử (Mentor)**: Player cấp cao dạy player cấp thấp
 
-### Nong trai & Nha o
+### NPC & Hội thoại
 
-- **Nong trai**: Trong cay, tuoi nuoc, thu hoach, nuoi dong vat
-- **Nha o**: Xay nha, dat noi that, trang tri
+- **Dialog Tree**: Hội thoại NPC phân nhánh (nhiều lựa chọn, điều kiện, hành động)
+- Admin cấu hình toàn bộ dialog qua panel
+
+### Kinh tế
+
+- **Thanh toán SePay**: QR ngân hàng, webhook tự động cộng diamond
+- **Webshop**: Giới hạn mua/user/ngày/tuần/tháng, theo dõi stock
+- **Mission Pass**: Free + Premium, 30 level, nhiệm vụ hàng ngày/tuần
+- **Gift code**: Admin tạo code, giới hạn sử dụng
+- **Cường hoá**: +1 đến +10, cấu hình tỉ lệ/giá trong admin
+
+### Nông trại & Nhà ở
+
+- **Nông trại**: Trồng cây, tưới nước, thu hoạch, nuôi động vật
+- **Nhà ở**: Xây nhà, đặt nội thất, trang trí
 
 ### Minigame
 
-- Bau cua, dua thu, do vui, o an quan
-- Phong choi, dat cuoc, xep hang
+- Bầu cua, đua thú, đố vui, ô ăn quan
+- Phòng chơi, đặt cược, xếp hạng
 
-### He thong khac
+### Hệ thống khác
 
-- **Pet & Mount**: Thu cung chien dau, tho cuoi tang speed
-- **Danh hieu (Title)**: Tu quest, achievement, event
-- **Bang xep hang**: Level, vang, PvP ELO, guild
-- **Multi-server**: Relay cross-server, chat lien server
-- **Bao tri**: Lich bao tri, thong bao den client
-- **Auto-save**: Moi 5 phut
-- **Event scheduler**: Double EXP, boss event, su kien dinh ky
+- **Pet & Mount**: Thú cưng chiến đấu, thú cưỡi tăng speed
+- **Danh hiệu (Title)**: Từ quest, achievement, event
+- **Bảng xếp hạng**: Level, vàng, PvP ELO, guild
+- **Multi-server**: Relay cross-server, chat liên server
+- **Bảo trì**: Lịch bảo trì, thông báo đến client
+- **Auto-save**: Mỗi 5 phút
+- **Event scheduler**: Double EXP, boss event, sự kiện định kỳ
+- **Rate limiting**: Giới hạn tần suất packet (chat, move, attack)
 
 ---
 
-## Admin Panel — 30 panels
+## Admin Panel — Quản trị toàn bộ
 
-<div align="center">
-<img src="docs/assets/ss-admin.png" alt="Admin Panel" width="100%"/>
-</div>
+### Kho Tổng (Master Registry)
 
-| Panel | Chuc nang |
+Tất cả "vật" trong game được quản lý tại **một bảng duy nhất** `master_registry`:
+- **12 loại**: item, skin, pet, mount, title, map, event_currency, sticker_pack, furniture, seed, animal
+- **Bộ lọc chuyên nghiệp**: theo loại, danh mục, phân loại phụ, độ hiếm, tags, tìm kiếm text
+- Mỗi vật có **ID duy nhất** — khi cấu hình sự kiện / sổ sứ mệnh / gift code, chỉ cần **nhập ID**
+
+### Danh sách panels (30+)
+
+| Panel | Chức năng |
 |---|---|
-| Dashboard | Tong quan: online, doanh thu, su kien |
-| Players | Xem/sua nhan vat, trao item, ban nick |
-| Guilds | Quan ly guild, giai tan, gui tin |
-| Maps | Cau hinh ban do, portal, spawn |
-| Monsters | Cau hinh quai, stats, drop rate |
-| NPCs | Quan ly NPC, doi thoai, nhiem vu |
-| Items | Tao/sua item, rarity, stats |
-| Shop | Cau hinh NPC shop |
-| Events | Bat/tat su kien, double EXP, boss |
-| Quests | Tao/sua quest, chain quest |
-| Accounts | Quan ly tai khoan, ban, reset mat khau |
-| SePay | Cau hinh thanh toan, test webhook |
-| Gift Code | Tao/xoa code, xem lich su doi |
-| Titles | Quan ly danh hieu |
-| Mission Pass | Cau hinh season, rewards, tasks |
-| Classes | Cau hinh 5 class, base stats |
-| Pet & Mount | Cau hinh thu cung, tho cuoi |
-| Webshop | Them/sua san pham, gioi han mua, stock |
-| Warehouse | Kho item admin cho event/giftcode |
-| PvP | Quan ly tran dau, ket thuc cuong che |
-| Minigame | Phong choi, lich su, gioi han cuoc |
-| Farming | Cau hinh hat giong, dong vat |
-| Housing | Catalog noi that, gia, toggle active |
+| Dashboard | Tổng quan: online, doanh thu, sự kiện |
+| Players | Xem/sửa nhân vật, trao item, ban |
+| Guilds | Quản lý guild, giải tán, gửi tin |
+| Items & Registry | Kho tổng, CRUD item, bộ lọc, phân loại |
+| Shop | Cấu hình NPC shop |
+| Events | Bật/tắt sự kiện, double EXP, boss |
+| Quests | Tạo/sửa quest, chain quest |
+| Announcements | Tạo thông báo sticky, broadcast tức thì |
+| Event Currency | Tạo/quản lý tiền tệ sự kiện, grant token |
+| Auction House | Quản lý đấu giá, cấu hình thuế/giới hạn |
+| Dungeons | Tạo/sửa dungeon template, bật/tắt |
+| NPC Dialogs | Editor hội thoại NPC, phân nhánh |
+| Trading | Lịch sử giao dịch |
+| Party | Nhóm đang hoạt động |
+| SePay | Cấu hình thanh toán, test webhook |
+| Gift Code | Tạo/xoá code, xem lịch sử đổi |
+| Mission Pass | Cấu hình season, rewards, tasks |
+| Enhancement | Chỉnh tỉ lệ cường hoá +1 đến +10 |
+| PvP | Quản lý trận đấu, kết thúc cưỡng chế |
+| Minigame | Phòng chơi, lịch sử, giới hạn cược |
+| Farming | Cấu hình hạt giống, động vật |
+| Housing | Catalog nội thất, giá, toggle active |
 | Leaderboard | Xem BXH, reset |
-| Enhancement | Chinh ti le cuong hoa +1 den +10 |
-| Chat History | Xem lich su chat, tim kiem, xoa |
-| Event Currency | Tao/quan ly tien te su kien |
-| Servers | Quan ly multi-server, trang thai |
-| Logs | Xem server logs, loi |
-| Settings | Cau hinh chung |
+| Chat History | Xem lịch sử chat, tìm kiếm, xoá |
+| Rate Limiting | Cấu hình giới hạn packet/giây |
+| Servers | Quản lý multi-server |
+| Logs | Xem server logs |
+| Settings | Cấu hình chung |
 
 ---
 
-## Cai dat
+## Cài đặt
 
-### Yeu cau
+### Yêu cầu
 
-| Tool | Phien ban |
+| Tool | Phiên bản |
 |---|---|
 | Java JDK | 17+ |
 | Maven | 3.8+ |
 | MySQL | 8.0+ |
-| Node.js | 18+ |
+| Node.js | 18+ (webshop) |
+| Unity | 2022.3 LTS (client) |
 
-### Quick Start (Local)
+### Chạy nhanh (Local)
 
 ```bash
 # 1. Clone
@@ -259,92 +242,64 @@ mysql -u root -p < scripts/create-db.sql
 mysql -u nexus -p nexus_isekai < server/src/main/resources/schema.sql
 mysql -u nexus -p nexus_isekai < server/src/main/resources/schema_v2.sql
 
-# 3. Config
+# 3. Cấu hình
 cp server/src/main/resources/application.properties.template \
    server/src/main/resources/application.properties
-# Sua db.password, admin.key
+# Sửa db.password, admin.key
 
 # 4. Build & Run server
 cd server && mvn clean package -DskipTests && java -jar target/nexus-isekai-server-1.0.jar
 
-# 5. Build webshop
+# 5. Build webshop (bao gồm landing page)
 cd ../webshop && npm ci && npm run build
 
-# 6. Client: sua SERVER_HOST roi build
+# 6. Unity: mở client/ trong Unity Editor, sửa SERVER_HOST, Play
 ```
 
-### Deploy len VPS
+### Triển khai VPS
 
 ```bash
-# Cai moi truong (Ubuntu 22.04)
-sudo ./scripts/setup-vps.sh
-
-# Deploy
-./scripts/deploy.sh
-```
-
-Chi tiet: xem phan **[Huong dan VPS](docs/VPS_GUIDE.md)** trong thu muc `docs/`.
-
----
-
-## Protocol
-
-```
-[4-byte big-endian length][2-byte opcode][payload...]
-```
-
-196 opcodes toan bo: `server/src/main/java/com/nexusisekai/network/PacketOpcode.java`
-
-Chat content types: `0=text | 1=sticker | 2=emoji | 3=location | 4=item | 5=red_envelope | 6=voice`
-
----
-
-## Thu muc du an
-
-```
-NexusIsekai/
-+-- server/                  # Java game server (57 files)
-+-- client/                  # Unity C# client (14 files)
-+-- client-android/          # Android client (20 files)
-+-- client-ios/              # iOS Swift client (5 files)
-+-- client-pc/               # PC JavaFX client (8 files)
-+-- client-j2me/             # J2ME feature phone (12 files)
-+-- webshop/                 # React webshop (20 files)
-+-- admin/                   # JavaFX admin panel (7 files)
-+-- landing/                 # Landing page website
-+-- scripts/                 # Deploy, setup, SQL
-+-- docs/                    # Tai lieu, assets placeholder
-+-- LICENSE                  # MIT License
-+-- README.md                # Ban dang doc
+sudo ./scripts/setup-vps.sh    # cài môi trường Ubuntu 22.04
+./scripts/deploy.sh             # build + restart service
 ```
 
 ---
 
-## Bao mat
+## Bảo mật
 
-- Mat khau hash voi **BCrypt**
-- Token web dung **random UUID**, het han
-- Admin API chi bind **localhost**, bao ve bang API key
-- **Anti-speedhack**: server validate vi tri + toc do di chuyen
-- SQL dung **PreparedStatement**, khong concat string
-- Upload voice gioi han **5MB**, validate MIME type
-- Rate limit: GUI han ket noi, send queue co gioi han
-- Li xi: **synchronized atomic grab**, khong duplicate
-- Cuong hoa: **server-side random**, client khong can thiet
-- Cross-server: poll relay table, khong expose truc tiep
+- Mật khẩu hash với **BCrypt**
+- Token web dùng **random UUID**, hết hạn
+- Admin API chỉ bind **localhost**, bảo vệ bằng API key
+- **Anti-speedhack**: server validate vị trí + tốc độ di chuyển
+- SQL dùng **PreparedStatement**, không concat string
+- Upload voice giới hạn **5MB**, validate MIME type
+- **Rate limiting**: cấu hình giới hạn packet/giây cho mỗi loại hành động
+- Lì xì: **synchronized atomic grab**, không duplicate
+- Cường hoá: **server-side random**, client không quyết định
+- Giao dịch: **DB transaction**, rollback khi lỗi
+- Đấu giá: **atomic bid**, lock khi buyout
+
+---
+
+## Số liệu
+
+| | |
+|---|---|
+| Opcodes | 292 |
+| DB tables | 102 (17 base + 85 mở rộng) |
+| Server Java files | 58 |
+| Unity C# files | 14 |
+| Admin panels | 30+ |
+| GameSession dispatch | 120 cases |
 
 ---
 
 ## License
 
-[MIT License](LICENSE) — Su dung tu do cho muc dich hoc tap va thuong mai.
-
----
+[MIT License](LICENSE) — Sử dụng tự do cho mục đích học tập và thương mại.
 
 <div align="center">
 
-**Nexus Isekai** — *Vong Linh Gioi*
-
-*Built with passion for the MMORPG genre*
+**Nexus Isekai** — *Vọng Linh Giới*
 
 </div>
