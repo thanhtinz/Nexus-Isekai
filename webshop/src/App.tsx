@@ -8,6 +8,7 @@ import { GiftCodePage } from '@/pages/GiftCodePage'
 import { PassPage } from '@/pages/PassPage'
 import { useAuth } from '@/hooks/useAuth'
 import LandingPage from '@/pages/LandingPage'
+import AdminDashboard from '@/pages/AdminDashboard'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { session } = useAuth()
@@ -20,6 +21,7 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/*"

@@ -1,0 +1,380 @@
+import { useState, useEffect, useCallback } from 'react';
+
+// ═══════════════════════════════════════════════════════════════
+// AdminDashboard — Web-based admin panel
+// Responsive mobile, gọi Admin API qua proxy
+// Route: /admin (trong webshop app)
+// ═══════════════════════════════════════════════════════════════
+
+const API_BASE = '/admin-api'; // proxy qua webshop server
+
+interface TableRow { [key: string]: string | number | boolean }
+
+// ─── API helper ──────────────────────────────────────────────
+
+async function api(path: string, method = 'GET', body?: Record<string, string>) {
+  const apiKey = localStorage.getItem('admin_key') || '';
+  const opts: RequestInit = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': apiKey },
+  };
+  if (body && method !== 'GET') opts.body = JSON.stringify(body);
+  const res = await fetch(`${API_BASE}${path}`, opts);
+  return res.json();
+}
+
+// ─── Components ──────────────────────────────────────────────
+
+function DataTable({ data, compact }: { data: TableRow[]; compact?: boolean }) {
+  if (!data || data.length === 0) return <p className="text-gray-500 text-sm p-4">Khong co du lieu</p>;
+  const keys = Object.keys(data[0]).slice(0, compact ? 5 : 12);
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="border-b border-white/10">
+            {keys.map(k => <th key={k} className="text-left p-2 text-gray-400 font-medium uppercase tracking-wider">{k}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {data.slice(0, 50).map((row, i) => (
+            <tr key={i} className="border-b border-white/5 hover:bg-white/5">
+              {keys.map(k => (
+                <td key={k} className="p-2 text-gray-300 max-w-[200px] truncate">
+                  {String(row[k] ?? '')}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {data.length > 50 && <p className="text-gray-500 text-xs p-2">Hien thi 50/{data.length} dong</p>}
+    </div>
+  );
+}
+
+function StatCard({ label, value, color = '#6c3ef3' }: { label: string; value: string | number; color?: string }) {
+  return (
+    <div className="bg-[#12122a] border border-white/5 rounded-xl p-4">
+      <div className="text-xs text-gray-500 mb-1">{label}</div>
+      <div className="text-2xl font-bold" style={{ color }}>{value}</div>
+    </div>
+  );
+}
+
+function ActionButton({ children, onClick, variant = 'primary' }: {
+  children: React.ReactNode; onClick: () => void; variant?: 'primary' | 'danger' | 'outline'
+}) {
+  const cls = variant === 'primary' ? 'bg-[#6c3ef3] text-white hover:bg-[#8a5cf5]'
+    : variant === 'danger' ? 'bg-red-600 text-white hover:bg-red-500'
+    : 'border border-white/20 text-gray-300 hover:bg-white/10';
+  return (
+    <button onClick={onClick} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${cls}`}>
+      {children}
+    </button>
+  );
+}
+
+// ─── Panel Configs ───────────────────────────────────────────
+
+interface PanelConfig {
+  key: string;
+  label: string;
+  group: string;
+  endpoint: string;
+  dataKey: string;
+  actions?: { label: string; endpoint: string; body: Record<string, string> }[];
+}
+
+const PANELS: PanelConfig[] = [
+  // Tong quan
+  { key: 'status',       label: 'Trang Thai',      group: 'Tong Quan',  endpoint: '/api/status',            dataKey: '' },
+  { key: 'stats',        label: 'Thong Ke',        group: 'Tong Quan',  endpoint: '/api/logs',              dataKey: 'logs' },
+
+  // Nguoi choi
+  { key: 'players',      label: 'Nguoi Choi',      group: 'Nguoi Choi', endpoint: '/api/players',           dataKey: 'players' },
+  { key: 'accounts',     label: 'Tai Khoan',       group: 'Nguoi Choi', endpoint: '/api/accounts',          dataKey: 'accounts' },
+  { key: 'mail',         label: 'Thu',             group: 'Nguoi Choi', endpoint: '/api/mail',              dataKey: 'mails' },
+  { key: 'reports',      label: 'Bao Cao',         group: 'Nguoi Choi', endpoint: '/api/reports',           dataKey: 'reports' },
+
+  // Noi dung
+  { key: 'story',        label: 'Cot Truyen',      group: 'Noi Dung',   endpoint: '/api/story',             dataKey: 'chapters' },
+  { key: 'quests',       label: 'Nhiem Vu',        group: 'Noi Dung',   endpoint: '/api/quests',            dataKey: 'quests' },
+  { key: 'dialogs',      label: 'NPC Dialog',      group: 'Noi Dung',   endpoint: '/api/dialogs',           dataKey: 'dialogs' },
+  { key: 'registry',     label: 'Kho Tong',        group: 'Noi Dung',   endpoint: '/api/registry',          dataKey: 'items' },
+  { key: 'items',        label: 'Items',           group: 'Noi Dung',   endpoint: '/api/items',             dataKey: 'items' },
+  { key: 'monsters',     label: 'Quai Vat',        group: 'Noi Dung',   endpoint: '/api/monsters',          dataKey: 'monsters' },
+  { key: 'maps',         label: 'Ban Do',          group: 'Noi Dung',   endpoint: '/api/maps',              dataKey: 'maps' },
+
+  // AI
+  { key: 'ai',           label: 'AI Content',      group: 'AI & Review',endpoint: '/api/story',             dataKey: 'chapters' },
+  { key: 'ai_log',       label: 'AI Log',          group: 'AI & Review',endpoint: '/api/logs?type=ai',      dataKey: 'logs' },
+
+  // Kinh te
+  { key: 'shop',         label: 'Shop NPC',        group: 'Kinh Te',    endpoint: '/api/shops',             dataKey: 'shops' },
+  { key: 'webshop',      label: 'Webshop',         group: 'Kinh Te',    endpoint: '/api/webshop',           dataKey: 'products' },
+  { key: 'auction',      label: 'Dau Gia',         group: 'Kinh Te',    endpoint: '/api/auction',           dataKey: 'listings' },
+  { key: 'trades',       label: 'Giao Dich',       group: 'Kinh Te',    endpoint: '/api/trade/history',     dataKey: 'trades' },
+  { key: 'giftcode',     label: 'Gift Code',       group: 'Kinh Te',    endpoint: '/api/giftcodes',         dataKey: 'codes' },
+  { key: 'pass',         label: 'So Su Menh',      group: 'Kinh Te',    endpoint: '/api/pass/seasons',      dataKey: 'seasons' },
+  { key: 'enhance',      label: 'Cuong Hoa',       group: 'Kinh Te',    endpoint: '/api/enhancement-config',dataKey: 'config' },
+  { key: 'eventcur',     label: 'Tien Te SK',      group: 'Kinh Te',    endpoint: '/api/event-currency',    dataKey: 'currencies' },
+
+  // Xa hoi
+  { key: 'guilds',       label: 'Guild',           group: 'Xa Hoi',     endpoint: '/api/guilds',            dataKey: 'guilds' },
+  { key: 'party',        label: 'Nhom',            group: 'Xa Hoi',     endpoint: '/api/party/active',      dataKey: 'parties' },
+  { key: 'pvp',          label: 'PvP',             group: 'Xa Hoi',     endpoint: '/api/pvp/history',       dataKey: 'matches' },
+  { key: 'leaderboard',  label: 'BXH',             group: 'Xa Hoi',     endpoint: '/api/leaderboard',       dataKey: 'entries' },
+  { key: 'chat',         label: 'Chat',            group: 'Xa Hoi',     endpoint: '/api/chat/history',      dataKey: 'messages' },
+  { key: 'titles',       label: 'Danh Hieu',       group: 'Xa Hoi',     endpoint: '/api/titles',            dataKey: 'titles' },
+  { key: 'pets',         label: 'Pet & Mount',     group: 'Xa Hoi',     endpoint: '/api/pets',              dataKey: 'pets' },
+
+  // He thong
+  { key: 'announce',     label: 'Thong Bao',       group: 'He Thong',   endpoint: '/api/announcements',     dataKey: 'announcements' },
+  { key: 'assets',       label: 'Assets OTA',      group: 'He Thong',   endpoint: '/api/assets',            dataKey: 'assets' },
+  { key: 'versions',     label: 'Phien Ban',       group: 'He Thong',   endpoint: '/api/client-versions',   dataKey: 'versions' },
+  { key: 'hotconfig',    label: 'Hot Config',      group: 'He Thong',   endpoint: '/api/hot-config',        dataKey: 'configs' },
+  { key: 'ratelimit',    label: 'Rate Limit',      group: 'He Thong',   endpoint: '/api/rate-limit',        dataKey: 'limits' },
+  { key: 'dungeon',      label: 'Dungeon',         group: 'He Thong',   endpoint: '/api/dungeon',           dataKey: 'dungeons' },
+  { key: 'farming',      label: 'Nong Trai',       group: 'He Thong',   endpoint: '/api/farming/seeds',     dataKey: 'seeds' },
+  { key: 'housing',      label: 'Nha O',           group: 'He Thong',   endpoint: '/api/housing/catalog',   dataKey: 'furniture' },
+  { key: 'minigame',     label: 'Minigame',        group: 'He Thong',   endpoint: '/api/minigame/config',   dataKey: 'config' },
+  { key: 'schedule',     label: 'Lich Hen',        group: 'He Thong',   endpoint: '/api/scheduled-tasks',   dataKey: 'tasks' },
+  { key: 'audit',        label: 'Audit Log',       group: 'He Thong',   endpoint: '/api/audit-log',         dataKey: 'logs' },
+  { key: 'servers',      label: 'Servers',         group: 'He Thong',   endpoint: '/api/servers',           dataKey: 'servers' },
+];
+
+// ─── AI Generate Panel ───────────────────────────────────────
+
+function AIPanel() {
+  const [genType, setGenType] = useState('quest');
+  const [prompt, setPrompt] = useState('');
+  const [result, setResult] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [reviewStatus, setReviewStatus] = useState('draft');
+
+  const generate = async () => {
+    if (!prompt.trim()) return;
+    setLoading(true); setResult('Dang tao...');
+    const res = await api('/api/story/ai', 'POST', { gen_type: genType, prompt, context: '' });
+    setResult(res.success ? res.result : `Loi: ${res.message}`);
+    setLoading(false);
+  };
+
+  const approve = async () => {
+    // Would approve the last generated content
+    setReviewStatus('approved');
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {['quest','dialog','story','item_desc','event_desc','announcement'].map(t => (
+          <button key={t} onClick={() => setGenType(t)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium ${genType === t ? 'bg-[#6c3ef3] text-white' : 'bg-white/5 text-gray-400'}`}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      <textarea value={prompt} onChange={e => setPrompt(e.target.value)}
+        placeholder="Nhap yeu cau cho AI..." rows={3}
+        className="w-full bg-[#1a1a35] border border-white/10 rounded-lg p-3 text-sm text-white placeholder-gray-600 resize-none" />
+
+      <div className="flex gap-2">
+        <ActionButton onClick={generate}>{loading ? 'Dang tao...' : 'Tao noi dung'}</ActionButton>
+        <ActionButton onClick={approve} variant="outline">Duyet & Ap Dung</ActionButton>
+      </div>
+
+      {/* Review status */}
+      <div className="flex gap-2 text-xs">
+        {['draft','review','testing','approved','published','rejected'].map(s => (
+          <span key={s} className={`px-2 py-1 rounded ${reviewStatus === s ? 'bg-[#6c3ef3] text-white' : 'bg-white/5 text-gray-500'}`}>
+            {s}
+          </span>
+        ))}
+      </div>
+
+      {result && (
+        <div className="bg-[#0d0d24] border border-white/10 rounded-lg p-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs text-gray-400">Ket qua AI:</span>
+            <button onClick={() => navigator.clipboard.writeText(result)} className="text-xs text-[#4ecca3]">Copy</button>
+          </div>
+          <pre className="text-xs text-gray-300 whitespace-pre-wrap max-h-64 overflow-y-auto">{result}</pre>
+
+          <div className="mt-3 flex gap-2">
+            <ActionButton onClick={() => setReviewStatus('testing')} variant="outline">Test tren SV test</ActionButton>
+            <ActionButton onClick={() => setReviewStatus('approved')}>Duyet</ActionButton>
+            <ActionButton onClick={() => setReviewStatus('rejected')} variant="danger">Tu choi</ActionButton>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Dashboard ──────────────────────────────────────────
+
+export default function AdminDashboard() {
+  const [apiKey, setApiKey] = useState(localStorage.getItem('admin_key') || '');
+  const [authed, setAuthed] = useState(false);
+  const [activePanel, setActivePanel] = useState('status');
+  const [panelData, setPanelData] = useState<TableRow[]>([]);
+  const [statusData, setStatusData] = useState<Record<string, unknown>>({});
+  const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const login = () => {
+    if (apiKey.length > 5) {
+      localStorage.setItem('admin_key', apiKey);
+      setAuthed(true);
+      loadPanel('status');
+    }
+  };
+
+  const loadPanel = useCallback(async (key: string) => {
+    setActivePanel(key);
+    setSidebarOpen(false);
+    setLoading(true);
+
+    const panel = PANELS.find(p => p.key === key);
+    if (!panel) { setLoading(false); return; }
+
+    try {
+      const res = await api(panel.endpoint);
+      if (key === 'status') {
+        setStatusData(res);
+        setPanelData([]);
+      } else {
+        setPanelData(res[panel.dataKey] || (Array.isArray(res) ? res : []));
+      }
+    } catch (e) {
+      setPanelData([]);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (authed) loadPanel(activePanel);
+  }, [authed]);
+
+  // ── Login screen ──────────────────────────────────────────
+
+  if (!authed) {
+    return (
+      <div className="min-h-screen bg-[#080818] flex items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-[#12122a] border border-white/10 rounded-2xl p-8">
+          <h1 className="text-xl font-bold text-white text-center mb-6">Admin Panel</h1>
+          <input value={apiKey} onChange={e => setApiKey(e.target.value)} type="password"
+            placeholder="Admin API Key..."
+            className="w-full bg-[#1a1a35] border border-white/10 rounded-lg p-3 text-sm text-white mb-4"
+            onKeyDown={e => e.key === 'Enter' && login()} />
+          <button onClick={login}
+            className="w-full py-3 bg-[#6c3ef3] text-white rounded-lg font-semibold text-sm hover:bg-[#8a5cf5]">
+            Dang Nhap
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Groups ────────────────────────────────────────────────
+
+  const groups = [...new Set(PANELS.map(p => p.group))];
+  const currentPanel = PANELS.find(p => p.key === activePanel);
+
+  return (
+    <div className="min-h-screen bg-[#080818] text-gray-200 flex">
+
+      {/* ── Sidebar ──────────────────────────────────────── */}
+      <aside className={`fixed md:static inset-y-0 left-0 z-40 w-56 bg-[#0a0a1e] border-r border-white/5
+        transform transition-transform duration-200
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+
+        <div className="p-4 border-b border-white/5">
+          <h2 className="text-sm font-bold text-[#f0c050] tracking-wider">NEXUS ADMIN</h2>
+          <p className="text-[10px] text-gray-600">Web Dashboard</p>
+        </div>
+
+        <nav className="overflow-y-auto h-[calc(100vh-60px)] pb-20">
+          {groups.map(g => (
+            <div key={g}>
+              <div className="px-4 pt-4 pb-1 text-[10px] text-gray-600 uppercase tracking-wider font-medium">{g}</div>
+              {PANELS.filter(p => p.group === g).map(p => (
+                <button key={p.key} onClick={() => loadPanel(p.key)}
+                  className={`w-full text-left px-4 py-2 text-xs transition-colors ${
+                    activePanel === p.key
+                      ? 'bg-[#6c3ef3]/20 text-[#8a5cf5] border-l-2 border-[#6c3ef3]'
+                      : 'text-gray-400 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
+                  }`}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          ))}
+        </nav>
+      </aside>
+
+      {/* ── Overlay (mobile) ─────────────────────────────── */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {/* ── Main content ─────────────────────────────────── */}
+      <main className="flex-1 min-w-0">
+        {/* Top bar */}
+        <header className="sticky top-0 z-20 bg-[#080818]/90 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button className="md:hidden text-gray-400 text-xl" onClick={() => setSidebarOpen(!sidebarOpen)}>
+              {'\u2630'}
+            </button>
+            <h1 className="text-sm font-semibold text-white">{currentPanel?.label || 'Dashboard'}</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => loadPanel(activePanel)} className="text-xs text-gray-400 hover:text-white px-2 py-1 rounded bg-white/5">
+              Tai Lai
+            </button>
+            <button onClick={() => { setAuthed(false); localStorage.removeItem('admin_key'); }}
+              className="text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded bg-white/5">
+              Dang Xuat
+            </button>
+          </div>
+        </header>
+
+        {/* Content area */}
+        <div className="p-4">
+          {loading && <div className="text-center py-8 text-gray-500 text-sm">Dang tai...</div>}
+
+          {!loading && activePanel === 'status' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <StatCard label="Trang thai" value={statusData.online_count != null ? 'Online' : 'Checking...'} color="#4ecca3" />
+                <StatCard label="Online" value={String(statusData.online_count ?? '—')} />
+                <StatCard label="Tong acc" value={String(statusData.total_accounts ?? '—')} />
+                <StatCard label="Server" value={String(statusData.uptime ?? '—')} color="#f0c050" />
+              </div>
+              <div className="bg-[#12122a] border border-white/5 rounded-xl p-4">
+                <h3 className="text-sm font-medium text-white mb-2">Hanh dong nhanh</h3>
+                <div className="flex flex-wrap gap-2">
+                  <ActionButton onClick={() => api('/api/broadcast', 'POST', { message: prompt })}>Broadcast</ActionButton>
+                  <ActionButton onClick={() => api('/api/maintenance', 'POST', { enabled: 'true' })} variant="danger">Bao Tri</ActionButton>
+                  <ActionButton onClick={() => loadPanel('ai')} variant="outline">AI Generate</ActionButton>
+                  <ActionButton onClick={() => loadPanel('announce')} variant="outline">Thong Bao</ActionButton>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!loading && activePanel === 'ai' && <AIPanel />}
+
+          {!loading && activePanel !== 'status' && activePanel !== 'ai' && (
+            <div className="bg-[#12122a] border border-white/5 rounded-xl overflow-hidden">
+              <DataTable data={panelData} />
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}

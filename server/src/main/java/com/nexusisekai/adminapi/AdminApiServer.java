@@ -140,6 +140,12 @@ public class AdminApiServer {
         httpServer.createContext("/api/housing/catalog",      ex -> handleAuth(ex, this::handleHousingCatalog));
         
         
+        
+        httpServer.createContext("/api/mail",             ex -> handleAuth(ex, this::handleMailAdmin));
+        httpServer.createContext("/api/reports",           ex -> handleAuth(ex, this::handleReports));
+        httpServer.createContext("/api/audit-log",         ex -> handleAuth(ex, this::handleAuditLog));
+        httpServer.createContext("/api/scheduled-tasks",   ex -> handleAuth(ex, this::handleScheduledTasks));
+        httpServer.createContext("/api/ai/review",         ex -> handleAuth(ex, this::handleAIReview));
         httpServer.createContext("/api/assets/upload",    ex -> handleAuth(ex, this::handleAssetUpload));
         httpServer.createContext("/api/assets",           ex -> handleAuth(ex, this::handleAssets));
         httpServer.createContext("/api/assets/bundles",   ex -> handleAuth(ex, this::handleAssetBundles));
@@ -1487,6 +1493,186 @@ public class AdminApiServer {
     }
 
     /** POST /api/assets/upload — Upload file asset (multipart hoặc raw bytes) */
+
+    // ─── Player Mail ────────────────────────────────────────────
+
+    private void handleMailAdmin(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String charId = params.getOrDefault("char_id", "");
+                String sql = charId.isEmpty()
+                    ? "SELECT * FROM player_mail ORDER BY created_at DESC LIMIT 100"
+                    : "SELECT * FROM player_mail WHERE recipient_id=" + charId + " ORDER BY created_at DESC LIMIT 50";
+                sendTableResult(ex, c.prepareStatement(sql), "mails");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "send" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO player_mail (recipient_id,sender_type,sender_name,title,content,attachment_json,expires_at) VALUES (?,?,?,?,?,?,?)");
+                        ps.setLong(1, Long.parseLong(str(body,"recipient_id")));
+                        ps.setString(2, "admin"); ps.setString(3, str(body,"sender_name"));
+                        ps.setString(4, str(body,"title")); ps.setString(5, str(body,"content"));
+                        ps.setString(6, str(body,"attachment_json")); ps.setString(7, str(body,"expires_at"));
+                        ps.executeUpdate();
+                        auditLog(ex, "send_mail", "player", str(body,"recipient_id"), "Mail: " + str(body,"title"));
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "send_all" -> {
+                        // Gui cho tat ca player online
+                        c.prepareStatement("INSERT INTO player_mail (recipient_id,sender_type,sender_name,title,content,attachment_json) " +
+                            "SELECT id,'admin','" + str(body,"sender_name").replace("'","") + "','" +
+                            str(body,"title").replace("'","") + "','" + str(body,"content").replace("'","") + "','" +
+                            str(body,"attachment_json").replace("'","") + "' FROM characters WHERE is_deleted=0").executeUpdate();
+                        auditLog(ex, "send_mail_all", "system", "all", "Mail blast: " + str(body,"title"));
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    // ─── Player Reports ─────────────────────────────────────────
+
+    private void handleReports(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String status = params.getOrDefault("status", "open");
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT * FROM player_reports WHERE status='" + status.replace("'","") +
+                    "' ORDER BY created_at DESC LIMIT 50"), "reports");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "assign" -> {
+                        c.prepareStatement("UPDATE player_reports SET status='investigating',assigned_to='" +
+                            str(body,"admin").replace("'","") + "' WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "resolve" -> {
+                        c.prepareStatement("UPDATE player_reports SET status='resolved',resolution='" +
+                            str(body,"resolution").replace("'","") + "',resolved_at=NOW() WHERE id=" + num(body,"id")).executeUpdate();
+                        auditLog(ex, "resolve_report", "report", String.valueOf(num(body,"id")), str(body,"resolution"));
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "dismiss" -> {
+                        c.prepareStatement("UPDATE player_reports SET status='dismissed',resolution='" +
+                            str(body,"resolution").replace("'","") + "',resolved_at=NOW() WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    // ─── Audit Log ──────────────────────────────────────────────
+
+    private void handleAuditLog(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            sendTableResult(ex, c.prepareStatement(
+                "SELECT * FROM admin_audit_log ORDER BY created_at DESC LIMIT 200"), "logs");
+        }
+    }
+
+    private void auditLog(HttpExchange ex, String action, String targetType, String targetId, String details) {
+        String admin = ex.getRequestHeaders().getFirst("X-Admin-User");
+        if (admin == null) admin = "admin";
+        String ip = ex.getRemoteAddress().getAddress().getHostAddress();
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "INSERT INTO admin_audit_log (admin_user,action,target_type,target_id,details,ip_address) VALUES (?,?,?,?,?,?)")) {
+            ps.setString(1, admin); ps.setString(2, action); ps.setString(3, targetType);
+            ps.setString(4, targetId); ps.setString(5, details); ps.setString(6, ip);
+            ps.executeUpdate();
+        } catch (Exception ignored) {}
+    }
+
+    // ─── Scheduled Tasks ────────────────────────────────────────
+
+    private void handleScheduledTasks(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM scheduled_tasks ORDER BY is_active DESC, next_run_at"), "tasks");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO scheduled_tasks (task_name,task_type,cron_expression,run_once_at,parameters) VALUES (?,?,?,?,?)");
+                        ps.setString(1, str(body,"task_name")); ps.setString(2, str(body,"task_type"));
+                        ps.setString(3, str(body,"cron_expression")); ps.setString(4, str(body,"run_once_at"));
+                        ps.setString(5, str(body,"parameters"));
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "toggle" -> {
+                        c.prepareStatement("UPDATE scheduled_tasks SET is_active=1-is_active WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM scheduled_tasks WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    // ─── AI Content Review ──────────────────────────────────────
+
+    private void handleAIReview(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String status = params.getOrDefault("status", "draft");
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT * FROM ai_generation_log WHERE status='" + status.replace("'","") +
+                    "' ORDER BY created_at DESC LIMIT 50"), "items");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                long id = num(body, "id");
+                String admin = ex.getRequestHeaders().getFirst("X-Admin-User");
+                if (admin == null) admin = "admin";
+                switch (action) {
+                    case "approve" -> {
+                        c.prepareStatement("UPDATE ai_generation_log SET status='approved'," +
+                            "reviewed_by='" + admin + "',reviewed_at=NOW() WHERE id=" + id).executeUpdate();
+                        auditLog(ex, "approve_ai", "ai_content", String.valueOf(id), "Approved");
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "reject" -> {
+                        c.prepareStatement("UPDATE ai_generation_log SET status='rejected'," +
+                            "reviewed_by='" + admin + "',reviewed_at=NOW(),reject_reason='" +
+                            str(body,"reason").replace("'","") + "' WHERE id=" + id).executeUpdate();
+                        auditLog(ex, "reject_ai", "ai_content", String.valueOf(id), str(body,"reason"));
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "test" -> {
+                        c.prepareStatement("UPDATE ai_generation_log SET status='testing'," +
+                            "test_server='" + str(body,"server").replace("'","") + "' WHERE id=" + id).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "publish" -> {
+                        c.prepareStatement("UPDATE ai_generation_log SET status='published' WHERE id=" + id +
+                            " AND status='approved'").executeUpdate();
+                        auditLog(ex, "publish_ai", "ai_content", String.valueOf(id), "Published to production");
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
     private void handleAssetUpload(HttpExchange ex) throws Exception {
         if (!ex.getRequestMethod().equals("POST")) { send405(ex); return; }
 

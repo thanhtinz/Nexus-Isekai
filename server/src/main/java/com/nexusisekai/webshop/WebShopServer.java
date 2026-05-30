@@ -62,6 +62,9 @@ public class WebShopServer {
         httpServer.createContext("/api/voice/upload",this::handleVoiceUpload);
         httpServer.createContext("/api/voice/",      this::handleVoiceServe);
 
+        // ── Admin API proxy (cho web admin dashboard trên mobile) ──
+        httpServer.createContext("/admin-api/",     this::handleAdminProxy);
+
         // ── OTA Asset Update ──────────────────────────────────────
         httpServer.createContext("/api/client/manifest",   this::handleManifest);
         httpServer.createContext("/api/client/asset/",     this::handleAssetDownload);
@@ -318,6 +321,50 @@ public class WebShopServer {
                 sendJson(ex, 200, Map.of("success",true,"orders",orders));
             }
         } catch (Exception e) { sendError(ex, 500, e.getMessage()); }
+    }
+
+    // ─────────────────────────────────────────
+    // Admin API Proxy — cho web dashboard mobile
+    // ─────────────────────────────────────────
+
+    private void handleAdminProxy(HttpExchange ex) throws IOException {
+        String path = ex.getRequestURI().getPath().replace("/admin-api", "");
+        String query = ex.getRequestURI().getQuery();
+        String adminKey = ex.getRequestHeaders().getFirst("X-Admin-Key");
+        if (adminKey == null || adminKey.isEmpty()) { sendError(ex, 401, "Missing admin key"); return; }
+
+        try {
+            String adminUrl = "http://localhost:" + ServerConfig.getInstance().get("admin.api.port", "8080")
+                + path + (query != null ? "?" + query : "");
+
+            java.net.URL url = new java.net.URL(adminUrl);
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(ex.getRequestMethod());
+            conn.setRequestProperty("X-Admin-Key", adminKey);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(10000);
+
+            // Forward body nếu có
+            if ("POST".equalsIgnoreCase(ex.getRequestMethod()) || "PUT".equalsIgnoreCase(ex.getRequestMethod())) {
+                conn.setDoOutput(true);
+                byte[] body = ex.getRequestBody().readAllBytes();
+                conn.getOutputStream().write(body);
+                conn.getOutputStream().flush();
+            }
+
+            int responseCode = conn.getResponseCode();
+            java.io.InputStream is = responseCode < 400 ? conn.getInputStream() : conn.getErrorStream();
+            byte[] response = is != null ? is.readAllBytes() : new byte[0];
+
+            ex.getResponseHeaders().set("Content-Type", "application/json");
+            ex.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            ex.sendResponseHeaders(responseCode, response.length);
+            ex.getResponseBody().write(response);
+            ex.getResponseBody().close();
+        } catch (Exception e) {
+            sendError(ex, 502, "Admin API unreachable: " + e.getMessage());
+        }
     }
 
     // ─────────────────────────────────────────

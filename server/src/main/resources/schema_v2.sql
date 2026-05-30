@@ -1562,3 +1562,134 @@ INSERT IGNORE INTO story_chapters (id,chapter_order,title,synopsis,min_level,sta
 (3,3,'Rừng Ám Ảnh','Ma khí nhiễm vào khu rừng phía Bắc. Cần tìm nguồn gốc sức mạnh tà ác.',25,'published'),
 (4,4,'Liên Minh Thiên Quang','Đến thủ phủ, gia nhập liên minh. Tiết lộ về Giáo Phái Vọng Linh.',35,'draft'),
 (5,5,'Phong Ấn Rung Chuyển','Phong ấn Azaroth bắt đầu yếu đi. Cuộc đua với thời gian.',50,'draft');
+
+-- ═════════════════════════════════════════════════════════════
+-- 35. AI REVIEW WORKFLOW — Duyệt nội dung AI trước khi lên production
+-- ═════════════════════════════════════════════════════════════
+
+ALTER TABLE ai_generation_log
+    ADD COLUMN IF NOT EXISTS status        VARCHAR(16) NOT NULL DEFAULT 'draft',   -- draft,review,testing,approved,published,rejected
+    ADD COLUMN IF NOT EXISTS reviewed_by   VARCHAR(64) DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS reviewed_at   DATETIME DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS test_server   VARCHAR(32) DEFAULT NULL,               -- 'test_1','staging'
+    ADD COLUMN IF NOT EXISTS applied_to    VARCHAR(256) DEFAULT NULL,              -- JSON: {"quest_id":5} hoặc {"dialog_id":12}
+    ADD COLUMN IF NOT EXISTS reject_reason VARCHAR(256) DEFAULT NULL;
+
+-- ═════════════════════════════════════════════════════════════
+-- 36. ADMIN AUDIT LOG — Ai làm gì trong admin
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    admin_user      VARCHAR(64) NOT NULL,
+    action          VARCHAR(64) NOT NULL,       -- 'create_item','ban_player','approve_ai','upload_asset','grant_diamond'
+    target_type     VARCHAR(32) DEFAULT '',      -- 'player','item','quest','announcement','config'
+    target_id       VARCHAR(64) DEFAULT '',      -- ID của đối tượng bị ảnh hưởng
+    details         TEXT,                         -- JSON chi tiết thay đổi
+    ip_address      VARCHAR(45) DEFAULT '',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_admin (admin_user, created_at DESC),
+    INDEX idx_action (action, created_at DESC)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 37. PLAYER MAIL — Hệ thống thư trong game
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS player_mail (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    recipient_id    BIGINT NOT NULL,            -- char_id người nhận
+    sender_type     VARCHAR(16) NOT NULL DEFAULT 'system', -- system,admin,player,event
+    sender_name     VARCHAR(64) NOT NULL DEFAULT 'He Thong',
+    title           VARCHAR(128) NOT NULL,
+    content         TEXT NOT NULL,
+    attachment_json TEXT DEFAULT NULL,           -- JSON: [{"item_id":5,"qty":2},{"gold":1000}]
+    is_read         TINYINT NOT NULL DEFAULT 0,
+    is_claimed      TINYINT NOT NULL DEFAULT 0, -- đã nhận vật phẩm đính kèm chưa
+    expires_at      DATETIME DEFAULT NULL,       -- NULL = không hết hạn
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_recipient (recipient_id, is_read, created_at DESC)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 38. ADMIN ROLES — Phân quyền admin
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS admin_accounts (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    username        VARCHAR(64) NOT NULL UNIQUE,
+    password_hash   VARCHAR(255) NOT NULL,       -- BCrypt
+    display_name    VARCHAR(64) NOT NULL,
+    role            VARCHAR(32) NOT NULL DEFAULT 'gm', -- super_admin,admin,gm,support,content_editor,viewer
+    permissions     TEXT,                         -- JSON: ["players","items","quests","story","ai","assets","ban","mail"]
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    last_login      DATETIME DEFAULT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT IGNORE INTO admin_accounts (id,username,password_hash,display_name,role,permissions) VALUES
+(1,'admin','$2a$10$placeholder','Super Admin','super_admin','["*"]');
+
+-- ═════════════════════════════════════════════════════════════
+-- 39. SCHEDULED TASKS — Lịch sự kiện tự động
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS scheduled_tasks (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    task_name       VARCHAR(64) NOT NULL,
+    task_type       VARCHAR(32) NOT NULL,         -- 'double_exp','boss_spawn','maintenance','event_start','event_end','mail_blast','backup'
+    cron_expression VARCHAR(64) DEFAULT NULL,     -- '0 20 * * 5' (thứ 6 lúc 20h)
+    run_once_at     DATETIME DEFAULT NULL,        -- chạy 1 lần tại thời điểm này
+    parameters      TEXT,                          -- JSON: {"exp_multiplier":2,"duration_hours":4}
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    last_run_at     DATETIME DEFAULT NULL,
+    next_run_at     DATETIME DEFAULT NULL,
+    created_by      VARCHAR(64) DEFAULT 'admin',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT IGNORE INTO scheduled_tasks (id,task_name,task_type,cron_expression,parameters) VALUES
+(1,'Double EXP Cuoi Tuan','double_exp','0 20 * * 5','{"multiplier":2,"duration_hours":48}'),
+(2,'Boss Spawn Hang Ngay','boss_spawn','0 12 * * *','{"boss_id":99,"map_id":5}'),
+(3,'Backup DB','backup','0 3 * * *','{"keep_days":7}');
+
+-- ═════════════════════════════════════════════════════════════
+-- 40. PLAYER REPORTS — Hệ thống báo cáo / khiếu nại
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS player_reports (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    reporter_id     BIGINT NOT NULL,             -- người báo cáo
+    reporter_name   VARCHAR(32) NOT NULL,
+    reported_id     BIGINT DEFAULT NULL,         -- người bị báo cáo (NULL = báo lỗi chung)
+    reported_name   VARCHAR(32) DEFAULT '',
+    report_type     VARCHAR(32) NOT NULL,         -- 'cheat','harassment','bug','suggestion','other'
+    description     TEXT NOT NULL,
+    evidence        TEXT DEFAULT NULL,            -- URL screenshot hoặc chat log
+    status          VARCHAR(16) NOT NULL DEFAULT 'open', -- open,investigating,resolved,dismissed
+    assigned_to     VARCHAR(64) DEFAULT NULL,     -- admin đang xử lý
+    resolution      TEXT DEFAULT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at     DATETIME DEFAULT NULL,
+    INDEX idx_status (status, created_at DESC)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 41. SERVER STATS — Thống kê server
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS server_stats_hourly (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    recorded_at     DATETIME NOT NULL,
+    online_count    INT NOT NULL DEFAULT 0,
+    new_registrations INT NOT NULL DEFAULT 0,
+    new_characters  INT NOT NULL DEFAULT 0,
+    total_revenue   BIGINT NOT NULL DEFAULT 0,    -- diamond bán được
+    gold_created    BIGINT NOT NULL DEFAULT 0,    -- gold sinh ra từ monster/quest
+    gold_destroyed  BIGINT NOT NULL DEFAULT 0,    -- gold tiêu (shop, enhance, tax)
+    trades_count    INT NOT NULL DEFAULT 0,
+    pvp_matches     INT NOT NULL DEFAULT 0,
+    dungeons_cleared INT NOT NULL DEFAULT 0,
+    peak_online     INT NOT NULL DEFAULT 0,
+    INDEX idx_time (recorded_at DESC)
+);
