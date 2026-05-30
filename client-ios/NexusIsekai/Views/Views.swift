@@ -225,7 +225,7 @@ struct CharSlotCard: View {
         [Color.blue, Color.purple, Color.orange, Color.teal, Color.green][max(0, id-1) % 5]
     }
     func classEmoji(_ id: Int) -> String {
-        ["⚔️","🗡️","🔮","🛡️","🏹"][max(0, id-1) % 5]
+        ["SW","AS","MG","GD","AR"][max(0, id-1) % 5]
     }
 }
 
@@ -372,7 +372,7 @@ struct HUDView: View {
             Spacer()
             VStack(alignment:.trailing, spacing:2) {
                 Text("\(vm.stats.gold) G").font(.system(size:11)).foregroundColor(Color(hex:"FFDD44"))
-                Text("\(vm.diamond) 💎").font(.system(size:11)).foregroundColor(Color(hex:"88AAFF"))
+                Text("\(vm.diamond) Dia").font(.system(size:11)).foregroundColor(Color(hex:"88AAFF"))
             }
         }
         .padding(10).background(Color.black.opacity(0.6)).cornerRadius(10)
@@ -398,13 +398,13 @@ struct DpadView: View {
     @State private var pressing = false
     var body: some View {
         VStack(spacing:4) {
-            Button("↑") { vm.movePlayer(0, -1) }.buttonStyle(DpadBtnStyle())
+            Button("Up") { vm.movePlayer(0, -1) }.buttonStyle(DpadBtnStyle())
             HStack(spacing:4) {
-                Button("←") { vm.movePlayer(-1, 0) }.buttonStyle(DpadBtnStyle())
-                Button("⚔") { vm.attackNearest() }.buttonStyle(DpadBtnStyle(accent: true))
-                Button("→") { vm.movePlayer(1, 0) }.buttonStyle(DpadBtnStyle())
+                Button("Left") { vm.movePlayer(-1, 0) }.buttonStyle(DpadBtnStyle())
+                Button("ATK") { vm.attackNearest() }.buttonStyle(DpadBtnStyle(accent: true))
+                Button("Right") { vm.movePlayer(1, 0) }.buttonStyle(DpadBtnStyle())
             }
-            Button("↓") { vm.movePlayer(0, 1) }.buttonStyle(DpadBtnStyle())
+            Button("Down") { vm.movePlayer(0, 1) }.buttonStyle(DpadBtnStyle())
         }
     }
 }
@@ -432,12 +432,12 @@ struct GameMenuView: View {
     var body: some View {
         NavigationView {
             List {
-                Button("🎒 Túi đồ") { GameClient.shared.send(PacketWriter.inventoryList()); showInventory = true; close() }
-                Button("📜 Nhiệm vụ") { GameClient.shared.send(PacketWriter.questList()); showQuest = true; close() }
-                Button("⚔️ Kỹ năng")  { GameClient.shared.send(PacketWriter.skillList()); close() }
-                Button("🐉 Pet/Mount"){ GameClient.shared.send(PacketWriter.petList()); close() }
-                Button("🏆 Xếp hạng") { GameClient.shared.send(PacketWriter.leaderboard()); close() }
-                Button("🎁 Gift Code"){ showGiftCode = true; close() }
+                Button("Tui do") { GameClient.shared.send(PacketWriter.inventoryList()); showInventory = true; close() }
+                Button("Nhiem vu") { GameClient.shared.send(PacketWriter.questList()); showQuest = true; close() }
+                Button("Ky nang")  { GameClient.shared.send(PacketWriter.skillList()); close() }
+                Button("Pet/Mount"){ GameClient.shared.send(PacketWriter.petList()); close() }
+                Button("Xep hang") { GameClient.shared.send(PacketWriter.leaderboard()); close() }
+                Button("Gift Code"){ showGiftCode = true; close() }
                 Divider()
                 Button("Đăng xuất", role: .destructive) { GameClient.shared.disconnect(); vm.isInGame = false; vm.isLoggedIn = false; close() }
             }

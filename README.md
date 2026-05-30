@@ -1,734 +1,350 @@
-# Nexus Isekai MMORPG
+<div align="center">
 
-> **Full-stack MMORPG engine** — Java TCP server · Unity C# client · React webshop · JavaFX admin panel
+<!-- Logo placeholder: thay bằng logo thực khi có asset -->
+<img src="docs/assets/logo-placeholder.png" alt="Nexus Isekai" width="360"/>
+
+# NEXUS ISEKAI
+
+### Vong Linh Gioi — The Realm Between Worlds
+
+**Full-stack MMORPG engine** — 5 nền tảng client · Java TCP server · React webshop · JavaFX admin
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Java](https://img.shields.io/badge/Java-17%2B-orange.svg)](https://openjdk.org/)
-[![Unity](https://img.shields.io/badge/Unity-2022.3%2B-black.svg)](https://unity.com/)
-[![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://react.dev/)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0%2B-blue.svg)](https://mysql.com/)
+[![Java](https://img.shields.io/badge/Server-Java%2017%20%2B%20Netty-orange.svg)](#)
+[![Platforms](https://img.shields.io/badge/Clients-5%20platforms-green.svg)](#clients)
+[![Opcodes](https://img.shields.io/badge/Protocol-196%20opcodes-purple.svg)](#protocol)
+[![DB](https://img.shields.io/badge/Database-61%2B%20tables-blue.svg)](#database)
+[![Admin](https://img.shields.io/badge/Admin-30%20panels-red.svg)](#admin-panel)
+
+</div>
 
 ---
 
-## Tổng quan
+## The Story — Cot Truyen
 
-Nexus Isekai là một **bộ khung MMORPG đầy đủ** gồm 4 thành phần đồng bộ:
+<div align="center">
+<img src="docs/assets/banner-world.png" alt="World of Nexus Isekai" width="100%"/>
+</div>
 
-| Layer | Công nghệ | Mô tả |
+> *"Khi ranh gioi giua cac the gioi sup do, mot cong thoi khong xuat hien tren bau troi..."*
+
+### Boi canh
+
+**Nexus Isekai** lay boi canh tai **Vong Linh Gioi** — mot the gioi huyen bi noi ma cac luc dia tu nhieu chieu khong gian khac nhau bi keo vao va hop nhat thanh mot. Moi vung dat mang theo van minh, quai vat, va phap thuat rieng cua no.
+
+**5.000 nam truoc**, cuoc chien **Dai Hoanh Dieu** (The Great Convergence) da xay ra khi Tieu Than *Azaroth* co gang pha huy buc tuong ngan cach cac the gioi de thong tri van vat. Cuoc chien ket thuc khi **Bay Anh Hung Thuong Co** (Seven Primordial Heroes) hi sinh de niem phong Azaroth, nhung de lai nhung vet nut khong gian ran khap the gioi.
+
+**Hien tai**, nhung vet nut nay dang mo rong. Quai vat tu cac chieu khong gian khac tran vao. Cac vung dat bi nhiem doc boi ma khi. Va nhung ke theo Azaroth — **Giao Phai Vong Linh** — dang tim cach pha phong an de phuc sinh Tieu Than.
+
+**Nguoi choi** la mot trong nhung **Luu Dan** (Wanderers) — nhung ke den tu the gioi khac bi cuon vao Vong Linh Gioi qua mot cong thoi khong. Voi suc manh ky la ma chi Luu Dan moi co — kha nang hap thu linh luc tu nhieu nguon — nguoi choi phai tham hiem, chien dau, va khoi phuc lat lai trat tu cho the gioi nay.
+
+### Cac vung dat
+
+| Vung | Mo ta | Cap do |
 |---|---|---|
-| **Game Server** | Java 17 + Netty + HikariCP | TCP game server, xử lý packet nhị phân |
-| **Game Client** | C# Unity 2022 | Client 2D, đầy đủ UI ingame |
-| **J2ME Client**     | Java CLDC 1.1 / MIDP 2.0 | Client điện thoại feature phone (Nokia, Samsung...) |
-| **Android Client**  | Java, Android 5.0+ (SDK 21) | Native Android, SurfaceView 60fps, virtual D-pad |
-| **iOS Client**      | Swift, SwiftUI + SpriteKit, iOS 14+ | NWConnection TCP, SpriteKit canvas |
-| **PC Client**       | Java 17 + JavaFX 21          | Windows/Linux/macOS, Canvas 2D, WASD controls |
-| **Webshop** | React 18 + TypeScript + Vite | Cổng nạp game, mua item, gift code |
-| **Admin Panel** | JavaFX 17 | Quản trị toàn bộ game, 30+ panels |
+| **Lang Khai Nguyen** | Ngoi lang nho noi Luu Dan tinh day, duoc bao ve boi ket gioi co dai | 1-10 |
+| **Dong Bang Suong Mu** | Canh dong bao phu suong mu bi an, an giau di tich | 10-25 |
+| **Rung Am Anh** | Khu rung nhiem ma khi, quai vat dang bien di | 25-40 |
+| **Thanh Pho Thien Quang** | Thu phu cua lien minh, trung tam thuong mai va guild | 20+ |
+| **Nui Vong Linh** | Noi phong an cua Azaroth, ma khi day dac | 40-60 |
+| **Hoang Mac Vang** | Sa mac khac nghiet, an giau thanh co va boss the gioi | 50-70 |
+| **Bien Dam Huyen Bi** | Quần dao tren bien, dung cho PvP lien server | 60+ |
+| **Dia Nguc Tham Uyên** | Dungeon cao cap, chi mo khi co su kien | 70-99 |
 
-### Tính năng chính
+### 5 nhanh nghe
 
-**Gameplay:**
-- 5 class nhân vật (Kiếm Sĩ, Sát Thủ, Pháp Sư, Pháp Thủ, Cung Thủ)
-- Hệ thống combat PvE + PvP duel (ELO rating)
-- 30–40 skill mỗi class, 7 slot kỹ năng active
-- Quest hệ thống (main quest + side quest + auto-accept next)
-- Guild (tạo, mời, kick, promote, giải tán)
-- Pet + Mount (feed, level up, speed bonus)
-- Cường hoá vũ khí +1 đến +10 (tỉ lệ thất bại, tụt level)
-- Nhà ở + nội thất (housing system)
-- Nông trại (trồng cây, nuôi động vật)
-- Hệ thống hôn nhân + con cái + sư đồ (mentor/student)
-- Minigame: bầu cua, đua thú, đố vui, ô ăn quan
-- Bảng xếp hạng (level, vàng, PvP ELO)
+<div align="center">
+<img src="docs/assets/classes-banner.png" alt="5 Classes" width="100%"/>
+</div>
 
-**Xã hội:**
-- Chat đa kênh: Map / World / Guild / PM / Cross-server
-- Sticker (pack mặc định + premium)
-- Emoji (unicode)
-- Gửi toạ độ (click để đến nơi)
-- Khoe vật phẩm trong chat
-- Lì xì (red envelope) — vàng hoặc diamond, giựt ngẫu nhiên
-- Voice message (ghi âm → upload → phát lại)
+| Class | Mo ta | Vai tro |
+|---|---|---|
+| **Kiem Si** (Swordsman) | Chien binh can chien, phong ngu va tan cong can bang | Tank / DPS |
+| **Sat Thu** (Assassin) | Diet dich nhanh chong, ne tranh, chi mang | Burst DPS |
+| **Phap Su** (Mage) | Phap thuat tam xa manh, dien rong | AoE DPS |
+| **Phap Thu** (Guardian) | Ho tro, hoi mau, tang suc manh dong doi | Healer / Support |
+| **Cung Thu** (Archer) | Tan cong tam xa, ban tinh, khu vuc | Ranged DPS |
 
-**Kinh tế:**
-- Thanh toán SePay (QR ngân hàng, webhook tự động)
-- Webshop: giới hạn mua/user/ngày/tuần/tháng, tracking stock
-- Mission Pass free + premium (30 level, task ingame)
-- Gift code (item, diamond, vàng, danh hiệu)
-- Kho vật phẩm admin
-
-**Hệ thống:**
-- Multi-server với relay cross-server
-- Lịch bảo trì
-- Auto-save mỗi 5 phút
-- Event scheduler (double EXP, boss event)
-- Admin panel: 30 panels quản lý toàn bộ
+Moi class co **30-40 ky nang doc quyen**, he thong **7 slot skill active**, va cot truyen rieng khi tao nhan vat.
 
 ---
 
-## Cấu trúc thư mục
+## Screenshots
+
+<div align="center">
+
+| | | |
+|:---:|:---:|:---:|
+| <img src="docs/assets/ss-login.png" width="250"/> | <img src="docs/assets/ss-game.png" width="250"/> | <img src="docs/assets/ss-chat.png" width="250"/> |
+| Dang nhap | The gioi game | Chat da kenh |
+| <img src="docs/assets/ss-inventory.png" width="250"/> | <img src="docs/assets/ss-pvp.png" width="250"/> | <img src="docs/assets/ss-webshop.png" width="250"/> |
+| Tui do + Cuong hoa | PvP Arena | Webshop |
+
+</div>
+
+> *Thay cac anh placeholder bang screenshot that khi co asset.*
+
+---
+
+## Architecture
+
+```
+                    +------------------+
+                    |   Landing Page   |  (React SPA)
+                    |  nexusisekai.vn  |
+                    +--------+---------+
+                             |
+                    +--------+---------+
+                    |   Nginx (HTTPS)  |  Reverse proxy
+                    +--+-----+-----+---+
+                       |     |     |
+          +------------+  +--+--+  +------------+
+          |               |     |               |
+  +-------+-------+ +----+----+ +------+-------+
+  | Webshop HTTP  | | Admin   | | Game Server  |  Java 17 + Netty
+  | :9090 (React) | | API     | | TCP :7777    |  Binary protocol
+  +-------+-------+ | :8080   | +----+---------+
+          |          +----+----+      |
+          |               |          |
+          +-------+-------+----------+
+                  |
+          +-------+-------+
+          |    MySQL 8     |
+          | 61+ tables     |
+          | HikariCP pool  |
+          +----------------+
+
+ Clients:  Unity C#  |  Android  |  iOS Swift  |  PC JavaFX  |  J2ME
+           (2D/3D)   | (SurfaceView)| (SpriteKit) | (Canvas2D) | (GameCanvas)
+```
+
+---
+
+## Clients
+
+| Platform | Thu muc | Stack | Trang thai |
+|---|---|---|---|
+| **Unity** | `client/` | C# 2022 LTS, 14 files | Day du nhat, dung production |
+| **Android** | `client-android/` | Java, min SDK 21, 20 files | Native, SurfaceView 60fps |
+| **iOS** | `client-ios/` | Swift, SwiftUI+SpriteKit, 5 files | NWConnection TCP, iOS 14+ |
+| **PC** | `client-pc/` | Java 17+JavaFX 21, 8 files | WASD controls, Canvas2D |
+| **J2ME** | `client-j2me/` | CLDC 1.1/MIDP 2.0, 12 files | Feature phone (Nokia...) |
+
+Tat ca dung chung **binary TCP protocol**: `[4-byte length][2-byte opcode][payload...]`
+
+---
+
+## He thong game
+
+### Tien te
+
+| Loai | Mo ta | Cach nhan |
+|---|---|---|
+| **Vang (Gold)** | Tien te chinh, dung mua item, cuong hoa, tao guild | Farm monster, quest, ban item |
+| **Diamond** | Tien te premium, dung mua VIP item, Mission Pass | Nap the, gift code, event |
+| **Event Token** | Tien te su kien (thay doi tuy event), het han khi event ket thuc | Tham gia event, nhiem vu su kien |
+
+He thong Event Token ho tro **nhieu loai tien te phu cung luc**, tat ca duoc cau hinh trong Admin panel:
+- Moi event co the tao 1 loai token rieng (VD: "Hoa Sen" cho Tet, "Sao Bang" cho su kien he)
+- Admin cau hinh: ten token, icon, ti le doi, thoi gian het han, shop rieng
+- Khi event ket thuc, token chua dung co the doi sang vang hoac mat
+
+### Chien dau
+
+- **PvE**: Farm monster, boss map, boss su kien, dungeon
+- **PvP**: Duel 1v1 (ELO rating), arena lien server
+- **30-40 skill/class**, 7 slot active, nang cap skill, cooldown
+- **Cuong hoa** vu khi +1 den +10 (ti le that bai tang, tut level khi fail)
+
+### Xa hoi
+
+- **Chat**: Map / World / Guild / PM / Lien server
+- **Noi dung chat**: Text, Sticker pack, Emoji, Gul toa do, Khoe item, Li xi (Gold/Diamond), Voice
+- **Li xi**: Tao bao li xi voi N phan, nguoi khac bam giut, random amount
+- **Guild**: Tao, moi, promote, kick, giai tan, chat guild rieng
+- **Hon nhan**: Hen ho -> Cau hon -> Ket hon -> Con cai (feed, level up)
+- **Su tu (Mentor)**: Player cap cao day player cap thap, nhan thuong khi hoc tro tot nghiep
+
+### Kinh te
+
+- **Thanh toan SePay**: QR ngan hang, webhook tu dong cong diamond
+- **Webshop**: Gioi han mua/user/ngay/tuan/thang, theo doi stock
+- **Mission Pass**: Free + Premium, 30 level, nhiem vu hang ngay/tuan
+- **Gift code**: Admin tao code, gioi han su dung, thuong item/diamond/vang
+- **Cuong hoa**: +1 den +10, cau hinh ti le/gia trong admin
+- **Kho item admin**: Phat item cho player qua admin panel
+
+### Nong trai & Nha o
+
+- **Nong trai**: Trong cay, tuoi nuoc, thu hoach, nuoi dong vat
+- **Nha o**: Xay nha, dat noi that, trang tri
+
+### Minigame
+
+- Bau cua, dua thu, do vui, o an quan
+- Phong choi, dat cuoc, xep hang
+
+### He thong khac
+
+- **Pet & Mount**: Thu cung chien dau, tho cuoi tang speed
+- **Danh hieu (Title)**: Tu quest, achievement, event
+- **Bang xep hang**: Level, vang, PvP ELO, guild
+- **Multi-server**: Relay cross-server, chat lien server
+- **Bao tri**: Lich bao tri, thong bao den client
+- **Auto-save**: Moi 5 phut
+- **Event scheduler**: Double EXP, boss event, su kien dinh ky
+
+---
+
+## Admin Panel — 30 panels
+
+<div align="center">
+<img src="docs/assets/ss-admin.png" alt="Admin Panel" width="100%"/>
+</div>
+
+| Panel | Chuc nang |
+|---|---|
+| Dashboard | Tong quan: online, doanh thu, su kien |
+| Players | Xem/sua nhan vat, trao item, ban nick |
+| Guilds | Quan ly guild, giai tan, gui tin |
+| Maps | Cau hinh ban do, portal, spawn |
+| Monsters | Cau hinh quai, stats, drop rate |
+| NPCs | Quan ly NPC, doi thoai, nhiem vu |
+| Items | Tao/sua item, rarity, stats |
+| Shop | Cau hinh NPC shop |
+| Events | Bat/tat su kien, double EXP, boss |
+| Quests | Tao/sua quest, chain quest |
+| Accounts | Quan ly tai khoan, ban, reset mat khau |
+| SePay | Cau hinh thanh toan, test webhook |
+| Gift Code | Tao/xoa code, xem lich su doi |
+| Titles | Quan ly danh hieu |
+| Mission Pass | Cau hinh season, rewards, tasks |
+| Classes | Cau hinh 5 class, base stats |
+| Pet & Mount | Cau hinh thu cung, tho cuoi |
+| Webshop | Them/sua san pham, gioi han mua, stock |
+| Warehouse | Kho item admin cho event/giftcode |
+| PvP | Quan ly tran dau, ket thuc cuong che |
+| Minigame | Phong choi, lich su, gioi han cuoc |
+| Farming | Cau hinh hat giong, dong vat |
+| Housing | Catalog noi that, gia, toggle active |
+| Leaderboard | Xem BXH, reset |
+| Enhancement | Chinh ti le cuong hoa +1 den +10 |
+| Chat History | Xem lich su chat, tim kiem, xoa |
+| Event Currency | Tao/quan ly tien te su kien |
+| Servers | Quan ly multi-server, trang thai |
+| Logs | Xem server logs, loi |
+| Settings | Cau hinh chung |
+
+---
+
+## Cai dat
+
+### Yeu cau
+
+| Tool | Phien ban |
+|---|---|
+| Java JDK | 17+ |
+| Maven | 3.8+ |
+| MySQL | 8.0+ |
+| Node.js | 18+ |
+
+### Quick Start (Local)
+
+```bash
+# 1. Clone
+git clone https://github.com/thanhtinz/Nexus-Isekai.git && cd Nexus-Isekai
+
+# 2. Database
+mysql -u root -p < scripts/create-db.sql
+mysql -u nexus -p nexus_isekai < server/src/main/resources/schema.sql
+mysql -u nexus -p nexus_isekai < server/src/main/resources/schema_v2.sql
+
+# 3. Config
+cp server/src/main/resources/application.properties.template \
+   server/src/main/resources/application.properties
+# Sua db.password, admin.key
+
+# 4. Build & Run server
+cd server && mvn clean package -DskipTests && java -jar target/nexus-isekai-server-1.0.jar
+
+# 5. Build webshop
+cd ../webshop && npm ci && npm run build
+
+# 6. Client: sua SERVER_HOST roi build
+```
+
+### Deploy len VPS
+
+```bash
+# Cai moi truong (Ubuntu 22.04)
+sudo ./scripts/setup-vps.sh
+
+# Deploy
+./scripts/deploy.sh
+```
+
+Chi tiet: xem phan **[Huong dan VPS](docs/VPS_GUIDE.md)** trong thu muc `docs/`.
+
+---
+
+## Protocol
+
+```
+[4-byte big-endian length][2-byte opcode][payload...]
+```
+
+196 opcodes toan bo: `server/src/main/java/com/nexusisekai/network/PacketOpcode.java`
+
+Chat content types: `0=text | 1=sticker | 2=emoji | 3=location | 4=item | 5=red_envelope | 6=voice`
+
+---
+
+## Thu muc du an
 
 ```
 NexusIsekai/
-├── server/                     # Java game server
-│   ├── src/main/java/com/nexusisekai/
-│   │   ├── core/               # Khởi động, config
-│   │   ├── network/            # Netty TCP, packet dispatch
-│   │   │   └── handler/        # 15+ handler classes
-│   │   ├── game/               # Game logic
-│   │   │   ├── entity/         # Player, Monster, Item
-│   │   │   ├── world/          # Map, Zone, NPC, Portal
-│   │   │   ├── combat/         # CombatEngine
-│   │   │   ├── quest/          # QuestManager
-│   │   │   ├── battlepass/     # MissionPassManager
-│   │   │   ├── guild/          # GuildManager
-│   │   │   ├── pet/            # PetManager
-│   │   │   ├── social/         # SocialManager
-│   │   │   ├── mentor/         # MentorManager
-│   │   │   ├── payment/        # SePayService
-│   │   │   ├── economy/        # WarehouseManager
-│   │   │   ├── title/          # TitleManager
-│   │   │   ├── skill/          # SkillManager
-│   │   │   ├── giftcode/       # GiftCodeManager
-│   │   │   ├── server/         # ServerManager
-│   │   │   └── event/          # EventScheduler
-│   │   ├── adminapi/           # REST API cho Admin panel
-│   │   └── webshop/            # HTTP server cho Webshop
-│   └── src/main/resources/
-│       ├── schema.sql          # Bảng cơ bản
-│       ├── schema_v2.sql       # 60+ bảng mở rộng
-│       └── webshop-static/     # Build output của React (tự tạo)
-│
-├── client/                     # Unity C# client
-│   └── Assets/Scripts/
-│       ├── Data/               # GameData, GameState models
-│       ├── Game/               # GameObjects, PacketHandlers, PlayerController
-│       ├── Network/            # GameClient, PacketBuilder, PacketDispatcher, PacketOpcode
-│       └── UI/                 # ChatUI, InventoryUI, UIScripts (tất cả UI)
-│
-├── client-j2me/               # J2ME client (feature phones)
-│   ├── src/com/nexusisekai/
-│   │   ├── NexusIsekaiMIDlet.java # Main MIDlet
-│   │   ├── net/                   # TCP + PacketWriter/Reader/Opcode
-│   │   ├── game/                  # GameCanvas, LoginCanvas, PacketHandler
-│   │   └── data/                  # GameState
-│   ├── res/                       # Resources, MANIFEST.MF
-│   └── build.xml                  # Ant build (output: dist/*.jar + *.jad)
-│
-├── webshop/                    # React frontend
-│   ├── src/
-│   │   ├── api/                # Axios client
-│   │   ├── components/         # Layout, Header
-│   │   ├── hooks/              # useAuth (Zustand)
-│   │   ├── pages/              # Login, Topup, Shop, Pass, GiftCode
-│   │   └── types/              # TypeScript types (sync với Java DTOs)
-│   ├── package.json
-│   └── vite.config.ts
-│
-└── admin/                      # JavaFX admin application
-    └── src/main/java/com/nexusisekai/admin/
-        ├── AdminApp.java
-        ├── api/                # ApiClient, ApiResponse
-        └── ui/                 # MainWindow (30 panels), AdminPanels
++-- server/                  # Java game server (57 files)
++-- client/                  # Unity C# client (14 files)
++-- client-android/          # Android client (20 files)
++-- client-ios/              # iOS Swift client (5 files)
++-- client-pc/               # PC JavaFX client (8 files)
++-- client-j2me/             # J2ME feature phone (12 files)
++-- webshop/                 # React webshop (20 files)
++-- admin/                   # JavaFX admin panel (7 files)
++-- landing/                 # Landing page website
++-- scripts/                 # Deploy, setup, SQL
++-- docs/                    # Tai lieu, assets placeholder
++-- LICENSE                  # MIT License
++-- README.md                # Ban dang doc
 ```
 
 ---
 
-## Yêu cầu hệ thống
-
-| Công cụ | Phiên bản | Ghi chú |
-|---|---|---|
-| Java JDK | 17+ | [Download](https://adoptium.net/) |
-| Maven | 3.8+ | Đi kèm IDE hoặc tải riêng |
-| MySQL | 8.0+ | Hoặc MariaDB 10.6+ |
-| Node.js | 18+ | Dùng cho webshop |
-| Unity | 2022.3 LTS | Dùng cho client |
-| Git | Bất kỳ | |
-
----
-
-## Cài đặt Local (Development)
-
-### 1. Clone repo
-
-```bash
-git clone https://github.com/thanhtinz/Nexus-Isekai.git
-cd Nexus-Isekai
-```
-
-### 2. Tạo database
-
-```sql
--- Đăng nhập MySQL
-mysql -u root -p
-
--- Tạo database
-CREATE DATABASE nexus_isekai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'nexus'@'localhost' IDENTIFIED BY 'your_password';
-GRANT ALL PRIVILEGES ON nexus_isekai.* TO 'nexus'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-
--- Import schema
-mysql -u nexus -p nexus_isekai < server/src/main/resources/schema.sql
-mysql -u nexus -p nexus_isekai < server/src/main/resources/schema_v2.sql
-```
-
-### 3. Cấu hình server
-
-Tạo file `server/src/main/resources/application.properties`:
-
-```properties
-# Database
-db.url=jdbc:mysql://localhost:3306/nexus_isekai?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
-db.username=nexus
-db.password=your_password
-db.pool.size=20
-
-# Game server
-game.port=7777
-game.max.connections=5000
-server.id=1
-server.name=Server 1
-
-# Admin API (chỉ localhost)
-admin.port=8080
-admin.key=admin_secret_key_change_this
-
-# Webshop HTTP
-webshop.port=9090
-
-# SePay (optional - để trống nếu chưa cần)
-sepay.api.key=
-sepay.webhook.secret=
-sepay.bank.account=
-sepay.bank.name=
-sepay.account.name=
-
-# Voice message storage
-voice.dir=voice-messages
-voice.max.duration.ms=60000
-voice.max.size.bytes=5242880
-```
-
-### 4. Build & chạy server
-
-```bash
-cd server
-mvn clean package -DskipTests
-java -jar target/nexus-isekai-server-1.0.jar
-```
-
-Hoặc chạy trực tiếp từ Maven:
-
-```bash
-mvn exec:java -Dexec.mainClass="com.nexusisekai.core.Main"
-```
-
-Server khởi động theo thứ tự:
-```
-[DB] Connected — pool size 20
-[WORLD] Loading maps, NPCs, monsters...
-[SKILLS] Loaded 40 skill templates
-[NETWORK] Game server listening on :7777
-[ADMIN] Admin API listening on :8080
-[WEBSHOP] Webshop HTTP listening on :9090
-[EVENTS] Scheduler started
-[SERVER] Nexus Isekai ready!
-```
-
-### 5. Build webshop
-
-```bash
-cd webshop
-npm install
-npm run dev          # dev mode (port 5173, proxy → :9090)
-
-# Hoặc build production (output vào server/src/main/resources/webshop-static/)
-npm run build
-```
-
-Truy cập webshop: http://localhost:5173 (dev) hoặc http://localhost:9090 (production)
-
-### 6. Chạy admin panel
-
-```bash
-cd admin
-mvn clean package -DskipTests
-java -jar target/nexus-isekai-admin-1.0.jar
-```
-
-Admin panel kết nối tới `http://localhost:8080` với key trong `application.properties`.
-
-### 7. Mở Unity client
-
-1. Mở Unity Hub → Add Project → chọn thư mục `client/`
-2. Unity version: **2022.3 LTS**
-3. Import TextMeshPro nếu được hỏi
-4. Mở scene `Assets/Scenes/Login.unity`
-5. Trong `Assets/Scripts/Network/GameClient.cs`, set:
-   ```csharp
-   public string serverHost = "localhost";
-   public int    serverPort = 7777;
-   ```
-6. Play
-
----
-
-## Triển khai lên VPS
-
-### Yêu cầu VPS
-
-- **OS**: Ubuntu 22.04 LTS (khuyến nghị)
-- **RAM**: Tối thiểu 2GB (khuyến nghị 4GB)
-- **CPU**: 2 vCPU+
-- **Storage**: 20GB+
-- **Ports cần mở**: 7777 (game TCP), 9090 (webshop HTTP), 443 (HTTPS nếu có domain)
-
----
-
-### Bước 1: Cài đặt môi trường VPS
-
-```bash
-# Cập nhật hệ thống
-sudo apt update && sudo apt upgrade -y
-
-# Cài Java 17
-sudo apt install -y openjdk-17-jdk
-java -version   # phải thấy: openjdk 17...
-
-# Cài Maven
-sudo apt install -y maven
-mvn -version
-
-# Cài Node.js 20
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-node -v    # v20.x.x
-
-# Cài MySQL 8
-sudo apt install -y mysql-server
-sudo systemctl start mysql
-sudo systemctl enable mysql
-
-# Cài Nginx (cho HTTPS reverse proxy)
-sudo apt install -y nginx certbot python3-certbot-nginx
-```
-
-### Bước 2: Cấu hình MySQL
-
-```bash
-sudo mysql_secure_installation
-# Nhập mật khẩu root, trả lời Y cho các câu hỏi bảo mật
-
-sudo mysql -u root -p
-```
-
-```sql
-CREATE DATABASE nexus_isekai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'nexus'@'localhost' IDENTIFIED BY 'STRONG_PASSWORD_HERE';
-GRANT ALL PRIVILEGES ON nexus_isekai.* TO 'nexus'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-```
-
-### Bước 3: Deploy code
-
-```bash
-# Tạo thư mục deploy
-sudo mkdir -p /opt/nexus-isekai
-sudo chown $USER:$USER /opt/nexus-isekai
-cd /opt/nexus-isekai
-
-# Clone repo
-git clone https://github.com/thanhtinz/Nexus-Isekai.git .
-
-# Import database
-mysql -u nexus -p nexus_isekai < server/src/main/resources/schema.sql
-mysql -u nexus -p nexus_isekai < server/src/main/resources/schema_v2.sql
-```
-
-### Bước 4: Cấu hình production
-
-```bash
-# Tạo file config (KHÔNG commit file này lên git)
-cat > server/src/main/resources/application.properties << 'EOF'
-db.url=jdbc:mysql://localhost:3306/nexus_isekai?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
-db.username=nexus
-db.password=STRONG_PASSWORD_HERE
-db.pool.size=30
-
-game.port=7777
-game.max.connections=10000
-server.id=1
-server.name=Server 1
-
-admin.port=8080
-admin.key=VERY_LONG_RANDOM_ADMIN_KEY
-
-webshop.port=9090
-
-sepay.api.key=YOUR_SEPAY_KEY
-sepay.webhook.secret=YOUR_WEBHOOK_SECRET
-sepay.bank.account=YOUR_BANK_ACCOUNT
-sepay.bank.name=Vietcombank
-sepay.account.name=NGUYEN VAN A
-
-voice.dir=/opt/nexus-isekai/voice-messages
-voice.max.duration.ms=60000
-voice.max.size.bytes=5242880
-EOF
-```
-
-### Bước 5: Build
-
-```bash
-# Build game server
-cd /opt/nexus-isekai/server
-mvn clean package -DskipTests -q
-
-# Build webshop (output vào webshop-static/)
-cd /opt/nexus-isekai/webshop
-npm ci
-npm run build
-
-echo "Build hoàn tất!"
-```
-
-### Bước 6: Tạo systemd service
-
-```bash
-# Game server service
-sudo tee /etc/systemd/system/nexus-server.service << 'EOF'
-[Unit]
-Description=Nexus Isekai Game Server
-After=network.target mysql.service
-
-[Service]
-Type=simple
-User=ubuntu
-WorkingDirectory=/opt/nexus-isekai/server
-ExecStart=/usr/bin/java -Xmx2g -Xms512m \
-    -XX:+UseG1GC \
-    -XX:MaxGCPauseMillis=50 \
-    -jar target/nexus-isekai-server-1.0.jar
-Restart=on-failure
-RestartSec=10
-StandardOutput=append:/var/log/nexus/server.log
-StandardError=append:/var/log/nexus/server-error.log
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Tạo thư mục log
-sudo mkdir -p /var/log/nexus
-sudo chown ubuntu:ubuntu /var/log/nexus
-
-# Kích hoạt service
-sudo systemctl daemon-reload
-sudo systemctl enable nexus-server
-sudo systemctl start nexus-server
-sudo systemctl status nexus-server
-```
-
-### Bước 7: Cấu hình Nginx
-
-Nếu có domain (ví dụ `nexusisekai.vn`):
-
-```bash
-sudo tee /etc/nginx/sites-available/nexus-webshop << 'EOF'
-server {
-    listen 80;
-    server_name nexusisekai.vn www.nexusisekai.vn;
-
-    # Redirect HTTP → HTTPS
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name nexusisekai.vn www.nexusisekai.vn;
-
-    # SSL (certbot sẽ tự điền)
-    ssl_certificate     /etc/letsencrypt/live/nexusisekai.vn/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/nexusisekai.vn/privkey.pem;
-
-    # Security headers
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
-    add_header X-XSS-Protection "1; mode=block";
-
-    # Proxy tới webshop server
-    location / {
-        proxy_pass http://127.0.0.1:9090;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 30s;
-    }
-
-    # Voice files (serve trực tiếp)
-    location /api/voice/ {
-        proxy_pass http://127.0.0.1:9090;
-        proxy_cache_valid 200 1d;
-    }
-
-    # SePay webhook
-    location /payment/webhook {
-        proxy_pass http://127.0.0.1:9090;
-        proxy_read_timeout 10s;
-    }
-}
-EOF
-
-sudo ln -s /etc/nginx/sites-available/nexus-webshop /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
-
-# Cấp SSL certificate
-sudo certbot --nginx -d nexusisekai.vn -d www.nexusisekai.vn
-```
-
-Nếu **không có domain** (dùng IP trực tiếp):
-
-```bash
-sudo tee /etc/nginx/sites-available/nexus-webshop << 'EOF'
-server {
-    listen 80;
-    server_name _;
-
-    location / {
-        proxy_pass http://127.0.0.1:9090;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-EOF
-
-sudo ln -s /etc/nginx/sites-available/nexus-webshop /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-### Bước 8: Mở firewall
-
-```bash
-# UFW
-sudo ufw allow ssh
-sudo ufw allow 80/tcp      # HTTP
-sudo ufw allow 443/tcp     # HTTPS
-sudo ufw allow 7777/tcp    # Game TCP (từ client Unity)
-# Port 8080 (admin) KHÔNG mở ra ngoài — chỉ localhost!
-sudo ufw enable
-sudo ufw status
-```
-
-### Bước 9: Kiểm tra
-
-```bash
-# Server đang chạy?
-sudo systemctl status nexus-server
-
-# Log realtime
-sudo tail -f /var/log/nexus/server.log
-
-# Test game port
-nc -zv localhost 7777
-
-# Test webshop
-curl http://localhost:9090/api/packages
-
-# Test webshop từ ngoài (thay YOUR_VPS_IP)
-curl http://YOUR_VPS_IP/api/packages
-```
-
-### Bước 10: Update code (khi có version mới)
-
-```bash
-cd /opt/nexus-isekai
-
-# Pull code mới
-git pull
-
-# Build lại server
-cd server && mvn clean package -DskipTests -q && cd ..
-
-# Build lại webshop
-cd webshop && npm ci && npm run build && cd ..
-
-# Restart server
-sudo systemctl restart nexus-server
-
-echo "Update hoàn tất!"
-```
-
----
-
-## Cấu hình SePay (Thanh toán)
-
-1. Đăng ký tài khoản tại [sepay.vn](https://sepay.vn)
-2. Lấy API key từ dashboard
-3. Cấu hình webhook URL: `https://yourdomain.com/payment/webhook`
-4. Điền vào `application.properties`:
-   ```properties
-   sepay.api.key=se_live_xxxxxxxxxxxx
-   sepay.webhook.secret=your_webhook_secret
-   sepay.bank.account=1234567890
-   sepay.bank.name=Vietcombank
-   sepay.account.name=NGUYEN VAN A
-   ```
-5. Trong admin panel → SePay → Test webhook để xác nhận
-
----
-
-## Cấu hình Unity Client cho Production
-
-Trong `client/Assets/Scripts/Network/GameClient.cs`, thay:
-
-```csharp
-// Development
-public string serverHost = "localhost";
-public int    serverPort = 7777;
-
-// Production
-public string serverHost = "YOUR_VPS_IP_OR_DOMAIN";
-public int    serverPort = 7777;
-```
-
-Build Unity:
-- **Android**: File → Build Settings → Android → Build
-- **Windows**: File → Build Settings → PC → Build
-- **WebGL**: File → Build Settings → WebGL → Build
-
----
-
-## Cấu hình Multi-Server
-
-Để chạy nhiều server (server 1, server 2...):
-
-1. Mỗi server chạy trên VPS riêng hoặc port riêng
-2. Tất cả share cùng MySQL database
-3. `server.id` phải khác nhau giữa các server
-4. Cross-server chat relay qua bảng `cross_server_relay` (poll mỗi 10 giây)
-
-```properties
-# VPS 1 (Server 1)
-server.id=1
-server.name=Thiên Hạ
-
-# VPS 2 (Server 2)
-server.id=2
-server.name=Bắc Phương
-```
-
----
-
-## Quản trị với Admin Panel
-
-### Tài khoản admin mặc định
-
-Admin panel **không có tài khoản riêng** — bảo vệ bằng API key trong `application.properties`:
-
-```
-admin.key=VERY_LONG_RANDOM_ADMIN_KEY
-```
-
-Chạy admin panel với key:
-```bash
-java -Dadmin.url=http://localhost:8080 -Dadmin.key=YOUR_KEY -jar admin/target/nexus-isekai-admin-1.0.jar
-```
-
-### Panels quan trọng
-
-| Panel | Chức năng |
-|---|---|
-| Players | Xem/sửa nhân vật, trao item |
-| Guilds | Quản lý guild, disband, gửi tin |
-| Webshop | Thêm/sửa sản phẩm, bổ sung kho |
-| Warehouse | Kho item admin dùng cho event/giftcode |
-| Gift Code | Tạo/xoá code, xem lịch sử đổi |
-| Mission Pass | Cấu hình season, rewards, tasks |
-| Enhancement | Chỉnh tỉ lệ cường hoá +1 đến +10 |
-| SePay | Cấu hình thanh toán, test webhook |
-| Events | Bật/tắt double EXP, boss event |
-| Leaderboard | Xem BXH, reset thủ công |
-
----
-
-## Giao thức mạng
-
-Server dùng TCP binary protocol:
-
-```
-[4 byte big-endian length][2 byte opcode][payload...]
-```
-
-- **196 opcodes** (C2S + S2C)
-- Content types chat: text / sticker / emoji / location / item / lì xì / voice
-- All handlers trong `GameSession.java` dispatch switch
-
----
-
-## Database
-
-- **17 bảng cơ bản** (schema.sql): accounts, characters, inventory, maps, quests, guilds...
-- **61 bảng mở rộng** (schema_v2.sql): payment, webshop, mission pass, pet, mount, farming, housing, minigame, pvp, chat history...
-
----
-
-## Troubleshooting
-
-### Server không khởi động
-
-```bash
-# Xem log lỗi
-journalctl -u nexus-server -n 50
-
-# Kiểm tra MySQL
-sudo systemctl status mysql
-mysql -u nexus -p -e "SELECT 1"
-
-# Kiểm tra port
-ss -tlnp | grep 7777
-```
-
-### Lỗi "Table doesn't exist"
-
-```bash
-mysql -u nexus -p nexus_isekai < server/src/main/resources/schema_v2.sql
-```
-
-### Client không kết nối được
-
-- Kiểm tra firewall VPS đã mở port 7777 chưa
-- Kiểm tra `serverHost` trong GameClient.cs đúng IP chưa
-- `nc -zv YOUR_VPS_IP 7777` từ máy local
-
-### Webshop lỗi CORS
-
-Trong `vite.config.ts`, proxy target phải khớp với port webshop server (mặc định 9090).
-
-### Out of Memory
-
-```bash
-# Tăng heap cho Java
-ExecStart=/usr/bin/java -Xmx4g -Xms1g -jar ...
-```
-
----
-
-## Đóng góp
-
-1. Fork repo
-2. Tạo branch: `git checkout -b feature/ten-tinh-nang`
-3. Commit: `git commit -m "feat: mô tả tính năng"`
-4. Push: `git push origin feature/ten-tinh-nang`
-5. Tạo Pull Request
+## Bao mat
+
+- Mat khau hash voi **BCrypt**
+- Token web dung **random UUID**, het han
+- Admin API chi bind **localhost**, bao ve bang API key
+- **Anti-speedhack**: server validate vi tri + toc do di chuyen
+- SQL dung **PreparedStatement**, khong concat string
+- Upload voice gioi han **5MB**, validate MIME type
+- Rate limit: GUI han ket noi, send queue co gioi han
+- Li xi: **synchronized atomic grab**, khong duplicate
+- Cuong hoa: **server-side random**, client khong can thiet
+- Cross-server: poll relay table, khong expose truc tiep
 
 ---
 
 ## License
 
-[MIT License](LICENSE) © 2025 Nexus Isekai Team
+[MIT License](LICENSE) — Su dung tu do cho muc dich hoc tap va thuong mai.
+
+---
+
+<div align="center">
+
+**Nexus Isekai** — *Vong Linh Gioi*
+
+*Built with passion for the MMORPG genre*
+
+</div>

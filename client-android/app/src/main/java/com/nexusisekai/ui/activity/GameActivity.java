@@ -171,7 +171,7 @@ public class GameActivity extends AppCompatActivity {
             String[] names = new String[quests.size()];
             for (int i=0;i<quests.size();i++) {
                 GameViewModel.QuestData q = quests.get(i);
-                names[i] = (q.completed ? "✓ " : "") + q.title + " " + q.progress + "/" + q.target;
+                names[i] = (q.completed ? "[V] " : "") + q.title + " " + q.progress + "/" + q.target;
             }
             new AlertDialog.Builder(this).setTitle("Nhiệm Vụ")
                 .setItems(names, (d, which) -> {

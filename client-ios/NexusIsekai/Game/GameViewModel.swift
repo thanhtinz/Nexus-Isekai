@@ -221,7 +221,7 @@ final class GameViewModel: ObservableObject {
         stats.level  = Int(r.readInt32()); stats.maxHp = Int(r.readInt32()); stats.maxMp = Int(r.readInt32())
         stats.atk    = Int(r.readInt32()); stats.def   = Int(r.readInt32()); stats.expNext = r.readInt64()
         stats.hp     = stats.maxHp; stats.mp = stats.maxMp
-        notify("LEVEL UP! Lv.\(stats.level) 🎉")
+        notify("LEVEL UP! Lv.\(stats.level)")
     }
 
     private func onPlayerStats(_ r: PacketReader) {
@@ -272,10 +272,10 @@ final class GameViewModel: ObservableObject {
         switch ct {
         case 0: content = String(data: payload, encoding: .utf8) ?? ""
         case 1: content = "[Sticker]"
-        case 3: content = "[📍 Vị trí]"
-        case 4: content = "[🎒 Vật phẩm]"
-        case 5: content = "[🧧 Lì xì]"
-        case 6: content = "[🎤 Voice]"
+        case 3: content = "[Vi tri]"
+        case 4: content = "[Item]"
+        case 5: content = "[Li xi]"
+        case 6: content = "[Voice]"
         default: content = String(data: payload, encoding: .utf8) ?? ""
         }
         let chanLabel = ["Map","World","Guild","PM","System","Cross"][Int(ch) < 6 ? Int(ch) : 0]
@@ -288,7 +288,7 @@ final class GameViewModel: ObservableObject {
         let cur = r.readByte(); let msg = r.readString()
         let unit = cur == 0 ? "G" : "Dia"
         addChat(sender: "Lì xì", content: "\(sndr) thả \(amt)\(unit)×\(max) | \(msg)", channel: "envelope")
-        notify("\(sndr) thả lì xì! Bấm giựt! 🧧")
+        notify("\(sndr) thả lì xì! Bấm giựt! ")
     }
 
     private func onGrabResult(_ r: PacketReader) {
@@ -312,7 +312,7 @@ final class GameViewModel: ObservableObject {
 
     private func onGuildInvited(_ r: PacketReader) {
         let gid = r.readInt64(); let gname = r.readString(); let inviter = r.readString()
-        notify("\(inviter) mời vào [\(gname)] 🏰")
+        notify("\(inviter) mời vào [\(gname)] ")
     }
 
     // ─────────────────────────────────────────

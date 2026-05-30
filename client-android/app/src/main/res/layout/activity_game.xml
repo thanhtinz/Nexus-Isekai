@@ -77,7 +77,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="0 💎"
+                android:text="0 Dia"
                 android:textColor="#88AAFF"
                 android:textSize="11sp"/>
         </LinearLayout>
@@ -166,13 +166,13 @@
                 android:layout_marginBottom="8dp">
 
                 <Button android:id="@+id/btnInventory" android:layout_width="60dp" android:layout_height="50dp"
-                    android:text="🎒" android:textSize="22sp" android:backgroundTint="#1A2A4A" android:layout_marginEnd="4dp"/>
+                    android:text="Bag" android:textSize="11sp" android:backgroundTint="#1A2A4A" android:layout_marginEnd="4dp"/>
                 <Button android:id="@+id/btnQuest" android:layout_width="60dp" android:layout_height="50dp"
-                    android:text="📜" android:textSize="22sp" android:backgroundTint="#1A2A4A" android:layout_marginEnd="4dp"/>
+                    android:text="Quest" android:textSize="11sp" android:backgroundTint="#1A2A4A" android:layout_marginEnd="4dp"/>
                 <Button android:id="@+id/btnSkill" android:layout_width="60dp" android:layout_height="50dp"
-                    android:text="⚡" android:textSize="22sp" android:backgroundTint="#1A2A4A" android:layout_marginEnd="4dp"/>
+                    android:text="Skill" android:textSize="11sp" android:backgroundTint="#1A2A4A" android:layout_marginEnd="4dp"/>
                 <Button android:id="@+id/btnPet" android:layout_width="60dp" android:layout_height="50dp"
-                    android:text="🐉" android:textSize="22sp" android:backgroundTint="#1A2A4A"/>
+                    android:text="Pet" android:textSize="11sp" android:backgroundTint="#1A2A4A"/>
             </LinearLayout>
 
             <LinearLayout
@@ -181,13 +181,13 @@
                 android:orientation="horizontal">
 
                 <Button android:id="@+id/btnGiftCode" android:layout_width="60dp" android:layout_height="50dp"
-                    android:text="🎁" android:textSize="22sp" android:backgroundTint="#2A1A4A" android:layout_marginEnd="4dp"/>
+                    android:text="Code" android:textSize="11sp" android:backgroundTint="#2A1A4A" android:layout_marginEnd="4dp"/>
                 <Button android:id="@+id/btnMap" android:layout_width="60dp" android:layout_height="50dp"
-                    android:text="🗺️" android:textSize="20sp" android:backgroundTint="#1A2A4A" android:layout_marginEnd="4dp"/>
+                    android:text="Map" android:textSize="11sp" android:backgroundTint="#1A2A4A" android:layout_marginEnd="4dp"/>
                 <Button android:id="@+id/btnGuild" android:layout_width="60dp" android:layout_height="50dp"
-                    android:text="🏰" android:textSize="22sp" android:backgroundTint="#1A2A4A" android:layout_marginEnd="4dp"/>
+                    android:text="Guild" android:textSize="11sp" android:backgroundTint="#1A2A4A" android:layout_marginEnd="4dp"/>
                 <Button android:id="@+id/btnLeaderboard" android:layout_width="60dp" android:layout_height="50dp"
-                    android:text="🏆" android:textSize="22sp" android:backgroundTint="#1A2A4A"/>
+                    android:text="Rank" android:textSize="11sp" android:backgroundTint="#1A2A4A"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

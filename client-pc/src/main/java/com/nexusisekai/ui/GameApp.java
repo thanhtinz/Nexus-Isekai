@@ -229,10 +229,10 @@ public class GameApp extends Application {
         String content = switch (ct) {
             case 0 -> new String(payload, java.nio.charset.StandardCharsets.UTF_8);
             case 1 -> "[Sticker]";
-            case 3 -> "[📍 Vị trí]";
-            case 4 -> "[🎒 Item]";
-            case 5 -> "[🧧 Lì xì]";
-            case 6 -> "[🎤 Voice]";
+            case 3 -> "[Vi tri]";
+            case 4 -> "[Item]";
+            case 5 -> "[Li xi]";
+            case 6 -> "[Voice]";
             default -> new String(payload, java.nio.charset.StandardCharsets.UTF_8);
         };
         String label = switch (ch) { case 0->"Map"; case 1->"World"; case 2->"Guild"; case 3->"PM"; case 5->"Cross"; default->"?"; };

@@ -66,14 +66,14 @@ public class PcGameState {
         public long instanceId; public int itemId, qty, slot, rarity, enhanceLevel;
         public String name; public boolean equipped;
         @Override public String toString() {
-            return name + (enhanceLevel > 0 ? " +" + enhanceLevel : "") + (qty > 1 ? " x" + qty : "") + (equipped ? " [✓]" : "");
+            return name + (enhanceLevel > 0 ? " +" + enhanceLevel : "") + (qty > 1 ? " x" + qty : "") + (equipped ? " [E]" : "");
         }
     }
 
     public static class QuestData {
         public int id, progress, target; public String title, desc; public boolean completed;
         @Override public String toString() {
-            return (completed ? "✓ " : "○ ") + title + "  " + progress + "/" + target;
+            return (completed ? "[V] " : "[ ] ") + title + "  " + progress + "/" + target;
         }
     }
 

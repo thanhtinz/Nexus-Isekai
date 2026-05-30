@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nexus Isekai - MMORPG Vong Linh Gioi. 5 class, PvP lien server, chat da kenh, li xi, cuong hoa. Tai mien phi!">
+    <meta name="keywords" content="Nexus Isekai, MMORPG, game nhap vai, game mobile, RPG, PvP, guild, li xi">
+    <meta property="og:title" content="Nexus Isekai - Vong Linh Gioi">
+    <meta property="og:description" content="Sieu pham MMORPG - 5 class, PvP, Guild, Chat da kenh, Li xi, Nong trai, Nha o. Tai ngay!">
+    <meta property="og:image" content="assets/images/og-banner.png">
+    <title>Nexus Isekai - Vong Linh Gioi | Trang Chu</title>
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #080818;
+            --bg-card: #0d0d24;
+            --bg-panel: #12122a;
+            --bg-hover: #1a1a3e;
+            --primary: #6c3ef3;
+            --primary-glow: #8a5cf5;
+            --accent: #f0c050;
+            --accent2: #4ecca3;
+            --text: #e0e0f0;
+            --text-dim: #8a8aaa;
+            --danger: #e94560;
+            --border: #1e1e3a;
+            --font-display: 'Cinzel', 'Georgia', serif;
+            --font-body: 'Noto Sans', 'Segoe UI', sans-serif;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        a { color: var(--accent2); text-decoration:none; transition: color 0.3s; }
+        a:hover { color: var(--accent); }
+        img { max-width:100%; height:auto; }
+
+        /* ── NAV ──────────────────────────────────────────── */
+        .nav {
+            position:fixed; top:0; width:100%; z-index:100;
+            background: rgba(8,8,24,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            transition: background 0.3s;
+        }
+        .nav-inner {
+            max-width:1200px; margin:0 auto;
+            display:flex; align-items:center; justify-content:space-between;
+            padding: 0 24px; height: 64px;
+        }
+        .nav-logo {
+            font-family: var(--font-display);
+            font-size: 22px; font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+        .nav-logo span { color: var(--primary-glow); }
+        .nav-links { display:flex; gap:28px; list-style:none; }
+        .nav-links a {
+            color: var(--text-dim); font-size:14px; font-weight:500;
+            text-transform: uppercase; letter-spacing:1px;
+            transition: color 0.3s, border-bottom 0.3s;
+            padding-bottom:4px;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent); border-bottom-color: var(--accent);
+        }
+        .nav-cta {
+            background: var(--primary); color:#fff !important;
+            padding: 8px 22px; border-radius:8px; font-weight:600;
+            font-size:13px; letter-spacing:0.5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-bottom:none !important;
+        }
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(108,62,243,0.4);
+            color:#fff !important;
+        }
+        .nav-toggle { display:none; cursor:pointer; color:var(--text); font-size:24px; }
+
+        /* ── HERO ─────────────────────────────────────────── */
+        .hero {
+            position:relative; min-height:100vh;
+            display:flex; align-items:center; justify-content:center;
+            text-align:center; padding: 100px 24px 60px;
+            background: linear-gradient(180deg, #080818 0%, #0a0a2a 50%, #12122a 100%);
+            overflow:hidden;
+        }
+        .hero::before {
+            content:''; position:absolute; inset:0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(108,62,243,0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(78,204,163,0.08) 0%, transparent 50%);
+            pointer-events:none;
+        }
+        .hero-particles {
+            position:absolute; inset:0; pointer-events:none;
+        }
+        .hero-content { position:relative; z-index:2; max-width:800px; }
+        .hero-logo {
+            width: 300px; margin:0 auto 20px;
+            /* Placeholder: thay bang logo that */
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 20px; padding:30px;
+            display:flex; align-items:center; justify-content:center;
+            font-family: var(--font-display); font-size:48px; color:#fff;
+            font-weight:900; letter-spacing:4px;
+            box-shadow: 0 8px 40px rgba(108,62,243,0.3);
+        }
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 900; color: #fff;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 20px rgba(108,62,243,0.4);
+        }
+        .hero .tagline {
+            font-size: clamp(14px, 2vw, 18px);
+            color: var(--accent);
+            font-style: italic;
+            margin-bottom: 32px;
+            letter-spacing: 2px;
+        }
+        .hero p {
+            font-size: 16px; color: var(--text-dim);
+            max-width: 600px; margin: 0 auto 40px;
+        }
+        .hero-buttons { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+        .btn {
+            display:inline-flex; align-items:center; gap:8px;
+            padding: 14px 32px; border-radius:10px;
+            font-weight: 600; font-size:15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor:pointer; border:none; text-decoration:none;
+        }
+        .btn:hover { transform:translateY(-2px); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #8a5cf5);
+            color:#fff; box-shadow: 0 4px 20px rgba(108,62,243,0.3);
+        }
+        .btn-primary:hover { box-shadow: 0 8px 30px rgba(108,62,243,0.5); color:#fff; }
+        .btn-outline {
+            background: transparent; color: var(--accent2);
+            border: 2px solid var(--accent2);
+        }
+        .btn-outline:hover { background: var(--accent2); color: var(--bg-dark); }
+        .btn-gold { background: linear-gradient(135deg, #d4a43a, #f0c050); color:#1a1a2e; }
+        .btn-gold:hover { box-shadow: 0 4px 20px rgba(240,192,80,0.4); color:#1a1a2e; }
+
+        /* ── SECTIONS ─────────────────────────────────────── */
+        section { padding: 80px 24px; }
+        .container { max-width:1200px; margin:0 auto; }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(24px, 3vw, 36px);
+            font-weight: 700; color:#fff;
+            text-align:center; margin-bottom:12px;
+        }
+        .section-subtitle {
+            text-align:center; color:var(--text-dim); font-size:15px;
+            margin-bottom:48px;
+        }
+
+        /* ── FEATURES ─────────────────────────────────────── */
+        .features { background: var(--bg-card); }
+        .features-grid {
+            display:grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap:24px;
+        }
+        .feature-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius:16px; padding:28px;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .feature-card:hover {
+            transform:translateY(-4px);
+            border-color: var(--primary);
+        }
+        .feature-icon {
+            width:52px; height:52px; border-radius:12px;
+            background: linear-gradient(135deg, var(--primary), var(--accent2));
+            display:flex; align-items:center; justify-content:center;
+            margin-bottom:16px;
+            /* Placeholder icon background, thay bang asset */
+        }
+        .feature-icon img { width:28px; height:28px; }
+        .feature-card h3 { font-size:17px; font-weight:600; margin-bottom:8px; color:#fff; }
+        .feature-card p  { font-size:14px; color:var(--text-dim); line-height:1.5; }
+
+        /* ── NEWS ──────────────────────────────────────────── */
+        .news { background: var(--bg-dark); }
+        .news-tabs { display:flex; gap:0; margin-bottom:32px; justify-content:center; }
+        .news-tab {
+            padding:10px 32px; cursor:pointer;
+            font-size:14px; font-weight:600;
+            color: var(--text-dim);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .news-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .news-tab:hover  { color: var(--text); }
+        .news-list { max-width:700px; margin:0 auto; }
+        .news-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:14px 0; border-bottom:1px solid var(--border);
+            transition: padding-left 0.3s;
+        }
+        .news-item:hover { padding-left:8px; }
+        .news-item a { color:var(--text); font-size:15px; }
+        .news-item a:hover { color:var(--accent2); }
+        .news-tag {
+            background: var(--primary); color:#fff; font-size:11px;
+            padding:2px 8px; border-radius:4px; margin-right:8px;
+            font-weight:600;
+        }
+        .news-tag.event { background: var(--danger); }
+        .news-date { color:var(--text-dim); font-size:13px; white-space:nowrap; }
+
+        /* ── CLASSES ──────────────────────────────────────── */
+        .classes { background:var(--bg-card); }
+        .class-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; }
+        .class-card {
+            text-align:center; padding:24px 12px;
+            background: var(--bg-panel); border:1px solid var(--border);
+            border-radius:16px; transition: transform 0.3s, border-color 0.3s;
+        }
+        .class-card:hover { transform:translateY(-4px); border-color:var(--primary); }
+        .class-avatar {
+            width:80px; height:80px; border-radius:50%;
+            background: var(--bg-hover); margin:0 auto 12px;
+            display:flex; align-items:center; justify-content:center;
+            border: 3px solid var(--primary);
+            /* Placeholder: thay bang avatar sprite */
+        }
+        .class-card h3 { font-size:16px; font-weight:600; margin-bottom:4px; }
+        .class-card .role { font-size:12px; color:var(--accent2); font-weight:500; }
+        .class-card p { font-size:13px; color:var(--text-dim); margin-top:8px; }
+
+        /* ── SCREENSHOTS ──────────────────────────────────── */
+        .screenshots { background:var(--bg-dark); }
+        .ss-gallery {
+            display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+        }
+        .ss-item {
+            border-radius:12px; overflow:hidden;
+            border:1px solid var(--border);
+            background:var(--bg-panel); aspect-ratio:16/10;
+            display:flex; align-items:center; justify-content:center;
+            color:var(--text-dim); font-size:13px;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .ss-item:hover { transform:scale(1.03); border-color:var(--primary); }
+        .ss-item img { width:100%; height:100%; object-fit:cover; }
+
+        /* ── DOWNLOAD ─────────────────────────────────────── */
+        .download {
+            background: linear-gradient(180deg, var(--bg-card), var(--bg-dark));
+            text-align:center;
+        }
+        .download-grid { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:40px; }
+        .download-card {
+            background:var(--bg-panel); border:1px solid var(--border);
+            border-radius:16px; padding:32px 28px; width:200px;
+            transition: transform 0.3s;
+        }
+        .download-card:hover { transform:translateY(-4px); }
+        .download-card .icon {
+            font-size:36px; margin-bottom:12px;
+            /* Placeholder: dung asset thay emoji */
+        }
+        .download-card h3 { font-size:16px; margin-bottom:8px; }
+        .download-card .btn { width:100%; justify-content:center; margin-top:12px; font-size:13px; padding:10px 20px; }
+
+        /* ── SUPPORT ──────────────────────────────────────── */
+        .support { background:var(--bg-card); }
+        .support-grid {
+            display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr));
+            gap:20px;
+        }
+        .support-card {
+            background:var(--bg-panel); border:1px solid var(--border);
+            border-radius:12px; padding:24px; text-align:center;
+        }
+        .support-card h3 { font-size:16px; margin-bottom:8px; }
+        .support-card p { font-size:14px; color:var(--text-dim); }
+
+        /* ── FOOTER ───────────────────────────────────────── */
+        .footer {
+            background: #050510; padding:40px 24px 20px;
+            border-top:1px solid var(--border);
+        }
+        .footer-inner {
+            max-width:1200px; margin:0 auto;
+            display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:20px;
+        }
+        .footer-brand {
+            font-family: var(--font-display);
+            font-size:18px; color:var(--accent); font-weight:700;
+        }
+        .footer-links { display:flex; gap:24px; }
+        .footer-links a { color:var(--text-dim); font-size:13px; }
+        .footer-links a:hover { color:var(--text); }
+        .footer-copy { width:100%; text-align:center; color:var(--text-dim); font-size:12px; margin-top:20px; }
+
+        /* ── RESPONSIVE ───────────────────────────────────── */
+        @media (max-width:768px) {
+            .nav-links { display:none; }
+            .nav-toggle { display:block; }
+            .nav-links.open {
+                display:flex; flex-direction:column; position:absolute;
+                top:64px; left:0; right:0; background:rgba(8,8,24,0.98);
+                padding:20px; gap:16px; border-bottom:1px solid var(--border);
+            }
+            .class-grid { grid-template-columns:repeat(2,1fr); }
+            .ss-gallery { grid-template-columns:repeat(2,1fr); }
+            .hero-logo { width:200px; font-size:32px; padding:20px; }
+        }
+        @media (max-width:480px) {
+            .class-grid { grid-template-columns:1fr; }
+            .ss-gallery { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- NAV -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<nav class="nav" id="nav">
+    <div class="nav-inner">
+        <div class="nav-logo">NEXUS <span>ISEKAI</span></div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#hero" class="active">Trang Chu</a></li>
+            <li><a href="#features">Tinh Nang</a></li>
+            <li><a href="#news">Tin Tuc</a></li>
+            <li><a href="#classes">Nhanh Nghe</a></li>
+            <li><a href="#screenshots">Hinh Anh</a></li>
+            <li><a href="#download">Tai Game</a></li>
+            <li><a href="/webshop" class="nav-cta">Nap Tien</a></li>
+        </ul>
+        <div class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">
+            &#9776;
+        </div>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+    <canvas class="hero-particles" id="particles"></canvas>
+    <div class="hero-content">
+        <!-- Thay bang logo image: <img src="assets/images/logo.png" class="hero-logo"> -->
+        <div class="hero-logo">NI</div>
+
+        <h1>Nexus Isekai</h1>
+        <div class="tagline">VONG LINH GIOI — The Realm Between Worlds</div>
+
+        <p>
+            Buoc vao the gioi huyen bi noi cac luc dia tu nhieu chieu khong gian 
+            hop nhat. Chien dau, xay dung guild, ket hon, trong trot, va kham pha 
+            bi mat cua Tieu Than Azaroth.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="#download" class="btn btn-primary">Tai Game Ngay</a>
+            <a href="/webshop" class="btn btn-gold">Nap Diamond</a>
+            <a href="#features" class="btn btn-outline">Tim Hieu Them</a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- FEATURES -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="features" id="features">
+    <div class="container">
+        <h2 class="section-title">Tinh Nang Noi Bat</h2>
+        <p class="section-subtitle">Mot the gioi day du voi hang tram tinh nang cho nguoi choi</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"></div>
+                <h3>5 Nhanh Nghe</h3>
+                <p>Kiem Si, Sat Thu, Phap Su, Phap Thu, Cung Thu — moi class 30-40 skill doc quyen, 7 slot active.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"></div>
+                <h3>PvP Lien Server</h3>
+                <p>Duel 1v1 voi he thong ELO rating. Dau truong lien server, xep hang toan cau.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"></div>
+                <h3>Chat Da Kenh</h3>
+                <p>Text, sticker, gui toa do, khoe item, li xi vang/diamond, voice message.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"></div>
+                <h3>Guild & Xa Hoi</h3>
+                <p>Lap guild, hen ho, ket hon, sinh con. He thong su tu (mentor/student).</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"></div>
+                <h3>Cuong Hoa +10</h3>
+                <p>Nang cap vu khi tu +1 den +10. Ti le that bai tang dan, tut level khi fail.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"></div>
+                <h3>Nong Trai & Nha O</h3>
+                <p>Trong cay, nuoi dong vat, thu hoach. Xay nha, dat noi that, trang tri.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"></div>
+                <h3>Mission Pass</h3>
+                <p>Free + Premium pass, 30 level thuong, nhiem vu hang ngay va hang tuan.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"></div>
+                <h3>Su Kien Lien Tuc</h3>
+                <p>Double EXP, boss the gioi, tien te su kien doc quyen, minigame bau cua, do vui.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- NEWS / EVENTS -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="news" id="news">
+    <div class="container">
+        <h2 class="section-title">Tin Tuc & Su Kien</h2>
+        <p class="section-subtitle">Cap nhat moi nhat tu the gioi Vong Linh Gioi</p>
+
+        <div class="news-tabs">
+            <div class="news-tab active" data-tab="news">Tin Tuc</div>
+            <div class="news-tab" data-tab="events">Su Kien</div>
+            <div class="news-tab" data-tab="guides">Huong Dan</div>
+        </div>
+
+        <div class="news-list" id="newsContent">
+            <div class="news-item">
+                <div><span class="news-tag">Tin Tuc</span><a href="#">Khai mo server Thien Ha — Dang ky nhan thuong tan thu</a></div>
+                <span class="news-date">30/05</span>
+            </div>
+            <div class="news-item">
+                <div><span class="news-tag event">Su Kien</span><a href="#">Su kien Hoa Sen mua He — Nhan token Hoa Sen doi qua doc quyen</a></div>
+                <span class="news-date">28/05</span>
+            </div>
+            <div class="news-item">
+                <div><span class="news-tag">Tin Tuc</span><a href="#">Cap nhat phien ban 1.2 — Them he thong Nong Trai va Nha O</a></div>
+                <span class="news-date">25/05</span>
+            </div>
+            <div class="news-item">
+                <div><span class="news-tag">Tin Tuc</span><a href="#">Tong hop Gift Code tan thu 2025</a></div>
+                <span class="news-date">20/05</span>
+            </div>
+            <div class="news-item">
+                <div><span class="news-tag event">Su Kien</span><a href="#">PvP mua 3 — Dau truong Bien Dam Huyen Bi mo cua</a></div>
+                <span class="news-date">15/05</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- CLASSES -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="classes" id="classes">
+    <div class="container">
+        <h2 class="section-title">5 Nhanh Nghe</h2>
+        <p class="section-subtitle">Chon huong di cua rieng ban trong Vong Linh Gioi</p>
+
+        <div class="class-grid">
+            <div class="class-card">
+                <div class="class-avatar" style="border-color:#e94560;"><!-- Icon/Sprite --></div>
+                <h3>Kiem Si</h3>
+                <div class="role">Tank / DPS</div>
+                <p>Chien binh can chien, phong ngu va tan cong can bang.</p>
+            </div>
+            <div class="class-card">
+                <div class="class-avatar" style="border-color:#8a5cf5;"><!-- Icon --></div>
+                <h3>Sat Thu</h3>
+                <div class="role">Burst DPS</div>
+                <p>Diet dich nhanh, ne tranh cao, chi mang.</p>
+            </div>
+            <div class="class-card">
+                <div class="class-avatar" style="border-color:#f0c050;"><!-- Icon --></div>
+                <h3>Phap Su</h3>
+                <div class="role">AoE DPS</div>
+                <p>Phap thuat tam xa, sat thuong dien rong.</p>
+            </div>
+            <div class="class-card">
+                <div class="class-avatar" style="border-color:#4ecca3;"><!-- Icon --></div>
+                <h3>Phap Thu</h3>
+                <div class="role">Healer / Support</div>
+                <p>Hoi mau, tang buff, bao ve dong doi.</p>
+            </div>
+            <div class="class-card">
+                <div class="class-avatar" style="border-color:#44a5ff;"><!-- Icon --></div>
+                <h3>Cung Thu</h3>
+                <div class="role">Ranged DPS</div>
+                <p>Tan cong tam xa, ban tinh, khu vuc.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SCREENSHOTS -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="screenshots" id="screenshots">
+    <div class="container">
+        <h2 class="section-title">Hinh Anh Game</h2>
+        <p class="section-subtitle">Kham pha the gioi Vong Linh Gioi qua nhung hinh anh thuc te</p>
+
+        <div class="ss-gallery">
+            <!-- Thay bang screenshot that -->
+            <div class="ss-item">Login Screen</div>
+            <div class="ss-item">The Gioi Mo</div>
+            <div class="ss-item">Chien Dau Boss</div>
+            <div class="ss-item">Chat & Li Xi</div>
+            <div class="ss-item">PvP Arena</div>
+            <div class="ss-item">Nong Trai</div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- DOWNLOAD -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="download" id="download">
+    <div class="container">
+        <h2 class="section-title">Tai Game</h2>
+        <p class="section-subtitle">Choi mien phi tren moi nen tang</p>
+
+        <div class="download-grid">
+            <div class="download-card">
+                <div class="icon"><!-- Android icon asset --></div>
+                <h3>Android</h3>
+                <a href="/download/NexusIsekai.apk" class="btn btn-primary">Tai APK</a>
+            </div>
+            <div class="download-card">
+                <div class="icon"><!-- iOS icon asset --></div>
+                <h3>iOS</h3>
+                <a href="#" class="btn btn-outline">Sap Ra Mat</a>
+            </div>
+            <div class="download-card">
+                <div class="icon"><!-- PC icon asset --></div>
+                <h3>PC (Windows)</h3>
+                <a href="/download/NexusIsekai-PC.jar" class="btn btn-primary">Tai JAR</a>
+            </div>
+            <div class="download-card">
+                <div class="icon"><!-- Web icon asset --></div>
+                <h3>Web</h3>
+                <a href="/play" class="btn btn-gold">Choi Ngay</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SUPPORT -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<section class="support" id="support">
+    <div class="container">
+        <h2 class="section-title">Ho Tro</h2>
+        <p class="section-subtitle">Can giup do? Lien he voi chung toi</p>
+
+        <div class="support-grid">
+            <div class="support-card">
+                <h3>Fanpage</h3>
+                <p>Theo doi tin tuc va su kien moi nhat</p>
+                <a href="#" class="btn btn-outline" style="margin-top:12px;">Facebook</a>
+            </div>
+            <div class="support-card">
+                <h3>Group Zalo</h3>
+                <p>Cong dong nguoi choi, ho tro nhanh</p>
+                <a href="#" class="btn btn-outline" style="margin-top:12px;">Tham Gia</a>
+            </div>
+            <div class="support-card">
+                <h3>Nap Tien</h3>
+                <p>Cong nap tu dong qua QR ngan hang</p>
+                <a href="/webshop" class="btn btn-gold" style="margin-top:12px;">Webshop</a>
+            </div>
+            <div class="support-card">
+                <h3>Bao Loi</h3>
+                <p>Gui bao cao loi ve doi ngu phat trien</p>
+                <a href="mailto:support@nexusisekai.vn" class="btn btn-outline" style="margin-top:12px;">Email</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- FOOTER -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-brand">NEXUS ISEKAI</div>
+        <div class="footer-links">
+            <a href="#features">Tinh Nang</a>
+            <a href="#news">Tin Tuc</a>
+            <a href="#download">Tai Game</a>
+            <a href="/webshop">Nap Tien</a>
+            <a href="#support">Ho Tro</a>
+            <a href="https://github.com/thanhtinz/Nexus-Isekai" target="_blank">GitHub</a>
+        </div>
+    </div>
+    <div class="footer-copy">
+        &copy; 2025 Nexus Isekai Team. MIT License. Fan site — Community.
+    </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SCRIPTS -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<script>
+// Particles background
+(function(){
+    var c=document.getElementById('particles'),ctx=c.getContext('2d');
+    function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
+    resize();window.addEventListener('resize',resize);
+    var pts=[];for(var i=0;i<60;i++)pts.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*2+0.5,dx:(Math.random()-0.5)*0.3,dy:(Math.random()-0.5)*0.3,a:Math.random()*0.4+0.1});
+    function draw(){
+        ctx.clearRect(0,0,c.width,c.height);
+        for(var i=0;i<pts.length;i++){
+            var p=pts[i];p.x+=p.dx;p.y+=p.dy;
+            if(p.x<0||p.x>c.width)p.dx*=-1;if(p.y<0||p.y>c.height)p.dy*=-1;
+            ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+            ctx.fillStyle='rgba(108,62,243,'+p.a+')';ctx.fill();
+        }
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+
+// Active nav link on scroll
+window.addEventListener('scroll',function(){
+    var links=document.querySelectorAll('.nav-links a:not(.nav-cta)');
+    var sections=document.querySelectorAll('section[id]');
+    var scrollY=window.scrollY+100;
+    sections.forEach(function(s){
+        if(scrollY>=s.offsetTop&&scrollY<s.offsetTop+s.offsetHeight){
+            links.forEach(function(l){l.classList.remove('active');});
+            var link=document.querySelector('.nav-links a[href="#'+s.id+'"]');
+            if(link)link.classList.add('active');
+        }
+    });
+});
+
+// News tabs
+document.querySelectorAll('.news-tab').forEach(function(tab){
+    tab.addEventListener('click',function(){
+        document.querySelectorAll('.news-tab').forEach(function(t){t.classList.remove('active');});
+        tab.classList.add('active');
+    });
+});
+</script>
+
+</body>
+</html>

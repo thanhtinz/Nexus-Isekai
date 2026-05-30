@@ -34,7 +34,7 @@ public class LoginPane extends BorderPane {
         header.setAlignment(Pos.CENTER);
         header.setPadding(new Insets(40, 0, 32, 0));
 
-        Label logo = new Label("⚔️");
+        Label logo = new Label("NI");
         logo.setStyle("-fx-font-size:52px;");
         Label title = new Label("NEXUS ISEKAI");
         title.setStyle("-fx-text-fill:white;-fx-font-size:26px;-fx-font-weight:bold;");
@@ -150,8 +150,8 @@ class CharPane extends BorderPane {
             @Override protected void updateItem(PcGameState.CharSlot item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) { setText(null); setStyle(""); return; }
-                String cls = switch (item.classId) { case 1->"⚔️ Kiếm Sĩ"; case 2->"🗡️ Sát Thủ"; case 3->"🔮 Pháp Sư"; case 4->"🛡️ Pháp Thủ"; case 5->"🏹 Cung Thủ"; default->"? Unknown"; };
-                setText("  " + item.name + "   Lv." + item.level + "   " + cls + (item.gender==1?" ♀":" ♂"));
+                String cls = switch (item.classId) { case 1->"Kiem Si"; case 2->"Sat Thu"; case 3->"Phap Su"; case 4->"Phap Thu"; case 5->"Cung Thu"; default->"? Unknown"; };
+                setText("  " + item.name + "   Lv." + item.level + "   " + cls + (item.gender==1?" ":" "));
                 setStyle("-fx-text-fill:#DDDDFF;-fx-padding:12px 8px;-fx-background-color:#1A1A35;");
             }
         });
@@ -165,11 +165,11 @@ class CharPane extends BorderPane {
         btnSelect.setStyle("-fx-background-color:#6C3EF3;-fx-text-fill:white;-fx-font-size:14px;-fx-font-weight:bold;-fx-padding:12px 28px;-fx-background-radius:8;");
         btnSelect.setOnAction(e -> selectChar());
 
-        Button btnCreate = new Button("＋  Tạo nhân vật");
+        Button btnCreate = new Button("+  Tao nhan vat");
         btnCreate.setStyle("-fx-background-color:#1A2A4A;-fx-text-fill:#AAAADD;-fx-font-size:13px;-fx-padding:12px 24px;-fx-background-radius:8;-fx-border-color:#3A3A5A;-fx-border-radius:8;");
         btnCreate.setOnAction(e -> showCreateDialog());
 
-        Button btnDelete = new Button("🗑  Xoá");
+        Button btnDelete = new Button("Xoa");
         btnDelete.setStyle("-fx-background-color:#2A1A1A;-fx-text-fill:#FF6666;-fx-font-size:12px;-fx-padding:12px 18px;-fx-background-radius:8;");
         btnDelete.setOnAction(e -> deleteChar());
 
@@ -220,8 +220,8 @@ class CharPane extends BorderPane {
         cbClass.getItems().addAll("Kiếm Sĩ","Sát Thủ","Pháp Sư","Pháp Thủ","Cung Thủ");
         cbClass.setValue("Kiếm Sĩ");
         ToggleGroup tgGender = new ToggleGroup();
-        RadioButton rbMale = new RadioButton("Nam ♂"); rbMale.setToggleGroup(tgGender); rbMale.setSelected(true); rbMale.setStyle("-fx-text-fill:white;");
-        RadioButton rbFem  = new RadioButton("Nữ ♀");  rbFem.setToggleGroup(tgGender);  rbFem.setStyle("-fx-text-fill:white;");
+        RadioButton rbMale = new RadioButton("Nam"); rbMale.setToggleGroup(tgGender); rbMale.setSelected(true); rbMale.setStyle("-fx-text-fill:white;");
+        RadioButton rbFem  = new RadioButton("Nu");  rbFem.setToggleGroup(tgGender);  rbFem.setStyle("-fx-text-fill:white;");
         HBox genderBox = new HBox(20, rbMale, rbFem);
 
         VBox content = new VBox(12,

@@ -1041,3 +1041,63 @@ CREATE TABLE IF NOT EXISTS leaderboard_cache (
     PRIMARY KEY (rank_type, rank_pos)
 );
 ALTER TABLE characters ADD COLUMN IF NOT EXISTS server_id INT NOT NULL DEFAULT 1;
+
+-- ─────────────────────────────────────────
+-- 24. EVENT CURRENCY — tien te su kien phu
+-- ─────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS event_currencies (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    event_id        INT NOT NULL DEFAULT 0,      -- 0 = thuong truc, >0 = gan su kien cu the
+    currency_code   VARCHAR(32) NOT NULL UNIQUE,  -- VD: "hoa_sen", "sao_bang", "la_phong"
+    display_name    VARCHAR(64) NOT NULL,          -- VD: "Hoa Sen", "Sao Bang"
+    icon_asset      VARCHAR(128) NOT NULL DEFAULT 'Icons/Currency/default',
+    description     VARCHAR(256) DEFAULT '',
+    exchange_rate_gold    INT NOT NULL DEFAULT 0,  -- 1 token = ? gold (0 = khong doi duoc)
+    exchange_rate_diamond INT NOT NULL DEFAULT 0,  -- 1 token = ? diamond
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    expires_at      DATETIME DEFAULT NULL,         -- NULL = khong het han
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_active (is_active, expires_at)
+);
+
+CREATE TABLE IF NOT EXISTS player_event_currencies (
+    char_id         BIGINT NOT NULL,
+    currency_id     INT NOT NULL,
+    amount          INT NOT NULL DEFAULT 0,
+    last_earned_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (char_id, currency_id),
+    FOREIGN KEY (currency_id) REFERENCES event_currencies(id) ON DELETE CASCADE
+);
+
+-- Event currency shop (item mua bang event token)
+CREATE TABLE IF NOT EXISTS event_currency_shop (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    currency_id     INT NOT NULL,
+    item_id         INT NOT NULL,
+    item_name       VARCHAR(64) NOT NULL,
+    price           INT NOT NULL,
+    stock           INT NOT NULL DEFAULT -1,   -- -1 = vo han
+    per_user_limit  INT NOT NULL DEFAULT 0,    -- 0 = khong gioi han
+    sort_order      INT NOT NULL DEFAULT 0,
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    FOREIGN KEY (currency_id) REFERENCES event_currencies(id)
+);
+
+-- Log giao dich event currency
+CREATE TABLE IF NOT EXISTS event_currency_log (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id         BIGINT NOT NULL,
+    currency_id     INT NOT NULL,
+    amount          INT NOT NULL,       -- + = nhan, - = tieu
+    reason          VARCHAR(128) NOT NULL, -- 'quest_reward','shop_buy','exchange','admin_grant','event_drop'
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_char_cur (char_id, currency_id)
+);
+
+-- Seed VD
+INSERT IGNORE INTO event_currencies (id,currency_code,display_name,icon_asset,description,exchange_rate_gold,is_active)
+VALUES
+(1,'hoa_sen','Hoa Sen','Icons/Currency/hoa_sen','Tien te su kien Tet Nguyen Dan',100,0),
+(2,'sao_bang','Sao Bang','Icons/Currency/sao_bang','Tien te su kien He',50,0),
+(3,'la_phong','La Phong','Icons/Currency/la_phong','Tien te su kien Thu',80,0);

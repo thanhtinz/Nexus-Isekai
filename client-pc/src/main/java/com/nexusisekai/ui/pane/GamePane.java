@@ -122,19 +122,19 @@ public class GamePane extends BorderPane {
         mb.setStyle("-fx-background-color:#0D0D24;-fx-border-color:#1A1A2E;-fx-border-width:0 0 1 0;");
 
         Menu mGame = new Menu("_Game");
-        MenuItem miInventory = new MenuItem("🎒 Túi đồ (I)");
+        MenuItem miInventory = new MenuItem("Tui do (I)");
         miInventory.setOnAction(e -> { PcGameClient.getInstance().send(PcPacketWriter.inventoryList()); });
-        MenuItem miQuest = new MenuItem("📜 Nhiệm vụ (Q)");
+        MenuItem miQuest = new MenuItem("Nhiem vu (Q)");
         miQuest.setOnAction(e -> PcGameClient.getInstance().send(PcPacketWriter.questList()));
-        MenuItem miSkills = new MenuItem("⚡ Kỹ năng");
+        MenuItem miSkills = new MenuItem("Skill");
         miSkills.setOnAction(e -> PcGameClient.getInstance().send(PcPacketWriter.skillList()));
-        MenuItem miLeader  = new MenuItem("🏆 Xếp hạng");
+        MenuItem miLeader  = new MenuItem("Xep hang");
         miLeader.setOnAction(e -> PcGameClient.getInstance().send(PcPacketWriter.leaderboard()));
-        MenuItem miPet     = new MenuItem("🐉 Pet & Mount");
+        MenuItem miPet     = new MenuItem("Pet & Mount");
         miPet.setOnAction(e -> PcGameClient.getInstance().send(PcPacketWriter.petList()));
-        MenuItem miTitle   = new MenuItem("📛 Danh hiệu");
+        MenuItem miTitle   = new MenuItem("Danh hieu");
         miTitle.setOnAction(e -> PcGameClient.getInstance().send(PcPacketWriter.titleList()));
-        MenuItem miGiftCode= new MenuItem("🎁 Gift Code");
+        MenuItem miGiftCode= new MenuItem("Gift Code");
         miGiftCode.setOnAction(e -> showGiftCodeDialog());
         SeparatorMenuItem sep = new SeparatorMenuItem();
         MenuItem miLogout  = new MenuItem("Đăng xuất");
@@ -169,7 +169,7 @@ public class GamePane extends BorderPane {
         lblHp  = new Label("HP 0/0");  lblHp.setStyle("-fx-text-fill:#88FF88;-fx-font-size:11px;");
         lblMp  = new Label("MP 0/0");  lblMp.setStyle("-fx-text-fill:#8888FF;-fx-font-size:11px;");
         lblGold= new Label("0 G");     lblGold.setStyle("-fx-text-fill:#FFDD44;-fx-font-size:12px;");
-        lblDia = new Label("0 💎");    lblDia.setStyle("-fx-text-fill:#88AAFF;-fx-font-size:12px;");
+        lblDia = new Label("0 Dia");    lblDia.setStyle("-fx-text-fill:#88AAFF;-fx-font-size:12px;");
 
         HBox moneyRow = new HBox(16, lblGold, lblDia);
         hud.getChildren().addAll(lblName, pbHp, lblHp, pbMp, lblMp, pbExp, moneyRow);
@@ -215,7 +215,7 @@ public class GamePane extends BorderPane {
 
         VBox chatPane = new VBox(0, chatList, chatInput);
         VBox.setVgrow(chatList, Priority.ALWAYS);
-        Tab tab = new Tab("💬 Chat", chatPane);
+        Tab tab = new Tab("Chat", chatPane);
         return tab;
     }
 
@@ -239,7 +239,7 @@ public class GamePane extends BorderPane {
         VBox pane = new VBox(4, btnRefresh, invList);
         VBox.setVgrow(invList, Priority.ALWAYS);
         pane.setPadding(new Insets(6));
-        return new Tab("🎒 Túi đồ", pane);
+        return new Tab("Tui do", pane);
     }
 
     private Tab buildQuestTab() {
@@ -263,7 +263,7 @@ public class GamePane extends BorderPane {
         VBox pane = new VBox(4, btnRefresh, questList);
         VBox.setVgrow(questList, Priority.ALWAYS);
         pane.setPadding(new Insets(6));
-        return new Tab("📜 Quest", pane);
+        return new Tab("Quest", pane);
     }
 
     private Tab buildSkillTab() {
@@ -286,7 +286,7 @@ public class GamePane extends BorderPane {
         VBox pane = new VBox(4, btnRefresh, skillListView);
         VBox.setVgrow(skillListView, Priority.ALWAYS);
         pane.setPadding(new Insets(6));
-        return new Tab("⚡ Kỹ năng", pane);
+        return new Tab("Skill", pane);
     }
 
     // ─────────────────────────────────────────
@@ -407,7 +407,7 @@ public class GamePane extends BorderPane {
         if (state.maxHp > 0) { pbHp.setProgress((double)state.hp/state.maxHp); lblHp.setText("HP "+state.hp+"/"+state.maxHp); }
         if (state.maxMp > 0) { pbMp.setProgress((double)state.mp/state.maxMp); lblMp.setText("MP "+state.mp+"/"+state.maxMp); }
         lblGold.setText(state.gold + " G");
-        lblDia.setText(state.diamond + " 💎");
+        lblDia.setText(state.diamond + " Dia");
     }
 
     public void refreshInventory() {

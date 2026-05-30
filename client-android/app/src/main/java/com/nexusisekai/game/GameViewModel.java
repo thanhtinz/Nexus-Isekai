@@ -344,10 +344,10 @@ public class GameViewModel extends ViewModel implements GameClient.PacketListene
             case 0: return new String(data, java.nio.charset.StandardCharsets.UTF_8);
             case 1: return "[Sticker]";
             case 2: return new String(data, java.nio.charset.StandardCharsets.UTF_8);
-            case 3: return "[📍 Toạ độ]";
-            case 4: return "[🎒 Item]";
-            case 5: return "[🧧 Lì xì]";
-            case 6: return "[🎤 Voice]";
+            case 3: return "[Vi tri]";
+            case 4: return "[Item]";
+            case 5: return "[Li xi]";
+            case 6: return "[Voice]";
             default: return "";
         }
     }
