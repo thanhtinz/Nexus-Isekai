@@ -407,5 +407,66 @@ namespace NexusIsekai.Data
         public string      TargetName { get; set; }  // chỉ dùng khi channel=PM
         public string      Message    { get; set; }
         public bool        IsSelf     { get; set; }  // PM từ bản thân gửi đi
+    
+    // ─── Character Appearance (Mana Seed sprite layers) ──────
+
+    [System.Serializable]
+    public class CharacterAppearance
+    {
+        public int BodyType   = 1;   // 1-9
+        public int SkinColor  = 1;   // 0-10 (0bas_humn_vXX)
+        public int EyeStyle   = 0;   // 0-10 (3fac/eye_vXX)
+        public int HairStyle  = 0;   // 0=bob1, 1=bob2, 2=dap1, 3=flat, 4=fro1, 5=pon1, 6=spk2
+        public int HairColor  = 1;   // 0-13
+        public int ShirtColor = 1;   // 1-5 (1out/fstr_vXX)
+        public int PantsColor = 1;   // 1-5 (1out/pfpn_vXX)
+
+        // Sprite system config
+        public const string PrimarySystem = "farmer";   // 1024x1024, 32px tiles
+        public const int TileSize = 32;
+        public const int SheetSize = 1024;
+        public const int GridSize = 32;                  // 32x32 grid
+
+        // Hair style key mapping
+        public static readonly string[] HairKeys = { "bob1", "bob2", "dap1", "flat", "fro1", "pon1", "spk2" };
+
+        /// <summary>Farmer System sprite path cho body action animations</summary>
+        public string GetFarmerBodyPath() => "FarmerSystem/sheets/01body/fbas_01body_human_00.png";
+
+        /// <summary>Farmer System sprite path cho hair khi action</summary>
+        public string GetFarmerHairPath()
+        {
+            string key = HairStyle < HairKeys.Length ? HairKeys[HairStyle] : "bob1";
+            // Map to farmer hair: bob1→bob1, bob2→bob2, dap1→dapper, flat→flattop, fro1→afro, pon1→ponytail1, spk2→spiky2
+            string farmerKey = key switch {
+                "bob1" => "bob1", "bob2" => "bob2", "dap1" => "dapper",
+                "flat" => "flattop", "fro1" => "afro", "pon1" => "ponytail1", "spk2" => "spiky2",
+                _ => "bob1"
+            };
+            return $"FarmerSystem/sheets/13hair/fbas_13hair_{farmerKey}_00.png";
+        }
+
+        /// <summary>Character Base sprite path (dùng cho preview/avatar)</summary>
+        public string GetPreviewBodyPath() => $"Character/body_{BodyType}/char_a_p1_0bas_humn_v{SkinColor:D2}.png";
+        public string GetPreviewHairPath()
+        {
+            string key = HairStyle < HairKeys.Length ? HairKeys[HairStyle] : "bob1";
+            return $"Character/body_{BodyType}/4har/char_a_p1_4har_{key}_v{HairColor:D2}.png";
+        }
+        public string GetPreviewEyePath() => $"Character/body_{BodyType}/3fac/eye_v{EyeStyle:D2}.png";
     }
+
+    // Animation state (loaded from server config)
+    [System.Serializable]
+    public class AnimationState
+    {
+        public string StateKey;       // "walk", "attack_sword", "farm_hoe"
+        public int RowDown, RowUp, RowRight, RowLeft;
+        public int FrameCount;
+        public float FrameRate;
+        public bool IsLooping;
+        public string EffectKey;
+    }
+
+}
 }

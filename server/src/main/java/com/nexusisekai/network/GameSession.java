@@ -234,6 +234,8 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_EVENT_CURRENCY_SHOP     -> { requireInGame(); ExtendedHandlers.handleEventCurrencyShop(this, toBuf(p)); }
             case PacketOpcode.C2S_EVENT_CURRENCY_BUY      -> { requireInGame(); ExtendedHandlers.handleEventCurrencyBuy(this, toBuf(p)); }
 
+            case PacketOpcode.C2S_CLASS_CHANGE -> { requireInGame(); CharHandler.handleClassChange(this, toBuf(p)); }
+
             // ── Achievement ────────────────────────────────────────────
             case PacketOpcode.C2S_ACHIEVEMENT_LIST  -> { requireInGame(); ExtendedHandlers.handleAchievementList(this, toBuf(p)); }
             case PacketOpcode.C2S_ACHIEVEMENT_CLAIM -> { requireInGame(); ExtendedHandlers.handleAchievementClaim(this, toBuf(p)); }

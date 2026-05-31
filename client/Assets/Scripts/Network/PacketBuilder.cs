@@ -117,9 +117,20 @@ namespace NexusIsekai.Network
         public static void SendCharList()
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
-        public static void SendCharCreate(string name, int classId, int gender)
+        /// <summary>
+        /// Tạo nhân vật — chỉ gửi ngoại hình + tên, KHÔNG gửi class (chọn sau tại NPC)
+        /// </summary>
+        public static void SendCharCreate(string name, int bodyType, int skinColor, int eyeStyle,
+            int hairStyle, int hairColor, int shirtColor, int pantsColor)
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_CREATE)
-                .WriteString(name).WriteInt(classId).WriteByte((byte)gender));
+                .WriteString(name)
+                .WriteByte((byte)bodyType)     // 1-9
+                .WriteByte((byte)skinColor)    // 0-10
+                .WriteByte((byte)eyeStyle)     // 0-10
+                .WriteByte((byte)hairStyle)    // 0-6 (bob1,bob2,dap1,flat,fro1,pon1,spk2)
+                .WriteByte((byte)hairColor)    // 0-13
+                .WriteByte((byte)shirtColor)   // 1-5
+                .WriteByte((byte)pantsColor)); // 1-5
 
         public static void SendCharDelete(long charId)
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_DELETE).WriteLong(charId));
@@ -544,6 +555,11 @@ namespace NexusIsekai.Network
         public static void SendEventCurrencyExchange(int currencyId, int amount)
             => Send(new PacketBuilder(PacketOpcode.C2S_EVENT_CURRENCY_EXCHANGE).WriteInt(currencyId).WriteInt(amount));
 
+        // ── CLASS CHANGE ─────────────────────────────────
+
+        public static void SendClassChange(int classId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CLASS_CHANGE).WriteInt(classId));
+
         // ── ACHIEVEMENT ──────────────────────────────────────
 
         public static void SendAchievementList()
@@ -735,6 +751,11 @@ namespace NexusIsekai.Network
             rw.Write(payload);
             return result.ToArray();
         }
+
+        // ── CLASS CHANGE ─────────────────────────────────
+
+        public static void SendClassChange(int classId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CLASS_CHANGE).WriteInt(classId));
 
         // ── ACHIEVEMENT ──────────────────────────────────────
 

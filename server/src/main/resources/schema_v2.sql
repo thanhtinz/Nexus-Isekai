@@ -2220,8 +2220,8 @@ ON DUPLICATE KEY UPDATE config_value='["0bas","1out_pfpn","1out_fstr","3fac_eye"
 -- ═════════════════════════════════════════════════════════════
 
 -- Mỗi nhân vật dùng 2 hệ thống sprite:
---   Character Base (512x512, 64px) → walk, idle (8x8 grid)
---   Farmer System  (1024x1024, 32px) → combat, farm, fish, tool (32x32 grid)
+--   Farmer System  (1024x1024, 32px) → TẤT CẢ animations (walk, idle, combat, farm, fish)
+--   Character Base (512x512, 64px) → CHỈ dùng cho preview/avatar UI
 -- Farmer System là SHARED — mọi body type dùng chung farmer sheets
 
 CREATE TABLE IF NOT EXISTS animation_states (
@@ -2244,9 +2244,9 @@ CREATE TABLE IF NOT EXISTS animation_states (
 );
 
 INSERT IGNORE INTO animation_states (state_key,display_name,sprite_system,sheet_size,tile_size,row_down,row_up,row_right,row_left,frame_count,frame_rate,is_looping,effect_key) VALUES
--- Character Base animations (512x512, 64px, 8x8)
-('idle',          'Đứng yên',        'charbase',512,64, 0,1,2,3, 2,4,  1,''),
-('walk',          'Đi bộ',           'charbase',512,64, 4,5,6,7, 6,8,  1,''),
+-- Farmer System (tất cả dùng farmer, kể cả idle/walk)
+('idle',          'Đứng yên',        'farmer',1024,32, 0,1,2,3, 6,6,  1,''),
+('walk',          'Đi bộ',           'farmer',1024,32, 4,5,6,7, 6,8,  1,''),
 -- Farmer System animations (1024x1024, 32px, 32x32)
 ('run',           'Chạy',            'farmer',1024,32,  4,5,6,7,   6,10, 1,''),
 ('attack_sword',  'Chém kiếm',       'farmer',1024,32,  16,17,18,19, 6,12, 0,'farmer slash effects 64x64'),
@@ -2315,7 +2315,7 @@ VALUES
 ('farmer_sheet_size', '1024', 'Farmer spritesheet size (px)'),
 ('farmer_tile_size', '32', 'Farmer tile size (px)'),
 ('farmer_grid', '32', 'Farmer grid cols/rows'),
-('animation_system', 'dual', 'charbase (walk/idle) + farmer (actions)')
+('animation_system', 'farmer_only', 'Farmer System cho tất cả gameplay, Character Base cho preview/avatar')
 ON DUPLICATE KEY UPDATE config_value=VALUES(config_value);
 
 

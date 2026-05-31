@@ -321,6 +321,10 @@ namespace NexusIsekai.Network
         public const short S2C_EVENT_CURRENCY_UPDATE   = 0x1613;
 
 
+        // ── CLASS CHANGE ───────────────────────────────────
+        public const short C2S_CLASS_CHANGE    = 0x0250;
+        public const short S2C_CLASS_CHANGE_OK = 0x0260;
+
         // ── ACHIEVEMENT (18xx) ────────────────────────────────
         public const short C2S_ACHIEVEMENT_LIST   = 0x1801;
         public const short C2S_ACHIEVEMENT_CLAIM  = 0x1802;

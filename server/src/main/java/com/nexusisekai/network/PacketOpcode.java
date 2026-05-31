@@ -70,6 +70,10 @@ public final class PacketOpcode {
     public static final short S2C_EVENT_CURRENCY_UPDATE = (short)0x1613;
 
 
+    // ── CLASS CHANGE (chọn class tại NPC) ─────────────────
+    public static final short C2S_CLASS_CHANGE      = (short)0x0250;
+    public static final short S2C_CLASS_CHANGE_OK   = (short)0x0260;
+
     // ── ACHIEVEMENT (18xx) ────────────────────────────────
     public static final short C2S_ACHIEVEMENT_LIST   = (short)0x1801;
     public static final short C2S_ACHIEVEMENT_CLAIM  = (short)0x1802;
@@ -410,6 +414,10 @@ public final class PacketOpcode {
     public static final short S2C_EVENT_CURRENCY_SHOP = (short)0x1612;
     public static final short S2C_EVENT_CURRENCY_UPDATE = (short)0x1613;
 
+
+    // ── CLASS CHANGE (chọn class tại NPC) ─────────────────
+    public static final short C2S_CLASS_CHANGE      = (short)0x0250;
+    public static final short S2C_CLASS_CHANGE_OK   = (short)0x0260;
 
     // ── ACHIEVEMENT (18xx) ────────────────────────────────
     public static final short C2S_ACHIEVEMENT_LIST   = (short)0x1801;
