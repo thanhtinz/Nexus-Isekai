@@ -2683,18 +2683,7 @@ CREATE TABLE IF NOT EXISTS topup_purchase_log (
     INDEX idx_char (char_id)
 );
 
--- Nạp thẻ cào (nếu cần)
-CREATE TABLE IF NOT EXISTS topup_card_config (
-    id              INT AUTO_INCREMENT PRIMARY KEY,
-    telco           VARCHAR(16) NOT NULL,             -- viettel,mobifone,vinaphone,vnpt,zing
-    display_name    VARCHAR(32) NOT NULL,
-    denominations   VARCHAR(256) NOT NULL,            -- '10000,20000,50000,100000,200000,500000'
-    exchange_rate   FLOAT NOT NULL DEFAULT 1.0,       -- 1 VND = X diamond
-    fee_pct         INT NOT NULL DEFAULT 20,          -- phí chiết khấu %
-    is_active       TINYINT NOT NULL DEFAULT 1
-);
 
-INSERT IGNORE INTO topup_card_config (telco,display_name,denominations,exchange_rate,fee_pct) VALUES
 ('viettel','Viettel','10000,20000,50000,100000,200000,500000',0.001,20),
 ('mobifone','Mobifone','10000,20000,50000,100000,200000,500000',0.001,25),
 ('vinaphone','Vinaphone','10000,20000,50000,100000,200000,500000',0.001,25);

@@ -152,7 +152,6 @@ public class AdminApiServer {
         httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
         httpServer.createContext("/api/gacha-banners",    ex -> handleAuth(ex, this::handleGachaBanners));
         httpServer.createContext("/api/topup-packages", ex -> handleAuth(ex, this::handleTopupPackages));
-        httpServer.createContext("/api/topup-cards",    ex -> handleAuth(ex, this::handleTopupCards));
         httpServer.createContext("/api/server-manage",  ex -> handleAuth(ex, this::handleServerManage));
         httpServer.createContext("/api/server-merge",   ex -> handleAuth(ex, this::handleServerMerge));
         httpServer.createContext("/api/server-monitor",  ex -> handleAuth(ex, this::handleServerMonitor));
@@ -1785,12 +1784,7 @@ public class AdminApiServer {
             }
         }
     }
-    private void handleTopupCards(HttpExchange ex) throws Exception {
-        try (Connection c = DatabaseManager.getInstance().getConnection()) {
-            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM topup_card_config ORDER BY id"), "cards");
-            else { var b = parseBody(ex); c.prepareStatement("UPDATE topup_card_config SET exchange_rate="+str(b,"exchange_rate")+",fee_pct="+num(b,"fee_pct")+",is_active="+num(b,"is_active")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
-        }
-    }
+
 
     private void handleServerManage(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
