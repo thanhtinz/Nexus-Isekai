@@ -21,7 +21,11 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/ranking" element={<RankingPage />} />
+            <Route path="/download" element={<DownloadPage />} />
+            <Route path="/news" element={<NewsPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/*"
