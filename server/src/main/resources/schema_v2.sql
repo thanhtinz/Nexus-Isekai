@@ -2791,3 +2791,33 @@ ALTER TABLE characters ADD COLUMN IF NOT EXISTS vip_level INT NOT NULL DEFAULT 0
 -- topup_purchase_log đã có char_id — diamond cộng vào char_id cụ thể
 -- shop purchase cũng theo char_id
 -- gift code redeem theo char_id
+
+-- ═════════════════════════════════════════════════════════════
+-- PER-CHARACTER DATA — Mỗi nhân vật dữ liệu riêng biệt
+-- ═════════════════════════════════════════════════════════════
+
+-- Giới hạn 3 nhân vật / account / server
+-- Check trong CharHandler khi tạo:
+--   SELECT COUNT(*) FROM characters c
+--   JOIN accounts a ON a.id=c.account_id
+--   WHERE a.id=? AND a.last_server_id=?
+-- Nếu >= 3 → từ chối tạo
+
+-- Gift code: redeem per char_id (không phải account)
+ALTER TABLE gift_code_usage ADD COLUMN IF NOT EXISTS char_id BIGINT NOT NULL DEFAULT 0;
+-- Mỗi nhân vật nhập code 1 lần, không phải mỗi account
+-- VD: Account có 3 char → cả 3 đều nhập được cùng 1 code (nếu code cho phép)
+
+-- Đảm bảo mỗi NHÂN VẬT chỉ nhập 1 lần (không phải mỗi account)
+ALTER TABLE gift_code_usage DROP INDEX IF EXISTS idx_unique_usage;
+-- Unique: code_id + char_id (thay vì code_id + account_id)
+-- ALTER TABLE gift_code_usage ADD UNIQUE KEY uq_code_char (code_id, char_id);
+
+-- Gift code config: cho phép nhập theo account hay character
+ALTER TABLE gift_codes ADD COLUMN IF NOT EXISTS redeem_per VARCHAR(8) NOT NULL DEFAULT 'char';
+-- 'char' = mỗi nhân vật nhập 1 lần (3 char = 3 lần)
+-- 'account' = mỗi account nhập 1 lần (dù có 3 char)
+
+-- Max characters per server
+INSERT IGNORE INTO protection_config VALUES
+('max_chars_per_server','3','So nhan vat toi da moi account moi server');
