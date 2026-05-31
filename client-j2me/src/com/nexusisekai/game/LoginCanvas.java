@@ -257,13 +257,19 @@ public class LoginCanvas implements CommandListener {
         // ── CREATE CHAR ─────────────────────────────────────
         else if (cmd == cmdCreate) {
             String name    = tfCharName.getString().trim();
-            int    classId = cgClass.getSelectedIndex() + 1; // 1-5
-            int    gender  = cgGender.getSelectedIndex();    // 0=male,1=female
+            // Appearance — class chọn sau tại NPC
+            int bodyType   = cgBody  != null ? cgBody.getSelectedIndex() + 1 : 1;
+            int skinColor  = 1;  // default
+            int eyeStyle   = 0;  // default
+            int hairStyle  = cgHair != null ? cgHair.getSelectedIndex() : 0;
+            int hairColor  = 1;  // default
+            int shirtColor = 1;  // default
+            int pantsColor = 1;  // default
             if (name.length() < 2 || name.length() > 20) {
                 alert("Lỗi", "Tên 2-20 ký tự!", AlertType.WARNING);
                 return;
             }
-            midlet.getConnection().send(PacketWriter.charCreate(name, classId, gender));
+            midlet.getConnection().send(PacketWriter.charCreate(name, bodyType, skinColor, eyeStyle, hairStyle, hairColor, shirtColor, pantsColor));
         }
         else if (cmd == cmdCancelCreate) {
             showCharList();

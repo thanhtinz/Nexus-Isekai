@@ -111,9 +111,16 @@ public class PacketWriter {
         return new PacketWriter(PacketOpcode.C2S_CHAR_LIST);
     }
 
-    public static PacketWriter charCreate(String name, int classId, int gender) {
+    public static PacketWriter charCreate(String name, int bodyType, int skinColor, int eyeStyle, int hairStyle, int hairColor, int shirtColor, int pantsColor) {
         return new PacketWriter(PacketOpcode.C2S_CHAR_CREATE)
-            .writeString(name).writeInt(classId).writeByte(gender);
+            .writeString(name)
+            .writeByte(bodyType).writeByte(skinColor).writeByte(eyeStyle)
+            .writeByte(hairStyle).writeByte(hairColor)
+            .writeByte(shirtColor).writeByte(pantsColor);
+    }
+
+    public static PacketWriter classChange(int classId) {
+        return new PacketWriter(PacketOpcode.C2S_CLASS_CHANGE).writeInt(classId);
     }
 
     public static PacketWriter charSelect(long charId) {

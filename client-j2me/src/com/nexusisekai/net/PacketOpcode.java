@@ -126,4 +126,57 @@ public interface PacketOpcode {
     // ── LEADERBOARD ──────────────────────────────────────────
     short C2S_LEADERBOARD       = (short)0x0F20;
     short S2C_LEADERBOARD       = (short)0x0F31;
+
+    // ── CLASS CHANGE ─────────────────────────────────────────
+    short C2S_CLASS_CHANGE      = 0x0250;
+    short S2C_CLASS_CHANGE_OK   = 0x0260;
+
+    // ── TRADE ────────────────────────────────────────────────
+    short C2S_TRADE_REQUEST     = 0x1001;
+    short C2S_TRADE_CONFIRM     = 0x1005;
+    short C2S_TRADE_CANCEL      = 0x1006;
+    short S2C_TRADE_REQUEST     = 0x1011;
+    short S2C_TRADE_RESULT      = 0x1013;
+
+    // ── AUCTION ──────────────────────────────────────────────
+    short C2S_AUCTION_LIST      = 0x1101;
+    short S2C_AUCTION_LIST      = 0x1111;
+
+    // ── PARTY ────────────────────────────────────────────────
+    short C2S_PARTY_CREATE      = 0x1201;
+    short C2S_PARTY_INVITE      = 0x1202;
+    short C2S_PARTY_LEAVE       = 0x1204;
+    short S2C_PARTY_INFO        = 0x1211;
+
+    // ── DUNGEON ──────────────────────────────────────────────
+    short C2S_DUNGEON_LIST      = 0x1301;
+    short C2S_DUNGEON_ENTER     = 0x1302;
+    short S2C_DUNGEON_LIST      = 0x1311;
+
+    // ── DIALOG ───────────────────────────────────────────────
+    short C2S_DIALOG_START      = 0x1401;
+    short C2S_DIALOG_CHOICE     = 0x1402;
+    short S2C_DIALOG_SHOW       = 0x1411;
+
+    // ── ANNOUNCEMENTS ────────────────────────────────────────
+    short C2S_ANNOUNCEMENT_LIST = 0x1501;
+    short S2C_ANNOUNCEMENT_LIST = 0x1511;
+    short S2C_ANNOUNCEMENT_NEW  = 0x1512;
+
+    // ── ACHIEVEMENT ──────────────────────────────────────────
+    short C2S_ACHIEVEMENT_LIST  = 0x1801;
+    short C2S_ACHIEVEMENT_CLAIM = 0x1802;
+    short S2C_ACHIEVEMENT_LIST  = 0x1811;
+
+    // ── DAILY LOGIN ──────────────────────────────────────────
+    short C2S_DAILY_LOGIN_INFO  = 0x1901;
+    short C2S_DAILY_LOGIN_CLAIM = 0x1902;
+    short S2C_DAILY_LOGIN_INFO  = 0x1911;
+
+    // ── MAIL ─────────────────────────────────────────────────
+    short C2S_MAIL_LIST         = 0x1B01;
+    short C2S_MAIL_CLAIM        = 0x1B03;
+    short S2C_MAIL_LIST         = 0x1B11;
+    short S2C_MAIL_NEW          = 0x1B12;
+
 }

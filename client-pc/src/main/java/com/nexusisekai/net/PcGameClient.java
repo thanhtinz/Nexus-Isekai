@@ -94,7 +94,12 @@ class PcPacketWriter {
     static byte[] login(String u, String p)           { return new PcPacketWriter(PacketOpcode.C2S_LOGIN).writeString(u).writeString(p).build(); }
     static byte[] register(String u, String p, String e){ return new PcPacketWriter(PacketOpcode.C2S_REGISTER).writeString(u).writeString(p).writeString(e).build(); }
     static byte[] charList()                           { return new PcPacketWriter(PacketOpcode.C2S_CHAR_LIST).build(); }
-    static byte[] charCreate(String n, int cls, int g) { return new PcPacketWriter(PacketOpcode.C2S_CHAR_CREATE).writeString(n).writeInt(cls).writeByte(g).build(); }
+    static byte[] charCreate(String n, int body, int skin, int eye, int hair, int hairColor, int shirt, int pants) {
+        return new PcPacketWriter(PacketOpcode.C2S_CHAR_CREATE).writeString(n)
+            .writeByte(body).writeByte(skin).writeByte(eye)
+            .writeByte(hair).writeByte(hairColor).writeByte(shirt).writeByte(pants).build();
+    }
+    static byte[] classChange(int classId) { return new PcPacketWriter(PacketOpcode.C2S_CLASS_CHANGE).writeInt(classId).build(); }
     static byte[] charSelect(long id)                  { return new PcPacketWriter(PacketOpcode.C2S_CHAR_SELECT).writeLong(id).build(); }
     static byte[] move(float x, float y, byte dir)     { return new PcPacketWriter(PacketOpcode.C2S_MOVE).writeFloat(x).writeFloat(y).writeByte(dir).build(); }
     static byte[] attack(long id)                      { return new PcPacketWriter(PacketOpcode.C2S_ATTACK).writeLong(id).build(); }

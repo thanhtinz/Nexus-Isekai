@@ -186,7 +186,13 @@ final class PacketWriter {
     static func login(_ user: String, _ pass: String)              -> Data { PacketWriter(Op.C2S_LOGIN).writeString(user).writeString(pass).build() }
     static func register(_ u: String, _ p: String, _ e: String)   -> Data { PacketWriter(Op.C2S_REGISTER).writeString(u).writeString(p).writeString(e).build() }
     static func charList()                                          -> Data { PacketWriter(Op.C2S_CHAR_LIST).build() }
-    static func charCreate(_ name: String, _ cls: Int, _ gen: Int) -> Data { PacketWriter(Op.C2S_CHAR_CREATE).writeString(name).writeInt(UInt32(cls)).writeByte(UInt8(gen)).build() }
+    static func charCreate(_ name: String, _ body: Int, _ skin: Int, _ eye: Int, _ hair: Int, _ hairColor: Int, _ shirt: Int, _ pants: Int) -> Data {
+        PacketWriter(Op.C2S_CHAR_CREATE).writeString(name)
+            .writeByte(UInt8(body)).writeByte(UInt8(skin)).writeByte(UInt8(eye))
+            .writeByte(UInt8(hair)).writeByte(UInt8(hairColor))
+            .writeByte(UInt8(shirt)).writeByte(UInt8(pants)).build()
+    }
+    static func classChange(_ classId: Int) -> Data { PacketWriter(Op.C2S_CLASS_CHANGE).writeInt(UInt32(classId)).build() }
     static func charSelect(_ id: Int64)                            -> Data { PacketWriter(Op.C2S_CHAR_SELECT).writeLong(id).build() }
     static func move(_ x: Float, _ y: Float, _ dir: UInt8)        -> Data { PacketWriter(Op.C2S_MOVE).writeFloat(x).writeFloat(y).writeByte(dir).build() }
     static func attack(_ id: Int64)                                -> Data { PacketWriter(Op.C2S_ATTACK).writeLong(id).build() }
