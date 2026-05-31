@@ -41,7 +41,29 @@ public class EventScheduler {
         // Poll cross-server relay mỗi 10 giây
         scheduler.scheduleAtFixedRate(this::pollCrossServerRelay, 10, 10, TimeUnit.SECONDS);
 
+        // Chăm con: giảm nhu cầu dần, bảo mẫu tự chăm (mỗi 10 phút)
+        scheduler.scheduleAtFixedRate(this::childCareTask, 10, 10, TimeUnit.MINUTES);
+
         log.info("[EVENT] Scheduler started.");
+    }
+
+
+    /** Giảm nhu cầu con theo thời gian; bảo mẫu (nanny_until > NOW) tự chăm đầy. */
+    private void childCareTask() {
+        try (java.sql.Connection c = com.nexusisekai.database.DatabaseManager.getInstance().getConnection()) {
+            // Con có bảo mẫu còn hạn → giữ nhu cầu đầy + happiness cao
+            com.nexusisekai.database.SqlSafe.update(c,
+                "UPDATE children SET hunger=100, thirst=100, cleanliness=100, happiness=LEAST(100,happiness+2) " +
+                "WHERE nanny_until IS NOT NULL AND nanny_until > NOW()");
+            // Con KHÔNG có bảo mẫu → nhu cầu giảm; nếu đói/khát/bẩn thì happiness giảm
+            com.nexusisekai.database.SqlSafe.update(c,
+                "UPDATE children SET " +
+                "hunger=GREATEST(0,hunger-5), thirst=GREATEST(0,thirst-5), cleanliness=GREATEST(0,cleanliness-4), " +
+                "happiness=GREATEST(0, happiness - CASE WHEN hunger<20 OR thirst<20 OR cleanliness<20 THEN 5 ELSE 0 END) " +
+                "WHERE nanny_until IS NULL OR nanny_until <= NOW()");
+        } catch (Exception e) {
+            log.warn("childCareTask error: {}", e.getMessage());
+        }
     }
 
     public void stop() {

@@ -432,6 +432,7 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
     public String getAccountName()       { return accountName; }
     public void setAccountName(String n) { this.accountName = n; }
     public boolean isAuthenticated()     { return accountId > 0; }
+    public boolean isInGame()            { return player != null; }
     public boolean isAdmin()             { return admin; }
     public void setAdmin(boolean a)      { this.admin = a; }
     public Player getPlayer()            { return player; }

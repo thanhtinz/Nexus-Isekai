@@ -465,210 +465,60 @@ public final class PacketOpcode {
     public static final short S2C_MENTOR_GRADUATE   = 0x0F12; // xuất sư thành công
 
     // ── TRADE (10xx) ──────────────────────────────────────────
-    public static final short C2S_TRADE_REQUEST     = (short)0x1001;
-    public static final short C2S_TRADE_RESPOND     = (short)0x1002;
-    public static final short C2S_TRADE_ADD_ITEM    = (short)0x1003;
-    public static final short C2S_TRADE_SET_GOLD    = (short)0x1004;
-    public static final short C2S_TRADE_CONFIRM     = (short)0x1005;
-    public static final short C2S_TRADE_CANCEL      = (short)0x1006;
-    public static final short S2C_TRADE_REQUEST     = (short)0x1011;
-    public static final short S2C_TRADE_UPDATE      = (short)0x1012;
-    public static final short S2C_TRADE_RESULT      = (short)0x1013;
 
     // ── AUCTION (11xx) ────────────────────────────────────────
-    public static final short C2S_AUCTION_LIST      = (short)0x1101;
-    public static final short C2S_AUCTION_CREATE    = (short)0x1102;
-    public static final short C2S_AUCTION_BID       = (short)0x1103;
-    public static final short C2S_AUCTION_BUYOUT    = (short)0x1104;
-    public static final short C2S_AUCTION_CANCEL    = (short)0x1105;
-    public static final short C2S_AUCTION_MY_ITEMS  = (short)0x1106;
-    public static final short S2C_AUCTION_LIST      = (short)0x1111;
-    public static final short S2C_AUCTION_RESULT    = (short)0x1112;
 
     // ── PARTY (12xx) ──────────────────────────────────────────
-    public static final short C2S_PARTY_CREATE      = (short)0x1201;
-    public static final short C2S_PARTY_INVITE      = (short)0x1202;
-    public static final short C2S_PARTY_ACCEPT      = (short)0x1203;
-    public static final short C2S_PARTY_LEAVE       = (short)0x1204;
-    public static final short C2S_PARTY_KICK        = (short)0x1205;
-    public static final short C2S_PARTY_DISBAND     = (short)0x1206;
-    public static final short S2C_PARTY_INFO        = (short)0x1211;
-    public static final short S2C_PARTY_INVITED     = (short)0x1212;
-    public static final short S2C_PARTY_UPDATE      = (short)0x1213;
 
     // ── DUNGEON (13xx) ────────────────────────────────────────
-    public static final short C2S_DUNGEON_LIST      = (short)0x1301;
-    public static final short C2S_DUNGEON_ENTER     = (short)0x1302;
-    public static final short C2S_DUNGEON_EXIT      = (short)0x1303;
-    public static final short S2C_DUNGEON_LIST      = (short)0x1311;
-    public static final short S2C_DUNGEON_ENTER_OK  = (short)0x1312;
-    public static final short S2C_DUNGEON_RESULT    = (short)0x1313;
-    public static final short S2C_DUNGEON_TIMER     = (short)0x1314;
 
     // ── NPC DIALOG (14xx) ─────────────────────────────────────
-    public static final short C2S_DIALOG_START      = (short)0x1401;
-    public static final short C2S_DIALOG_CHOICE     = (short)0x1402;
-    public static final short S2C_DIALOG_SHOW       = (short)0x1411;
-    public static final short S2C_DIALOG_OPTIONS    = (short)0x1412;
 
     // ── SYSTEM ANNOUNCEMENTS (15xx) ───────────────────────────
-    public static final short C2S_ANNOUNCEMENT_LIST = (short)0x1501;
-    public static final short S2C_ANNOUNCEMENT_LIST = (short)0x1511;
-    public static final short S2C_ANNOUNCEMENT_NEW  = (short)0x1512;
-    public static final short S2C_SYSTEM_EVENT_LOG  = (short)0x1513;
 
     // ── EVENT CURRENCY (16xx) ─────────────────────────────────
-    public static final short C2S_EVENT_CURRENCY_LIST = (short)0x1601;
-    public static final short C2S_EVENT_CURRENCY_SHOP = (short)0x1602;
-    public static final short C2S_EVENT_CURRENCY_BUY  = (short)0x1603;
-    public static final short C2S_EVENT_CURRENCY_EXCHANGE = (short)0x1604;
-    public static final short S2C_EVENT_CURRENCY_LIST = (short)0x1611;
-    public static final short S2C_EVENT_CURRENCY_SHOP = (short)0x1612;
-    public static final short S2C_EVENT_CURRENCY_UPDATE = (short)0x1613;
 
 
     // ── SETTINGS (1Cxx) ───────────────────────────────────
-    public static final short C2S_SETTINGS_LOAD     = (short)0x1C01;
-    public static final short C2S_SETTINGS_SAVE     = (short)0x1C02;
-    public static final short S2C_SETTINGS_DATA     = (short)0x1C11;
-    public static final short S2C_SETTINGS_DEFAULTS = (short)0x1C12;
 
 
     // ── GACHA (1Dxx) ─────────────────────────────────────────
-    public static final short C2S_GACHA_BANNER_LIST = (short)0x1D01;
-    public static final short C2S_GACHA_PULL        = (short)0x1D02;
-    public static final short C2S_GACHA_HISTORY     = (short)0x1D03;
-    public static final short S2C_GACHA_BANNER_LIST = (short)0x1D11;
-    public static final short S2C_GACHA_RESULT      = (short)0x1D12;
-    public static final short C2S_GACHA_BUY_TICKET  = (short)0x1D04; // mua vé bằng diamond
-    public static final short C2S_GACHA_CURRENCY    = (short)0x1D05; // xem số vé hiện có
-    public static final short S2C_GACHA_CURRENCY    = (short)0x1D14; // trả về số vé
-    public static final short S2C_GACHA_HISTORY     = (short)0x1D13;
 
     // ── PVP SEASON (1Exx) ────────────────────────────────────
-    public static final short C2S_PVP_SEASON_INFO   = (short)0x1E01;
-    public static final short C2S_PVP_SEASON_RANK   = (short)0x1E02;
-    public static final short C2S_PVP_SEASON_REWARD = (short)0x1E03;
-    public static final short S2C_PVP_SEASON_INFO   = (short)0x1E11;
-    public static final short S2C_PVP_SEASON_RANK   = (short)0x1E12;
 
     // ── SOCIAL LOGIN (1Fxx) ──────────────────────────────────
-    public static final short C2S_SOCIAL_LOGIN      = (short)0x1F01;
-    public static final short C2S_SOCIAL_LINK       = (short)0x1F02;
-    public static final short C2S_SOCIAL_UNLINK     = (short)0x1F03;
-    public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
-    public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
 
 
 
     // ── INTRO VIDEO (30xx) ────────────────────────────────
-    public static final short C2S_INTRO_VIDEO_CONFIG = (short)0x3001;
-    public static final short S2C_INTRO_VIDEO_CONFIG = (short)0x3011;
 
     // ── CHAR ACTIONS + PAIR (2Fxx) ────────────────────────
-    public static final short C2S_CHAR_ACTION       = (short)0x2F01;
-    public static final short C2S_PAIR_ACTION       = (short)0x2F02;
-    public static final short C2S_PAIR_ACTION_REPLY = (short)0x2F03;
-    public static final short S2C_CHAR_ACTION       = (short)0x2F11;
-    public static final short S2C_PAIR_ACTION_REQ   = (short)0x2F12;
-    public static final short S2C_PAIR_ACTION_PLAY  = (short)0x2F13;
-    public static final short C2S_AUTO_CONFIG       = (short)0x2F04;
-    public static final short S2C_AUTO_CONFIG       = (short)0x2F14;
 
     // ── EXTENDED GAMEPLAY (26xx-2Axx) ─────────────────────
-    public static final short C2S_INSPECT_PLAYER  = (short)0x2601;
-    public static final short S2C_INSPECT_DATA    = (short)0x2611;
-    public static final short C2S_AUTO_PLAY       = (short)0x2701;
-    public static final short S2C_AUTO_PLAY_STATE = (short)0x2711;
-    public static final short C2S_EMOTE           = (short)0x2801;
-    public static final short S2C_EMOTE_SHOW      = (short)0x2811;
-    public static final short C2S_TELEPORT        = (short)0x2901;
-    public static final short S2C_TELEPORT_OK     = (short)0x2911;
-    public static final short C2S_WAREHOUSE       = (short)0x2A01;
-    public static final short S2C_WAREHOUSE_DATA  = (short)0x2A11;
-    public static final short C2S_GEM_SOCKET      = (short)0x2B01;
-    public static final short S2C_GEM_SOCKET_OK   = (short)0x2B11;
-    public static final short C2S_REFINE          = (short)0x2C01;
-    public static final short S2C_REFINE_OK       = (short)0x2C11;
-    public static final short C2S_NEWS_LIST       = (short)0x2D01;
-    public static final short S2C_NEWS_LIST       = (short)0x2D11;
-    public static final short C2S_BLOCK_PLAYER    = (short)0x2E01;
-    public static final short C2S_REPORT_PLAYER   = (short)0x2E02;
-    public static final short S2C_BLOCK_OK        = (short)0x2E11;
 
     // ── TOPUP IN-GAME (25xx) ─────────────────────────────
-    public static final short C2S_TOPUP_PACKAGES    = (short)0x2501;
-    public static final short C2S_TOPUP_BUY         = (short)0x2502;
-    public static final short C2S_TOPUP_HISTORY     = (short)0x2503;
-    public static final short S2C_TOPUP_PACKAGES    = (short)0x2511;
-    public static final short S2C_TOPUP_URL         = (short)0x2512;  // URL trang nạp, client mở browser/webview
-    public static final short S2C_TOPUP_SUCCESS     = (short)0x2513;
-    public static final short S2C_TOPUP_HISTORY     = (short)0x2514;
 
     // ── SERVER SELECTION (24xx) ─────────────────────────
-    public static final short C2S_SERVER_LIST       = (short)0x2401;
-    public static final short C2S_SERVER_SELECT     = (short)0x2402;
-    public static final short C2S_CHANNEL_LIST      = (short)0x2403;
-    public static final short C2S_CHANNEL_SELECT    = (short)0x2404;
-    public static final short S2C_SERVER_LIST       = (short)0x2411;
-    public static final short S2C_CHANNEL_LIST      = (short)0x2412;
-    public static final short S2C_SERVER_FULL       = (short)0x2413;
-    public static final short S2C_CHANNEL_CHANGED   = (short)0x2414;
 
     // ── INTRO CUTSCENE (22xx) ────────────────────────────
-    public static final short C2S_INTRO_REQUEST     = (short)0x2201;
-    public static final short C2S_INTRO_COMPLETE    = (short)0x2202;
-    public static final short C2S_INTRO_SKIP        = (short)0x2203;
-    public static final short S2C_INTRO_SCENES      = (short)0x2211;
-    public static final short S2C_INTRO_NOT_NEEDED  = (short)0x2212;
 
     // ── LOGIN SCREEN (23xx) ──────────────────────────────
-    public static final short C2S_LOGIN_SCREEN_CFG  = (short)0x2301;
-    public static final short S2C_LOGIN_SCREEN_CFG  = (short)0x2311;
 
     // ── TUTORIAL (20xx) ──────────────────────────────────────
-    public static final short C2S_TUTORIAL_PROGRESS = (short)0x2001;
-    public static final short C2S_TUTORIAL_SKIP     = (short)0x2002;
-    public static final short S2C_TUTORIAL_STEP     = (short)0x2011;
-    public static final short S2C_TUTORIAL_COMPLETE = (short)0x2012;
 
     // ── LOCALIZATION (21xx) ──────────────────────────────────
-    public static final short C2S_LANG_SET          = (short)0x2101;
-    public static final short S2C_LANG_PACK         = (short)0x2111;
 
     // ── ANALYTICS (internal, no C2S) ─────────────────────────
-    public static final short S2C_ANALYTICS_EVENT   = (short)0x2211;
 
     // ── CLASS CHANGE (chọn class tại NPC) ─────────────────
-    public static final short C2S_CLASS_CHANGE      = (short)0x0250;
-    public static final short S2C_CLASS_CHANGE_OK   = (short)0x0260;
 
     // ── ACHIEVEMENT (18xx) ────────────────────────────────
-    public static final short C2S_ACHIEVEMENT_LIST   = (short)0x1801;
-    public static final short C2S_ACHIEVEMENT_CLAIM  = (short)0x1802;
-    public static final short S2C_ACHIEVEMENT_LIST   = (short)0x1811;
-    public static final short S2C_ACHIEVEMENT_UPDATE = (short)0x1812;
-    public static final short S2C_ACHIEVEMENT_UNLOCK = (short)0x1813;
 
     // ── DAILY LOGIN (19xx) ────────────────────────────────
-    public static final short C2S_DAILY_LOGIN_INFO   = (short)0x1901;
-    public static final short C2S_DAILY_LOGIN_CLAIM  = (short)0x1902;
-    public static final short S2C_DAILY_LOGIN_INFO   = (short)0x1911;
-    public static final short S2C_DAILY_LOGIN_CLAIMED= (short)0x1912;
 
     // ── WORLD BOSS (1Axx) ─────────────────────────────────
-    public static final short C2S_WORLD_BOSS_INFO    = (short)0x1A01;
-    public static final short S2C_WORLD_BOSS_SPAWN   = (short)0x1A11;
-    public static final short S2C_WORLD_BOSS_DEAD    = (short)0x1A12;
-    public static final short S2C_WORLD_BOSS_UPDATE  = (short)0x1A13;
 
     // ── PLAYER MAIL (1Bxx) ────────────────────────────────
-    public static final short C2S_MAIL_LIST          = (short)0x1B01;
-    public static final short C2S_MAIL_READ          = (short)0x1B02;
-    public static final short C2S_MAIL_CLAIM         = (short)0x1B03;
-    public static final short C2S_MAIL_DELETE        = (short)0x1B04;
-    public static final short S2C_MAIL_LIST          = (short)0x1B11;
-    public static final short S2C_MAIL_NEW           = (short)0x1B12;
 
     // ── MASTER REGISTRY (admin only, 17xx) ────────────────────
     // Khong can opcode — admin dung REST API
