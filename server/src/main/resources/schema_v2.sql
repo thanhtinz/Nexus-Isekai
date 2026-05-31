@@ -2315,7 +2315,7 @@ VALUES
 ('farmer_sheet_size', '1024', 'Farmer spritesheet size (px)'),
 ('farmer_tile_size', '32', 'Farmer tile size (px)'),
 ('farmer_grid', '32', 'Farmer grid cols/rows'),
-('animation_system', 'farmer_only', 'Farmer System cho tất cả gameplay, Character Base cho preview/avatar')
+('animation_system', '2d_sprite', 'Generic 2D sprite system, upload pack qua admin')
 ON DUPLICATE KEY UPDATE config_value=VALUES(config_value);
 
 
@@ -2343,8 +2343,8 @@ UPDATE animation_states SET row_down=4, row_up=5, row_right=6, row_left=7,
 -- Config rõ ràng
 DELETE FROM character_sprite_config WHERE config_key IN ('primary_system','charbase_usage','render_ppu','render_scale');
 INSERT INTO character_sprite_config (config_key, config_value, description) VALUES
-('primary_system', 'farmer', 'Hệ thống sprite chính cho gameplay'),
-('charbase_usage', 'preview', 'Character Base dùng cho: preview khi tạo nhân vật, avatar, portrait'),
+('primary_system', '2d_sprite', 'Hệ thống sprite chính cho gameplay'),
+('charbase_usage', 'none', 'Chưa có sprite system, chờ upload pack mới'),
 ('render_ppu', '32', 'Pixels Per Unit trong Unity (Farmer = 32px tiles)'),
 ('render_scale', '1', 'Scale nhân vật trong game world (1 = 32px, 2 = 64px hiển thị)');
 

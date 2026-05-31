@@ -422,7 +422,7 @@ namespace NexusIsekai.Data
         public int PantsColor = 1;   // 1-5 (1out/pfpn_vXX)
 
         // Sprite system config
-        public const string PrimarySystem = "farmer";   // 1024x1024, 32px tiles
+        public const string PrimarySystem = "2d_sprite";   // 1024x1024, 32px tiles
         public const int TileSize = 32;
         public const int SheetSize = 1024;
         public const int GridSize = 32;                  // 32x32 grid
@@ -430,30 +430,14 @@ namespace NexusIsekai.Data
         // Hair style key mapping
         public static readonly string[] HairKeys = { "bob1", "bob2", "dap1", "flat", "fro1", "pon1", "spk2" };
 
-        /// <summary>Farmer System sprite path cho body action animations</summary>
-        public string GetFarmerBodyPath() => "FarmerSystem/sheets/01body/fbas_01body_human_00.png";
+        /// <summary>Sprite path cho body (loaded from server config)</summary>
+        public string GetBodySpritePath() => $"Sprites/Characters/{BodyType}/body.png";
 
-        /// <summary>Farmer System sprite path cho hair khi action</summary>
-        public string GetFarmerHairPath()
-        {
-            string key = HairStyle < HairKeys.Length ? HairKeys[HairStyle] : "bob1";
-            // Map to farmer hair: bob1→bob1, bob2→bob2, dap1→dapper, flat→flattop, fro1→afro, pon1→ponytail1, spk2→spiky2
-            string farmerKey = key switch {
-                "bob1" => "bob1", "bob2" => "bob2", "dap1" => "dapper",
-                "flat" => "flattop", "fro1" => "afro", "pon1" => "ponytail1", "spk2" => "spiky2",
-                _ => "bob1"
-            };
-            return $"FarmerSystem/sheets/13hair/fbas_13hair_{farmerKey}_00.png";
-        }
+        /// <summary>Sprite path cho hair</summary>
+        public string GetHairSpritePath() => $"Sprites/Characters/{BodyType}/hair_{HairStyle}.png";
 
-        /// <summary>Character Base sprite path (dùng cho preview/avatar)</summary>
-        public string GetPreviewBodyPath() => $"Character/body_{BodyType}/char_a_p1_0bas_humn_v{SkinColor:D2}.png";
-        public string GetPreviewHairPath()
-        {
-            string key = HairStyle < HairKeys.Length ? HairKeys[HairStyle] : "bob1";
-            return $"Character/body_{BodyType}/4har/char_a_p1_4har_{key}_v{HairColor:D2}.png";
-        }
-        public string GetPreviewEyePath() => $"Character/body_{BodyType}/3fac/eye_v{EyeStyle:D2}.png";
+        /// <summary>Sprite paths (generic, loaded from server sprite config)</summary>
+        public string GetPreviewPath() => $"Sprites/Characters/{BodyType}/preview.png";
     }
 
     // Animation state (loaded from server config)
