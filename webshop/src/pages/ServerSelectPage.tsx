@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const CLASS_NAMES = ['','Swordsman','Mage','Gunner','Slinger','Axeman','Brawler','Archer'];
 
 export default function ServerSelectPage() {
+  const navigate = useNavigate();
   const { servers, selectedServer, selectServer, characters, selectCharacter, selectedChar } = useAuth();
 
   return (
@@ -43,6 +45,15 @@ export default function ServerSelectPage() {
             )}
           </>
         )}
+      {selectedChar && (
+            <div className="mt-8 text-center">
+              <button onClick={() => navigate('/store')}
+                className="bg-yellow-500 text-black font-bold px-8 py-3 rounded-xl hover:bg-yellow-400 transition">
+                Continue as {selectedChar.name}
+              </button>
+              <p className="text-xs text-gray-500 mt-2">All purchases will go to this character</p>
+            </div>
+          )}
       </div>
     </div>
   );

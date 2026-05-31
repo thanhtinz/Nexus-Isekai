@@ -2778,3 +2778,16 @@ CREATE TABLE IF NOT EXISTS server_copy_log (
     created_by      VARCHAR(64) DEFAULT 'admin',
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ═════════════════════════════════════════════════════════════
+-- TOPUP PER CHARACTER — Nạp theo nhân vật, không phải account
+-- ═════════════════════════════════════════════════════════════
+
+-- Diamond lưu trong characters table (đã có gold, thêm diamond)
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS diamond BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS total_topup BIGINT NOT NULL DEFAULT 0; -- tổng nạp VND
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS vip_level INT NOT NULL DEFAULT 0;
+
+-- topup_purchase_log đã có char_id — diamond cộng vào char_id cụ thể
+-- shop purchase cũng theo char_id
+-- gift code redeem theo char_id
