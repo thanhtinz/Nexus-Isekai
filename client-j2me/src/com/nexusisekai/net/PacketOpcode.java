@@ -128,7 +128,12 @@ public interface PacketOpcode {
     short S2C_LEADERBOARD       = (short)0x0F31;
 
     // ── CLASS CHANGE ─────────────────────────────────────────
-    short C2S_CLASS_CHANGE      = 0x0250;
+    short // ── SETTINGS ─────────────────────────────────────────────
+    short C2S_SETTINGS_LOAD     = 0x1C01;
+    short C2S_SETTINGS_SAVE     = 0x1C02;
+    short S2C_SETTINGS_DATA     = 0x1C11;
+    short S2C_SETTINGS_DEFAULTS = 0x1C12;
+    C2S_CLASS_CHANGE      = 0x0250;
     short S2C_CLASS_CHANGE_OK   = 0x0260;
 
     // ── TRADE ────────────────────────────────────────────────

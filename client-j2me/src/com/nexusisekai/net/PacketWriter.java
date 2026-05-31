@@ -119,6 +119,13 @@ public class PacketWriter {
             .writeByte(shirtColor).writeByte(pantsColor);
     }
 
+    public static PacketWriter settingsLoad() {
+        return new PacketWriter(PacketOpcode.C2S_SETTINGS_LOAD);
+    }
+    public static PacketWriter settingsSave(String json) {
+        return new PacketWriter(PacketOpcode.C2S_SETTINGS_SAVE).writeString(json);
+    }
+
     public static PacketWriter classChange(int classId) {
         return new PacketWriter(PacketOpcode.C2S_CLASS_CHANGE).writeInt(classId);
     }

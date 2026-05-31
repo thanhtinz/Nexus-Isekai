@@ -892,7 +892,18 @@ public class ExtendedHandlers {
             pkt.writeShort(PacketOpcode.S2C_SETTINGS_DATA);
             writeStr(pkt, json);
             session.send(pkt);
+            // Also send feature-specific prefs
+            sendPrefs(session, p.getCharId());
         } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    private static void sendPrefs(GameSession session, long charId) {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            // Auto-create prefs rows if not exist
+            for (String tbl : new String[]{"player_chat_prefs","player_guild_prefs","player_party_prefs","player_notify_prefs"}) {
+                c.prepareStatement("INSERT IGNORE INTO " + tbl + " (char_id) VALUES (" + charId + ")").executeUpdate();
+            }
+        } catch (Exception ignored) {}
     }
 
     public static void handleSettingsSave(GameSession session, ByteBuf buf) {

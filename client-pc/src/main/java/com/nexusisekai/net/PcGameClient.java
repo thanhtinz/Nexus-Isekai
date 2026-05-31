@@ -99,7 +99,11 @@ class PcPacketWriter {
             .writeByte(body).writeByte(skin).writeByte(eye)
             .writeByte(hair).writeByte(hairColor).writeByte(shirt).writeByte(pants).build();
     }
-    static byte[] classChange(int classId) { return new PcPacketWriter(PacketOpcode.C2S_CLASS_CHANGE).writeInt(classId).build(); }
+    static byte[] settingsLoad() { return new PcPacketWriter(PacketOpcode.C2S_SETTINGS_LOAD).build(); }
+    static byte[] settingsSave(String json) { return new PcPacketWriter(PacketOpcode.C2S_SETTINGS_SAVE).writeString(json).build(); }
+    static byte[] classChange(int classId) { return new PcPacketWriter(PacketOpcode.short C2S_SETTINGS_LOAD=0x1C01, C2S_SETTINGS_SAVE=0x1C02;
+    short S2C_SETTINGS_DATA=0x1C11, S2C_SETTINGS_DEFAULTS=0x1C12;
+    C2S_CLASS_CHANGE).writeInt(classId).build(); }
     static byte[] charSelect(long id)                  { return new PcPacketWriter(PacketOpcode.C2S_CHAR_SELECT).writeLong(id).build(); }
     static byte[] move(float x, float y, byte dir)     { return new PcPacketWriter(PacketOpcode.C2S_MOVE).writeFloat(x).writeFloat(y).writeByte(dir).build(); }
     static byte[] attack(long id)                      { return new PcPacketWriter(PacketOpcode.C2S_ATTACK).writeLong(id).build(); }

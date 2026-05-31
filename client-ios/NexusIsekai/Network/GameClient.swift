@@ -192,7 +192,13 @@ final class PacketWriter {
             .writeByte(UInt8(hair)).writeByte(UInt8(hairColor))
             .writeByte(UInt8(shirt)).writeByte(UInt8(pants)).build()
     }
-    static func classChange(_ classId: Int) -> Data { PacketWriter(Op.C2S_CLASS_CHANGE).writeInt(UInt32(classId)).build() }
+    static func settingsLoad() -> Data { PacketWriter(Op.C2S_SETTINGS_LOAD).build() }
+    static func settingsSave(_ json: String) -> Data { PacketWriter(Op.C2S_SETTINGS_SAVE).writeString(json).build() }
+    static func classChange(_ classId: Int) -> Data { PacketWriter(Op.static let C2S_SETTINGS_LOAD:  UInt16 = 0x1C01
+    static let C2S_SETTINGS_SAVE:  UInt16 = 0x1C02
+    static let S2C_SETTINGS_DATA:  UInt16 = 0x1C11
+    static let S2C_SETTINGS_DEFAULTS:UInt16 = 0x1C12
+    C2S_CLASS_CHANGE).writeInt(UInt32(classId)).build() }
     static func charSelect(_ id: Int64)                            -> Data { PacketWriter(Op.C2S_CHAR_SELECT).writeLong(id).build() }
     static func move(_ x: Float, _ y: Float, _ dir: UInt8)        -> Data { PacketWriter(Op.C2S_MOVE).writeFloat(x).writeFloat(y).writeByte(dir).build() }
     static func attack(_ id: Int64)                                -> Data { PacketWriter(Op.C2S_ATTACK).writeLong(id).build() }

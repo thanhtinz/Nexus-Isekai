@@ -153,6 +153,10 @@ public class PacketWriter {
         { return new PacketWriter(Opcodes.C2S_CHAR_LIST); }
     public static PacketWriter charCreate(String name, int bodyType, int skinColor, int eyeStyle, int hairStyle, int hairColor, int shirtColor, int pantsColor)
         { return new PacketWriter(Opcodes.C2S_CHAR_CREATE).writeString(name).writeByte(bodyType).writeByte(skinColor).writeByte(eyeStyle).writeByte(hairStyle).writeByte(hairColor).writeByte(shirtColor).writeByte(pantsColor); }
+    public static PacketWriter settingsLoad()
+        { return new PacketWriter(Opcodes.C2S_SETTINGS_LOAD); }
+    public static PacketWriter settingsSave(String json)
+        { return new PacketWriter(Opcodes.C2S_SETTINGS_SAVE).writeString(json); }
     public static PacketWriter classChange(int classId)
         { return new PacketWriter(Opcodes.C2S_CLASS_CHANGE).writeInt(classId); }
     public static PacketWriter charSelect(long charId)

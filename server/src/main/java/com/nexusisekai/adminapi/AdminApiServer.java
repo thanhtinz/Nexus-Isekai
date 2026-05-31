@@ -149,6 +149,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/item-templates",   ex -> handleAuth(ex, this::handleItemTemplates));
         httpServer.createContext("/api/enhance-rates",    ex -> handleAuth(ex, this::handleEnhanceRates));
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
+        httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
         httpServer.createContext("/api/settings-defaults",ex -> handleAuth(ex, this::handleSettingsDefaults));
         httpServer.createContext("/api/animations",       ex -> handleAuth(ex, this::handleAnimations));
         httpServer.createContext("/api/achievements",       ex -> handleAuth(ex, this::handleAchievements));
@@ -1719,6 +1720,23 @@ public class AdminApiServer {
 
 
     /** CRUD Animation states + class mapping */
+
+
+    /** GET /api/player-prefs?char_id=X&type=chat|guild|party|notify */
+    private void handlePlayerPrefs(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            var params = parseQuery(ex.getRequestURI().getQuery());
+            String charId = params.getOrDefault("char_id", "0");
+            String type = params.getOrDefault("type", "chat");
+            String table = switch (type) {
+                case "guild" -> "player_guild_prefs";
+                case "party" -> "player_party_prefs";
+                case "notify" -> "player_notify_prefs";
+                default -> "player_chat_prefs";
+            };
+            sendTableResult(ex, c.prepareStatement("SELECT * FROM " + table + " WHERE char_id=" + charId), "prefs");
+        }
+    }
 
     private void handleSettingsDefaults(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
