@@ -69,6 +69,34 @@ public final class PacketOpcode {
     public static final short S2C_EVENT_CURRENCY_SHOP = (short)0x1612;
     public static final short S2C_EVENT_CURRENCY_UPDATE = (short)0x1613;
 
+
+    // ── ACHIEVEMENT (18xx) ────────────────────────────────
+    public static final short C2S_ACHIEVEMENT_LIST   = (short)0x1801;
+    public static final short C2S_ACHIEVEMENT_CLAIM  = (short)0x1802;
+    public static final short S2C_ACHIEVEMENT_LIST   = (short)0x1811;
+    public static final short S2C_ACHIEVEMENT_UPDATE = (short)0x1812;
+    public static final short S2C_ACHIEVEMENT_UNLOCK = (short)0x1813;
+
+    // ── DAILY LOGIN (19xx) ────────────────────────────────
+    public static final short C2S_DAILY_LOGIN_INFO   = (short)0x1901;
+    public static final short C2S_DAILY_LOGIN_CLAIM  = (short)0x1902;
+    public static final short S2C_DAILY_LOGIN_INFO   = (short)0x1911;
+    public static final short S2C_DAILY_LOGIN_CLAIMED= (short)0x1912;
+
+    // ── WORLD BOSS (1Axx) ─────────────────────────────────
+    public static final short C2S_WORLD_BOSS_INFO    = (short)0x1A01;
+    public static final short S2C_WORLD_BOSS_SPAWN   = (short)0x1A11;
+    public static final short S2C_WORLD_BOSS_DEAD    = (short)0x1A12;
+    public static final short S2C_WORLD_BOSS_UPDATE  = (short)0x1A13;
+
+    // ── PLAYER MAIL (1Bxx) ────────────────────────────────
+    public static final short C2S_MAIL_LIST          = (short)0x1B01;
+    public static final short C2S_MAIL_READ          = (short)0x1B02;
+    public static final short C2S_MAIL_CLAIM         = (short)0x1B03;
+    public static final short C2S_MAIL_DELETE        = (short)0x1B04;
+    public static final short S2C_MAIL_LIST          = (short)0x1B11;
+    public static final short S2C_MAIL_NEW           = (short)0x1B12;
+
     // ── MASTER REGISTRY (admin only, 17xx) ────────────────────
     // Khong can opcode — admin dung REST API
 }
@@ -381,6 +409,34 @@ public final class PacketOpcode {
     public static final short S2C_EVENT_CURRENCY_LIST = (short)0x1611;
     public static final short S2C_EVENT_CURRENCY_SHOP = (short)0x1612;
     public static final short S2C_EVENT_CURRENCY_UPDATE = (short)0x1613;
+
+
+    // ── ACHIEVEMENT (18xx) ────────────────────────────────
+    public static final short C2S_ACHIEVEMENT_LIST   = (short)0x1801;
+    public static final short C2S_ACHIEVEMENT_CLAIM  = (short)0x1802;
+    public static final short S2C_ACHIEVEMENT_LIST   = (short)0x1811;
+    public static final short S2C_ACHIEVEMENT_UPDATE = (short)0x1812;
+    public static final short S2C_ACHIEVEMENT_UNLOCK = (short)0x1813;
+
+    // ── DAILY LOGIN (19xx) ────────────────────────────────
+    public static final short C2S_DAILY_LOGIN_INFO   = (short)0x1901;
+    public static final short C2S_DAILY_LOGIN_CLAIM  = (short)0x1902;
+    public static final short S2C_DAILY_LOGIN_INFO   = (short)0x1911;
+    public static final short S2C_DAILY_LOGIN_CLAIMED= (short)0x1912;
+
+    // ── WORLD BOSS (1Axx) ─────────────────────────────────
+    public static final short C2S_WORLD_BOSS_INFO    = (short)0x1A01;
+    public static final short S2C_WORLD_BOSS_SPAWN   = (short)0x1A11;
+    public static final short S2C_WORLD_BOSS_DEAD    = (short)0x1A12;
+    public static final short S2C_WORLD_BOSS_UPDATE  = (short)0x1A13;
+
+    // ── PLAYER MAIL (1Bxx) ────────────────────────────────
+    public static final short C2S_MAIL_LIST          = (short)0x1B01;
+    public static final short C2S_MAIL_READ          = (short)0x1B02;
+    public static final short C2S_MAIL_CLAIM         = (short)0x1B03;
+    public static final short C2S_MAIL_DELETE        = (short)0x1B04;
+    public static final short S2C_MAIL_LIST          = (short)0x1B11;
+    public static final short S2C_MAIL_NEW           = (short)0x1B12;
 
     // ── MASTER REGISTRY (admin only, 17xx) ────────────────────
     // Khong can opcode — admin dung REST API

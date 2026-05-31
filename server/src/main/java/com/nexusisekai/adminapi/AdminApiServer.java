@@ -142,6 +142,14 @@ public class AdminApiServer {
         
         
         
+        
+        httpServer.createContext("/api/achievements",       ex -> handleAuth(ex, this::handleAchievements));
+        httpServer.createContext("/api/daily-login",         ex -> handleAuth(ex, this::handleDailyLogin));
+        httpServer.createContext("/api/world-bosses",        ex -> handleAuth(ex, this::handleWorldBosses));
+        httpServer.createContext("/api/monster-drops",       ex -> handleAuth(ex, this::handleMonsterDrops));
+        httpServer.createContext("/api/spawn-zones",         ex -> handleAuth(ex, this::handleSpawnZones));
+        httpServer.createContext("/api/event-currency-shop", ex -> handleAuth(ex, this::handleEventCurrencyShop));
+        httpServer.createContext("/api/pass/tasks",          ex -> handleAuth(ex, this::handlePassTasks));
         httpServer.createContext("/api/skills",           ex -> handleAuth(ex, this::handleSkills));
         httpServer.createContext("/api/stickers",         ex -> handleAuth(ex, this::handleStickers));
         httpServer.createContext("/api/admin-accounts",   ex -> handleAuth(ex, this::handleAdminAccounts));
@@ -1509,6 +1517,241 @@ public class AdminApiServer {
     // ═════════════════════════════════════════════════════════════
 
     /** CRUD Kỹ năng class */
+
+    // ═══════════════════════════════════════════════════════════
+    // Achievements, Daily Login, World Boss, Monster Drops, Spawn Zones
+    // ═══════════════════════════════════════════════════════════
+
+    private void handleAchievements(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String cat = params.getOrDefault("category", "");
+                String sql = cat.isEmpty()
+                    ? "SELECT * FROM achievements ORDER BY category, sort_order"
+                    : "SELECT * FROM achievements WHERE category='" + cat.replace("'","") + "' ORDER BY sort_order";
+                sendTableResult(ex, c.prepareStatement(sql), "achievements");
+            } else {
+                var body = parseBody(ex);
+                switch (str(body,"action")) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO achievements (name,description,category,icon_asset,condition_type,condition_value," +
+                            "reward_type,reward_id,reward_amount,points,is_hidden,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+                        ps.setString(1,str(body,"name")); ps.setString(2,str(body,"description"));
+                        ps.setString(3,str(body,"category")); ps.setString(4,str(body,"icon_asset"));
+                        ps.setString(5,str(body,"condition_type")); ps.setInt(6,num(body,"condition_value"));
+                        ps.setString(7,str(body,"reward_type")); ps.setInt(8,num(body,"reward_id"));
+                        ps.setInt(9,num(body,"reward_amount")); ps.setInt(10,num(body,"points"));
+                        ps.setInt(11,num(body,"is_hidden")); ps.setInt(12,num(body,"sort_order"));
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update" -> {
+                        c.prepareStatement("UPDATE achievements SET name='" + str(body,"name").replace("'","") +
+                            "',description='" + str(body,"description").replace("'","") +
+                            "',category='" + str(body,"category").replace("'","") +
+                            "',condition_type='" + str(body,"condition_type").replace("'","") +
+                            "',condition_value=" + num(body,"condition_value") +
+                            ",reward_type='" + str(body,"reward_type").replace("'","") +
+                            "',reward_amount=" + num(body,"reward_amount") +
+                            ",points=" + num(body,"points") +
+                            ",is_active=" + num(body,"is_active") +
+                            " WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM achievements WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    private void handleDailyLogin(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM daily_login_rewards ORDER BY day_number"), "rewards");
+            } else {
+                var body = parseBody(ex);
+                c.prepareStatement("UPDATE daily_login_rewards SET reward_type='" + str(body,"reward_type").replace("'","") +
+                    "',reward_id=" + num(body,"reward_id") +
+                    ",reward_amount=" + num(body,"reward_amount") +
+                    ",description='" + str(body,"description").replace("'","") +
+                    "' WHERE day_number=" + num(body,"day_number")).executeUpdate();
+                sendJson(ex,200,Map.of("success",true));
+            }
+        }
+    }
+
+    private void handleWorldBosses(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM world_bosses ORDER BY id"), "bosses");
+            } else {
+                var body = parseBody(ex);
+                switch (str(body,"action")) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO world_bosses (monster_id,name,map_id,spawn_x,spawn_y,hp,atk,def,reward_exp,reward_gold,loot_json,spawn_cron,duration_min) " +
+                            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        ps.setInt(1,num(body,"monster_id")); ps.setString(2,str(body,"name"));
+                        ps.setInt(3,num(body,"map_id")); ps.setFloat(4,Float.parseFloat(str(body,"spawn_x")));
+                        ps.setFloat(5,Float.parseFloat(str(body,"spawn_y"))); ps.setInt(6,num(body,"hp"));
+                        ps.setInt(7,num(body,"atk")); ps.setInt(8,num(body,"def"));
+                        ps.setInt(9,num(body,"reward_exp")); ps.setInt(10,num(body,"reward_gold"));
+                        ps.setString(11,str(body,"loot_json")); ps.setString(12,str(body,"spawn_cron"));
+                        ps.setInt(13,num(body,"duration_min"));
+                        ps.executeUpdate(); sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "toggle" -> {
+                        c.prepareStatement("UPDATE world_bosses SET is_active=1-is_active WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM world_bosses WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    private void handleMonsterDrops(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String monsterId = params.getOrDefault("monster_id", "");
+                String sql = monsterId.isEmpty()
+                    ? "SELECT md.*, m.name as monster_name, i.name as item_name FROM monster_drops md JOIN monsters m ON m.id=md.monster_id JOIN items i ON i.id=md.item_id ORDER BY md.monster_id"
+                    : "SELECT md.*, m.name as monster_name, i.name as item_name FROM monster_drops md JOIN monsters m ON m.id=md.monster_id JOIN items i ON i.id=md.item_id WHERE md.monster_id=" + monsterId;
+                sendTableResult(ex, c.prepareStatement(sql), "drops");
+            } else {
+                var body = parseBody(ex);
+                switch (str(body,"action")) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO monster_drops (monster_id,item_id,drop_rate,min_qty,max_qty,min_level) VALUES (?,?,?,?,?,?)");
+                        ps.setInt(1,num(body,"monster_id")); ps.setInt(2,num(body,"item_id"));
+                        ps.setFloat(3,Float.parseFloat(str(body,"drop_rate"))); ps.setInt(4,num(body,"min_qty"));
+                        ps.setInt(5,num(body,"max_qty")); ps.setInt(6,num(body,"min_level"));
+                        ps.executeUpdate(); sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update" -> {
+                        c.prepareStatement("UPDATE monster_drops SET drop_rate=" + str(body,"drop_rate") +
+                            ",min_qty=" + num(body,"min_qty") + ",max_qty=" + num(body,"max_qty") +
+                            ",is_active=" + num(body,"is_active") + " WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM monster_drops WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    private void handleSpawnZones(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String mapId = params.getOrDefault("map_id", "");
+                String sql = mapId.isEmpty()
+                    ? "SELECT sz.*, m.name as map_name, mon.name as monster_name FROM monster_spawn_zones sz JOIN maps m ON m.id=sz.map_id JOIN monsters mon ON mon.id=sz.monster_id ORDER BY sz.map_id"
+                    : "SELECT sz.*, m.name as map_name, mon.name as monster_name FROM monster_spawn_zones sz JOIN maps m ON m.id=sz.map_id JOIN monsters mon ON mon.id=sz.monster_id WHERE sz.map_id=" + mapId;
+                sendTableResult(ex, c.prepareStatement(sql), "zones");
+            } else {
+                var body = parseBody(ex);
+                switch (str(body,"action")) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO monster_spawn_zones (map_id,monster_id,zone_x1,zone_y1,zone_x2,zone_y2,max_count,respawn_sec) VALUES (?,?,?,?,?,?,?,?)");
+                        ps.setInt(1,num(body,"map_id")); ps.setInt(2,num(body,"monster_id"));
+                        ps.setFloat(3,Float.parseFloat(str(body,"zone_x1"))); ps.setFloat(4,Float.parseFloat(str(body,"zone_y1")));
+                        ps.setFloat(5,Float.parseFloat(str(body,"zone_x2"))); ps.setFloat(6,Float.parseFloat(str(body,"zone_y2")));
+                        ps.setInt(7,num(body,"max_count")); ps.setInt(8,num(body,"respawn_sec"));
+                        ps.executeUpdate(); sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "toggle" -> {
+                        c.prepareStatement("UPDATE monster_spawn_zones SET is_active=1-is_active WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM monster_spawn_zones WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    private void handleEventCurrencyShop(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String curId = params.getOrDefault("currency_id", "");
+                String sql = curId.isEmpty()
+                    ? "SELECT ecs.*, ec.display_name as currency_name FROM event_currency_shop ecs JOIN event_currencies ec ON ec.id=ecs.currency_id ORDER BY ecs.currency_id, ecs.sort_order"
+                    : "SELECT ecs.*, ec.display_name as currency_name FROM event_currency_shop ecs JOIN event_currencies ec ON ec.id=ecs.currency_id WHERE ecs.currency_id=" + curId + " ORDER BY ecs.sort_order";
+                sendTableResult(ex, c.prepareStatement(sql), "items");
+            } else {
+                var body = parseBody(ex);
+                switch (str(body,"action")) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO event_currency_shop (currency_id,item_id,item_name,price,stock,per_user_limit,sort_order) VALUES (?,?,?,?,?,?,?)");
+                        ps.setInt(1,num(body,"currency_id")); ps.setInt(2,num(body,"item_id"));
+                        ps.setString(3,str(body,"item_name")); ps.setInt(4,num(body,"price"));
+                        ps.setInt(5,num(body,"stock")); ps.setInt(6,num(body,"per_user_limit"));
+                        ps.setInt(7,num(body,"sort_order"));
+                        ps.executeUpdate(); sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "toggle" -> {
+                        c.prepareStatement("UPDATE event_currency_shop SET is_active=1-is_active WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM event_currency_shop WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    private void handlePassTasks(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM mission_pass_tasks ORDER BY season_id, task_type, sort_order"), "tasks");
+            } else {
+                var body = parseBody(ex);
+                switch (str(body,"action")) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO mission_pass_tasks (season_id,task_type,description,target_type,target_value,exp_reward,sort_order) VALUES (?,?,?,?,?,?,?)");
+                        ps.setInt(1,num(body,"season_id")); ps.setString(2,str(body,"task_type"));
+                        ps.setString(3,str(body,"description")); ps.setString(4,str(body,"target_type"));
+                        ps.setInt(5,num(body,"target_value")); ps.setInt(6,num(body,"exp_reward"));
+                        ps.setInt(7,num(body,"sort_order"));
+                        ps.executeUpdate(); sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM mission_pass_tasks WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
     private void handleSkills(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             if (ex.getRequestMethod().equals("GET")) {

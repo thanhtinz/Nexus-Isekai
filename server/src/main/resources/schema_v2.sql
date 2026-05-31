@@ -1693,3 +1693,179 @@ CREATE TABLE IF NOT EXISTS server_stats_hourly (
     peak_online     INT NOT NULL DEFAULT 0,
     INDEX idx_time (recorded_at DESC)
 );
+
+-- ═════════════════════════════════════════════════════════════
+-- 42. ACHIEVEMENT SYSTEM — Thành tựu
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS achievements (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    name            VARCHAR(64) NOT NULL,
+    description     VARCHAR(256) NOT NULL,
+    category        VARCHAR(32) NOT NULL DEFAULT 'general', -- combat,social,economy,exploration,collection,event
+    icon_asset      VARCHAR(128) DEFAULT 'Icons/Achievement/default',
+    condition_type  VARCHAR(32) NOT NULL,  -- 'kill_monster','reach_level','collect_item','complete_quest','win_pvp','gold_earned','login_days','enhance_success','join_guild','get_married','clear_dungeon'
+    condition_value INT NOT NULL DEFAULT 1, -- số lượng cần đạt
+    reward_type     VARCHAR(16) DEFAULT 'title',  -- title,item,gold,diamond,exp
+    reward_id       INT DEFAULT 0,         -- title_id hoặc item_id
+    reward_amount   INT DEFAULT 0,
+    points          INT NOT NULL DEFAULT 10, -- điểm thành tựu
+    is_hidden       TINYINT NOT NULL DEFAULT 0, -- 1=ẩn cho đến khi hoàn thành
+    sort_order      INT NOT NULL DEFAULT 0,
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS player_achievements (
+    char_id         BIGINT NOT NULL,
+    achievement_id  INT NOT NULL,
+    progress        INT NOT NULL DEFAULT 0,
+    completed       TINYINT NOT NULL DEFAULT 0,
+    claimed         TINYINT NOT NULL DEFAULT 0,
+    completed_at    DATETIME DEFAULT NULL,
+    PRIMARY KEY (char_id, achievement_id),
+    FOREIGN KEY (achievement_id) REFERENCES achievements(id)
+);
+
+INSERT IGNORE INTO achievements (id,name,description,category,condition_type,condition_value,reward_type,reward_amount,points) VALUES
+(1,'Buoc Dau Tien','Dat cap 10','combat','reach_level',10,'exp',500,10),
+(2,'Chien Binh','Dat cap 30','combat','reach_level',30,'gold',5000,20),
+(3,'Anh Hung','Dat cap 50','combat','reach_level',50,'diamond',50,50),
+(4,'Truyen Thuyet','Dat cap 99','combat','reach_level',99,'diamond',200,100),
+(5,'Sat Thu Quai Vat','Tieu diet 100 quai vat','combat','kill_monster',100,'gold',1000,10),
+(6,'Diet Long','Tieu diet 1000 quai vat','combat','kill_monster',1000,'diamond',20,30),
+(7,'Nhiem Vu Gia','Hoan thanh 10 nhiem vu','exploration','complete_quest',10,'exp',1000,10),
+(8,'Nguoi Kham Pha','Hoan thanh 50 nhiem vu','exploration','complete_quest',50,'gold',5000,25),
+(9,'Dai Gia','So huu 100.000 vang','economy','gold_earned',100000,'diamond',10,15),
+(10,'Trieu Phu','So huu 1.000.000 vang','economy','gold_earned',1000000,'diamond',50,30),
+(11,'Cuong Hoa +5','Cuong hoa thanh cong +5','collection','enhance_success',5,'gold',2000,15),
+(12,'Cuong Hoa +10','Cuong hoa thanh cong +10','collection','enhance_success',10,'diamond',100,50),
+(13,'PvP Tan Thu','Thang 10 tran PvP','combat','win_pvp',10,'gold',2000,10),
+(14,'Vo Dich','Thang 100 tran PvP','combat','win_pvp',100,'diamond',50,40),
+(15,'Tham Hiem Gia','Xoa dungeon 10 lan','exploration','clear_dungeon',10,'gold',3000,15),
+(16,'Ket Hon','Ket hon voi nguoi choi khac','social','get_married',1,'diamond',20,20),
+(17,'Hoi Vien','Gia nhap guild','social','join_guild',1,'gold',500,5),
+(18,'Trung Thanh','Dang nhap 7 ngay lien tiep','social','login_days',7,'diamond',10,10),
+(19,'Cong Dan','Dang nhap 30 ngay lien tiep','social','login_days',30,'diamond',30,25),
+(20,'Nha Thu Thap','So huu 50 vat pham khac nhau','collection','collect_item',50,'gold',5000,20);
+
+-- ═════════════════════════════════════════════════════════════
+-- 43. DAILY LOGIN REWARDS — Phần thưởng đăng nhập hàng ngày
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS daily_login_rewards (
+    day_number      INT NOT NULL PRIMARY KEY,  -- 1-7 (lặp lại)
+    reward_type     VARCHAR(16) NOT NULL,       -- gold,diamond,item,exp,event_currency
+    reward_id       INT NOT NULL DEFAULT 0,     -- item_id nếu type=item
+    reward_amount   INT NOT NULL DEFAULT 0,
+    bonus_streak    TINYINT NOT NULL DEFAULT 0,  -- 1=thưởng thêm cho streak đầy đủ
+    description     VARCHAR(128) DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS player_daily_login (
+    char_id         BIGINT NOT NULL PRIMARY KEY,
+    current_day     INT NOT NULL DEFAULT 0,     -- ngày hiện tại trong chu kỳ (1-7)
+    streak_count    INT NOT NULL DEFAULT 0,     -- số ngày liên tiếp
+    last_login_date DATE DEFAULT NULL,          -- ngày đăng nhập gần nhất
+    total_logins    INT NOT NULL DEFAULT 0,     -- tổng số ngày đã đăng nhập
+    claimed_today   TINYINT NOT NULL DEFAULT 0  -- đã nhận thưởng hôm nay chưa
+);
+
+INSERT IGNORE INTO daily_login_rewards VALUES
+(1,'gold',0,1000,0,'1.000 Vang'),
+(2,'exp',0,500,0,'500 EXP'),
+(3,'gold',0,2000,0,'2.000 Vang'),
+(4,'item',1001,3,0,'3x Thuoc Hoi Mau'),
+(5,'gold',0,3000,0,'3.000 Vang'),
+(6,'exp',0,2000,0,'2.000 EXP'),
+(7,'diamond',0,10,1,'10 Diamond + Thuong Streak');
+
+-- ═════════════════════════════════════════════════════════════
+-- 44. WORLD BOSS — Boss thế giới, spawn theo lịch
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS world_bosses (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    monster_id      INT NOT NULL,
+    name            VARCHAR(64) NOT NULL,
+    map_id          INT NOT NULL,
+    spawn_x         FLOAT NOT NULL DEFAULT 0,
+    spawn_y         FLOAT NOT NULL DEFAULT 0,
+    hp              INT NOT NULL DEFAULT 1000000,
+    atk             INT NOT NULL DEFAULT 5000,
+    def             INT NOT NULL DEFAULT 3000,
+    reward_exp      INT NOT NULL DEFAULT 50000,
+    reward_gold     INT NOT NULL DEFAULT 100000,
+    loot_json       TEXT,                          -- JSON: [{"item_id":1,"drop_rate":0.1,"qty":1}]
+    spawn_cron      VARCHAR(64) DEFAULT '0 20 * * 0', -- chủ nhật 20h
+    duration_min    INT NOT NULL DEFAULT 30,        -- tồn tại tối đa 30 phút
+    min_players     INT NOT NULL DEFAULT 5,         -- cần ít nhất 5 người
+    announce_before_min INT NOT NULL DEFAULT 10,    -- thông báo trước 10 phút
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    last_spawn_at   DATETIME DEFAULT NULL,
+    last_killed_by  VARCHAR(32) DEFAULT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT IGNORE INTO world_bosses (id,monster_id,name,map_id,spawn_x,spawn_y,hp,reward_exp,reward_gold,spawn_cron) VALUES
+(1,901,'Rong Co Dai',5,50,50,500000,30000,50000,'0 20 * * 0'),
+(2,902,'Kiem Thanh Am Anh',3,30,30,800000,50000,80000,'0 20 * * 3'),
+(3,903,'Tieu Than Phan Than',6,60,60,2000000,100000,200000,'0 20 * * 6');
+
+-- ═════════════════════════════════════════════════════════════
+-- 45. MONSTER DROPS — Bảng drop item chi tiết
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS monster_drops (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    monster_id      INT NOT NULL,
+    item_id         INT NOT NULL,
+    drop_rate       FLOAT NOT NULL DEFAULT 0.1,    -- 0.0-1.0 (10%)
+    min_qty         INT NOT NULL DEFAULT 1,
+    max_qty         INT NOT NULL DEFAULT 1,
+    min_level       INT NOT NULL DEFAULT 1,         -- level tối thiểu monster
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    INDEX idx_monster (monster_id)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 46. NPC SPAWN CONFIG — Quản lý spawn NPC trên map
+-- ═════════════════════════════════════════════════════════════
+
+-- Bảng npcs đã có sẵn (schema.sql) với map_id, pos_x, pos_y
+-- Thêm fields mở rộng cho NPC management
+ALTER TABLE npcs
+    ADD COLUMN IF NOT EXISTS npc_type_detail VARCHAR(32) DEFAULT 'generic',  -- generic,quest_giver,shopkeeper,banker,blacksmith,stable_master,teleporter,guard
+    ADD COLUMN IF NOT EXISTS interaction     VARCHAR(32) DEFAULT 'dialog',    -- dialog,shop,bank,enhance,teleport,quest,storage
+    ADD COLUMN IF NOT EXISTS icon_asset      VARCHAR(128) DEFAULT 'Sprites/NPC/default',
+    ADD COLUMN IF NOT EXISTS level_req       INT NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS quest_ids       VARCHAR(256) DEFAULT '',         -- JSON: [1,5,12] — quest mà NPC này cho
+    ADD COLUMN IF NOT EXISTS visible_hours   VARCHAR(32) DEFAULT '',          -- "08:00-22:00" hoặc "" = luôn hiển thị
+    ADD COLUMN IF NOT EXISTS respawn_sec     INT NOT NULL DEFAULT 0;          -- 0 = luôn tồn tại
+
+-- ═════════════════════════════════════════════════════════════
+-- 47. MONSTER SPAWN ZONES — Khu vực spawn quái
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS monster_spawn_zones (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    map_id          INT NOT NULL,
+    monster_id      INT NOT NULL,
+    zone_x1         FLOAT NOT NULL,     -- góc trên trái
+    zone_y1         FLOAT NOT NULL,
+    zone_x2         FLOAT NOT NULL,     -- góc dưới phải
+    zone_y2         FLOAT NOT NULL,
+    max_count       INT NOT NULL DEFAULT 5,      -- số lượng tối đa trong zone
+    respawn_sec     INT NOT NULL DEFAULT 30,     -- thời gian respawn
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    INDEX idx_map (map_id)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 48. EVENT CURRENCY SHOP — CRUD cho shop event token (thiếu)
+-- ═════════════════════════════════════════════════════════════
+-- Bảng đã có, chỉ cần seed
+INSERT IGNORE INTO event_currency_shop (id,currency_id,item_id,item_name,price,stock,per_user_limit,sort_order) VALUES
+(1,1,1001,'Thuoc Hoi Mau x10',50,-1,0,1),
+(2,1,2001,'Tui Do Mo Rong',200,100,1,2),
+(3,1,3001,'Skin Doc Quyen Tet',500,50,1,3);

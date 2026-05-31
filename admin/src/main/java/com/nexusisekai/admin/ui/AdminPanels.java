@@ -2581,3 +2581,123 @@ class PlayerReportsPanel extends BasePanel {
         addContent(table);
     }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// Achievements, Daily Login, World Boss, Monster Drops, Spawn Zones
+// ═══════════════════════════════════════════════════════════════
+
+class AchievementsPanel extends BasePanel {
+    AchievementsPanel(ApiClient api, MainWindow main) {
+        super("Thanh Tuu (Achievements)");
+        var table = createTableView("GET", "/api/achievements", "achievements");
+        var cbCat = new ComboBox<String>();
+        cbCat.getItems().addAll("Tat ca","combat","social","economy","exploration","collection","event");
+        cbCat.setValue("Tat ca");
+        var btnFilter = new Button("Loc");
+        btnFilter.setOnAction(e -> {
+            String cat = cbCat.getValue().equals("Tat ca") ? "" : cbCat.getValue();
+            refreshTable(table, "GET", "/api/achievements" + (cat.isEmpty() ? "" : "?category=" + cat), "achievements");
+        });
+        var btnAdd = new Button("Them Thanh Tuu");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/achievements", Map.of("action","create","name","Thanh tuu moi","description","Mo ta",
+                "category","general","icon_asset","Icons/Achievement/default","condition_type","kill_monster",
+                "condition_value","10","reward_type","gold","reward_id","0","reward_amount","1000","points","10","is_hidden","0","sort_order","0"));
+            refreshTable(table, "GET", "/api/achievements", "achievements");
+        });
+        addToolbar(new Label("Loai:"), cbCat, btnFilter, btnAdd);
+        addContent(table);
+    }
+}
+
+class DailyLoginPanel extends BasePanel {
+    DailyLoginPanel(ApiClient api, MainWindow main) {
+        super("Thuong Dang Nhap Hang Ngay");
+        var table = createTableView("GET", "/api/daily-login", "rewards");
+        var btnSave = new Button("Luu Thay Doi");
+        addToolbar(btnSave, new Label("7 ngay lap lai, ngay 7 co bonus streak"));
+        addContent(table);
+    }
+}
+
+class WorldBossPanel extends BasePanel {
+    WorldBossPanel(ApiClient api, MainWindow main) {
+        super("World Boss");
+        var table = createTableView("GET", "/api/world-bosses", "bosses");
+        var btnAdd = new Button("Them Boss");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/world-bosses", Map.of("action","create","monster_id","900","name","Boss Moi",
+                "map_id","5","spawn_x","50","spawn_y","50","hp","500000","atk","5000","def","3000",
+                "reward_exp","30000","reward_gold","50000","loot_json","[]","spawn_cron","0 20 * * 0","duration_min","30"));
+            refreshTable(table, "GET", "/api/world-bosses", "bosses");
+        });
+        addToolbar(btnAdd);
+        addContent(table);
+    }
+}
+
+class MonsterDropsPanel extends BasePanel {
+    MonsterDropsPanel(ApiClient api, MainWindow main) {
+        super("Drop Rate Quai Vat");
+        var table = createTableView("GET", "/api/monster-drops", "drops");
+        var tfMonsterId = new TextField(); tfMonsterId.setPromptText("Monster ID...");
+        var btnFilter = new Button("Loc");
+        btnFilter.setOnAction(e -> refreshTable(table, "GET", "/api/monster-drops?monster_id=" + tfMonsterId.getText().trim(), "drops"));
+        var btnAdd = new Button("Them Drop");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/monster-drops", Map.of("action","create","monster_id",tfMonsterId.getText().trim(),
+                "item_id","1","drop_rate","0.1","min_qty","1","max_qty","1","min_level","1"));
+            refreshTable(table, "GET", "/api/monster-drops", "drops");
+        });
+        addToolbar(tfMonsterId, btnFilter, btnAdd);
+        addContent(table);
+    }
+}
+
+class SpawnZonesPanel extends BasePanel {
+    SpawnZonesPanel(ApiClient api, MainWindow main) {
+        super("Khu Vuc Spawn Quai");
+        var table = createTableView("GET", "/api/spawn-zones", "zones");
+        var tfMapId = new TextField(); tfMapId.setPromptText("Map ID...");
+        var btnFilter = new Button("Loc");
+        btnFilter.setOnAction(e -> refreshTable(table, "GET", "/api/spawn-zones?map_id=" + tfMapId.getText().trim(), "zones"));
+        var btnAdd = new Button("Them Zone");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/spawn-zones", Map.of("action","create","map_id",tfMapId.getText().trim(),
+                "monster_id","1","zone_x1","0","zone_y1","0","zone_x2","20","zone_y2","20","max_count","5","respawn_sec","30"));
+            refreshTable(table, "GET", "/api/spawn-zones", "zones");
+        });
+        addToolbar(tfMapId, btnFilter, btnAdd);
+        addContent(table);
+    }
+}
+
+class EventCurrencyShopPanel extends BasePanel {
+    EventCurrencyShopPanel(ApiClient api, MainWindow main) {
+        super("Shop Token Su Kien");
+        var table = createTableView("GET", "/api/event-currency-shop", "items");
+        var btnAdd = new Button("Them Item");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/event-currency-shop", Map.of("action","create","currency_id","1","item_id","1",
+                "item_name","Item moi","price","100","stock","-1","per_user_limit","0","sort_order","0"));
+            refreshTable(table, "GET", "/api/event-currency-shop", "items");
+        });
+        addToolbar(btnAdd);
+        addContent(table);
+    }
+}
+
+class PassTasksPanel extends BasePanel {
+    PassTasksPanel(ApiClient api, MainWindow main) {
+        super("Nhiem Vu So Su Menh");
+        var table = createTableView("GET", "/api/pass/tasks", "tasks");
+        var btnAdd = new Button("Them Task");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/pass/tasks", Map.of("action","create","season_id","1","task_type","daily",
+                "description","Nhiem vu moi","target_type","kill_monster","target_value","10","exp_reward","100","sort_order","0"));
+            refreshTable(table, "GET", "/api/pass/tasks", "tasks");
+        });
+        addToolbar(btnAdd);
+        addContent(table);
+    }
+}

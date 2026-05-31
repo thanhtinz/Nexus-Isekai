@@ -138,6 +138,14 @@ public class MainWindow {
             // ── AI & Content ─────────────────────
             {"AI Generate",    "AIGeneration"},
             {"AI Review",      "AIReview"},
+            // ── Game Systems ─────────────────────
+            {"Thanh Tuu",      "Achievements"},
+            {"Dang Nhap",      "DailyLogin"},
+            {"World Boss",     "WorldBoss"},
+            {"Drop Rate",      "MonsterDrops"},
+            {"Spawn Zones",    "SpawnZones"},
+            {"Shop Token SK",  "EventCurrencyShop"},
+            {"NV So Su Menh",  "PassTasks"},
             // ── He thong ─────────────────────────
             {"Thong Bao",      "Announcements"},
             {"Assets OTA",     "Assets"},
@@ -247,6 +255,13 @@ public class MainWindow {
             case "AuditLog"          -> new AuditLogPanel(api, this).getRoot();
             case "ScheduledTasks"    -> new ScheduledTasksPanel(api, this).getRoot();
             case "AIReview"          -> new AIReviewPanel(api, this).getRoot();
+            case "Achievements"      -> new AchievementsPanel(api, this).getRoot();
+            case "DailyLogin"        -> new DailyLoginPanel(api, this).getRoot();
+            case "WorldBoss"         -> new WorldBossPanel(api, this).getRoot();
+            case "MonsterDrops"      -> new MonsterDropsPanel(api, this).getRoot();
+            case "SpawnZones"        -> new SpawnZonesPanel(api, this).getRoot();
+            case "EventCurrencyShop" -> new EventCurrencyShopPanel(api, this).getRoot();
+            case "PassTasks"         -> new PassTasksPanel(api, this).getRoot();
             // ── System ───────────────────────────────────
             case "Logs"        -> new LogsPanel().getRoot();
             case "Settings"    -> new SettingsPanel(this).getRoot();
