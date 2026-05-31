@@ -144,6 +144,10 @@ namespace NexusIsekai.Network
         public static void SendClassSkillList()
             => Send(new PacketBuilder(PacketOpcode.C2S_SKILL_CLASS_LIST));
         public static void SendCosmeticEquip(long id)   { var p=new PacketBuilder(PacketOpcode.C2S_COSMETIC_EQUIP); p.WriteLong(id); Send(p); }
+        public static void SendFacilityPortals()      => Send(new PacketBuilder(PacketOpcode.C2S_FACILITY_PORTALS));
+        public static void SendEnterFacility(string category) { var p=new PacketBuilder(PacketOpcode.C2S_ENTER_FACILITY); p.WriteString(category); Send(p); }
+        public static void SendLeaveFacility()         => Send(new PacketBuilder(PacketOpcode.C2S_LEAVE_FACILITY));
+
         public static void SendCosmeticList()       => Send(new PacketBuilder(PacketOpcode.C2S_COSMETIC_LIST));
         public static void SendCosmeticUpgrade(long id) { var p=new PacketBuilder(PacketOpcode.C2S_COSMETIC_UPGRADE); p.WriteLong(id); Send(p); }
         public static void SendCrossChat(string message)

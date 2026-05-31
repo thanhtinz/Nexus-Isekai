@@ -482,5 +482,13 @@ namespace NexusIsekai.Network
         public const short C2S_SET_INFO         = 0x3401;
         public const short S2C_SET_INFO         = 0x3411;
         public const short S2C_SET_BONUS_UPDATE = 0x3412;
+        // ── FACILITY MAP / CỔNG DỊCH CHUYỂN ──
+        public const short C2S_FACILITY_PORTALS = 0x3501;
+        public const short C2S_ENTER_FACILITY   = 0x3502;
+        public const short C2S_LEAVE_FACILITY   = 0x3503;
+        public const short S2C_FACILITY_PORTALS = 0x3511;
+        public const short S2C_FACILITY_ENTER   = 0x3512;
+        public const short S2C_FACILITY_LEFT     = 0x3513;
+
     }
 }

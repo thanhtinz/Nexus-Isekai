@@ -412,4 +412,12 @@ extension FixedWidthInteger {
     static let C2S_SET_INFO: Int16 = 0x3401
     static let S2C_SET_INFO: Int16 = 0x3411
     static let S2C_SET_BONUS_UPDATE: Int16 = 0x3412
+
+    // Facility opcodes (35xx)
+    static let C2S_FACILITY_PORTALS: Int16 = 0x3501
+    static let C2S_ENTER_FACILITY: Int16 = 0x3502
+    static let C2S_LEAVE_FACILITY: Int16 = 0x3503
+    static let S2C_FACILITY_PORTALS: Int16 = 0x3511
+    static let S2C_FACILITY_ENTER: Int16 = 0x3512
+    static let S2C_FACILITY_LEFT: Int16 = 0x3513
 }

@@ -3232,3 +3232,55 @@ INSERT IGNORE INTO factions (id, name, description) VALUES
  (3,'Giáo Đoàn Ánh Sáng','Phe tu luyện, đối kháng Giáo Phái Vọng Linh');
 INSERT IGNORE INTO faction_rep_tiers (faction_id, tier_order, tier_name, rep_required) VALUES
  (1,1,'Lạ Mặt',0),(1,2,'Thân Thiện',3000),(1,3,'Tôn Kính',9000),(1,4,'Sùng Bái',21000);
+
+-- ═════════════════════════════════════════════════════════════
+-- FACILITY MAPS + CỔNG DỊCH CHUYỂN (instanced)
+-- Map riêng cho: guild, lễ đường, nhà/trồng cây/nuôi thú,
+-- đấu trường, minigame, world boss, tân thủ.
+-- Nằm "trên" map thường, vào qua cổng dịch chuyển.
+-- ═════════════════════════════════════════════════════════════
+
+ALTER TABLE maps ADD COLUMN IF NOT EXISTS map_category   VARCHAR(16) NOT NULL DEFAULT 'normal';
+  -- normal,guild,wedding,housing,farm,arena,minigame,worldboss,tutorial,dungeon
+ALTER TABLE maps ADD COLUMN IF NOT EXISTS instance_scope VARCHAR(16) NOT NULL DEFAULT 'static';
+  -- static (chung), personal (theo char), guild (theo bang), party (theo tổ đội), room (theo phòng)
+ALTER TABLE maps ADD COLUMN IF NOT EXISTS return_map_id  INT NOT NULL DEFAULT 0;   -- map quay về khi rời
+ALTER TABLE maps ADD COLUMN IF NOT EXISTS return_x       FLOAT NOT NULL DEFAULT 0;
+ALTER TABLE maps ADD COLUMN IF NOT EXISTS return_y       FLOAT NOT NULL DEFAULT 0;
+
+ALTER TABLE map_portals ADD COLUMN IF NOT EXISTS portal_type       VARCHAR(16) NOT NULL DEFAULT 'normal'; -- normal,facility
+ALTER TABLE map_portals ADD COLUMN IF NOT EXISTS facility_category VARCHAR(16) NOT NULL DEFAULT '';       -- guild,wedding,housing,farm,arena,minigame...
+ALTER TABLE map_portals ADD COLUMN IF NOT EXISTS label             VARCHAR(32) NOT NULL DEFAULT '';        -- tên hiển thị cổng
+ALTER TABLE map_portals ADD COLUMN IF NOT EXISTS icon_id           INT NOT NULL DEFAULT 0;
+
+-- Instance đang sống (tổng quát hoá dungeon_instances)
+CREATE TABLE IF NOT EXISTS map_instances (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    template_map_id INT NOT NULL,                 -- map facility gốc
+    owner_type      VARCHAR(16) NOT NULL,         -- char,guild,party,room,global
+    owner_id        BIGINT NOT NULL,              -- id chủ instance (charId/guildId/partyId/roomId)
+    status          VARCHAR(16) NOT NULL DEFAULT 'active',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_active     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_instance (template_map_id, owner_type, owner_id),
+    INDEX idx_owner (owner_type, owner_id)
+);
+
+-- Seed các facility map mẫu (file_name = asset team art làm)
+INSERT IGNORE INTO maps (id, name, file_name, map_category, instance_scope, is_safe, return_map_id, return_x, return_y) VALUES
+ (200,'Lãnh Địa Bang Hội','guild_hall', 'guild',    'guild',    1, 1, 100, 100),
+ (201,'Lễ Đường',         'wedding_hall','wedding',  'party',    1, 1, 120, 100),
+ (202,'Tư Gia',           'house',      'housing',  'personal', 1, 1, 140, 100),
+ (203,'Nông Trại',        'farm',       'farm',     'personal', 1, 1, 160, 100),
+ (204,'Đấu Trường',       'arena',      'arena',    'room',     0, 1, 180, 100),
+ (205,'Sảnh Tiểu Trò Chơi','minigame_hall','minigame','room',   1, 1, 200, 100),
+ (206,'Thí Luyện Tân Thủ','tutorial_zone','tutorial','personal',1, 1, 100, 120);
+
+-- Seed cổng dịch chuyển vào facility (đặt tại Làng Khải Nguyên map_id=1)
+INSERT IGNORE INTO map_portals (map_id, pos_x, pos_y, portal_type, facility_category, label, level_req) VALUES
+ (1, 300, 200, 'facility', 'guild',    'Lãnh Địa Bang', 1),
+ (1, 340, 200, 'facility', 'wedding',  'Lễ Đường',      1),
+ (1, 380, 200, 'facility', 'housing',  'Tư Gia',        1),
+ (1, 420, 200, 'facility', 'farm',     'Nông Trại',     1),
+ (1, 460, 200, 'facility', 'arena',    'Đấu Trường',    10),
+ (1, 500, 200, 'facility', 'minigame', 'Tiểu Trò Chơi', 1);

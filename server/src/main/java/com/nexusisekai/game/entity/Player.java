@@ -57,6 +57,7 @@ public class Player {
 
     // Guild
     private long guildId = -1;
+    private long instanceId = 0; // 0 = map thường; >0 = facility instance
     private String guildName;
 
     // ===================================================
@@ -243,6 +244,8 @@ public class Player {
     public int getStoryChapter()          { return storyChapter; }
     public List<InventoryItem> getInventory() { return inventory; }
     public List<PlayerSkill> getSkills()  { return skills; }
+    public long getInstanceId()           { return instanceId; }
+    public void setInstanceId(long id)    { this.instanceId = id; }
     public long getGuildId()              { return guildId; }
     public boolean isInCombat()           { return inCombat; }
     public void setInCombat(boolean b)    { this.inCombat = b; }

@@ -299,6 +299,10 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_BESTIARY_CLAIM -> ProgressionHandler.handleBestiaryClaim(this, toBuf(p));
             case PacketOpcode.C2S_SET_INFO -> ProgressionHandler.handleSetInfo(this, toBuf(p));
 
+            case PacketOpcode.C2S_FACILITY_PORTALS -> FacilityHandler.handleFacilityPortals(this, toBuf(p));
+            case PacketOpcode.C2S_ENTER_FACILITY -> FacilityHandler.handleEnterFacility(this, toBuf(p));
+            case PacketOpcode.C2S_LEAVE_FACILITY -> FacilityHandler.handleLeaveFacility(this, toBuf(p));
+
             // ── Char Actions + Pair ────────────────────────────
             case PacketOpcode.C2S_CHAR_ACTION      -> { requireInGame(); ExtendedHandlers.handleCharAction(this, toBuf(p)); }
             case PacketOpcode.C2S_PAIR_ACTION      -> { requireInGame(); ExtendedHandlers.handlePairAction(this, toBuf(p)); }

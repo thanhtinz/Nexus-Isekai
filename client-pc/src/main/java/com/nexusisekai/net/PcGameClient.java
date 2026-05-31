@@ -252,4 +252,12 @@ public class PcGameClient {
     public static final short C2S_SET_INFO = (short)0x3401;
     public static final short S2C_SET_INFO = (short)0x3411;
     public static final short S2C_SET_BONUS_UPDATE = (short)0x3412;
+
+    // Facility opcodes (35xx)
+    public static final short C2S_FACILITY_PORTALS = (short)0x3501;
+    public static final short C2S_ENTER_FACILITY = (short)0x3502;
+    public static final short C2S_LEAVE_FACILITY = (short)0x3503;
+    public static final short S2C_FACILITY_PORTALS = (short)0x3511;
+    public static final short S2C_FACILITY_ENTER = (short)0x3512;
+    public static final short S2C_FACILITY_LEFT = (short)0x3513;
 }

@@ -42,6 +42,10 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_CHAR_DELETE_OK,  OnCharDeleteOk);
             d.Register(PacketOpcode.S2C_CHAR_ENTER_GAME, OnEnterGame);
             d.Register(PacketOpcode.S2C_INTRO_VIDEO_CONFIG, OnIntroVideoConfig);
+            // Facility maps + cổng dịch chuyển
+            d.Register(PacketOpcode.S2C_FACILITY_PORTALS, OnFacilityPortals);
+            d.Register(PacketOpcode.S2C_FACILITY_ENTER,   OnFacilityEnter);
+            d.Register(PacketOpcode.S2C_FACILITY_LEFT,    OnFacilityLeft);
             // Progression: Cánh/Hào quang, Danh vọng, Bestiary, Set
             d.Register(PacketOpcode.S2C_COSMETIC_LIST,      OnCosmeticList);
             d.Register(PacketOpcode.S2C_COSMETIC_EQUIP,     OnCosmeticEquip);
@@ -506,6 +510,26 @@ namespace NexusIsekai.Game
         }
         private void OnSetBonusUpdate(PacketReader r) {
             SetBonusUI.Instance?.Refresh();
+        }
+
+
+        private void OnFacilityPortals(PacketReader r) {
+            int n=r.ReadShort();
+            FacilityPortalUI.Instance?.Clear();
+            for(int i=0;i<n;i++){
+                int id=r.ReadInt(); float x=r.ReadFloat(); float y=r.ReadFloat();
+                string cat=r.ReadString(); string label=r.ReadString(); int lvlReq=r.ReadInt(); int icon=r.ReadInt();
+                FacilityPortalUI.Instance?.AddPortal(id, x, y, cat, label, lvlReq, icon);
+            }
+        }
+        private void OnFacilityEnter(PacketReader r) {
+            int mapId=r.ReadInt(); long instanceId=r.ReadLong();
+            string name=r.ReadString(); string fileName=r.ReadString(); string cat=r.ReadString();
+            MapManager.Instance?.EnterFacility(mapId, instanceId, name, fileName, cat);
+        }
+        private void OnFacilityLeft(PacketReader r) {
+            int mapId=r.ReadInt(); float x=r.ReadFloat(); float y=r.ReadFloat();
+            MapManager.Instance?.ChangeMap(mapId, x, y);
         }
 
         private void OnClassStory(PacketReader r)

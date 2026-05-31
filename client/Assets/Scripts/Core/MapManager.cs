@@ -8,4 +8,9 @@ public class MapManager : MonoBehaviour {
     public void ChangeMap(int mapId, float x, float y) {
         // Tai map moi + dat vi tri nhan vat
     }
+
+    public void EnterFacility(int mapId, long instanceId, string name, string fileName, string category){
+        // Tải map facility (asset fileName), set instance hiện tại, đặt nhân vật vào
+        ChangeMap(mapId, 50, 50);
+    }
 }

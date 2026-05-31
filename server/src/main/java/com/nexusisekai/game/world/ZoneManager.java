@@ -20,6 +20,8 @@ public class ZoneManager {
 
     private final WorldManager world;
     private final Map<Integer, Zone> zones = new ConcurrentHashMap<>();
+    // Facility instance zones, key = instanceId (mỗi guild/char/party 1 zone riêng)
+    private final Map<Long, Zone> instanceZones = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public ZoneManager(WorldManager world) { this.world = world; }
@@ -58,8 +60,29 @@ public class ZoneManager {
     }
 
     public void removePlayer(Player p) {
+        if (p.getInstanceId() > 0) {
+            Zone iz = instanceZones.get(p.getInstanceId());
+            if (iz != null) {
+                iz.removePlayer(p.getCharId());
+                if (iz.getPlayers().isEmpty()) instanceZones.remove(p.getInstanceId()); // dọn zone rỗng
+            }
+            return;
+        }
         Zone z = zones.get(p.getMapId());
         if (z != null) z.removePlayer(p.getCharId());
+    }
+
+    /** Thêm player vào facility instance (tạo zone nếu chưa có). */
+    public void addPlayerToInstance(Player p, int mapId, long instanceId) {
+        if (instanceId <= 0) { addPlayer(p); return; }
+        Zone iz = instanceZones.computeIfAbsent(instanceId, k -> new Zone(mapId));
+        iz.addPlayer(p);
+    }
+
+    /** Lấy zone hiện tại của player (instance hoặc thường). */
+    public Zone getZoneOf(Player p) {
+        if (p.getInstanceId() > 0) return instanceZones.get(p.getInstanceId());
+        return zones.get(p.getMapId());
     }
 
     public void movePlayer(Player p, int fromMapId) {
