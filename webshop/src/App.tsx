@@ -33,8 +33,8 @@ export function App() {
           element={
             <Layout>
               <Routes>
-                <Route path="/topup" element={<PrivateRoute><TopupPage /></PrivateRoute>} />
-                <Route path="/shop" element={<PrivateRoute><ShopPage /></PrivateRoute>} />
+</PrivateRoute>} />
+</PrivateRoute>} />
                 <Route path="/giftcode" element={<PrivateRoute><GiftCodePage /></PrivateRoute>} />
                 <Route path="/pass" element={<PrivateRoute><PassPage /></PrivateRoute>} />
               </Routes>
