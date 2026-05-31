@@ -356,6 +356,25 @@ Total: 10
 - Channel player bar        | T  | 2 (frame + fill)
 Total: 12
 
+
+## 27. LEADERBOARD / BXH (In-Game)
+- Leaderboard panel frame   | 9S | 1
+- Tab Level                 | 2L | 2 (Level / Cap Do)
+- Tab PvP                   | T  | 1 (PvP)
+- Tab Guild                 | 2L | 2 (Guild / Bang Hoi)
+- Tab Wealth                | 2L | 2 (Wealth / Dai Gia)
+- Entry row background      | 9S | 1
+- Entry row highlight (top3)| T  | 1
+- Rank #1 medal (gold)      | T  | 1
+- Rank #2 medal (silver)    | T  | 1
+- Rank #3 medal (bronze)    | T  | 1
+- My rank frame             | 9S | 1
+- Class icon small (7)      | T  | 7 (shared from #17)
+- Scroll list frame         | 9S | 1
+- Page prev button          | T  | 1
+- Page next button          | T  | 1
+Total: 15 files (+ 7 shared)
+
 ## ════════════════════════════════════
 ## SUMMARY
 ##
@@ -364,5 +383,24 @@ Total: 12
 ## Animated (spritesheet):       7 sets (~36 frames)
 ## 9-slice (stretchable):      ~30
 ## ──────────────────────────────
-## GRAND TOTAL:              ~400 PNG files
+## GRAND TOTAL:              ~415 PNG files
+
+## 27. LEADERBOARD / BXH (In-Game)
+- Leaderboard panel frame   | 9S | 1
+- Tab Level                 | 2L | 2 (Level / Cap Do)
+- Tab PvP                   | T  | 1 (PvP)
+- Tab Guild                 | 2L | 2 (Guild / Bang Hoi)
+- Tab Wealth                | 2L | 2 (Wealth / Dai Gia)
+- Entry row background      | 9S | 1
+- Entry row highlight (top3)| T  | 1
+- Rank #1 medal (gold)      | T  | 1
+- Rank #2 medal (silver)    | T  | 1
+- Rank #3 medal (bronze)    | T  | 1
+- My rank frame             | 9S | 1
+- Class icon small (7)      | T  | 7 (shared from #17)
+- Scroll list frame         | 9S | 1
+- Page prev button          | T  | 1
+- Page next button          | T  | 1
+Total: 15 files (+ 7 shared)
+
 ## ════════════════════════════════════
