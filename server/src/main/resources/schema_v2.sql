@@ -979,12 +979,6 @@ CREATE TABLE IF NOT EXISTS farm_seeds (
     is_active    TINYINT NOT NULL DEFAULT 1
 );
 
-INSERT IGNORE INTO farm_seeds (id,name,growth_time_min,stages,harvest_item_id,harvest_qty_min,harvest_qty_max,seed_item_id,water_needed) VALUES
-(1,'Lúa Mì',   30,4,101,3,8,201,2),
-(2,'Cà Rốt',   60,4,102,2,6,202,3),
-(3,'Bí Đỏ',   120,4,103,1,4,203,4),
-(4,'Hoa Sen',  240,5,104,1,3,204,5),
-(5,'Linh Thảo',480,6,105,1,2,205,6);
 
 CREATE TABLE IF NOT EXISTS farm_animals (
     id           INT AUTO_INCREMENT PRIMARY KEY,
@@ -997,11 +991,6 @@ CREATE TABLE IF NOT EXISTS farm_animals (
     is_active    TINYINT NOT NULL DEFAULT 1
 );
 
-INSERT IGNORE INTO farm_animals (id,name,animal_type,feed_item_id,produce_item_id,produce_time_min,produce_qty) VALUES
-(1,'Gà Vàng','bird',301,401,60,3),
-(2,'Lợn Hồng','pig',302,402,120,1),
-(3,'Cá Chép','fish',303,403,30,5),
-(4,'Bò Sữa','cow',304,404,180,2);
 
 -- ─────────────────────────────────────────
 -- 29. HOUSING catalog
@@ -1411,16 +1400,6 @@ CREATE TABLE IF NOT EXISTS furniture_catalog (
     is_active       TINYINT NOT NULL DEFAULT 1,
     sort_order      INT NOT NULL DEFAULT 0
 );
-
-INSERT IGNORE INTO farm_seeds (id,seed_name,grow_time_min,harvest_item_id,harvest_qty,buy_price) VALUES
-(1,'Hat Lua',30,1001,5,50),(2,'Hat Ngo',45,1002,3,80),(3,'Hat Ca Chua',60,1003,4,100);
-
-INSERT IGNORE INTO farm_animals (id,animal_name,product_item_id,produce_time_min,buy_price) VALUES
-(1,'Ga',1010,60,200),(2,'Bo',1011,180,500),(3,'Ca',1012,90,300);
-
-INSERT IGNORE INTO furniture_catalog (id,name,furniture_type,price_gold,size) VALUES
-(1,'Ban Go','table',500,2),(2,'Giuong','bed',1000,4),(3,'Tu Quan Ao','wardrobe',800,2),
-(4,'Den Lung','lamp',200,1),(5,'Cay Canh','plant',150,1);
 
 -- ═════════════════════════════════════════════════════════════
 -- 33. OTA ASSET UPDATE — Hệ thống cập nhật client qua mạng
@@ -3428,10 +3407,7 @@ ALTER TABLE animal_pens ADD COLUMN IF NOT EXISTS last_fed       TIMESTAMP NULL;
 ALTER TABLE farm_animals ADD COLUMN IF NOT EXISTS breed_time_min INT NOT NULL DEFAULT 720; -- phút để sẵn sàng sinh sản
 
 -- Phân bón mẫu (item)
-INSERT IGNORE INTO farm_seeds (id,name,growth_time_min,stages,harvest_item_id,harvest_qty_min,harvest_qty_max,seed_item_id,water_needed,fertilizer_item_id) VALUES
- (10,'Lúa Linh',120,4,410,5,12,310,3,320),
- (11,'Cà Rốt Vàng',90,4,411,4,10,311,2,320),
- (12,'Linh Chi Thảo',240,5,412,2,6,312,4,320);
+
 
 -- ═════════════════════════════════════════════════════════════
 -- NHÀ KHO + BÁN SẢN PHẨM (nông sản, sản phẩm thú)
@@ -3517,3 +3493,56 @@ CREATE TABLE IF NOT EXISTS gift_codes (
 -- ═════════════════════════════════════════════════════════════
 ALTER TABLE characters ADD COLUMN IF NOT EXISTS gold BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE characters ADD COLUMN IF NOT EXISTS last_played DATETIME NULL;
+
+-- ═════════════════════════════════════════════════════════════
+-- BỘ DATA NÔNG TRẠI ĐẦY ĐỦ (theme Vọng Linh Giới)
+-- Cấu trúc tham khảo Avatar-Sv: thời gian chín / sản lượng / giá bán
+-- ═════════════════════════════════════════════════════════════
+
+-- ITEM: hạt giống (seed), nông sản (produce), thức ăn thú, sản phẩm thú, phân bón
+INSERT IGNORE INTO items (id,name,description,type,level_req,sell_price,buy_price,icon_id) VALUES
+ -- Hạt giống (mua ở shop)
+ (310,'Hạt Lúa Linh','Hạt giống Lúa Linh','seed',1,0,200,310),
+ (311,'Hạt Cà Rốt Vàng','Hạt giống Cà Rốt Vàng','seed',1,0,150,311),
+ (312,'Hạt Linh Chi','Hạt giống Linh Chi Thảo','seed',5,0,500,312),
+ (313,'Hạt Tiên Đào','Hạt giống Tiên Đào','seed',10,0,1200,313),
+ (314,'Hạt Hỏa Liên','Hạt giống Hỏa Liên (hệ hỏa)','seed',15,0,2000,314),
+ (315,'Hạt Băng Tâm Thảo','Hạt giống Băng Tâm Thảo (hệ băng)','seed',20,0,3000,315),
+ (316,'Hạt Tử Vân Quả','Hạt giống Tử Vân Quả (quý)','seed',30,0,6000,316),
+ -- Nông sản (thu hoạch → bán)
+ (410,'Lúa Linh','Nông sản cơ bản','material',1,80,0,410),
+ (411,'Cà Rốt Vàng','Nông sản phổ biến','material',1,60,0,411),
+ (412,'Linh Chi Thảo','Dược liệu tu luyện','material',5,200,0,412),
+ (413,'Tiên Đào','Quả tiên hồi linh lực','material',10,450,0,413),
+ (414,'Hỏa Liên','Linh hoa hệ hỏa','material',15,700,0,414),
+ (415,'Băng Tâm Thảo','Linh thảo hệ băng','material',20,1000,0,415),
+ (416,'Tử Vân Quả','Quả quý luyện đan','material',30,2200,0,416),
+ -- Thức ăn thú
+ (301,'Cỏ Linh','Thức ăn cho gia cầm','material',1,0,50,301),
+ (302,'Cám Tinh Hoa','Thức ăn cho gia súc','material',1,0,120,302),
+ (303,'Linh Ngư Nhĩ','Thức ăn cho thủy sinh','material',1,0,90,303),
+ -- Sản phẩm thú (thu → bán)
+ (401,'Trứng Linh Kê','Sản phẩm chăn nuôi','material',1,50,0,401),
+ (402,'Sữa Linh Ngưu','Sản phẩm chăn nuôi','material',1,120,0,402),
+ (403,'Lông Vũ Quý','Sản phẩm chăn nuôi','material',1,90,0,403),
+ (404,'Tơ Linh Tằm','Sản phẩm cao cấp','material',1,250,0,404),
+ -- Phân bón
+ (320,'Phân Linh Thổ','Bón phân: cây lớn nhanh + sản lượng cao','material',1,0,100,320);
+
+-- HẠT GIỐNG → CÂY (farm_seeds): growth_time_min, stages, harvest item, yield, water, fertilizer
+INSERT IGNORE INTO farm_seeds (id,name,growth_time_min,stages,harvest_item_id,harvest_qty_min,harvest_qty_max,seed_item_id,water_needed,fertilizer_item_id) VALUES
+ (1,'Lúa Linh',          60, 4, 410, 5, 12, 310, 3, 320),
+ (2,'Cà Rốt Vàng',       45, 4, 411, 4, 10, 311, 2, 320),
+ (3,'Linh Chi Thảo',    180, 5, 412, 2,  6, 312, 4, 320),
+ (4,'Tiên Đào',         240, 5, 413, 3,  8, 313, 4, 320),
+ (5,'Hỏa Liên',         300, 5, 414, 2,  5, 314, 5, 320),
+ (6,'Băng Tâm Thảo',    300, 5, 415, 2,  5, 315, 5, 320),
+ (7,'Tử Vân Quả',       480, 6, 416, 1,  4, 316, 6, 320);
+
+-- THÚ NUÔI (farm_animals): feed, produce, produce_time, qty, breed_time
+INSERT IGNORE INTO farm_animals (id,name,animal_type,feed_item_id,produce_item_id,produce_time_min,produce_qty,breed_time_min) VALUES
+ (1,'Linh Kê',     'bird', 301, 401,  60, 3, 720),
+ (2,'Linh Ngưu',   'cow',  302, 402, 120, 2, 1440),
+ (3,'Thải Vũ Điểu','bird', 301, 403,  90, 2, 1080),
+ (4,'Linh Tằm',    'bug',  301, 404, 150, 1, 1440),
+ (5,'Linh Ngư',    'fish', 303, 401,  80, 2, 960);
