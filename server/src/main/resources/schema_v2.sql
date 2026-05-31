@@ -2317,3 +2317,33 @@ VALUES
 ('farmer_grid', '32', 'Farmer grid cols/rows'),
 ('animation_system', 'dual', 'charbase (walk/idle) + farmer (actions)')
 ON DUPLICATE KEY UPDATE config_value=VALUES(config_value);
+
+
+-- ═════════════════════════════════════════════════════════════
+-- 55. ĐỒNG BỘ KÍCH THƯỚC — Farmer System là primary gameplay
+-- ═════════════════════════════════════════════════════════════
+
+-- Character Base (64px) gấp 2x Farmer System (32px)
+-- KHÔNG thể trộn trực tiếp → chọn 1 hệ thống làm chính
+
+-- QUYẾT ĐỊNH:
+--   Farmer System = GAMEPLAY (mọi animation: walk, idle, combat, farm, fish)
+--   Character Base = CHARACTER CREATION UI + AVATAR/PORTRAIT (preview lớn, chi tiết)
+
+-- Cập nhật animation_states: TẤT CẢ dùng farmer system
+UPDATE animation_states SET sprite_system='farmer', sheet_size=1024, tile_size=32
+WHERE state_key IN ('idle','walk');
+
+-- Cập nhật idle/walk row positions cho Farmer System
+UPDATE animation_states SET row_down=0, row_up=1, row_right=2, row_left=3,
+    frame_count=6, frame_rate=6 WHERE state_key='idle';
+UPDATE animation_states SET row_down=4, row_up=5, row_right=6, row_left=7,
+    frame_count=6, frame_rate=8 WHERE state_key='walk';
+
+-- Config rõ ràng
+DELETE FROM character_sprite_config WHERE config_key IN ('primary_system','charbase_usage','render_ppu','render_scale');
+INSERT INTO character_sprite_config (config_key, config_value, description) VALUES
+('primary_system', 'farmer', 'Hệ thống sprite chính cho gameplay'),
+('charbase_usage', 'preview', 'Character Base dùng cho: preview khi tạo nhân vật, avatar, portrait'),
+('render_ppu', '32', 'Pixels Per Unit trong Unity (Farmer = 32px tiles)'),
+('render_scale', '1', 'Scale nhân vật trong game world (1 = 32px, 2 = 64px hiển thị)');
