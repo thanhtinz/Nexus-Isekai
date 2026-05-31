@@ -496,6 +496,15 @@ namespace NexusIsekai.Network
         public const short S2C_FURNITURE_INTERACT = 0x3611;
         public const short S2C_FURNITURE_STOP     = 0x3612;
         public const short S2C_FURNITURE_BUY      = 0x3613;
+        // ── CON CÁI MỞ RỘNG ──
+        public const short C2S_CHILD_SHOP      = 0x3701;
+        public const short C2S_CHILD_BUY        = 0x3702;
+        public const short C2S_CHILD_HIRE_NANNY = 0x3703;
+        public const short C2S_CHILD_INTERACT   = 0x3704;
+        public const short S2C_CHILD_SHOP      = 0x3711;
+        public const short S2C_CHILD_BUY        = 0x3712;
+        public const short S2C_CHILD_INTERACT   = 0x3713;
+        public const short S2C_CHILD_NPC_MOVE   = 0x3714;
 
     }
 }

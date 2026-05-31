@@ -712,4 +712,14 @@ public final class PacketOpcode {
     public static final short S2C_FURNITURE_INTERACT = (short)0x3611; // broadcast tương tác
     public static final short S2C_FURNITURE_STOP     = (short)0x3612;
     public static final short S2C_FURNITURE_BUY      = (short)0x3613;
+
+    // ── CON CÁI MỞ RỘNG (37xx) ─────────────────────────────
+    public static final short C2S_CHILD_SHOP     = (short)0x3701;
+    public static final short C2S_CHILD_BUY       = (short)0x3702;
+    public static final short C2S_CHILD_HIRE_NANNY = (short)0x3703;
+    public static final short C2S_CHILD_INTERACT  = (short)0x3704;
+    public static final short S2C_CHILD_SHOP     = (short)0x3711;
+    public static final short S2C_CHILD_BUY       = (short)0x3712;
+    public static final short S2C_CHILD_INTERACT  = (short)0x3713;
+    public static final short S2C_CHILD_NPC_MOVE  = (short)0x3714;
 }

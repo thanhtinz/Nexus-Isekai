@@ -3363,3 +3363,41 @@ INSERT IGNORE INTO furniture_catalog (id,name,furniture_type,width,height,gold_p
  (50,'Bàn Ăn Thịnh Soạn','table',2,2,8000,'eat','eat','{"hp_regen":150,"buff":"well_fed","duration":1800}',1),
  (51,'Bình Nước Mát','decoration',1,1,2000,'drink','drink','{"mp_regen":100,"buff":"refreshed","duration":900}',1),
  (52,'Lò Sưởi','decoration',2,1,12000,'none','','{"buff":"warm","duration":600}',0);
+
+-- ═════════════════════════════════════════════════════════════
+-- CON CÁI MỞ RỘNG: nhu cầu, shop riêng, bảo mẫu, NPC trong nhà
+-- ═════════════════════════════════════════════════════════════
+
+-- Nhu cầu con (giảm dần theo thời gian, đáp ứng bằng ăn/uống/tả)
+ALTER TABLE children ADD COLUMN IF NOT EXISTS hunger       INT NOT NULL DEFAULT 100; -- đói (0-100)
+ALTER TABLE children ADD COLUMN IF NOT EXISTS thirst       INT NOT NULL DEFAULT 100; -- khát
+ALTER TABLE children ADD COLUMN IF NOT EXISTS cleanliness  INT NOT NULL DEFAULT 100; -- sạch (tả)
+ALTER TABLE children ADD COLUMN IF NOT EXISTS fashion_head INT NOT NULL DEFAULT 0;   -- thời trang đầu
+ALTER TABLE children ADD COLUMN IF NOT EXISTS fashion_body INT NOT NULL DEFAULT 0;   -- thời trang thân
+ALTER TABLE children ADD COLUMN IF NOT EXISTS nanny_until  DATETIME DEFAULT NULL;     -- bảo mẫu chăm tới lúc này
+ALTER TABLE children ADD COLUMN IF NOT EXISTS last_care    TIMESTAMP DEFAULT CURRENT_TIMESTAMP; -- lần chăm gần nhất
+
+-- Shop con cái
+CREATE TABLE IF NOT EXISTS child_shop_items (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(64) NOT NULL,
+    category      VARCHAR(16) NOT NULL,         -- fashion,food,drink,diaper,nanny
+    gold_price    INT NOT NULL DEFAULT 0,
+    diamond_price INT NOT NULL DEFAULT 0,
+    effect_json   VARCHAR(256) DEFAULT '',      -- {"hunger":40} / {"thirst":50} / {"cleanliness":100}
+    fashion_slot  VARCHAR(8) DEFAULT '',        -- head,body (nếu category=fashion)
+    fashion_id    INT NOT NULL DEFAULT 0,        -- sprite thời trang
+    nanny_hours   INT NOT NULL DEFAULT 0,        -- số giờ bảo mẫu (nếu category=nanny)
+    icon_id       INT NOT NULL DEFAULT 0,
+    is_active     TINYINT NOT NULL DEFAULT 1
+);
+
+INSERT IGNORE INTO child_shop_items (id,name,category,gold_price,diamond_price,effect_json,fashion_slot,fashion_id,nanny_hours) VALUES
+ (1,'Sữa Bột',        'food',  500,0,'{"hunger":40}','',0,0),
+ (2,'Cháo Dinh Dưỡng','food',  1200,0,'{"hunger":70}','',0,0),
+ (3,'Nước Trái Cây',  'drink', 400,0,'{"thirst":50}','',0,0),
+ (4,'Tả Em Bé',       'diaper',300,0,'{"cleanliness":100}','',0,0),
+ (5,'Mũ Thỏ Hồng',    'fashion',0,30,'','head',101,0),
+ (6,'Bộ Đồ Phi Hành Gia','fashion',0,80,'','body',201,0),
+ (7,'Bảo Mẫu 8 Giờ',  'nanny', 5000,0,'','',0,8),
+ (8,'Bảo Mẫu 24 Giờ', 'nanny', 0,50,'','',0,24);

@@ -307,6 +307,11 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_FURNITURE_STOP -> FurnitureHandler.handleStop(this, toBuf(p));
             case PacketOpcode.C2S_FURNITURE_BUY -> FurnitureHandler.handleBuy(this, toBuf(p));
 
+            case PacketOpcode.C2S_CHILD_SHOP -> ChildHandler.handleChildShop(this, toBuf(p));
+            case PacketOpcode.C2S_CHILD_BUY -> ChildHandler.handleChildBuy(this, toBuf(p));
+            case PacketOpcode.C2S_CHILD_HIRE_NANNY -> ChildHandler.handleChildHireNanny(this, toBuf(p));
+            case PacketOpcode.C2S_CHILD_INTERACT -> ChildHandler.handleChildInteract(this, toBuf(p));
+
             // ── Char Actions + Pair ────────────────────────────
             case PacketOpcode.C2S_CHAR_ACTION      -> { requireInGame(); ExtendedHandlers.handleCharAction(this, toBuf(p)); }
             case PacketOpcode.C2S_PAIR_ACTION      -> { requireInGame(); ExtendedHandlers.handlePairAction(this, toBuf(p)); }

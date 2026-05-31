@@ -101,4 +101,7 @@ namespace NexusIsekai.Game
 
     public void PlayFurnitureAnimation(long charId, string animState){ /* ngồi ghế/nằm giường/ăn/uống */ }
     public void StopFurnitureAnimation(long charId){ /* đứng dậy */ }
+
+    public void PlayChildInteract(long childId){ /* bé phản ứng vui khi được chơi */ }
+    public void MoveChildNpc(long childId, float x, float y){ /* di chuyển NPC bé trong nhà */ }
 }

@@ -428,4 +428,14 @@ extension FixedWidthInteger {
     static let S2C_FURNITURE_INTERACT: Int16 = 0x3611
     static let S2C_FURNITURE_STOP: Int16 = 0x3612
     static let S2C_FURNITURE_BUY: Int16 = 0x3613
+
+    // Child extended (37xx)
+    static let C2S_CHILD_SHOP: Int16 = 0x3701
+    static let C2S_CHILD_BUY: Int16 = 0x3702
+    static let C2S_CHILD_HIRE_NANNY: Int16 = 0x3703
+    static let C2S_CHILD_INTERACT: Int16 = 0x3704
+    static let S2C_CHILD_SHOP: Int16 = 0x3711
+    static let S2C_CHILD_BUY: Int16 = 0x3712
+    static let S2C_CHILD_INTERACT: Int16 = 0x3713
+    static let S2C_CHILD_NPC_MOVE: Int16 = 0x3714
 }

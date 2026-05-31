@@ -144,6 +144,11 @@ namespace NexusIsekai.Network
         public static void SendClassSkillList()
             => Send(new PacketBuilder(PacketOpcode.C2S_SKILL_CLASS_LIST));
         public static void SendCosmeticEquip(long id)   { var p=new PacketBuilder(PacketOpcode.C2S_COSMETIC_EQUIP); p.WriteLong(id); Send(p); }
+        public static void SendChildShop() => Send(new PacketBuilder(PacketOpcode.C2S_CHILD_SHOP));
+        public static void SendChildBuy(long childId, int itemId){ var p=new PacketBuilder(PacketOpcode.C2S_CHILD_BUY); p.WriteLong(childId); p.WriteInt(itemId); Send(p); }
+        public static void SendChildHireNanny(long childId, int itemId){ var p=new PacketBuilder(PacketOpcode.C2S_CHILD_HIRE_NANNY); p.WriteLong(childId); p.WriteInt(itemId); Send(p); }
+        public static void SendChildInteract(long childId){ var p=new PacketBuilder(PacketOpcode.C2S_CHILD_INTERACT); p.WriteLong(childId); Send(p); }
+
         public static void SendFurnitureInteract(long furnitureId) { var p=new PacketBuilder(PacketOpcode.C2S_FURNITURE_INTERACT); p.WriteLong(furnitureId); Send(p); }
         public static void SendFurnitureStop()         => Send(new PacketBuilder(PacketOpcode.C2S_FURNITURE_STOP));
         public static void SendFurnitureBuy(int furnitureId) { var p=new PacketBuilder(PacketOpcode.C2S_FURNITURE_BUY); p.WriteInt(furnitureId); Send(p); }

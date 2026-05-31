@@ -42,6 +42,10 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_CHAR_DELETE_OK,  OnCharDeleteOk);
             d.Register(PacketOpcode.S2C_CHAR_ENTER_GAME, OnEnterGame);
             d.Register(PacketOpcode.S2C_INTRO_VIDEO_CONFIG, OnIntroVideoConfig);
+            d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
+            d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
+            d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
+            d.Register(PacketOpcode.S2C_CHILD_NPC_MOVE,   OnChildNpcMove);
             // Tương tác nội thất
             d.Register(PacketOpcode.S2C_FURNITURE_INTERACT, OnFurnitureInteract);
             d.Register(PacketOpcode.S2C_FURNITURE_STOP,     OnFurnitureStop);
@@ -551,6 +555,29 @@ namespace NexusIsekai.Game
         private void OnFurnitureBuy(PacketReader r) {
             int fid=r.ReadInt(); bool ok=r.ReadBool();
             if(ok) UIManager.Instance?.ShowNotification("Đã mua vật dụng!", UINotificationType.Success);
+        }
+
+
+        private void OnChildShop(PacketReader r) {
+            int n=r.ReadShort(); ChildShopUI.Instance?.Clear();
+            for(int i=0;i<n;i++){
+                int id=r.ReadInt(); string name=r.ReadString(); string cat=r.ReadString();
+                int gold=r.ReadInt(); int dia=r.ReadInt(); string slot=r.ReadString();
+                int fid=r.ReadInt(); int nanny=r.ReadInt(); int icon=r.ReadInt();
+                ChildShopUI.Instance?.AddItem(id, name, cat, gold, dia, slot, fid, nanny, icon);
+            }
+        }
+        private void OnChildBuy(PacketReader r) {
+            long childId=r.ReadLong(); int itemId=r.ReadInt(); bool ok=r.ReadBool();
+            if(ok) UIManager.Instance?.ShowNotification("Đã mua cho bé!", UINotificationType.Success);
+        }
+        private void OnChildInteract(PacketReader r) {
+            long parentId=r.ReadLong(); long childId=r.ReadLong();
+            GameState.Instance?.PlayChildInteract(childId);
+        }
+        private void OnChildNpcMove(PacketReader r) {
+            long childId=r.ReadLong(); float x=r.ReadFloat(); float y=r.ReadFloat();
+            GameState.Instance?.MoveChildNpc(childId, x, y);
         }
 
         private void OnClassStory(PacketReader r)
