@@ -189,6 +189,23 @@ final class PacketWriter {
     static func charCreate(_ name: String, _ cls: Int, _ gen: Int) -> Data {
         PacketWriter(Op.C2S_CHAR_CREATE).writeString(name).writeByte(UInt8(cls)).writeByte(UInt8(gen)).build()
     }
+    static func 
+    static func gachaPull(_ bid: Int, _ cnt: Int) -> Data { PacketWriter(Op.C2S_GACHA_PULL).writeInt(UInt32(bid)).writeInt(UInt32(cnt)).build() }
+    static func pvpSeasonInfo() -> Data { PacketWriter(Op.C2S_PVP_SEASON_INFO).build() }
+    static func socialLogin(_ p: String, _ t: String) -> Data { PacketWriter(Op.C2S_SOCIAL_LOGIN).writeString(p).writeString(t).build() }
+    static func socialLink(_ p: String, _ t: String) -> Data { PacketWriter(Op.C2S_SOCIAL_LINK).writeString(p).writeString(t).build() }
+    static func tutorialProgress(_ s: String) -> Data { PacketWriter(Op.C2S_TUTORIAL_PROGRESS).writeString(s).build() }
+    static func tutorialSkip() -> Data { PacketWriter(Op.C2S_TUTORIAL_SKIP).build() }
+    static func langSet(_ l: String) -> Data { PacketWriter(Op.C2S_LANG_SET).writeString(l).build() }
+
+    public static func 
+    static func gachaPull(_ bid: Int, _ cnt: Int) -> Data { PacketWriter(Op.C2S_GACHA_PULL).writeInt(UInt32(bid)).writeInt(UInt32(cnt)).build() }
+    static func pvpSeasonInfo() -> Data { PacketWriter(Op.C2S_PVP_SEASON_INFO).build() }
+    static func socialLogin(_ p: String, _ t: String) -> Data { PacketWriter(Op.C2S_SOCIAL_LOGIN).writeString(p).writeString(t).build() }
+    static func socialLink(_ p: String, _ t: String) -> Data { PacketWriter(Op.C2S_SOCIAL_LINK).writeString(p).writeString(t).build() }
+    static func tutorialProgress(_ s: String) -> Data { PacketWriter(Op.C2S_TUTORIAL_PROGRESS).writeString(s).build() }
+    static func tutorialSkip() -> Data { PacketWriter(Op.C2S_TUTORIAL_SKIP).build() }
+    static func langSet(_ l: String) -> Data { PacketWriter(Op.C2S_LANG_SET).writeString(l).build() }
     static func settingsLoad() -> Data { PacketWriter(Op.C2S_SETTINGS_LOAD).build() }
     static func settingsSave(_ json: String) -> Data { PacketWriter(Op.C2S_SETTINGS_SAVE).writeString(json).build() }
     static func classChange(_ classId: Int) -> Data { PacketWriter(Op.static let C2S_SETTINGS_LOAD:  UInt16 = 0x1C01

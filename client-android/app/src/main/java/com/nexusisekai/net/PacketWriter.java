@@ -153,6 +153,22 @@ public class PacketWriter {
         { return new PacketWriter(Opcodes.C2S_CHAR_LIST); }
     public static PacketWriter charCreate(String name, int classId, int gender)
         { return new PacketWriter(Opcodes.C2S_CHAR_CREATE).writeString(name).writeByte(classId).writeByte(gender); }
+    public static PacketWriter 
+    public static PacketWriter gachaPull(int bannerId, int count)
+        { return new PacketWriter(Opcodes.C2S_GACHA_PULL).writeInt(bannerId).writeInt(count); }
+    public static PacketWriter pvpSeasonInfo()
+        { return new PacketWriter(Opcodes.C2S_PVP_SEASON_INFO); }
+    public static PacketWriter socialLogin(String provider, String token)
+        { return new PacketWriter(Opcodes.C2S_SOCIAL_LOGIN).writeString(provider).writeString(token); }
+    public static PacketWriter socialLink(String provider, String token)
+        { return new PacketWriter(Opcodes.C2S_SOCIAL_LINK).writeString(provider).writeString(token); }
+    public static PacketWriter tutorialProgress(String step)
+        { return new PacketWriter(Opcodes.C2S_TUTORIAL_PROGRESS).writeString(step); }
+    public static PacketWriter tutorialSkip()
+        { return new PacketWriter(Opcodes.C2S_TUTORIAL_SKIP); }
+    public static PacketWriter langSet(String lang)
+        { return new PacketWriter(Opcodes.C2S_LANG_SET).writeString(lang); }
+
     public static PacketWriter settingsLoad()
         { return new PacketWriter(Opcodes.C2S_SETTINGS_LOAD); }
     public static PacketWriter settingsSave(String json)

@@ -95,7 +95,16 @@ class PcPacketWriter {
     static byte[] register(String u, String p, String e){ return new PcPacketWriter(PacketOpcode.C2S_REGISTER).writeString(u).writeString(p).writeString(e).build(); }
     static byte[] charList()                           { return new PcPacketWriter(PacketOpcode.C2S_CHAR_LIST).build(); }
     static byte[] charCreate(String n, int cls, int g) { return new PcPacketWriter(PacketOpcode.C2S_CHAR_CREATE).writeString(n).writeByte(cls).writeByte(g).build(); }
-    static byte[] settingsLoad() { return new PcPacketWriter(PacketOpcode.C2S_SETTINGS_LOAD).build(); }
+    static byte[] 
+    static byte[] gachaPull(int bid, int cnt) { return new PcPacketWriter(PacketOpcode.C2S_GACHA_PULL).writeInt(bid).writeInt(cnt).build(); }
+    static byte[] pvpSeasonInfo() { return new PcPacketWriter(PacketOpcode.C2S_PVP_SEASON_INFO).build(); }
+    static byte[] socialLogin(String p, String t) { return new PcPacketWriter(PacketOpcode.C2S_SOCIAL_LOGIN).writeString(p).writeString(t).build(); }
+    static byte[] socialLink(String p, String t) { return new PcPacketWriter(PacketOpcode.C2S_SOCIAL_LINK).writeString(p).writeString(t).build(); }
+    static byte[] tutorialProgress(String s) { return new PcPacketWriter(PacketOpcode.C2S_TUTORIAL_PROGRESS).writeString(s).build(); }
+    static byte[] tutorialSkip() { return new PcPacketWriter(PacketOpcode.C2S_TUTORIAL_SKIP).build(); }
+    static byte[] langSet(String l) { return new PcPacketWriter(PacketOpcode.C2S_LANG_SET).writeString(l).build(); }
+
+    public static byte[] settingsLoad() { return new PcPacketWriter(PacketOpcode.C2S_SETTINGS_LOAD).build(); }
     static byte[] settingsSave(String json) { return new PcPacketWriter(PacketOpcode.C2S_SETTINGS_SAVE).writeString(json).build(); }
     static byte[] classChange(int classId) { return new PcPacketWriter(PacketOpcode.short C2S_SETTINGS_LOAD=0x1C01, C2S_SETTINGS_SAVE=0x1C02;
     short S2C_SETTINGS_DATA=0x1C11, S2C_SETTINGS_DEFAULTS=0x1C12;
