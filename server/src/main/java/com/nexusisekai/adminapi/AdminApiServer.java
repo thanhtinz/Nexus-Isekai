@@ -1896,10 +1896,10 @@ public class AdminApiServer {
     private void handleEnhanceRates(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             if (ex.getRequestMethod().equals("GET")) {
-                sendTableResult(ex, c.prepareStatement("SELECT * FROM enhance_rates ORDER BY level"), "rates");
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM enhancement_config ORDER BY level"), "rates");
             } else {
                 var body = parseBody(ex);
-                c.prepareStatement("UPDATE enhance_rates SET success_rate=" + str(body,"success_rate") +
+                c.prepareStatement("UPDATE enhancement_config SET success_rate=" + str(body,"success_rate") +
                     ",gold_cost=" + num(body,"gold_cost") + ",on_fail='" + safeStr(body,"on_fail") +
                     "' WHERE level=" + num(body,"level")).executeUpdate();
                 sendJson(ex,200,Map.of("success",true));

@@ -86,6 +86,8 @@ public class Player {
         p.x           = rs.getFloat("pos_x");
         p.y           = rs.getFloat("pos_y");
         p.storyChapter = rs.getInt("story_chapter");
+        try { p.gold = (int) rs.getLong("gold"); } catch (Exception ignore) {}
+        try { p.guildId = rs.getLong("guild_id"); } catch (Exception ignore) {}
         p.expToNextLevel = calcExpForLevel(p.level + 1);
         p.characterClass = CharacterClassFactory.create(p.classId);
         return p;

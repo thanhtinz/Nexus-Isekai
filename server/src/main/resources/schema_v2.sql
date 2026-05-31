@@ -3452,3 +3452,68 @@ CREATE TABLE IF NOT EXISTS warehouse_info (
     max_slots  INT NOT NULL DEFAULT 50,       -- số ô tối đa
     expansions INT NOT NULL DEFAULT 0          -- số lần mở rộng đã mua
 );
+
+-- ═════════════════════════════════════════════════════════════
+-- FIX: thống nhất trang bị vào character_inventory (bỏ character_equipment ảo)
+-- ═════════════════════════════════════════════════════════════
+ALTER TABLE character_inventory ADD COLUMN IF NOT EXISTS is_equipped TINYINT NOT NULL DEFAULT 0;
+ALTER TABLE character_inventory ADD COLUMN IF NOT EXISTS refine_level INT NOT NULL DEFAULT 0;
+ALTER TABLE character_inventory ADD COLUMN IF NOT EXISTS gem_slot_1  INT NOT NULL DEFAULT 0;
+ALTER TABLE character_inventory ADD COLUMN IF NOT EXISTS gem_slot_2  INT NOT NULL DEFAULT 0;
+ALTER TABLE character_inventory ADD COLUMN IF NOT EXISTS gem_slot_3  INT NOT NULL DEFAULT 0;
+
+-- Bảng config admin còn thiếu (admin CRUD quản lý)
+CREATE TABLE IF NOT EXISTS gem_templates (
+    id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(64) NOT NULL,
+    gem_type VARCHAR(16), stat_bonus VARCHAR(256), tier TINYINT DEFAULT 1,
+    icon_id INT DEFAULT 0, is_active TINYINT DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS equipment_slots (
+    id INT AUTO_INCREMENT PRIMARY KEY, slot_index INT NOT NULL, name VARCHAR(32), is_active TINYINT DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS class_change_config (
+    id INT AUTO_INCREMENT PRIMARY KEY, from_class INT NOT NULL, to_class INT NOT NULL,
+    level_req INT DEFAULT 10, cost_gold INT DEFAULT 0, cost_item INT DEFAULT 0, is_active TINYINT DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS default_settings (
+    setting_key VARCHAR(64) PRIMARY KEY, setting_value VARCHAR(256), description VARCHAR(128)
+);
+CREATE TABLE IF NOT EXISTS farmer_layer_mapping (
+    id INT AUTO_INCREMENT PRIMARY KEY, layer_name VARCHAR(64), asset_id INT, sort_order INT DEFAULT 0
+);
+
+-- Bảng admin item editor (định nghĩa item chi tiết)
+CREATE TABLE IF NOT EXISTS item_templates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(128) NOT NULL, description TEXT,
+    item_type VARCHAR(24), equip_slot VARCHAR(16), class_restrict VARCHAR(32),
+    level_req INT DEFAULT 1, quality TINYINT DEFAULT 1,
+    icon_asset VARCHAR(64), sprite_asset VARCHAR(64),
+    stat_hp INT DEFAULT 0, stat_mp INT DEFAULT 0, stat_patk INT DEFAULT 0, stat_matk INT DEFAULT 0,
+    stat_def INT DEFAULT 0, stat_crit INT DEFAULT 0, stat_dodge INT DEFAULT 0, stat_accuracy INT DEFAULT 0,
+    stat_aspd INT DEFAULT 0, stat_mspd INT DEFAULT 0, stat_lifesteal INT DEFAULT 0, stat_resist INT DEFAULT 0,
+    max_enhance INT DEFAULT 0, gem_slots INT DEFAULT 0, can_refine TINYINT DEFAULT 0, can_awaken TINYINT DEFAULT 0,
+    buy_price INT DEFAULT 0, sell_price INT DEFAULT 0,
+    is_tradeable TINYINT DEFAULT 1, is_stackable TINYINT DEFAULT 0, max_stack INT DEFAULT 1
+);
+-- Bảng admin asset pack (upload gói asset)
+CREATE TABLE IF NOT EXISTS asset_packs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    pack_name VARCHAR(128), original_filename VARCHAR(256), extract_path VARCHAR(256),
+    file_count INT DEFAULT 0, total_size BIGINT DEFAULT 0, pack_type VARCHAR(24),
+    status VARCHAR(16) DEFAULT 'uploaded', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+-- Giftcode đa server (server_ids CSV) — admin copy giữa server
+CREATE TABLE IF NOT EXISTS gift_codes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(32) NOT NULL UNIQUE, reward_json VARCHAR(512),
+    max_uses INT DEFAULT 1, used_count INT DEFAULT 0,
+    server_ids VARCHAR(128) DEFAULT 'all', expires_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- FIX: characters thiếu cột gold (18 file dùng) — tiền tệ per-character
+-- ═════════════════════════════════════════════════════════════
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS gold BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS last_played DATETIME NULL;

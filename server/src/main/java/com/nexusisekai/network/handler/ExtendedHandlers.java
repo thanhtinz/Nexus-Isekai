@@ -902,7 +902,7 @@ public class ExtendedHandlers {
     public static void handleSettingsLoad(GameSession session, ByteBuf buf) {
         Player p = session.getPlayer(); if (p == null) return;
         try (Connection c = DatabaseManager.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT settings_json FROM player_settings WHERE char_id=?")) {
+             PreparedStatement ps = c.prepareStatement("SELECT settings_json FROM character_settings WHERE char_id=?")) {
             ps.setLong(1, p.getCharId()); ResultSet rs = ps.executeQuery();
             String json = rs.next() ? rs.getString(1) : "{}";
             ByteBuf pkt = Unpooled.buffer();
@@ -929,7 +929,7 @@ public class ExtendedHandlers {
         String json = new String(b, java.nio.charset.StandardCharsets.UTF_8);
         try (Connection c = DatabaseManager.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(
-                 "INSERT INTO player_settings (char_id,settings_json) VALUES (?,?) ON DUPLICATE KEY UPDATE settings_json=?")) {
+                 "INSERT INTO character_settings (char_id,settings_json) VALUES (?,?) ON DUPLICATE KEY UPDATE settings_json=?")) {
             ps.setLong(1, p.getCharId()); ps.setString(2, json); ps.setString(3, json);
             ps.executeUpdate();
             msg(session, "Luu cai dat thanh cong!");
@@ -1008,7 +1008,7 @@ public class ExtendedHandlers {
             pkt.writeInt(((Number)ch.get("level")).intValue());
             pkt.writeInt(((Number)ch.getOrDefault("vip_level",0)).intValue());
             // equipped items
-            var equips=SqlSafe.query(c,"SELECT equip_slot,item_id,enhance_level FROM character_equipment WHERE char_id=? AND equipped=1",targetId);
+            var equips=SqlSafe.query(c,"SELECT slot AS equip_slot,item_id,enhance_level FROM character_inventory WHERE char_id=? AND is_equipped=1",targetId);
             pkt.writeShort(equips.size());
             for(var e:equips){pkt.writeInt(((Number)e.get("equip_slot")).intValue());pkt.writeInt(((Number)e.get("item_id")).intValue());pkt.writeByte(((Number)e.get("enhance_level")).intValue());}
             s.send(pkt);
@@ -1078,7 +1078,7 @@ public class ExtendedHandlers {
         Player p = s.getPlayer(); if (p == null) return;
         try (java.sql.Connection c = DatabaseManager.getInstance().getConnection()) {
             com.nexusisekai.database.SqlSafe.update(c,
-                "UPDATE character_equipment SET gem_slot_" + (socketIdx+1) + "=? WHERE char_id=? AND equip_slot=?",
+                "UPDATE character_inventory SET gem_slot_" + (socketIdx+1) + "=? WHERE char_id=? AND slot=?",
                 gem, p.getCharId(), slot);
             msg(s, "Kham ngoc thanh cong");
         } catch (Exception e) { msg(s, "Loi kham ngoc"); }
