@@ -149,6 +149,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/item-templates",   ex -> handleAuth(ex, this::handleItemTemplates));
         httpServer.createContext("/api/enhance-rates",    ex -> handleAuth(ex, this::handleEnhanceRates));
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
+        httpServer.createContext("/api/animations",       ex -> handleAuth(ex, this::handleAnimations));
         httpServer.createContext("/api/achievements",       ex -> handleAuth(ex, this::handleAchievements));
         httpServer.createContext("/api/daily-login",         ex -> handleAuth(ex, this::handleDailyLogin));
         httpServer.createContext("/api/world-bosses",        ex -> handleAuth(ex, this::handleWorldBosses));
@@ -1707,6 +1708,45 @@ public class AdminApiServer {
                     }
                     case "delete" -> {
                         c.prepareStatement("DELETE FROM gem_templates WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+
+    /** CRUD Animation states + class mapping */
+    private void handleAnimations(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            var params = parseQuery(ex.getRequestURI().getQuery());
+            String type = params.getOrDefault("type", "states"); // states, class_map, farmer_map
+            if (ex.getRequestMethod().equals("GET")) {
+                switch (type) {
+                    case "states" -> sendTableResult(ex, c.prepareStatement("SELECT * FROM animation_states ORDER BY sort_order"), "states");
+                    case "class_map" -> sendTableResult(ex, c.prepareStatement(
+                        "SELECT cam.*, as2.display_name as anim_name FROM class_animation_map cam " +
+                        "JOIN animation_states as2 ON as2.state_key=cam.animation_state ORDER BY cam.class_id"), "mappings");
+                    case "farmer_map" -> sendTableResult(ex, c.prepareStatement("SELECT * FROM farmer_layer_mapping ORDER BY char_outfit_key"), "mappings");
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            } else {
+                var body = parseBody(ex);
+                switch (str(body,"action")) {
+                    case "update_state" -> {
+                        c.prepareStatement("UPDATE animation_states SET frame_count=" + num(body,"frame_count") +
+                            ",frame_rate=" + str(body,"frame_rate") + ",is_looping=" + num(body,"is_looping") +
+                            ",row_down=" + num(body,"row_down") + ",row_up=" + num(body,"row_up") +
+                            ",row_right=" + num(body,"row_right") + ",row_left=" + num(body,"row_left") +
+                            " WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update_class_map" -> {
+                        c.prepareStatement("INSERT INTO class_animation_map (class_id,action_key,animation_state) VALUES (" +
+                            num(body,"class_id") + ",'" + str(body,"action_key").replace("'","") + "','" +
+                            str(body,"animation_state").replace("'","") + "') ON DUPLICATE KEY UPDATE animation_state='" +
+                            str(body,"animation_state").replace("'","") + "'").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
                     default -> sendJson(ex,400,Map.of("success",false));

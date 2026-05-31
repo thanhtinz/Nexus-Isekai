@@ -2214,3 +2214,106 @@ INSERT INTO character_sprite_config (config_key, config_value, description)
 VALUES ('layer_order', '["0bas","1out_pfpn","1out_fstr","3fac_eye","4har","5hat","6tla","7tlb"]',
         'Thứ tự render layer từ dưới lên')
 ON DUPLICATE KEY UPDATE config_value='["0bas","1out_pfpn","1out_fstr","3fac_eye","4har","5hat","6tla","7tlb"]';
+
+-- ═════════════════════════════════════════════════════════════
+-- 54. ANIMATION SYSTEM — Map Farmer sprites vào character
+-- ═════════════════════════════════════════════════════════════
+
+-- Mỗi nhân vật dùng 2 hệ thống sprite:
+--   Character Base (512x512, 64px) → walk, idle (8x8 grid)
+--   Farmer System  (1024x1024, 32px) → combat, farm, fish, tool (32x32 grid)
+-- Farmer System là SHARED — mọi body type dùng chung farmer sheets
+
+CREATE TABLE IF NOT EXISTS animation_states (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    state_key       VARCHAR(32) NOT NULL UNIQUE,  -- 'idle','walk','run','attack_sword','attack_bow','farm_hoe','fish','carry','sit','sleep','die','cast'
+    display_name    VARCHAR(64) NOT NULL,
+    sprite_system   VARCHAR(16) NOT NULL DEFAULT 'farmer', -- 'charbase' hoặc 'farmer'
+    sheet_size      INT NOT NULL DEFAULT 1024,    -- kích thước sheet (px)
+    tile_size       INT NOT NULL DEFAULT 32,      -- kích thước 1 tile (px)
+    -- Vị trí trong spritesheet (row range cho 4 hướng: down, up, right, left)
+    row_down        INT NOT NULL DEFAULT 0,
+    row_up          INT NOT NULL DEFAULT 1,
+    row_right       INT NOT NULL DEFAULT 2,
+    row_left        INT NOT NULL DEFAULT 3,
+    frame_count     INT NOT NULL DEFAULT 6,       -- số frame mỗi hướng
+    frame_rate      FLOAT NOT NULL DEFAULT 8.0,   -- FPS
+    is_looping      TINYINT NOT NULL DEFAULT 1,   -- 1=lặp, 0=chạy 1 lần
+    effect_key      VARCHAR(64) DEFAULT '',        -- sprite effect kèm theo
+    sort_order      INT NOT NULL DEFAULT 0
+);
+
+INSERT IGNORE INTO animation_states (state_key,display_name,sprite_system,sheet_size,tile_size,row_down,row_up,row_right,row_left,frame_count,frame_rate,is_looping,effect_key) VALUES
+-- Character Base animations (512x512, 64px, 8x8)
+('idle',          'Đứng yên',        'charbase',512,64, 0,1,2,3, 2,4,  1,''),
+('walk',          'Đi bộ',           'charbase',512,64, 4,5,6,7, 6,8,  1,''),
+-- Farmer System animations (1024x1024, 32px, 32x32)
+('run',           'Chạy',            'farmer',1024,32,  4,5,6,7,   6,10, 1,''),
+('attack_sword',  'Chém kiếm',       'farmer',1024,32,  16,17,18,19, 6,12, 0,'farmer slash effects 64x64'),
+('attack_bow',    'Bắn cung',        'farmer',1024,32,  20,21,22,23, 6,10, 0,'farmer bow 001 32x32 v00'),
+('attack_axe',    'Chém rìu',        'farmer',1024,32,  16,17,18,19, 6,10, 0,''),
+('attack_fist',   'Đấm',            'farmer',1024,32,  16,17,18,19, 4,12, 0,''),
+('attack_gun',    'Bắn súng',        'farmer',1024,32,  20,21,22,23, 4,14, 0,''),
+('attack_sling',  'Bắn ná',         'farmer',1024,32,  20,21,22,23, 5,10, 0,''),
+('cast_spell',    'Thi phép',       'farmer',1024,32,  24,25,26,27, 6,8,  0,''),
+('farm_hoe',      'Cuốc đất',       'farmer',1024,32,  12,13,14,15, 6,8,  0,'farmer tool 001 v00'),
+('farm_water',    'Tưới nước',       'farmer',1024,32,  12,13,14,15, 6,8,  0,'farmer tool 002 v00'),
+('farm_axe',      'Chặt cây',        'farmer',1024,32,  12,13,14,15, 6,8,  0,'farmer tool 003 v00'),
+('fish',          'Câu cá',           'farmer',1024,32,  28,29,30,31, 8,6,  0,'fishing effects (up, down) 64x96 v00'),
+('carry',         'Mang vác',         'farmer',1024,32,  8,9,10,11,   6,8,  1,'farmer props 32x32 v00'),
+('sit',           'Ngồi',             'farmer',1024,32,  8,9,10,11,   1,1,  1,''),
+('die',           'Chết',             'farmer',1024,32,  8,9,10,11,   4,6,  0,''),
+('revive',        'Hồi sinh',         'farmer',1024,32,  8,9,10,11,   4,8,  0,'');
+
+-- Map class → attack animation
+CREATE TABLE IF NOT EXISTS class_animation_map (
+    class_id        INT NOT NULL,
+    action_key      VARCHAR(32) NOT NULL,          -- 'attack','skill_1','skill_2',...
+    animation_state VARCHAR(32) NOT NULL,           -- FK → animation_states.state_key
+    PRIMARY KEY (class_id, action_key)
+);
+
+INSERT IGNORE INTO class_animation_map VALUES
+(1,'attack','attack_sword'),  (1,'skill','cast_spell'),
+(2,'attack','cast_spell'),    (2,'skill','cast_spell'),
+(3,'attack','attack_gun'),    (3,'skill','attack_gun'),
+(4,'attack','attack_sling'),  (4,'skill','attack_sling'),
+(5,'attack','attack_axe'),    (5,'skill','attack_axe'),
+(6,'attack','attack_fist'),   (6,'skill','attack_fist'),
+(7,'attack','attack_bow'),    (7,'skill','cast_spell');
+
+-- Farmer layer → character appearance mapping
+-- Khi nhân vật thực hiện action, dùng farmer layer tương ứng với outfit đang mặc
+CREATE TABLE IF NOT EXISTS farmer_layer_mapping (
+    char_outfit_key VARCHAR(32) NOT NULL,           -- key từ character appearance (shirt, pants, hair...)
+    farmer_layer    VARCHAR(8) NOT NULL,             -- folder trong FarmerSystem/sheets/ (05shrt, 04lwr1, 13hair...)
+    farmer_file     VARCHAR(128) NOT NULL,           -- file mặc định
+    description     VARCHAR(128) DEFAULT '',
+    PRIMARY KEY (char_outfit_key, farmer_layer)
+);
+
+INSERT IGNORE INTO farmer_layer_mapping VALUES
+('body',    '01body', 'fbas_01body_human_00.png',        'Base body farmer'),
+('pants',   '04lwr1', 'fbas_04lwr1_longpants_00a.png',   'Quần dài mặc định'),
+('shirt',   '05shrt', 'fbas_05shrt_shortshirt_00a.png',  'Áo ngắn mặc định'),
+('hair_bob1','13hair','fbas_13hair_bob1_00.png',          'Tóc bob1'),
+('hair_bob2','13hair','fbas_13hair_bob2_00.png',          'Tóc bob2'),
+('hair_dap1','13hair','fbas_13hair_dapper_00.png',        'Tóc dapper'),
+('hair_flat','13hair','fbas_13hair_flattop_00.png',       'Tóc flat'),
+('hair_fro1','13hair','fbas_13hair_afro_00.png',          'Tóc afro'),
+('hair_pon1','13hair','fbas_13hair_ponytail1_00.png',     'Tóc ponytail'),
+('hair_spk2','13hair','fbas_13hair_spiky2_00.png',        'Tóc spiky'),
+('boots',   '03fot1', 'fbas_03fot1_boots_00a.png',       'Giày mặc định'),
+('gloves',  '09hand', 'fbas_09hand_gloves_00a.png',      'Găng tay'),
+('hat',     '14head', 'fbas_14head_strawhat_01.png',     'Nón mặc định'),
+('cape',    '00undr', 'fbas_00undr_cloakplain_00d.png',  'Áo choàng'),
+('glasses', '12face', 'fbas_12face_glasses_00a.png',     'Kính');
+
+-- Cập nhật sprite config
+INSERT INTO character_sprite_config (config_key, config_value, description)
+VALUES 
+('farmer_sheet_size', '1024', 'Farmer spritesheet size (px)'),
+('farmer_tile_size', '32', 'Farmer tile size (px)'),
+('farmer_grid', '32', 'Farmer grid cols/rows'),
+('animation_system', 'dual', 'charbase (walk/idle) + farmer (actions)')
+ON DUPLICATE KEY UPDATE config_value=VALUES(config_value);
