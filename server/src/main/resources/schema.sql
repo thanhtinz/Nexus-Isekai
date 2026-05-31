@@ -276,13 +276,13 @@ UPDATE maps SET is_pvp=1 WHERE id=7;
 -- SEED DATA - Items cơ bản
 -- ===================================================
 INSERT INTO items (id,name,description,type,level_req,sell_price,buy_price,icon_id) VALUES
-(1,'Kiếm Gỗ','Vũ khí khởi đầu của kiếm sĩ',1,1,5,50,101),
-(2,'Dao Găm Sắt','Vũ khí khởi đầu của sát thủ',1,1,5,50,102),
-(3,'Gậy Phép','Vũ khí khởi đầu của pháp sư',1,1,5,50,103),
-(4,'Cung Gỗ','Vũ khí khởi đầu của cung thủ',1,1,5,50,104),
-(5,'Bình Máu Nhỏ','Hồi 100 HP',5,1,2,20,201),
-(6,'Bình Mana Nhỏ','Hồi 50 MP',5,1,2,20,202),
-(7,'Áo Giáp Da','Giáp cơ bản',2,1,10,80,301);
+(1001,'Kiếm Gỗ','Vũ khí khởi đầu của kiếm sĩ',1,1,5,50,1001),
+(1002,'Dao Găm Sắt','Vũ khí khởi đầu của sát thủ',1,1,5,50,1002),
+(1003,'Gậy Phép','Vũ khí khởi đầu của pháp sư',1,1,5,50,1003),
+(1004,'Cung Gỗ','Vũ khí khởi đầu của cung thủ',1,1,5,50,1004),
+(4001,'Bình Máu Nhỏ','Hồi 100 HP',5,1,2,20,4001),
+(4002,'Bình Mana Nhỏ','Hồi 50 MP',5,1,2,20,4002),
+(2001,'Áo Giáp Da','Giáp cơ bản',2,1,10,80,2001);
 
 -- ===================================================
 -- SEED DATA - Classes starter quests (mỗi class có story riêng)
@@ -356,8 +356,8 @@ INSERT INTO monsters (id,name,level,hp,atk,def,speed,exp_reward,gold_reward,map_
 -- Shops seed
 INSERT INTO shops (id,name,currency) VALUES (1,'Cửa Hàng Chung',1),(2,'Shop Premium',2);
 INSERT INTO shop_items (shop_id,item_id,price,stock) VALUES
-(1,5,20,-1),(1,6,20,-1),(1,7,80,-1),
-(2,5,1,-1),(2,6,1,-1);
+(1,4001,20,-1),(1,4002,20,-1),(1,2001,80,-1),
+(2,4001,1,-1),(2,4002,1,-1);
 
 -- NPC seed
 INSERT INTO npcs (id,name,map_id,pos_x,pos_y,npc_type,shop_id) VALUES

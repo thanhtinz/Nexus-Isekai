@@ -13,13 +13,13 @@
 ## 1. HẠT GIỐNG (seed) — icon trong shop/túi
 | icon_id | Tên | File | Mô tả |
 |---|---|---|---|
-| 310 | Hạt Lúa Linh | `farm_310.png` | Túi hạt lúa, ánh linh khí nhạt |
-| 311 | Hạt Cà Rốt Vàng | `farm_311.png` | Túi hạt cam |
-| 312 | Hạt Linh Chi | `farm_312.png` | Túi hạt nâu, hơi phát sáng |
-| 313 | Hạt Tiên Đào | `farm_313.png` | Túi hạt hồng đào |
-| 314 | Hạt Hỏa Liên | `farm_314.png` | Túi hạt đỏ rực (hệ hỏa) |
-| 315 | Hạt Băng Tâm Thảo | `farm_315.png` | Túi hạt xanh băng (hệ băng) |
-| 316 | Hạt Tử Vân Quả | `farm_316.png` | Túi hạt tím quý |
+| 6001 | Hạt Lúa Linh | `farm_6001.png` | Túi hạt lúa, ánh linh khí nhạt |
+| 6002 | Hạt Cà Rốt Vàng | `farm_6002.png` | Túi hạt cam |
+| 6003 | Hạt Linh Chi | `farm_6003.png` | Túi hạt nâu, hơi phát sáng |
+| 6004 | Hạt Tiên Đào | `farm_6004.png` | Túi hạt hồng đào |
+| 6005 | Hạt Hỏa Liên | `farm_6005.png` | Túi hạt đỏ rực (hệ hỏa) |
+| 6006 | Hạt Băng Tâm Thảo | `farm_6006.png` | Túi hạt xanh băng (hệ băng) |
+| 6007 | Hạt Tử Vân Quả | `farm_6007.png` | Túi hạt tím quý |
 
 ## 2. CÂY TRỒNG theo giai đoạn (stage) — vẽ trên ô đất
 > Mỗi cây cần ảnh theo số `stages`. Tên: `crop_<seedId>_s<1..stages>.png`
@@ -36,13 +36,13 @@
 ## 3. NÔNG SẢN thu hoạch (produce) — icon túi/kho/bán
 | icon_id | Tên | File | Mô tả |
 |---|---|---|---|
-| 410 | Lúa Linh | `farm_410.png` | Bó lúa vàng |
-| 411 | Cà Rốt Vàng | `farm_411.png` | Củ cà rốt cam |
-| 412 | Linh Chi Thảo | `farm_412.png` | Nấm linh chi phát sáng |
-| 413 | Tiên Đào | `farm_413.png` | Quả đào hồng |
-| 414 | Hỏa Liên | `farm_414.png` | Hoa sen lửa đỏ |
-| 415 | Băng Tâm Thảo | `farm_415.png` | Linh thảo xanh băng |
-| 416 | Tử Vân Quả | `farm_416.png` | Quả tím hào quang |
+| 6101 | Lúa Linh | `farm_6101.png` | Bó lúa vàng |
+| 6102 | Cà Rốt Vàng | `farm_6102.png` | Củ cà rốt cam |
+| 6103 | Linh Chi Thảo | `farm_6103.png` | Nấm linh chi phát sáng |
+| 6104 | Tiên Đào | `farm_6104.png` | Quả đào hồng |
+| 6105 | Hỏa Liên | `farm_6105.png` | Hoa sen lửa đỏ |
+| 6106 | Băng Tâm Thảo | `farm_6106.png` | Linh thảo xanh băng |
+| 6107 | Tử Vân Quả | `farm_6107.png` | Quả tím hào quang |
 
 ## 4. THÚ NUÔI — sprite trong chuồng (nên có anim idle)
 | animal id | Tên | type | File | Mô tả |
@@ -56,22 +56,22 @@
 ## 5. THỨC ĂN THÚ (feed) — icon
 | icon_id | Tên | File | Mô tả |
 |---|---|---|---|
-| 601 | Cỏ Linh | `farm_601.png` | Bó cỏ xanh (gia cầm) |
-| 602 | Cám Tinh Hoa | `farm_602.png` | Bao cám (gia súc) |
-| 603 | Linh Ngư Nhĩ | `farm_603.png` | Mồi cho cá |
+| 6201 | Cỏ Linh | `farm_6201.png` | Bó cỏ xanh (gia cầm) |
+| 6202 | Cám Tinh Hoa | `farm_6202.png` | Bao cám (gia súc) |
+| 6203 | Linh Ngư Nhĩ | `farm_6203.png` | Mồi cho cá |
 
 ## 6. SẢN PHẨM THÚ (produce) — icon túi/kho/bán
 | icon_id | Tên | File | Mô tả |
 |---|---|---|---|
-| 611 | Trứng Linh Kê | `farm_611.png` | Trứng vàng óng |
-| 612 | Sữa Linh Ngưu | `farm_612.png` | Bình sữa |
-| 613 | Lông Vũ Quý | `farm_613.png` | Cụm lông ngũ sắc |
-| 614 | Tơ Linh Tằm | `farm_614.png` | Cuộn tơ phát sáng |
+| 6301 | Trứng Linh Kê | `farm_6301.png` | Trứng vàng óng |
+| 6302 | Sữa Linh Ngưu | `farm_6302.png` | Bình sữa |
+| 6303 | Lông Vũ Quý | `farm_6303.png` | Cụm lông ngũ sắc |
+| 6304 | Tơ Linh Tằm | `farm_6304.png` | Cuộn tơ phát sáng |
 
 ## 7. PHÂN BÓN
 | icon_id | Tên | File | Mô tả |
 |---|---|---|---|
-| 320 | Phân Linh Thổ | `farm_320.png` | Túi phân nâu, lấp lánh linh khí |
+| 6401 | Phân Linh Thổ | `farm_6401.png` | Túi phân nâu, lấp lánh linh khí |
 
 ---
 

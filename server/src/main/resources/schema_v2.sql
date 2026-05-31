@@ -3494,47 +3494,47 @@ ALTER TABLE characters ADD COLUMN IF NOT EXISTS last_played DATETIME NULL;
 -- ITEM: hạt giống (seed), nông sản (produce), thức ăn thú, sản phẩm thú, phân bón
 INSERT IGNORE INTO items (id,name,description,type,level_req,sell_price,buy_price,icon_id) VALUES
  -- Hạt giống (mua ở shop)
- (310,'Hạt Lúa Linh','Hạt giống Lúa Linh','seed',1,0,200,310),
- (311,'Hạt Cà Rốt Vàng','Hạt giống Cà Rốt Vàng','seed',1,0,150,311),
- (312,'Hạt Linh Chi','Hạt giống Linh Chi Thảo','seed',5,0,500,312),
- (313,'Hạt Tiên Đào','Hạt giống Tiên Đào','seed',10,0,1200,313),
- (314,'Hạt Hỏa Liên','Hạt giống Hỏa Liên (hệ hỏa)','seed',15,0,2000,314),
- (315,'Hạt Băng Tâm Thảo','Hạt giống Băng Tâm Thảo (hệ băng)','seed',20,0,3000,315),
- (316,'Hạt Tử Vân Quả','Hạt giống Tử Vân Quả (quý)','seed',30,0,6000,316),
+ (6001,'Hạt Lúa Linh','Hạt giống Lúa Linh','seed',1,0,200,6001),
+ (6002,'Hạt Cà Rốt Vàng','Hạt giống Cà Rốt Vàng','seed',1,0,150,6002),
+ (6003,'Hạt Linh Chi','Hạt giống Linh Chi Thảo','seed',5,0,500,6003),
+ (6004,'Hạt Tiên Đào','Hạt giống Tiên Đào','seed',10,0,1200,6004),
+ (6005,'Hạt Hỏa Liên','Hạt giống Hỏa Liên (hệ hỏa)','seed',15,0,2000,6005),
+ (6006,'Hạt Băng Tâm Thảo','Hạt giống Băng Tâm Thảo (hệ băng)','seed',20,0,3000,6006),
+ (6007,'Hạt Tử Vân Quả','Hạt giống Tử Vân Quả (quý)','seed',30,0,6000,6007),
  -- Nông sản (thu hoạch → bán)
- (410,'Lúa Linh','Nông sản cơ bản','material',1,80,0,410),
- (411,'Cà Rốt Vàng','Nông sản phổ biến','material',1,60,0,411),
- (412,'Linh Chi Thảo','Dược liệu tu luyện','material',5,200,0,412),
- (413,'Tiên Đào','Quả tiên hồi linh lực','material',10,450,0,413),
- (414,'Hỏa Liên','Linh hoa hệ hỏa','material',15,700,0,414),
- (415,'Băng Tâm Thảo','Linh thảo hệ băng','material',20,1000,0,415),
- (416,'Tử Vân Quả','Quả quý luyện đan','material',30,2200,0,416),
+ (6101,'Lúa Linh','Nông sản cơ bản','material',1,80,0,6101),
+ (6102,'Cà Rốt Vàng','Nông sản phổ biến','material',1,60,0,6102),
+ (6103,'Linh Chi Thảo','Dược liệu tu luyện','material',5,200,0,6103),
+ (6104,'Tiên Đào','Quả tiên hồi linh lực','material',10,450,0,6104),
+ (6105,'Hỏa Liên','Linh hoa hệ hỏa','material',15,700,0,6105),
+ (6106,'Băng Tâm Thảo','Linh thảo hệ băng','material',20,1000,0,6106),
+ (6107,'Tử Vân Quả','Quả quý luyện đan','material',30,2200,0,6107),
  -- Thức ăn thú
- (601,'Cỏ Linh','Thức ăn cho gia cầm','material',1,0,50,601),
- (602,'Cám Tinh Hoa','Thức ăn cho gia súc','material',1,0,120,602),
- (603,'Linh Ngư Nhĩ','Thức ăn cho thủy sinh','material',1,0,90,603),
+ (6201,'Cỏ Linh','Thức ăn cho gia cầm','material',1,0,50,6201),
+ (6202,'Cám Tinh Hoa','Thức ăn cho gia súc','material',1,0,120,6202),
+ (6203,'Linh Ngư Nhĩ','Thức ăn cho thủy sinh','material',1,0,90,6203),
  -- Sản phẩm thú (thu → bán)
- (611,'Trứng Linh Kê','Sản phẩm chăn nuôi','material',1,50,0,611),
- (612,'Sữa Linh Ngưu','Sản phẩm chăn nuôi','material',1,120,0,612),
- (613,'Lông Vũ Quý','Sản phẩm chăn nuôi','material',1,90,0,613),
- (614,'Tơ Linh Tằm','Sản phẩm cao cấp','material',1,250,0,614),
+ (6301,'Trứng Linh Kê','Sản phẩm chăn nuôi','material',1,50,0,6301),
+ (6302,'Sữa Linh Ngưu','Sản phẩm chăn nuôi','material',1,120,0,6302),
+ (6303,'Lông Vũ Quý','Sản phẩm chăn nuôi','material',1,90,0,6303),
+ (6304,'Tơ Linh Tằm','Sản phẩm cao cấp','material',1,250,0,6304),
  -- Phân bón
- (320,'Phân Linh Thổ','Bón phân: cây lớn nhanh + sản lượng cao','material',1,0,100,320);
+ (6401,'Phân Linh Thổ','Bón phân: cây lớn nhanh + sản lượng cao','material',1,0,100,6401);
 
 -- HẠT GIỐNG → CÂY (farm_seeds): growth_time_min, stages, harvest item, yield, water, fertilizer
 INSERT IGNORE INTO farm_seeds (id,name,growth_time_min,stages,harvest_item_id,harvest_qty_min,harvest_qty_max,seed_item_id,water_needed,fertilizer_item_id) VALUES
- (1,'Lúa Linh',          60, 4, 410, 5, 12, 310, 3, 320),
- (2,'Cà Rốt Vàng',       45, 4, 411, 4, 10, 311, 2, 320),
- (3,'Linh Chi Thảo',    180, 5, 412, 2,  6, 312, 4, 320),
- (4,'Tiên Đào',         240, 5, 413, 3,  8, 313, 4, 320),
- (5,'Hỏa Liên',         300, 5, 414, 2,  5, 314, 5, 320),
- (6,'Băng Tâm Thảo',    300, 5, 415, 2,  5, 315, 5, 320),
- (7,'Tử Vân Quả',       480, 6, 416, 1,  4, 316, 6, 320);
+ (1,'Lúa Linh',          60, 4, 6101, 5, 12, 6001, 3, 6401),
+ (2,'Cà Rốt Vàng',       45, 4, 6102, 4, 10, 6002, 2, 6401),
+ (3,'Linh Chi Thảo',    180, 5, 6103, 2,  6, 6003, 4, 6401),
+ (4,'Tiên Đào',         240, 5, 6104, 3,  8, 6004, 4, 6401),
+ (5,'Hỏa Liên',         300, 5, 6105, 2,  5, 6005, 5, 6401),
+ (6,'Băng Tâm Thảo',    300, 5, 6106, 2,  5, 6006, 5, 6401),
+ (7,'Tử Vân Quả',       480, 6, 6107, 1,  4, 6007, 6, 6401);
 
 -- THÚ NUÔI (farm_animals): feed, produce, produce_time, qty, breed_time
 INSERT IGNORE INTO farm_animals (id,name,animal_type,feed_item_id,produce_item_id,produce_time_min,produce_qty,breed_time_min) VALUES
- (1,'Linh Kê',     'bird', 601, 611,  60, 3, 720),
- (2,'Linh Ngưu',   'cow',  602, 612, 120, 2, 1440),
- (3,'Thải Vũ Điểu','bird', 601, 613,  90, 2, 1080),
- (4,'Linh Tằm',    'bug',  601, 614, 150, 1, 1440),
- (5,'Linh Ngư',    'fish', 603, 611,  80, 2, 960);
+ (1,'Linh Kê',     'bird', 6201, 6301,  60, 3, 720),
+ (2,'Linh Ngưu',   'cow',  6202, 6302, 120, 2, 1440),
+ (3,'Thải Vũ Điểu','bird', 6201, 6303,  90, 2, 1080),
+ (4,'Linh Tằm',    'bug',  6201, 6304, 150, 1, 1440),
+ (5,'Linh Ngư',    'fish', 6203, 6301,  80, 2, 960);
