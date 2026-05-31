@@ -19,7 +19,8 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 export function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <ServerProvider>
+        <Routes>
         <Route path="/" element={<LandingPage />} />
         
             <Route path="/ranking" element={<RankingPage />} />
@@ -33,16 +34,19 @@ export function App() {
           path="/*"
           element={
             <Layout>
-              <Routes>
+              <ServerProvider>
+        <Routes>
 </PrivateRoute>} />
 </PrivateRoute>} />
                 <Route path="/giftcode" element={<PrivateRoute><GiftCodePage /></PrivateRoute>} />
                 <Route path="/pass" element={<PrivateRoute><PassPage /></PrivateRoute>} />
               </Routes>
+        </ServerProvider>
             </Layout>
           }
         />
       </Routes>
+        </ServerProvider>
     </BrowserRouter>
   )
 }

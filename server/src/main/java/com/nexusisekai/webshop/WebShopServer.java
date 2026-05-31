@@ -101,6 +101,14 @@ public class WebShopServer {
                 sendJson(ex, 200, Map.of("articles", list));
             } catch(Exception e) { sendJson(ex, 500, Map.of("error","db")); }
         });
+        httpServer.createContext("/api/servers", ex -> {
+            try (Connection conn = DatabaseManager.getInstance().getConnection()) {
+                ResultSet rs = conn.prepareStatement("SELECT id,name,status,group_name,online_count,is_new,is_recommend,is_hot FROM game_servers WHERE status>0 ORDER BY sort_order,id").executeQuery();
+                var list = new java.util.ArrayList<java.util.Map<String,Object>>();
+                while(rs.next()) list.add(java.util.Map.of("id",rs.getInt("id"),"name",rs.getString("name"),"status",rs.getInt("status"),"group_name",rs.getString("group_name")!=null?rs.getString("group_name"):""));
+                sendJson(ex, 200, java.util.Map.of("servers", list));
+            } catch(Exception e) { sendJson(ex, 500, java.util.Map.of("error","db")); }
+        });
         httpServer.createContext("/api/ranking", ex -> {
             try (Connection conn = DatabaseManager.getInstance().getConnection()) {
                 var p = parseQuery(ex.getRequestURI().getQuery());

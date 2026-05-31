@@ -1,21 +1,20 @@
 import { Swords, Trophy, Castle, Gem } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useServer } from '../context/ServerContext';
 import { api } from '../api/client';
 
 interface RankEntry { rank: number; name: string; level: number; class_name: string; elo: number; guild: string; }
 
 export default function RankingPage() {
   const [tab, setTab] = useState<'level'|'pvp'|'guild'|'wealth'>('level');
-  const [serverId, setServerId] = useState(0);
-  const [servers, setServers] = useState<any[]>([]);
+  const { selectedServer: serverId } = useServer();
   const [data, setData] = useState<RankEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { api.get('/api/download-links').catch(()=>{}); api.get('/api/social-links').then(r => {}).catch(()=>{});
     fetch('/api/ranking?type=level&server_id=0').catch(()=>{});
-    loadServers(); }, []);
+    }, []);
   useEffect(() => { loadRank(); }, [tab, serverId]);
-  const loadServers = async () => { try { const r = await api.get('/api/servers'); setServers(r.data.servers || []); } catch { setServers([{id:0,name:'All'}]); } };
   const loadRank = async () => {
     setLoading(true);
     try { const res = await api.get(`/api/ranking?type=${tab}&server_id=${serverId}`); setData(res.data.rankings || []); }
@@ -34,13 +33,6 @@ export default function RankingPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-center mb-8 text-yellow-400">Bang Xep Hang</h1>
-        <div className="flex gap-2 mb-4 justify-center">
-          <select value={serverId} onChange={e => setServerId(Number(e.target.value))}
-            className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600">
-            <option value={0}>All Servers</option>
-            {servers.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
-        </div>
         <div className="flex gap-2 mb-6 justify-center">
           {tabs.map(t => (
             <button key={t.key} onClick={() => setTab(t.key as any)}

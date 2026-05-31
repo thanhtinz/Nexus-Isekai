@@ -61,7 +61,8 @@ export function Header() {
                 {label}
               </Link>
             ))}
-          </nav>
+            <ServerSelector />
+        </nav>
 
           {/* Right side */}
           <div className="flex items-center gap-3 ml-auto">
