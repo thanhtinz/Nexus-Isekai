@@ -5,6 +5,7 @@ import com.nexusisekai.database.SqlSafe;
 import com.nexusisekai.game.entity.Player;
 import com.nexusisekai.game.world.FacilityManager;
 import com.nexusisekai.game.world.WorldManager;
+import com.nexusisekai.game.social.SocialManager;
 import com.nexusisekai.network.GameSession;
 import com.nexusisekai.network.PacketOpcode;
 import io.netty.buffer.ByteBuf;
@@ -72,6 +73,25 @@ public class FacilityHandler {
         String ownerType = switch (scope) {
             case "guild" -> "guild"; case "party" -> "party"; case "room" -> "room"; case "personal" -> "char"; default -> "global";
         };
+
+        // NHÀ CHUNG: nếu vào "housing" mà đã kết hôn → instance theo marriage
+        // → cả hai vợ chồng vào CÙNG một căn nhà.
+        if (category.equals("housing")) {
+            try {
+                var marriage = SocialManager.getInstance().getMarriage(p.getCharId());
+                if (marriage != null && "married".equals(marriage.status)) {
+                    ownerType = "marriage";
+                    ownerId = marriage.id;
+                    // đồng bộ spouse_id trên bản ghi nhà (cả 2 chiều)
+                    long spouse = (marriage.charIdA == p.getCharId()) ? marriage.charIdB : marriage.charIdA;
+                    try (java.sql.Connection cc = com.nexusisekai.database.DatabaseManager.getInstance().getConnection()) {
+                        com.nexusisekai.database.SqlSafe.update(cc,
+                            "UPDATE houses SET spouse_id=? WHERE char_id IN (?,?)", spouse, p.getCharId(), spouse);
+                    }
+                }
+            } catch (Exception ex) { log.warn("housing marriage check", ex); }
+        }
+
         long instanceId = scope.equals("static") ? 0 : fm.getOrCreateInstance(facilityMapId, ownerType, ownerId);
 
         // Rời zone cũ → vào facility
