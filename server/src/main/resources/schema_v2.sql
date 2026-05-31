@@ -2747,3 +2747,34 @@ INSERT IGNORE INTO news_articles (id,title,category,summary,content,is_published
 (1,'Khai mo Nexus Isekai','event','Chao mung cac Luu Dan den voi Vong Linh Gioi!','Chao mung cac Luu Dan den voi Vong Linh Gioi! Game chinh thuc ra mat.',1,NOW()),
 (2,'Mua PvP 1 bat dau','pvp','Mua PvP dau tien chinh thuc bat dau.','Chien dau de gianh skin doc quyen mua 1!',1,NOW()),
 (3,'Banner Trieu Hoi Gioi Han','gacha','Ti le SSR tang gap doi!','Banner gioi han voi ti le SSR tang gap doi trong 7 ngay.',1,NOW());
+
+-- ═════════════════════════════════════════════════════════════
+-- MULTI-SERVER SUPPORT — Gift code, topup, shop, BXH per server
+-- ═════════════════════════════════════════════════════════════
+
+-- Gift code: thêm server filter
+ALTER TABLE gift_codes ADD COLUMN IF NOT EXISTS server_ids VARCHAR(64) NOT NULL DEFAULT 'all';
+-- 'all' = tat ca server, '1,2,3' = chi sv 1,2,3
+
+-- Topup packages: per server
+ALTER TABLE topup_packages ADD COLUMN IF NOT EXISTS server_ids VARCHAR(64) NOT NULL DEFAULT 'all';
+
+-- Shop items: per server
+ALTER TABLE shop_items ADD COLUMN IF NOT EXISTS server_ids VARCHAR(64) NOT NULL DEFAULT 'all';
+
+-- Leaderboard cache: per server
+ALTER TABLE leaderboard_cache ADD COLUMN IF NOT EXISTS server_id INT NOT NULL DEFAULT 0;
+-- 0 = all servers combined, 1,2,3... = specific server
+ALTER TABLE leaderboard_cache DROP PRIMARY KEY;
+ALTER TABLE leaderboard_cache ADD PRIMARY KEY (rank_type, server_id, rank_pos);
+
+-- Server copy log
+CREATE TABLE IF NOT EXISTS server_copy_log (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    source_server   INT NOT NULL,
+    target_server   INT NOT NULL,
+    copy_type       VARCHAR(32) NOT NULL,            -- topup_packages,shop_items,gift_codes
+    items_copied    INT NOT NULL DEFAULT 0,
+    created_by      VARCHAR(64) DEFAULT 'admin',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

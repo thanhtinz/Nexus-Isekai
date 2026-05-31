@@ -350,8 +350,8 @@ namespace NexusIsekai.Network
 
         // ── Leaderboard ──────────────────────────────────────────
 
-        public static void SendLeaderboard(string rankType)
-            => Send(new PacketBuilder(PacketOpcode.C2S_LEADERBOARD).WriteString(rankType));
+        public static void SendLeaderboard(string rankType, int serverId = 0)
+            => Send(new PacketBuilder(PacketOpcode.C2S_LEADERBOARD).WriteString(rankType).WriteInt(serverId));
 
         // ── Drop item ────────────────────────────────────────────
 

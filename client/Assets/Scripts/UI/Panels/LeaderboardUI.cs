@@ -24,6 +24,7 @@ namespace NexusIsekai.UI
 
         string[] rankTypes = { "level", "pvp_rating", "guild_level", "wealth" };
         string currentType = "level";
+        int currentServerId = 0; // 0 = all servers
         int myRank;
         List<Entry> entries = new();
         bool isOpen;
@@ -50,7 +51,13 @@ namespace NexusIsekai.UI
         public void SwitchTab(string type)
         {
             currentType = type;
-            PacketBuilder.SendLeaderboard(type);
+            PacketBuilder.SendLeaderboard(type, currentServerId);
+        }
+
+        public void SwitchServer(int serverId)
+        {
+            currentServerId = serverId;
+            PacketBuilder.SendLeaderboard(currentType, currentServerId);
         }
 
         public void OnTabLevel()       => SwitchTab("level");

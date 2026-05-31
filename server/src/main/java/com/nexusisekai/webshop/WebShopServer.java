@@ -101,6 +101,18 @@ public class WebShopServer {
                 sendJson(ex, 200, Map.of("articles", list));
             } catch(Exception e) { sendJson(ex, 500, Map.of("error","db")); }
         });
+        httpServer.createContext("/api/ranking", ex -> {
+            try (Connection conn = DatabaseManager.getInstance().getConnection()) {
+                var p = parseQuery(ex.getRequestURI().getQuery());
+                String type = p.getOrDefault("type", "level");
+                int serverId = Integer.parseInt(p.getOrDefault("server_id", "0"));
+                String sql = "SELECT * FROM leaderboard_cache WHERE rank_type='" + type.replace("'","") + "' AND server_id=" + serverId + " ORDER BY rank_pos LIMIT 100";
+                ResultSet rs = conn.prepareStatement(sql).executeQuery();
+                var list = new java.util.ArrayList<java.util.Map<String,Object>>();
+                while(rs.next()) list.add(java.util.Map.of("rank",rs.getInt("rank_pos"),"name",rs.getString("char_name"),"class_id",rs.getInt("class_id"),"level",0,"elo",rs.getLong("rank_value"),"class_name",""));
+                sendJson(ex, 200, java.util.Map.of("rankings", list));
+            } catch(Exception e) { sendJson(ex, 500, java.util.Map.of("error","db")); }
+        });
         httpServer.start();
         log.info("[WEBSHOP] Running on port {}", port);
     }

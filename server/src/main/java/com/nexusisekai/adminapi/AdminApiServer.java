@@ -151,6 +151,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
         httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
         httpServer.createContext("/api/gacha-banners",    ex -> handleAuth(ex, this::handleGachaBanners));
+        httpServer.createContext("/api/server-copy",     ex -> handleAuth(ex, this::handleServerCopy));
         httpServer.createContext("/api/download-links", ex -> handleAuth(ex, this::handleDownloadLinks));
         httpServer.createContext("/api/social-links",   ex -> handleAuth(ex, this::handleSocialLinks));
         httpServer.createContext("/api/news-articles",  ex -> handleAuth(ex, this::handleNewsArticles));
@@ -711,6 +712,59 @@ public class AdminApiServer {
         }
     }
 
+
+
+    /** Copy topup/shop/giftcode config between servers */
+    private void handleServerCopy(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            var b = parseBody(ex);
+            int src = num(b,"source_server"), tgt = num(b,"target_server");
+            String type = str(b,"copy_type").replace("'","");
+            int copied = 0;
+
+            switch (type) {
+                case "topup_packages" -> {
+                    // Copy packages: change server_ids to include target
+                    ResultSet rs = c.prepareStatement("SELECT * FROM topup_packages WHERE server_ids='all' OR FIND_IN_SET(" + src + ",server_ids)").executeQuery();
+                    while (rs.next()) {
+                        String ids = rs.getString("server_ids");
+                        if (ids.equals("all")) continue; // already available
+                        if (!ids.contains(String.valueOf(tgt))) {
+                            c.prepareStatement("UPDATE topup_packages SET server_ids=CONCAT(server_ids,'," + tgt + "') WHERE id=" + rs.getInt("id")).executeUpdate();
+                            copied++;
+                        }
+                    }
+                }
+                case "shop_items" -> {
+                    ResultSet rs = c.prepareStatement("SELECT * FROM shop_items WHERE server_ids='all' OR FIND_IN_SET(" + src + ",server_ids)").executeQuery();
+                    while (rs.next()) {
+                        String ids = rs.getString("server_ids");
+                        if (ids.equals("all")) continue;
+                        if (!ids.contains(String.valueOf(tgt))) {
+                            c.prepareStatement("UPDATE shop_items SET server_ids=CONCAT(server_ids,'," + tgt + "') WHERE id=" + rs.getInt("id")).executeUpdate();
+                            copied++;
+                        }
+                    }
+                }
+                case "gift_codes" -> {
+                    ResultSet rs = c.prepareStatement("SELECT * FROM gift_codes WHERE server_ids='all' OR FIND_IN_SET(" + src + ",server_ids)").executeQuery();
+                    while (rs.next()) {
+                        String ids = rs.getString("server_ids");
+                        if (ids.equals("all")) continue;
+                        if (!ids.contains(String.valueOf(tgt))) {
+                            c.prepareStatement("UPDATE gift_codes SET server_ids=CONCAT(server_ids,'," + tgt + "') WHERE id=" + rs.getInt("id")).executeUpdate();
+                            copied++;
+                        }
+                    }
+                }
+            }
+
+            c.prepareStatement("INSERT INTO server_copy_log (source_server,target_server,copy_type,items_copied) VALUES (" +
+                src + "," + tgt + ",'" + type + "'," + copied + ")").executeUpdate();
+            auditLog(ex, "server_copy", type, src + "->" + tgt, copied + " items");
+            sendJson(ex, 200, Map.of("success", true, "copied", copied));
+        }
+    }
 
     private void handleDownloadLinks(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
@@ -1867,6 +1921,59 @@ public class AdminApiServer {
 
     /** Full server CRUD — tạo, sửa, bảo trì, xoá server */
 
+
+
+    /** Copy topup/shop/giftcode config between servers */
+    private void handleServerCopy(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            var b = parseBody(ex);
+            int src = num(b,"source_server"), tgt = num(b,"target_server");
+            String type = str(b,"copy_type").replace("'","");
+            int copied = 0;
+
+            switch (type) {
+                case "topup_packages" -> {
+                    // Copy packages: change server_ids to include target
+                    ResultSet rs = c.prepareStatement("SELECT * FROM topup_packages WHERE server_ids='all' OR FIND_IN_SET(" + src + ",server_ids)").executeQuery();
+                    while (rs.next()) {
+                        String ids = rs.getString("server_ids");
+                        if (ids.equals("all")) continue; // already available
+                        if (!ids.contains(String.valueOf(tgt))) {
+                            c.prepareStatement("UPDATE topup_packages SET server_ids=CONCAT(server_ids,'," + tgt + "') WHERE id=" + rs.getInt("id")).executeUpdate();
+                            copied++;
+                        }
+                    }
+                }
+                case "shop_items" -> {
+                    ResultSet rs = c.prepareStatement("SELECT * FROM shop_items WHERE server_ids='all' OR FIND_IN_SET(" + src + ",server_ids)").executeQuery();
+                    while (rs.next()) {
+                        String ids = rs.getString("server_ids");
+                        if (ids.equals("all")) continue;
+                        if (!ids.contains(String.valueOf(tgt))) {
+                            c.prepareStatement("UPDATE shop_items SET server_ids=CONCAT(server_ids,'," + tgt + "') WHERE id=" + rs.getInt("id")).executeUpdate();
+                            copied++;
+                        }
+                    }
+                }
+                case "gift_codes" -> {
+                    ResultSet rs = c.prepareStatement("SELECT * FROM gift_codes WHERE server_ids='all' OR FIND_IN_SET(" + src + ",server_ids)").executeQuery();
+                    while (rs.next()) {
+                        String ids = rs.getString("server_ids");
+                        if (ids.equals("all")) continue;
+                        if (!ids.contains(String.valueOf(tgt))) {
+                            c.prepareStatement("UPDATE gift_codes SET server_ids=CONCAT(server_ids,'," + tgt + "') WHERE id=" + rs.getInt("id")).executeUpdate();
+                            copied++;
+                        }
+                    }
+                }
+            }
+
+            c.prepareStatement("INSERT INTO server_copy_log (source_server,target_server,copy_type,items_copied) VALUES (" +
+                src + "," + tgt + ",'" + type + "'," + copied + ")").executeUpdate();
+            auditLog(ex, "server_copy", type, src + "->" + tgt, copied + " items");
+            sendJson(ex, 200, Map.of("success", true, "copied", copied));
+        }
+    }
 
     private void handleDownloadLinks(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
