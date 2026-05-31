@@ -2183,3 +2183,34 @@ INSERT IGNORE INTO item_templates (id,name,item_type,equip_slot,level_req,qualit
 (30002,'Day Chuyen Dong','necklace','necklace',5,0,2,3,3,600),
 (30003,'Khuyen Tai Dong','earring','earring_1',5,0,2,0,5,400),
 (30004,'Vong Tay Dong','bracelet','bracelet_1',5,0,1,3,3,350);
+
+-- ═════════════════════════════════════════════════════════════
+-- 53. EYES — Thêm mắt vào tạo nhân vật
+-- ═════════════════════════════════════════════════════════════
+
+-- Layer mới: 3fac (face) — mắt xếp giữa base body và outfit
+-- Sprite path: body_{N}/3fac/eye_v{XX}.png
+-- 11 kiểu mắt: v00–v10
+
+ALTER TABLE characters
+    ADD COLUMN IF NOT EXISTS eye_style TINYINT NOT NULL DEFAULT 0; -- 0-10 (eye_v00 - eye_v10)
+
+-- Cập nhật sprite config
+INSERT INTO character_sprite_config (config_key, config_value, description)
+VALUES ('eye_styles', '11', 'Số lượng kiểu mắt (eye_v00 - eye_v10)')
+ON DUPLICATE KEY UPDATE config_value='11';
+
+-- Layer order cập nhật:
+-- Layer 0: Base body (0bas_humn_vXX)
+-- Layer 1: Pants (1out/pfpn_vXX)
+-- Layer 2: Shirt (1out/fstr_vXX)
+-- Layer 3: Eyes (3fac/eye_vXX)     ← MỚI
+-- Layer 4: Hair (4har/{style}_vXX)
+-- Layer 5: Hat (5hat/ — equipment)
+-- Layer 6: Weapon (6tla/ — equipment)
+-- Layer 7: Shield (7tlb/ — equipment)
+
+INSERT INTO character_sprite_config (config_key, config_value, description)
+VALUES ('layer_order', '["0bas","1out_pfpn","1out_fstr","3fac_eye","4har","5hat","6tla","7tlb"]',
+        'Thứ tự render layer từ dưới lên')
+ON DUPLICATE KEY UPDATE config_value='["0bas","1out_pfpn","1out_fstr","3fac_eye","4har","5hat","6tla","7tlb"]';
