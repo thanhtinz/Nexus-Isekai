@@ -1,4 +1,16 @@
+import { useState, useEffect } from 'react';
+import { api } from '../api/client';
 export default function DownloadPage() {
+  const [links, setLinks] = useState<any>({});
+  useEffect(() => {
+    api.get('/api/download-links').then(r => {
+      const map: any = {};
+      (r.data.links || []).forEach((l: any) => { if (l.is_active) map[l.platform] = l; });
+      setLinks(map);
+    }).catch(() => {});
+  }, []);
+  const getUrl = (key: string) => links[key]?.url || '#';
+  const getVer = () => links['apk']?.version || '1.0.0';
   const downloads = [
     { key: 'appstore', url: '#', badge: (
       <div className="flex items-center gap-3 px-8 py-4">
@@ -39,19 +51,19 @@ export default function DownloadPage() {
         <p className="text-center text-gray-400 mb-10">Nexus Isekai — Vong Linh Gioi</p>
         <div className="grid grid-cols-2 gap-3 mb-4">
           {downloads.slice(0,2).map(d => (
-            <a key={d.key} href={d.url} className="bg-gray-950 hover:bg-gray-800 border border-gray-700 hover:border-gray-500 rounded-xl transition-all hover:scale-[1.02]">
+            <a key={d.key} href={getUrl(d.key)} className="bg-gray-950 hover:bg-gray-800 border border-gray-700 hover:border-gray-500 rounded-xl transition-all hover:scale-[1.02]">
               {d.badge}
             </a>
           ))}
         </div>
         <div className="grid grid-cols-3 gap-3">
           {downloads.slice(2).map(d => (
-            <a key={d.key} href={d.url} className="bg-gray-950 hover:bg-gray-800 border border-gray-700 hover:border-gray-500 rounded-xl transition-all hover:scale-[1.02]">
+            <a key={d.key} href={getUrl(d.key)} className="bg-gray-950 hover:bg-gray-800 border border-gray-700 hover:border-gray-500 rounded-xl transition-all hover:scale-[1.02]">
               {d.badge}
             </a>
           ))}
         </div>
-        <p className="text-center text-xs text-gray-500 mt-8">Phien ban: v1.0.0</p>
+        <p className="text-center text-xs text-gray-500 mt-8">Phien ban: v{getVer()}</p>
       </div>
     </div>
   );

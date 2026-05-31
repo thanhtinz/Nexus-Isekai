@@ -2687,3 +2687,63 @@ CREATE TABLE IF NOT EXISTS topup_purchase_log (
 ('viettel','Viettel','10000,20000,50000,100000,200000,500000',0.001,20),
 ('mobifone','Mobifone','10000,20000,50000,100000,200000,500000',0.001,25),
 ('vinaphone','Vinaphone','10000,20000,50000,100000,200000,500000',0.001,25);
+
+-- ═════════════════════════════════════════════════════════════
+-- DOWNLOAD LINKS + SOCIAL LINKS + NEWS — Admin quản lý
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS download_links (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    platform        VARCHAR(16) NOT NULL UNIQUE,      -- appstore,googleplay,pc,java,apk
+    display_name    VARCHAR(32) NOT NULL,
+    url             VARCHAR(256) NOT NULL DEFAULT '#',
+    version         VARCHAR(16) NOT NULL DEFAULT '1.0.0',
+    file_size       VARCHAR(16) DEFAULT '',
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    sort_order      INT NOT NULL DEFAULT 0
+);
+
+INSERT IGNORE INTO download_links (platform,display_name,url,sort_order) VALUES
+('appstore','App Store','#',1),
+('googleplay','Google Play','#',2),
+('pc','PC','#',3),
+('java','Java','#',4),
+('apk','APK','#',5);
+
+CREATE TABLE IF NOT EXISTS social_links (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    platform        VARCHAR(16) NOT NULL UNIQUE,      -- facebook,zalo,discord,telegram,youtube,tiktok
+    display_name    VARCHAR(32) NOT NULL,
+    url             VARCHAR(256) NOT NULL DEFAULT '#',
+    description     VARCHAR(64) DEFAULT '',
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    sort_order      INT NOT NULL DEFAULT 0
+);
+
+INSERT IGNORE INTO social_links (platform,display_name,url,description,sort_order) VALUES
+('facebook','Facebook','https://facebook.com/NexusIsekai','Fanpage chinh thuc',1),
+('zalo','Zalo','https://zalo.me/NexusIsekai','Nhom cong dong',2),
+('discord','Discord','https://discord.gg/NexusIsekai','Server Discord',3),
+('telegram','Telegram','https://t.me/NexusIsekai','Kenh Telegram',4),
+('youtube','YouTube','https://youtube.com/@NexusIsekai','Kenh YouTube',5),
+('tiktok','TikTok','https://tiktok.com/@NexusIsekai','TikTok chinh thuc',6);
+
+CREATE TABLE IF NOT EXISTS news_articles (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    title           VARCHAR(128) NOT NULL,
+    category        VARCHAR(16) NOT NULL DEFAULT 'event', -- event,update,pvp,gacha,maintenance,notice
+    summary         VARCHAR(256) DEFAULT '',
+    content         TEXT NOT NULL,
+    image_url       VARCHAR(256) DEFAULT '',
+    is_pinned       TINYINT NOT NULL DEFAULT 0,
+    is_published    TINYINT NOT NULL DEFAULT 0,
+    published_at    TIMESTAMP NULL,
+    created_by      VARCHAR(64) DEFAULT 'admin',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT IGNORE INTO news_articles (id,title,category,summary,content,is_published,published_at) VALUES
+(1,'Khai mo Nexus Isekai','event','Chao mung cac Luu Dan den voi Vong Linh Gioi!','Chao mung cac Luu Dan den voi Vong Linh Gioi! Game chinh thuc ra mat.',1,NOW()),
+(2,'Mua PvP 1 bat dau','pvp','Mua PvP dau tien chinh thuc bat dau.','Chien dau de gianh skin doc quyen mua 1!',1,NOW()),
+(3,'Banner Trieu Hoi Gioi Han','gacha','Ti le SSR tang gap doi!','Banner gioi han voi ti le SSR tang gap doi trong 7 ngay.',1,NOW());

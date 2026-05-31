@@ -72,6 +72,35 @@ public class WebShopServer {
         httpServer.createContext("/api/client/config",     this::handleHotConfig);
         httpServer.createContext("/payment/webhook",this::handleWebhook);
         httpServer.setExecutor(Executors.newFixedThreadPool(8));
+        // Public API (no auth)
+        httpServer.createContext("/api/download-links", ex -> {
+            try (Connection c = DatabaseManager.getInstance().getConnection()) {
+                ResultSet rs = c.prepareStatement("SELECT * FROM download_links WHERE is_active=1 ORDER BY sort_order").executeQuery();
+                var list = new java.util.ArrayList<Map<String,Object>>();
+                while(rs.next()) list.add(Map.of("platform",rs.getString("platform"),"display_name",rs.getString("display_name"),"url",rs.getString("url"),"version",rs.getString("version")));
+                sendJson(ex, 200, Map.of("links", list));
+            } catch(Exception e) { sendJson(ex, 500, Map.of("error","db")); }
+        });
+        httpServer.createContext("/api/social-links", ex -> {
+            try (Connection c = DatabaseManager.getInstance().getConnection()) {
+                ResultSet rs = c.prepareStatement("SELECT * FROM social_links WHERE is_active=1 ORDER BY sort_order").executeQuery();
+                var list = new java.util.ArrayList<Map<String,Object>>();
+                while(rs.next()) list.add(Map.of("platform",rs.getString("platform"),"display_name",rs.getString("display_name"),"url",rs.getString("url"),"description",rs.getString("description")));
+                sendJson(ex, 200, Map.of("links", list));
+            } catch(Exception e) { sendJson(ex, 500, Map.of("error","db")); }
+        });
+        httpServer.createContext("/api/news-articles", ex -> {
+            try (Connection c = DatabaseManager.getInstance().getConnection()) {
+                var p = parseQuery(ex.getRequestURI().getQuery()); String cat = p.getOrDefault("category","");
+                String sql = "SELECT id,title,category,summary,content,image_url,published_at FROM news_articles WHERE is_published=1";
+                if (!cat.isEmpty()) sql += " AND category='" + cat.replace("'","") + "'";
+                sql += " ORDER BY is_pinned DESC,published_at DESC LIMIT 30";
+                ResultSet rs = c.prepareStatement(sql).executeQuery();
+                var list = new java.util.ArrayList<Map<String,Object>>();
+                while(rs.next()) list.add(Map.of("id",rs.getInt("id"),"title",rs.getString("title"),"category",rs.getString("category"),"summary",rs.getString("summary"),"content",rs.getString("content"),"image_url",rs.getString("image_url")!=null?rs.getString("image_url"):"","published_at",rs.getString("published_at")!=null?rs.getString("published_at"):""));
+                sendJson(ex, 200, Map.of("articles", list));
+            } catch(Exception e) { sendJson(ex, 500, Map.of("error","db")); }
+        });
         httpServer.start();
         log.info("[WEBSHOP] Running on port {}", port);
     }

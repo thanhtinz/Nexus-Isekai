@@ -151,6 +151,9 @@ public class AdminApiServer {
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
         httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
         httpServer.createContext("/api/gacha-banners",    ex -> handleAuth(ex, this::handleGachaBanners));
+        httpServer.createContext("/api/download-links", ex -> handleAuth(ex, this::handleDownloadLinks));
+        httpServer.createContext("/api/social-links",   ex -> handleAuth(ex, this::handleSocialLinks));
+        httpServer.createContext("/api/news-articles",  ex -> handleAuth(ex, this::handleNewsArticles));
         httpServer.createContext("/api/topup-packages", ex -> handleAuth(ex, this::handleTopupPackages));
         httpServer.createContext("/api/server-manage",  ex -> handleAuth(ex, this::handleServerManage));
         httpServer.createContext("/api/server-merge",   ex -> handleAuth(ex, this::handleServerMerge));
@@ -705,6 +708,98 @@ public class AdminApiServer {
             cfg.isActive = num(body,"is_active") == 1;
             svc.saveConfig(cfg);
             sendJson(ex, 200, Map.of("success",true));
+        }
+    }
+
+
+    private void handleDownloadLinks(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM download_links ORDER BY sort_order"), "links");
+            } else {
+                var b = parseBody(ex);
+                c.prepareStatement("UPDATE download_links SET url='" + str(b,"url").replace("'","") +
+                    "',version='" + str(b,"version").replace("'","") +
+                    "',file_size='" + str(b,"file_size").replace("'","") +
+                    "',is_active=" + num(b,"is_active") +
+                    " WHERE platform='" + str(b,"platform").replace("'","") + "'").executeUpdate();
+                sendJson(ex, 200, Map.of("success", true));
+            }
+        }
+    }
+
+    private void handleSocialLinks(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM social_links ORDER BY sort_order"), "links");
+            } else {
+                var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "update" -> {
+                        c.prepareStatement("UPDATE social_links SET url='" + str(b,"url").replace("'","") +
+                            "',description='" + str(b,"description").replace("'","") +
+                            "',is_active=" + num(b,"is_active") +
+                            " WHERE platform='" + str(b,"platform").replace("'","") + "'").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "create" -> {
+                        c.prepareStatement("INSERT INTO social_links (platform,display_name,url,description,sort_order) VALUES ('" +
+                            str(b,"platform").replace("'","") + "','" + str(b,"display_name").replace("'","") + "','" +
+                            str(b,"url").replace("'","") + "','" + str(b,"description").replace("'","") + "'," +
+                            num(b,"sort_order") + ")").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    private void handleNewsArticles(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var p = parseQuery(ex.getRequestURI().getQuery());
+                String cat = p.getOrDefault("category", "");
+                String sql = "SELECT * FROM news_articles";
+                if (!cat.isEmpty()) sql += " WHERE category='" + cat.replace("'","") + "'";
+                sql += " ORDER BY is_pinned DESC, created_at DESC LIMIT 50";
+                sendTableResult(ex, c.prepareStatement(sql), "articles");
+            } else {
+                var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "create" -> {
+                        c.prepareStatement("INSERT INTO news_articles (title,category,summary,content,image_url,is_published,published_at,created_by) VALUES ('" +
+                            str(b,"title").replace("'","''") + "','" + str(b,"category").replace("'","") + "','" +
+                            str(b,"summary").replace("'","''") + "','" + str(b,"content").replace("'","''") + "','" +
+                            str(b,"image_url").replace("'","") + "'," + num(b,"is_published") +
+                            ",NOW(),'admin')").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update" -> {
+                        c.prepareStatement("UPDATE news_articles SET title='" + str(b,"title").replace("'","''") +
+                            "',category='" + str(b,"category").replace("'","") +
+                            "',summary='" + str(b,"summary").replace("'","''") +
+                            "',content='" + str(b,"content").replace("'","''") +
+                            "',image_url='" + str(b,"image_url").replace("'","") +
+                            "',is_published=" + num(b,"is_published") +
+                            " WHERE id=" + num(b,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "publish" -> {
+                        c.prepareStatement("UPDATE news_articles SET is_published=1,published_at=NOW() WHERE id=" + num(b,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "pin" -> {
+                        c.prepareStatement("UPDATE news_articles SET is_pinned=1-is_pinned WHERE id=" + num(b,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM news_articles WHERE id=" + num(b,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
         }
     }
 
@@ -1771,6 +1866,98 @@ public class AdminApiServer {
 
 
     /** Full server CRUD — tạo, sửa, bảo trì, xoá server */
+
+
+    private void handleDownloadLinks(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM download_links ORDER BY sort_order"), "links");
+            } else {
+                var b = parseBody(ex);
+                c.prepareStatement("UPDATE download_links SET url='" + str(b,"url").replace("'","") +
+                    "',version='" + str(b,"version").replace("'","") +
+                    "',file_size='" + str(b,"file_size").replace("'","") +
+                    "',is_active=" + num(b,"is_active") +
+                    " WHERE platform='" + str(b,"platform").replace("'","") + "'").executeUpdate();
+                sendJson(ex, 200, Map.of("success", true));
+            }
+        }
+    }
+
+    private void handleSocialLinks(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM social_links ORDER BY sort_order"), "links");
+            } else {
+                var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "update" -> {
+                        c.prepareStatement("UPDATE social_links SET url='" + str(b,"url").replace("'","") +
+                            "',description='" + str(b,"description").replace("'","") +
+                            "',is_active=" + num(b,"is_active") +
+                            " WHERE platform='" + str(b,"platform").replace("'","") + "'").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "create" -> {
+                        c.prepareStatement("INSERT INTO social_links (platform,display_name,url,description,sort_order) VALUES ('" +
+                            str(b,"platform").replace("'","") + "','" + str(b,"display_name").replace("'","") + "','" +
+                            str(b,"url").replace("'","") + "','" + str(b,"description").replace("'","") + "'," +
+                            num(b,"sort_order") + ")").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    private void handleNewsArticles(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var p = parseQuery(ex.getRequestURI().getQuery());
+                String cat = p.getOrDefault("category", "");
+                String sql = "SELECT * FROM news_articles";
+                if (!cat.isEmpty()) sql += " WHERE category='" + cat.replace("'","") + "'";
+                sql += " ORDER BY is_pinned DESC, created_at DESC LIMIT 50";
+                sendTableResult(ex, c.prepareStatement(sql), "articles");
+            } else {
+                var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "create" -> {
+                        c.prepareStatement("INSERT INTO news_articles (title,category,summary,content,image_url,is_published,published_at,created_by) VALUES ('" +
+                            str(b,"title").replace("'","''") + "','" + str(b,"category").replace("'","") + "','" +
+                            str(b,"summary").replace("'","''") + "','" + str(b,"content").replace("'","''") + "','" +
+                            str(b,"image_url").replace("'","") + "'," + num(b,"is_published") +
+                            ",NOW(),'admin')").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update" -> {
+                        c.prepareStatement("UPDATE news_articles SET title='" + str(b,"title").replace("'","''") +
+                            "',category='" + str(b,"category").replace("'","") +
+                            "',summary='" + str(b,"summary").replace("'","''") +
+                            "',content='" + str(b,"content").replace("'","''") +
+                            "',image_url='" + str(b,"image_url").replace("'","") +
+                            "',is_published=" + num(b,"is_published") +
+                            " WHERE id=" + num(b,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "publish" -> {
+                        c.prepareStatement("UPDATE news_articles SET is_published=1,published_at=NOW() WHERE id=" + num(b,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "pin" -> {
+                        c.prepareStatement("UPDATE news_articles SET is_pinned=1-is_pinned WHERE id=" + num(b,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM news_articles WHERE id=" + num(b,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
 
     private void handleTopupPackages(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
