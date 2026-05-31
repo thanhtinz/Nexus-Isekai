@@ -2571,3 +2571,58 @@ CREATE TABLE IF NOT EXISTS server_transfers (
     transfer_type   VARCHAR(16) NOT NULL DEFAULT 'manual', -- manual,merge,event
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ═════════════════════════════════════════════════════════════
+-- SERVER MANAGEMENT — Tạo, quản lý, bảo trì, gộp server
+-- ═════════════════════════════════════════════════════════════
+
+-- Lịch sử gộp server
+CREATE TABLE IF NOT EXISTS server_merges (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    source_server   INT NOT NULL,                    -- server bị gộp
+    target_server   INT NOT NULL,                    -- server nhận
+    merge_status    VARCHAR(16) NOT NULL DEFAULT 'pending', -- pending,processing,completed,failed
+    chars_moved     INT NOT NULL DEFAULT 0,
+    accounts_moved  INT NOT NULL DEFAULT 0,
+    conflicts       INT NOT NULL DEFAULT 0,          -- trùng tên nhân vật
+    conflict_log    TEXT,                             -- JSON chi tiết conflicts
+    started_at      TIMESTAMP NULL,
+    completed_at    TIMESTAMP NULL,
+    created_by      VARCHAR(64) DEFAULT 'admin',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Conflict resolution khi gộp (trùng tên)
+CREATE TABLE IF NOT EXISTS merge_name_conflicts (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    merge_id        INT NOT NULL,
+    char_id         BIGINT NOT NULL,
+    old_name        VARCHAR(64) NOT NULL,
+    new_name        VARCHAR(64) DEFAULT '',           -- tên mới (thêm suffix server cũ)
+    resolved        TINYINT NOT NULL DEFAULT 0,
+    INDEX idx_merge (merge_id)
+);
+
+-- Server monitoring realtime
+CREATE TABLE IF NOT EXISTS server_monitor (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    server_id       INT NOT NULL,
+    cpu_usage       FLOAT NOT NULL DEFAULT 0,
+    ram_usage_mb    INT NOT NULL DEFAULT 0,
+    ram_total_mb    INT NOT NULL DEFAULT 0,
+    network_in_kb   INT NOT NULL DEFAULT 0,
+    network_out_kb  INT NOT NULL DEFAULT 0,
+    online_players  INT NOT NULL DEFAULT 0,
+    tps             FLOAT NOT NULL DEFAULT 20.0,      -- ticks per second
+    uptime_hours    FLOAT NOT NULL DEFAULT 0,
+    recorded_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_server_time (server_id, recorded_at)
+);
+
+-- Maintenance window log
+ALTER TABLE maintenance_schedule
+    ADD COLUMN IF NOT EXISTS affected_servers VARCHAR(64) DEFAULT 'all', -- 'all' hoặc '1,2,3'
+    ADD COLUMN IF NOT EXISTS notify_before_min INT NOT NULL DEFAULT 30,
+    ADD COLUMN IF NOT EXISTS auto_kick TINYINT NOT NULL DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS kick_message VARCHAR(256) DEFAULT 'He thong sap bao tri, vui long dang xuat.',
+    ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP NULL;

@@ -151,6 +151,9 @@ public class AdminApiServer {
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
         httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
         httpServer.createContext("/api/gacha-banners",    ex -> handleAuth(ex, this::handleGachaBanners));
+        httpServer.createContext("/api/server-manage",  ex -> handleAuth(ex, this::handleServerManage));
+        httpServer.createContext("/api/server-merge",   ex -> handleAuth(ex, this::handleServerMerge));
+        httpServer.createContext("/api/server-monitor",  ex -> handleAuth(ex, this::handleServerMonitor));
         httpServer.createContext("/api/server-channels", ex -> handleAuth(ex, this::handleServerChannels));
         httpServer.createContext("/api/intro-scenes",    ex -> handleAuth(ex, this::handleIntroScenes));
         httpServer.createContext("/api/login-screen",    ex -> handleAuth(ex, this::handleLoginScreen));
@@ -1764,6 +1767,112 @@ public class AdminApiServer {
 
 
 
+
+
+    /** Full server CRUD — tạo, sửa, bảo trì, xoá server */
+    private void handleServerManage(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT gs.*, (SELECT COUNT(*) FROM server_channels sc WHERE sc.server_id=gs.id AND sc.is_active=1) as channel_count " +
+                    "FROM game_servers gs ORDER BY gs.sort_order, gs.id"), "servers");
+            } else {
+                var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "create" -> {
+                        c.prepareStatement("INSERT INTO game_servers (name,server_type,host,port,admin_port,status,max_players,group_name,description) VALUES ('" +
+                            str(b,"name").replace("'","") + "'," + num(b,"server_type") + ",'" +
+                            str(b,"host").replace("'","") + "'," + num(b,"port") + "," + num(b,"admin_port") + "," +
+                            num(b,"status") + "," + num(b,"max_players") + ",'" +
+                            str(b,"group_name").replace("'","") + "','" + str(b,"description").replace("'","") + "')").executeUpdate();
+                        auditLog(ex, "create_server", "server", str(b,"name"), "");
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update" -> {
+                        c.prepareStatement("UPDATE game_servers SET name='" + str(b,"name").replace("'","") +
+                            "',host='" + str(b,"host").replace("'","") + "',port=" + num(b,"port") +
+                            ",status=" + num(b,"status") + ",max_players=" + num(b,"max_players") +
+                            ",group_name='" + str(b,"group_name").replace("'","") +
+                            "',is_new=" + num(b,"is_new") + ",is_recommend=" + num(b,"is_recommend") +
+                            ",is_hot=" + num(b,"is_hot") + ",sort_order=" + num(b,"sort_order") +
+                            " WHERE id=" + num(b,"id")).executeUpdate();
+                        auditLog(ex, "update_server", "server", str(b,"name"), "");
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "set_status" -> {
+                        int status = num(b,"status"); // 0=offline,1=online,2=maintenance
+                        c.prepareStatement("UPDATE game_servers SET status=" + status + " WHERE id=" + num(b,"id")).executeUpdate();
+                        if (status == 2) { // maintenance — kick all
+                            // Log maintenance
+                            c.prepareStatement("INSERT INTO maintenance_schedule (server_id,title,message,start_time,end_time) VALUES (" +
+                                num(b,"id") + ",'Manual maintenance','Admin set maintenance',NOW(),DATE_ADD(NOW(),INTERVAL 1 HOUR))").executeUpdate();
+                        }
+                        auditLog(ex, "set_server_status", "server", ""+num(b,"id"), "status="+status);
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        // Soft delete — chuyển status=offline, không xoá data
+                        c.prepareStatement("UPDATE game_servers SET status=0, name=CONCAT('[DELETED] ',name) WHERE id=" + num(b,"id")).executeUpdate();
+                        auditLog(ex, "delete_server", "server", ""+num(b,"id"), "");
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** Gộp server */
+    private void handleServerMerge(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT sm.*, s1.name as source_name, s2.name as target_name FROM server_merges sm LEFT JOIN game_servers s1 ON s1.id=sm.source_server LEFT JOIN game_servers s2 ON s2.id=sm.target_server ORDER BY sm.created_at DESC"), "merges");
+            } else {
+                var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "preview" -> {
+                        // Preview merge — kiểm tra conflicts
+                        int src = num(b,"source_server"), tgt = num(b,"target_server");
+                        ResultSet rs = c.prepareStatement("SELECT COUNT(*) as cnt FROM characters c1 JOIN characters c2 ON c1.name=c2.name " +
+                            "JOIN accounts a1 ON a1.id=c1.account_id JOIN accounts a2 ON a2.id=c2.account_id " +
+                            "WHERE a1.last_server_id=" + src + " AND a2.last_server_id=" + tgt).executeQuery();
+                        int conflicts = rs.next() ? rs.getInt("cnt") : 0;
+                        ResultSet rs2 = c.prepareStatement("SELECT COUNT(DISTINCT a.id) as accs, COUNT(ch.id) as chars FROM accounts a JOIN characters ch ON ch.account_id=a.id WHERE a.last_server_id=" + src).executeQuery();
+                        int accs = 0, chars = 0;
+                        if (rs2.next()) { accs = rs2.getInt("accs"); chars = rs2.getInt("chars"); }
+                        sendJson(ex,200,Map.of("success",true,"accounts",accs,"characters",chars,"name_conflicts",conflicts));
+                    }
+                    case "execute" -> {
+                        int src = num(b,"source_server"), tgt = num(b,"target_server");
+                        // Tạo merge record
+                        c.prepareStatement("INSERT INTO server_merges (source_server,target_server,merge_status,started_at) VALUES (" +
+                            src + "," + tgt + ",'processing',NOW())").executeUpdate();
+                        // Xử lý trùng tên — thêm suffix [S{id}]
+                        c.prepareStatement("UPDATE characters c JOIN accounts a ON a.id=c.account_id SET c.name=CONCAT(c.name,'[S" + src + "]') " +
+                            "WHERE a.last_server_id=" + src + " AND c.name IN (SELECT name FROM (SELECT c2.name FROM characters c2 JOIN accounts a2 ON a2.id=c2.account_id WHERE a2.last_server_id=" + tgt + ") tmp)").executeUpdate();
+                        // Chuyển accounts
+                        int moved = c.prepareStatement("UPDATE accounts SET last_server_id=" + tgt + " WHERE last_server_id=" + src).executeUpdate();
+                        // Đóng server cũ
+                        c.prepareStatement("UPDATE game_servers SET status=0, name=CONCAT('[MERGED] ',name) WHERE id=" + src).executeUpdate();
+                        // Cập nhật merge record
+                        c.prepareStatement("UPDATE server_merges SET merge_status='completed', accounts_moved=" + moved + ", completed_at=NOW() WHERE source_server=" + src + " AND target_server=" + tgt + " ORDER BY id DESC LIMIT 1").executeUpdate();
+                        auditLog(ex, "merge_server", "server", src+"->"+tgt, moved+" accounts moved");
+                        sendJson(ex,200,Map.of("success",true,"accounts_moved",moved));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** Server monitoring */
+    private void handleServerMonitor(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            var p = parseQuery(ex.getRequestURI().getQuery());
+            String serverId = p.getOrDefault("server_id", "1");
+            sendTableResult(ex, c.prepareStatement("SELECT * FROM server_monitor WHERE server_id=" + serverId + " ORDER BY recorded_at DESC LIMIT 60"), "monitor");
+        }
+    }
 
     private void handleServerChannels(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
