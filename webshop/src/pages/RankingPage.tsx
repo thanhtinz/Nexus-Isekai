@@ -11,7 +11,7 @@ export default function RankingPage() {
   const [data, setData] = useState<RankEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { api.get('/api/download-links').catch(()=>{}); api.get('/api/social-links').then(r => {}).catch(()=>{});
+  useEffect(() => { api.get('/api/download-links').catch(()=>{}); api.get('/api/social-links').then((r: any) => {}).catch(()=>{});
     fetch('/api/ranking?type=level&server_id=0').catch(()=>{});
     }, []);
   useEffect(() => { loadRank(); }, [tab, serverId]);

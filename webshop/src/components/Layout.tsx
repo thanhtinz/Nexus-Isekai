@@ -1,5 +1,6 @@
 // components/Layout.tsx
 import { Link, useLocation } from 'react-router-dom'
+import ServerSelector from './ServerSelector'
 import {
   Gem, ShoppingBag, Gift, BookOpen, User, LogOut, Menu, X
 } from 'lucide-react'

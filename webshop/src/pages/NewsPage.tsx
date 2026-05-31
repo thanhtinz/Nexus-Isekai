@@ -9,7 +9,7 @@ export default function NewsPage() {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    api.get('/api/news-articles').then(r => setNews(r.data.articles || [])).catch(() => setNews([
+    api.get('/api/news-articles').then((r: any) => setNews(r.data.articles || [])).catch(() => setNews([
       { id: 1, title: 'Khai mở Nexus Isekai', category: 'event', content: 'Chào mừng các Lưu Dân đến với Vọng Linh Giới!', image: '', created_at: '2025-01-01' },
       { id: 2, title: 'Mùa PvP 1 bắt đầu', category: 'pvp', content: 'Mùa PvP đầu tiên chính thức bắt đầu. Chiến đấu để giành skin độc quyền!', image: '', created_at: '2025-01-15' },
       { id: 3, title: 'Banner Triệu Hồi Giới Hạn', category: 'gacha', content: 'Banner giới hạn với tỉ lệ SSR tăng gấp đôi!', image: '', created_at: '2025-02-01' },

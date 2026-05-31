@@ -6,7 +6,7 @@ import type {
   WebshopItem, BuyResult, RedeemResult,
 } from '@/types/api'
 
-const http = axios.create({
+export const http = axios.create({
   baseURL: '/api',
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
@@ -73,3 +73,7 @@ export const shopApi = {
     http.post<RedeemResult>('/redeem', { code, account_id: accountId, char_id: charId, level, token })
       .then(r => r.data),
 }
+
+
+// Alias for context/pages that import { api }
+export { http as api }

@@ -20,7 +20,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    api.get('/api/servers').then(r => {
+    api.get('/api/servers').then((r: any) => {
       const list = (r.data.servers || []).filter((s: Server) => s.status === 1);
       setServers(list);
       if (selectedServer === 0 && list.length > 0) setServer(list[0].id);

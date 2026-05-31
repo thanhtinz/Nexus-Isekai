@@ -1,56 +1,46 @@
 // App.tsx
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from '@/context/AuthContext'
+import { ServerProvider } from '@/context/ServerContext'
+import ProtectedRoute from '@/components/ProtectedRoute'
 import { Layout } from '@/components/Layout'
+import LandingPage from '@/pages/LandingPage'
 import { LoginPage } from '@/pages/LoginPage'
-import { TopupPage } from '@/pages/TopupPage'
-import { ShopPage } from '@/pages/ShopPage'
 import { GiftCodePage } from '@/pages/GiftCodePage'
 import { PassPage } from '@/pages/PassPage'
-import { useAuth } from '@/hooks/useAuth'
-import LandingPage from '@/pages/LandingPage'
+import RankingPage from '@/pages/RankingPage'
+import GameStorePage from '@/pages/GameStorePage'
+import DownloadPage from '@/pages/DownloadPage'
+import NewsPage from '@/pages/NewsPage'
+import SupportPage from '@/pages/SupportPage'
 import AdminDashboard from '@/pages/AdminDashboard'
 
-function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { session } = useAuth()
-  if (!session) return <Navigate to="/login" replace />
-  return <>{children}</>
-}
+const withLayout = (el: React.ReactNode) => <Layout>{el}</Layout>
 
 export function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <ServerProvider>
-        <Routes>
-        <Route path="/" element={<LandingPage />} />
-        
-            <Route path="/ranking" element={<ProtectedRoute><RankingPage /></ProtectedRoute>} />
-            <Route path="/store" element={<ProtectedRoute><GameStorePage /></ProtectedRoute>} />
-            <Route path="/download" element={<DownloadPage />} />
-            <Route path="/news" element={<NewsPage />} />
-            <Route path="/support" element={<SupportPage />} />
+          <Routes>
+            {/* Standalone (no nav layout) */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/sys/internal/v2/dashboard" element={<AdminDashboard />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/*"
-          element={
-            <Layout>
-              <AuthProvider>
-        <ServerProvider>
-        <Routes>
-</PrivateRoute>} />
-</PrivateRoute>} />
-                <Route path="/giftcode" element={<PrivateRoute><GiftCodePage /></PrivateRoute>} />
-                <Route path="/pass" element={<PrivateRoute><PassPage /></PrivateRoute>} />
-              </Routes>
+
+            {/* Public pages (with layout) */}
+            <Route path="/download" element={withLayout(<DownloadPage />)} />
+            <Route path="/news" element={withLayout(<NewsPage />)} />
+            <Route path="/support" element={withLayout(<SupportPage />)} />
+
+            {/* Gated: cần login + chọn server + chọn nhân vật */}
+            <Route path="/store" element={withLayout(<ProtectedRoute><GameStorePage /></ProtectedRoute>)} />
+            <Route path="/ranking" element={withLayout(<ProtectedRoute><RankingPage /></ProtectedRoute>)} />
+            <Route path="/giftcode" element={withLayout(<ProtectedRoute><GiftCodePage /></ProtectedRoute>)} />
+            <Route path="/pass" element={withLayout(<ProtectedRoute><PassPage /></ProtectedRoute>)} />
+          </Routes>
         </ServerProvider>
-        </AuthProvider>
-            </Layout>
-          }
-        />
-      </Routes>
-        </ServerProvider>
-        </AuthProvider>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

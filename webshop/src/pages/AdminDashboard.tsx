@@ -357,7 +357,7 @@ export default function AdminDashboard() {
               <div className="bg-[#12122a] border border-white/5 rounded-xl p-4">
                 <h3 className="text-sm font-medium text-white mb-2">Hanh dong nhanh</h3>
                 <div className="flex flex-wrap gap-2">
-                  <ActionButton onClick={() => api('/api/broadcast', 'POST', { message: prompt })}>Broadcast</ActionButton>
+                  <ActionButton onClick={() => { const msg = window.prompt('Nội dung broadcast:'); if (msg) api('/api/broadcast', 'POST', { message: msg }); }}>Broadcast</ActionButton>
                   <ActionButton onClick={() => api('/api/maintenance', 'POST', { enabled: 'true' })} variant="danger">Bao Tri</ActionButton>
                   <ActionButton onClick={() => loadPanel('ai')} variant="outline">AI Generate</ActionButton>
                   <ActionButton onClick={() => loadPanel('announce')} variant="outline">Thong Bao</ActionButton>

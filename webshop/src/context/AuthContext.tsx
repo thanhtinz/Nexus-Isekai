@@ -32,13 +32,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const ready = isLoggedIn && selectedServer > 0 && selectedChar !== null;
 
   useEffect(() => {
-    api.get('/api/servers').then(r => setServers((r.data.servers || []).filter((s: any) => s.status === 1))).catch(() => {});
+    api.get('/api/servers').then((r: any) => setServers((r.data.servers || []).filter((s: any) => s.status === 1))).catch(() => {});
   }, []);
 
   useEffect(() => {
     if (isLoggedIn && selectedServer > 0) {
       api.get(`/api/characters?account_id=${accountId}&server_id=${selectedServer}`)
-        .then(r => { const chars = r.data.characters || []; setCharacters(chars); if (chars.length > 0 && !selectedChar) setSelectedChar(chars[0]); })
+        .then((r: any) => { const chars = r.data.characters || []; setCharacters(chars); if (chars.length > 0 && !selectedChar) setSelectedChar(chars[0]); })
         .catch(() => setCharacters([]));
     }
   }, [accountId, selectedServer]);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Gem, ShoppingCart } from 'lucide-react';
-import TopupPage from './TopupPage';
-import ShopPage from './ShopPage';
+import { TopupPage } from './TopupPage';
+import { ShopPage } from './ShopPage';
 
 const TABS = [
   { key: 'topup', label: 'Nap', icon: Gem, component: TopupPage },

@@ -3,7 +3,7 @@ import { api } from '../api/client';
 export default function DownloadPage() {
   const [links, setLinks] = useState<any>({});
   useEffect(() => {
-    api.get('/api/download-links').then(r => {
+    api.get('/api/download-links').then((r: any) => {
       const map: any = {};
       (r.data.links || []).forEach((l: any) => { if (l.is_active) map[l.platform] = l; });
       setLinks(map);

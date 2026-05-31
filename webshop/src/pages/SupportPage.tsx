@@ -7,7 +7,7 @@ const SocialIcon = ({ d, color }: { d: string; color: string }) => (
 export default function SupportPage() {
   const [apiLinks, setApiLinks] = useState<any>({});
   useEffect(() => {
-    api.get('/api/social-links').then(r => {
+    api.get('/api/social-links').then((r: any) => {
       const map: any = {};
       (r.data.links || []).forEach((l: any) => { if (l.is_active) map[l.platform] = l; });
       setApiLinks(map);
