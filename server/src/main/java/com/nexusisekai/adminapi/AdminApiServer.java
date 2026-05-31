@@ -151,6 +151,8 @@ public class AdminApiServer {
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
         httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
         httpServer.createContext("/api/gacha-banners",    ex -> handleAuth(ex, this::handleGachaBanners));
+        httpServer.createContext("/api/gacha-currencies",ex -> handleAuth(ex, this::handleGachaCurrencies));
+        httpServer.createContext("/api/gacha-sources",   ex -> handleAuth(ex, this::handleGachaSources));
         httpServer.createContext("/api/gacha-pool",       ex -> handleAuth(ex, this::handleGachaPool));
         httpServer.createContext("/api/pvp-seasons",      ex -> handleAuth(ex, this::handlePvpSeasons));
         httpServer.createContext("/api/push-campaigns",   ex -> handleAuth(ex, this::handlePushCampaigns));
@@ -1756,6 +1758,28 @@ public class AdminApiServer {
 
 
     /** Anti-cheat violations log */
+
+
+    private void handleGachaCurrencies(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM gacha_currencies ORDER BY id"), "currencies");
+            else { var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "create" -> { c.prepareStatement("INSERT INTO gacha_currencies (currency_key,display_name,description,diamond_price,diamond_price_10) VALUES ('"+str(b,"currency_key").replace("'","")+"','"+str(b,"display_name").replace("'","")+"','"+str(b,"description").replace("'","")+"',"+num(b,"diamond_price")+","+num(b,"diamond_price_10")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "update" -> { c.prepareStatement("UPDATE gacha_currencies SET diamond_price="+num(b,"diamond_price")+",diamond_price_10="+num(b,"diamond_price_10")+",is_active="+num(b,"is_active")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+    private void handleGachaSources(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT gs.*, gc.display_name as currency_name FROM gacha_currency_sources gs JOIN gacha_currencies gc ON gc.id=gs.currency_id ORDER BY gs.currency_id,gs.source_type"), "sources");
+            else { var b = parseBody(ex);
+                c.prepareStatement("INSERT INTO gacha_currency_sources (currency_id,source_type,source_id,amount,description) VALUES ("+num(b,"currency_id")+",'"+str(b,"source_type").replace("'","")+"',"+num(b,"source_id")+","+num(b,"amount")+",'"+str(b,"description").replace("'","")+"')").executeUpdate();
+                sendJson(ex,200,Map.of("success",true)); }
+        }
+    }
 
     private void handleGachaBanners(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {

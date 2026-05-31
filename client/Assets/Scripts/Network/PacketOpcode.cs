@@ -334,6 +334,9 @@ namespace NexusIsekai.Network
         public const short C2S_GACHA_HISTORY     = 0x1D03;
         public const short S2C_GACHA_BANNER_LIST = 0x1D11;
         public const short S2C_GACHA_RESULT      = 0x1D12;
+        public const short C2S_GACHA_BUY_TICKET  = 0x1D04;
+        public const short C2S_GACHA_CURRENCY    = 0x1D05;
+        public const short S2C_GACHA_CURRENCY    = 0x1D14;
         public const short S2C_GACHA_HISTORY     = 0x1D13;
 
         // ── PVP SEASON ───────────────────────────────────────

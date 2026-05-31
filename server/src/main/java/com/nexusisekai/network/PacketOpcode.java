@@ -83,6 +83,9 @@ public final class PacketOpcode {
     public static final short C2S_GACHA_HISTORY     = (short)0x1D03;
     public static final short S2C_GACHA_BANNER_LIST = (short)0x1D11;
     public static final short S2C_GACHA_RESULT      = (short)0x1D12;
+    public static final short C2S_GACHA_BUY_TICKET  = (short)0x1D04; // mua vé bằng diamond
+    public static final short C2S_GACHA_CURRENCY    = (short)0x1D05; // xem số vé hiện có
+    public static final short S2C_GACHA_CURRENCY    = (short)0x1D14; // trả về số vé
     public static final short S2C_GACHA_HISTORY     = (short)0x1D13;
 
     // ── PVP SEASON (1Exx) ────────────────────────────────────
@@ -470,6 +473,9 @@ public final class PacketOpcode {
     public static final short C2S_GACHA_HISTORY     = (short)0x1D03;
     public static final short S2C_GACHA_BANNER_LIST = (short)0x1D11;
     public static final short S2C_GACHA_RESULT      = (short)0x1D12;
+    public static final short C2S_GACHA_BUY_TICKET  = (short)0x1D04; // mua vé bằng diamond
+    public static final short C2S_GACHA_CURRENCY    = (short)0x1D05; // xem số vé hiện có
+    public static final short S2C_GACHA_CURRENCY    = (short)0x1D14; // trả về số vé
     public static final short S2C_GACHA_HISTORY     = (short)0x1D13;
 
     // ── PVP SEASON (1Exx) ────────────────────────────────────

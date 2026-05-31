@@ -2347,3 +2347,81 @@ INSERT IGNORE INTO audio_assets (asset_key,asset_type,file_path,is_loop,descript
 ('ui_coin','ui','Audio/UI/coin.ogg',0,'Nhan vang'),
 ('ambient_village','ambient','Audio/Ambient/village.ogg',1,'Am thanh moi truong lang'),
 ('ambient_forest','ambient','Audio/Ambient/forest.ogg',1,'Am thanh rung');
+
+-- ═════════════════════════════════════════════════════════════
+-- GACHA CURRENCY — Mỗi banner có item gacha riêng
+-- ═════════════════════════════════════════════════════════════
+
+-- Vé / Key / Mảnh triệu hồi — mỗi banner dùng 1 loại
+CREATE TABLE IF NOT EXISTS gacha_currencies (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    currency_key    VARCHAR(32) NOT NULL UNIQUE,      -- 'ticket_standard','ticket_limited','key_pet','shard_weapon'
+    display_name    VARCHAR(64) NOT NULL,
+    description     VARCHAR(128) DEFAULT '',
+    icon_asset      VARCHAR(128) DEFAULT '',
+    -- Giá mua bằng diamond
+    diamond_price   INT NOT NULL DEFAULT 100,         -- giá 1 vé = 100 diamond
+    diamond_price_10 INT NOT NULL DEFAULT 900,        -- giá 10 vé = 900 diamond (giảm 10%)
+    -- Giới hạn
+    max_stack       INT NOT NULL DEFAULT 9999,
+    is_tradeable    TINYINT NOT NULL DEFAULT 0,       -- không giao dịch được
+    is_active       TINYINT NOT NULL DEFAULT 1
+);
+
+INSERT IGNORE INTO gacha_currencies (id,currency_key,display_name,description,diamond_price,diamond_price_10) VALUES
+(1,'ticket_standard','Ve Trieu Hoi Thuong','Ve trieu hoi banner thuong, khong het han',100,900),
+(2,'ticket_limited','Ve Trieu Hoi Gioi Han','Ve trieu hoi banner gioi han, het han theo mua',160,1440),
+(3,'key_pet','Chia Khoa Thu Cuoi','Mo hom trieu hoi thu cuoi',200,1800),
+(4,'key_mount','Chia Khoa Zu Ky','Mo hom trieu hoi tho cuoi',200,1800),
+(5,'shard_weapon','Manh Vu Khi','Manh trieu hoi vu khi huyen thoai',250,2250);
+
+-- Link banner → currency (mỗi banner dùng currency nào)
+ALTER TABLE gacha_banners ADD COLUMN IF NOT EXISTS currency_id INT NOT NULL DEFAULT 1;
+ALTER TABLE gacha_banners ADD COLUMN IF NOT EXISTS cost_currency_single INT NOT NULL DEFAULT 1;   -- 1 vé/lần
+ALTER TABLE gacha_banners ADD COLUMN IF NOT EXISTS cost_currency_multi INT NOT NULL DEFAULT 10;    -- 10 vé/10 lần
+
+-- Player sở hữu gacha currency
+CREATE TABLE IF NOT EXISTS player_gacha_currency (
+    char_id         BIGINT NOT NULL,
+    currency_id     INT NOT NULL,
+    amount          INT NOT NULL DEFAULT 0,
+    total_earned    BIGINT NOT NULL DEFAULT 0,        -- tổng đã nhận (từ quest + mua + event)
+    total_spent     BIGINT NOT NULL DEFAULT 0,        -- tổng đã dùng
+    PRIMARY KEY (char_id, currency_id)
+);
+
+-- Nguồn kiếm gacha currency
+CREATE TABLE IF NOT EXISTS gacha_currency_sources (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    currency_id     INT NOT NULL,
+    source_type     VARCHAR(16) NOT NULL,             -- quest,daily_login,achievement,event,pvp_reward,shop,admin
+    source_id       INT NOT NULL DEFAULT 0,           -- ID của quest/achievement/event
+    amount          INT NOT NULL DEFAULT 1,           -- số lượng nhận
+    description     VARCHAR(128) DEFAULT '',
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    INDEX idx_currency (currency_id, source_type)
+);
+
+-- Seed: nguồn kiếm vé triệu hồi
+INSERT IGNORE INTO gacha_currency_sources (currency_id,source_type,source_id,amount,description) VALUES
+-- Vé thường — kiếm từ nhiều nguồn (ít)
+(1,'daily_login',7,1,'Dang nhap ngay 7 nhan 1 ve'),
+(1,'achievement',0,1,'Hoan thanh thanh tuu nhan 1 ve'),
+(1,'quest',0,1,'Mot so nhiem vu chinh thuong 1 ve'),
+(1,'pvp_reward',0,2,'Ket thuc mua PvP (Gold+) nhan 2 ve'),
+(1,'event',0,1,'Su kien dac biet thuong ve'),
+-- Vé giới hạn — rất hiếm, chủ yếu mua diamond
+(2,'event',0,1,'Su kien gioi han thuong 1 ve'),
+(2,'achievement',0,1,'Thanh tuu dac biet thuong 1 ve'),
+-- Chìa khoá pet — hiếm
+(3,'quest',0,1,'Quest dac biet thuong chia khoa'),
+(3,'daily_login',7,1,'Dang nhap ngay 7 co co hoi nhan'),
+-- Chìa khoá mount — rất hiếm
+(4,'event',0,1,'Chi co trong event'),
+-- Mảnh vũ khí — hiếm nhất
+(5,'pvp_reward',0,1,'Top 10 PvP mua nhan 1 manh'),
+(5,'event',0,1,'Event dac biet');
+
+-- Shop mua vé bằng diamond (trong game shop)
+-- Dùng cost_type='diamond' + cost_single/cost_multi_10 từ gacha_banners
+-- Hoặc player mua trực tiếp gacha_currency bằng diamond qua API

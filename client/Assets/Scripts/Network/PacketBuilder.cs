@@ -451,6 +451,11 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_BANNER_LIST));
         public static void SendGachaPull(int bannerId, int pullCount)
             => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_PULL).WriteInt(bannerId).WriteInt(pullCount));
+        public static void SendGachaBuyTicket(int currencyId, int amount)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_BUY_TICKET).WriteInt(currencyId).WriteInt(amount));
+        public static void SendGachaCurrency()
+            => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_CURRENCY));
+
         public static void SendGachaHistory(int bannerId)
             => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_HISTORY).WriteInt(bannerId));
 
@@ -704,6 +709,11 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_BANNER_LIST));
         public static void SendGachaPull(int bannerId, int pullCount)
             => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_PULL).WriteInt(bannerId).WriteInt(pullCount));
+        public static void SendGachaBuyTicket(int currencyId, int amount)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_BUY_TICKET).WriteInt(currencyId).WriteInt(amount));
+        public static void SendGachaCurrency()
+            => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_CURRENCY));
+
         public static void SendGachaHistory(int bannerId)
             => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_HISTORY).WriteInt(bannerId));
 
