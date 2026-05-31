@@ -627,7 +627,14 @@ public class AdminApiServer {
         return m;
     }
 
+    /** Raw string getter (for parameterized queries only) */
     private String str(Map<?,?> m, String k) { Object v = m.get(k); return v == null ? "" : v.toString(); }
+    /** Sanitized string for any unavoidable concatenation — strips SQL injection vectors */
+    private String safeStr(Map<?,?> m, String k) {
+        String v = str(m, k);
+        // Strip quotes, semicolons, SQL comments, backslash — defense in depth
+        return v.replaceAll("['\\;]", "").replaceAll("--", "").replaceAll("/\\*", "").replaceAll("\\*/", "");
+    }
     private int num(Map<?,?> m, String k) {
         Object v = m.get(k);
         if (v == null) return 0;
@@ -734,7 +741,7 @@ public class AdminApiServer {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             var b = parseBody(ex);
             int src = num(b,"source_server"), tgt = num(b,"target_server");
-            String type = str(b,"copy_type").replace("'","");
+            String type = safeStr(b,"copy_type");
             int copied = 0;
 
             switch (type) {
@@ -787,11 +794,11 @@ public class AdminApiServer {
                 sendTableResult(ex, c.prepareStatement("SELECT * FROM download_links ORDER BY sort_order"), "links");
             } else {
                 var b = parseBody(ex);
-                c.prepareStatement("UPDATE download_links SET url='" + str(b,"url").replace("'","") +
-                    "',version='" + str(b,"version").replace("'","") +
-                    "',file_size='" + str(b,"file_size").replace("'","") +
+                c.prepareStatement("UPDATE download_links SET url='" + safeStr(b,"url") +
+                    "',version='" + safeStr(b,"version") +
+                    "',file_size='" + safeStr(b,"file_size") +
                     "',is_active=" + num(b,"is_active") +
-                    " WHERE platform='" + str(b,"platform").replace("'","") + "'").executeUpdate();
+                    " WHERE platform='" + safeStr(b,"platform") + "'").executeUpdate();
                 sendJson(ex, 200, Map.of("success", true));
             }
         }
@@ -805,16 +812,16 @@ public class AdminApiServer {
                 var b = parseBody(ex);
                 switch(str(b,"action")) {
                     case "update" -> {
-                        c.prepareStatement("UPDATE social_links SET url='" + str(b,"url").replace("'","") +
-                            "',description='" + str(b,"description").replace("'","") +
+                        c.prepareStatement("UPDATE social_links SET url='" + safeStr(b,"url") +
+                            "',description='" + safeStr(b,"description") +
                             "',is_active=" + num(b,"is_active") +
-                            " WHERE platform='" + str(b,"platform").replace("'","") + "'").executeUpdate();
+                            " WHERE platform='" + safeStr(b,"platform") + "'").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "create" -> {
                         c.prepareStatement("INSERT INTO social_links (platform,display_name,url,description,sort_order) VALUES ('" +
-                            str(b,"platform").replace("'","") + "','" + str(b,"display_name").replace("'","") + "','" +
-                            str(b,"url").replace("'","") + "','" + str(b,"description").replace("'","") + "'," +
+                            safeStr(b,"platform") + "','" + safeStr(b,"display_name") + "','" +
+                            safeStr(b,"url") + "','" + safeStr(b,"description") + "'," +
                             num(b,"sort_order") + ")").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
@@ -838,18 +845,18 @@ public class AdminApiServer {
                 switch(str(b,"action")) {
                     case "create" -> {
                         c.prepareStatement("INSERT INTO news_articles (title,category,summary,content,image_url,is_published,published_at,created_by) VALUES ('" +
-                            str(b,"title").replace("'","''") + "','" + str(b,"category").replace("'","") + "','" +
-                            str(b,"summary").replace("'","''") + "','" + str(b,"content").replace("'","''") + "','" +
-                            str(b,"image_url").replace("'","") + "'," + num(b,"is_published") +
+                            safeStr(b,"title") + "','" + safeStr(b,"category") + "','" +
+                            safeStr(b,"summary") + "','" + safeStr(b,"content") + "','" +
+                            safeStr(b,"image_url") + "'," + num(b,"is_published") +
                             ",NOW(),'admin')").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "update" -> {
-                        c.prepareStatement("UPDATE news_articles SET title='" + str(b,"title").replace("'","''") +
-                            "',category='" + str(b,"category").replace("'","") +
-                            "',summary='" + str(b,"summary").replace("'","''") +
-                            "',content='" + str(b,"content").replace("'","''") +
-                            "',image_url='" + str(b,"image_url").replace("'","") +
+                        c.prepareStatement("UPDATE news_articles SET title='" + safeStr(b,"title") +
+                            "',category='" + safeStr(b,"category") +
+                            "',summary='" + safeStr(b,"summary") +
+                            "',content='" + safeStr(b,"content") +
+                            "',image_url='" + safeStr(b,"image_url") +
                             "',is_published=" + num(b,"is_published") +
                             " WHERE id=" + num(b,"id")).executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
@@ -1475,12 +1482,12 @@ public class AdminApiServer {
                         sendJson(ex,200,Map.of("success",true,"message","Item added to registry"));
                     }
                     case "update" -> {
-                        c.prepareStatement("UPDATE master_registry SET display_name='" + str(body,"display_name").replace("'","") +
-                            "',category='" + str(body,"category").replace("'","") +
+                        c.prepareStatement("UPDATE master_registry SET display_name='" + safeStr(body,"display_name") +
+                            "',category='" + safeStr(body,"category") +
                             "',rarity=" + num(body,"rarity") +
-                            ",icon_asset='" + str(body,"icon_asset").replace("'","") +
-                            "',description='" + str(body,"description").replace("'","") +
-                            "',tags='" + str(body,"tags").replace("'","") +
+                            ",icon_asset='" + safeStr(body,"icon_asset") +
+                            "',description='" + safeStr(body,"description") +
+                            "',tags='" + safeStr(body,"tags") +
                             "',is_active=" + num(body,"is_active") +
                             " WHERE id=" + num(body,"id")).executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
@@ -1589,8 +1596,8 @@ public class AdminApiServer {
                 if ("cancel".equals(str(body,"action"))) {
                     c.prepareStatement("UPDATE auction_listings SET status='cancelled' WHERE id=" + num(body,"id")).executeUpdate();
                 } else if ("config".equals(str(body,"action"))) {
-                    c.prepareStatement("UPDATE auction_config SET config_value='" + str(body,"value").replace("'","") +
-                        "' WHERE config_key='" + str(body,"key").replace("'","") + "'").executeUpdate();
+                    c.prepareStatement("UPDATE auction_config SET config_value='" + safeStr(body,"value") +
+                        "' WHERE config_key='" + safeStr(body,"key") + "'").executeUpdate();
                 }
                 sendJson(ex,200,Map.of("success",true));
             }
@@ -1687,7 +1694,7 @@ public class AdminApiServer {
                 var body = parseBody(ex);
                 c.prepareStatement("UPDATE rate_limit_config SET max_per_second=" + num(body,"max_per_second") +
                     ",max_per_minute=" + num(body,"max_per_minute") +
-                    " WHERE config_key='" + str(body,"config_key").replace("'","") + "'").executeUpdate();
+                    " WHERE config_key='" + safeStr(body,"config_key") + "'").executeUpdate();
                 sendJson(ex,200,Map.of("success",true));
             }
         }
@@ -1794,8 +1801,8 @@ public class AdminApiServer {
                 switch (str(body,"action")) {
                     case "create" -> {
                         c.prepareStatement("INSERT INTO equipment_slots (slot_id,slot_name,slot_type,slot_key,max_per_char,sort_order) VALUES (" +
-                            num(body,"slot_id") + ",'" + str(body,"slot_name").replace("'","") + "','" +
-                            str(body,"slot_type").replace("'","") + "','" + str(body,"slot_key").replace("'","") + "'," +
+                            num(body,"slot_id") + ",'" + safeStr(body,"slot_name") + "','" +
+                            safeStr(body,"slot_type") + "','" + safeStr(body,"slot_key") + "'," +
                             num(body,"max_per_char") + "," + num(body,"sort_order") + ")").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
@@ -1851,7 +1858,7 @@ public class AdminApiServer {
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "update" -> {
-                        c.prepareStatement("UPDATE item_templates SET name='" + str(body,"name").replace("'","") +
+                        c.prepareStatement("UPDATE item_templates SET name='" + safeStr(body,"name") +
                             "',quality=" + num(body,"quality") + ",stat_patk=" + num(body,"stat_patk") +
                             ",stat_def=" + num(body,"stat_def") + ",stat_hp=" + num(body,"stat_hp") +
                             ",buy_price=" + num(body,"buy_price") + ",is_active=" + num(body,"is_active") +
@@ -1876,7 +1883,7 @@ public class AdminApiServer {
             } else {
                 var body = parseBody(ex);
                 c.prepareStatement("UPDATE enhance_rates SET success_rate=" + str(body,"success_rate") +
-                    ",gold_cost=" + num(body,"gold_cost") + ",on_fail='" + str(body,"on_fail").replace("'","") +
+                    ",gold_cost=" + num(body,"gold_cost") + ",on_fail='" + safeStr(body,"on_fail") +
                     "' WHERE level=" + num(body,"level")).executeUpdate();
                 sendJson(ex,200,Map.of("success",true));
             }
@@ -1893,7 +1900,7 @@ public class AdminApiServer {
                 switch (str(body,"action")) {
                     case "create" -> {
                         c.prepareStatement("INSERT INTO gem_templates (name,gem_type,stat_value,quality) VALUES ('" +
-                            str(body,"name").replace("'","") + "','" + str(body,"gem_type").replace("'","") + "'," +
+                            safeStr(body,"name") + "','" + safeStr(body,"gem_type") + "'," +
                             num(body,"stat_value") + "," + num(body,"quality") + ")").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
@@ -1957,7 +1964,7 @@ public class AdminApiServer {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             var b = parseBody(ex);
             int src = num(b,"source_server"), tgt = num(b,"target_server");
-            String type = str(b,"copy_type").replace("'","");
+            String type = safeStr(b,"copy_type");
             int copied = 0;
 
             switch (type) {
@@ -2010,11 +2017,11 @@ public class AdminApiServer {
                 sendTableResult(ex, c.prepareStatement("SELECT * FROM download_links ORDER BY sort_order"), "links");
             } else {
                 var b = parseBody(ex);
-                c.prepareStatement("UPDATE download_links SET url='" + str(b,"url").replace("'","") +
-                    "',version='" + str(b,"version").replace("'","") +
-                    "',file_size='" + str(b,"file_size").replace("'","") +
+                c.prepareStatement("UPDATE download_links SET url='" + safeStr(b,"url") +
+                    "',version='" + safeStr(b,"version") +
+                    "',file_size='" + safeStr(b,"file_size") +
                     "',is_active=" + num(b,"is_active") +
-                    " WHERE platform='" + str(b,"platform").replace("'","") + "'").executeUpdate();
+                    " WHERE platform='" + safeStr(b,"platform") + "'").executeUpdate();
                 sendJson(ex, 200, Map.of("success", true));
             }
         }
@@ -2028,16 +2035,16 @@ public class AdminApiServer {
                 var b = parseBody(ex);
                 switch(str(b,"action")) {
                     case "update" -> {
-                        c.prepareStatement("UPDATE social_links SET url='" + str(b,"url").replace("'","") +
-                            "',description='" + str(b,"description").replace("'","") +
+                        c.prepareStatement("UPDATE social_links SET url='" + safeStr(b,"url") +
+                            "',description='" + safeStr(b,"description") +
                             "',is_active=" + num(b,"is_active") +
-                            " WHERE platform='" + str(b,"platform").replace("'","") + "'").executeUpdate();
+                            " WHERE platform='" + safeStr(b,"platform") + "'").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "create" -> {
                         c.prepareStatement("INSERT INTO social_links (platform,display_name,url,description,sort_order) VALUES ('" +
-                            str(b,"platform").replace("'","") + "','" + str(b,"display_name").replace("'","") + "','" +
-                            str(b,"url").replace("'","") + "','" + str(b,"description").replace("'","") + "'," +
+                            safeStr(b,"platform") + "','" + safeStr(b,"display_name") + "','" +
+                            safeStr(b,"url") + "','" + safeStr(b,"description") + "'," +
                             num(b,"sort_order") + ")").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
@@ -2061,18 +2068,18 @@ public class AdminApiServer {
                 switch(str(b,"action")) {
                     case "create" -> {
                         c.prepareStatement("INSERT INTO news_articles (title,category,summary,content,image_url,is_published,published_at,created_by) VALUES ('" +
-                            str(b,"title").replace("'","''") + "','" + str(b,"category").replace("'","") + "','" +
-                            str(b,"summary").replace("'","''") + "','" + str(b,"content").replace("'","''") + "','" +
-                            str(b,"image_url").replace("'","") + "'," + num(b,"is_published") +
+                            safeStr(b,"title") + "','" + safeStr(b,"category") + "','" +
+                            safeStr(b,"summary") + "','" + safeStr(b,"content") + "','" +
+                            safeStr(b,"image_url") + "'," + num(b,"is_published") +
                             ",NOW(),'admin')").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "update" -> {
-                        c.prepareStatement("UPDATE news_articles SET title='" + str(b,"title").replace("'","''") +
-                            "',category='" + str(b,"category").replace("'","") +
-                            "',summary='" + str(b,"summary").replace("'","''") +
-                            "',content='" + str(b,"content").replace("'","''") +
-                            "',image_url='" + str(b,"image_url").replace("'","") +
+                        c.prepareStatement("UPDATE news_articles SET title='" + safeStr(b,"title") +
+                            "',category='" + safeStr(b,"category") +
+                            "',summary='" + safeStr(b,"summary") +
+                            "',content='" + safeStr(b,"content") +
+                            "',image_url='" + safeStr(b,"image_url") +
                             "',is_published=" + num(b,"is_published") +
                             " WHERE id=" + num(b,"id")).executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
@@ -2100,8 +2107,8 @@ public class AdminApiServer {
             if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM topup_packages ORDER BY sort_order"), "packages");
             else { var b = parseBody(ex);
                 switch(str(b,"action")) {
-                    case "create" -> { c.prepareStatement("INSERT INTO topup_packages (package_key,display_name,price_vnd,price_usd,diamond_base,diamond_bonus,bonus_type,badge,sort_order) VALUES ('"+str(b,"package_key").replace("'","")+"','"+str(b,"display_name").replace("'","")+"',"+num(b,"price_vnd")+","+str(b,"price_usd")+","+num(b,"diamond_base")+","+num(b,"diamond_bonus")+",'"+str(b,"bonus_type").replace("'","")+"','"+str(b,"badge").replace("'","")+"',"+num(b,"sort_order")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
-                    case "update" -> { c.prepareStatement("UPDATE topup_packages SET display_name='"+str(b,"display_name").replace("'","")+"',price_vnd="+num(b,"price_vnd")+",diamond_base="+num(b,"diamond_base")+",diamond_bonus="+num(b,"diamond_bonus")+",badge='"+str(b,"badge").replace("'","")+"',is_active="+num(b,"is_active")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "create" -> { c.prepareStatement("INSERT INTO topup_packages (package_key,display_name,price_vnd,price_usd,diamond_base,diamond_bonus,bonus_type,badge,sort_order) VALUES ('"+safeStr(b,"package_key")+"','"+safeStr(b,"display_name")+"',"+num(b,"price_vnd")+","+str(b,"price_usd")+","+num(b,"diamond_base")+","+num(b,"diamond_bonus")+",'"+safeStr(b,"bonus_type")+"','"+safeStr(b,"badge")+"',"+num(b,"sort_order")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "update" -> { c.prepareStatement("UPDATE topup_packages SET display_name='"+safeStr(b,"display_name")+"',price_vnd="+num(b,"price_vnd")+",diamond_base="+num(b,"diamond_base")+",diamond_bonus="+num(b,"diamond_bonus")+",badge='"+safeStr(b,"badge")+"',is_active="+num(b,"is_active")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
                     default -> sendJson(ex,400,Map.of("success",false));
                 }
             }
@@ -2120,18 +2127,18 @@ public class AdminApiServer {
                 switch(str(b,"action")) {
                     case "create" -> {
                         c.prepareStatement("INSERT INTO game_servers (name,server_type,host,port,admin_port,status,max_players,group_name,description) VALUES ('" +
-                            str(b,"name").replace("'","") + "'," + num(b,"server_type") + ",'" +
-                            str(b,"host").replace("'","") + "'," + num(b,"port") + "," + num(b,"admin_port") + "," +
+                            safeStr(b,"name") + "'," + num(b,"server_type") + ",'" +
+                            safeStr(b,"host") + "'," + num(b,"port") + "," + num(b,"admin_port") + "," +
                             num(b,"status") + "," + num(b,"max_players") + ",'" +
-                            str(b,"group_name").replace("'","") + "','" + str(b,"description").replace("'","") + "')").executeUpdate();
+                            safeStr(b,"group_name") + "','" + safeStr(b,"description") + "')").executeUpdate();
                         auditLog(ex, "create_server", "server", str(b,"name"), "");
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "update" -> {
-                        c.prepareStatement("UPDATE game_servers SET name='" + str(b,"name").replace("'","") +
-                            "',host='" + str(b,"host").replace("'","") + "',port=" + num(b,"port") +
+                        c.prepareStatement("UPDATE game_servers SET name='" + safeStr(b,"name") +
+                            "',host='" + safeStr(b,"host") + "',port=" + num(b,"port") +
                             ",status=" + num(b,"status") + ",max_players=" + num(b,"max_players") +
-                            ",group_name='" + str(b,"group_name").replace("'","") +
+                            ",group_name='" + safeStr(b,"group_name") +
                             "',is_new=" + num(b,"is_new") + ",is_recommend=" + num(b,"is_recommend") +
                             ",is_hot=" + num(b,"is_hot") + ",sort_order=" + num(b,"sort_order") +
                             " WHERE id=" + num(b,"id")).executeUpdate();
@@ -2221,7 +2228,7 @@ public class AdminApiServer {
             } else {
                 var b = parseBody(ex);
                 switch(str(b,"action")) {
-                    case "create" -> { c.prepareStatement("INSERT INTO server_channels (server_id,channel_number,channel_name,max_players) VALUES ("+num(b,"server_id")+","+num(b,"channel_number")+",'"+str(b,"channel_name").replace("'","")+"',"+num(b,"max_players")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "create" -> { c.prepareStatement("INSERT INTO server_channels (server_id,channel_number,channel_name,max_players) VALUES ("+num(b,"server_id")+","+num(b,"channel_number")+",'"+safeStr(b,"channel_name")+"',"+num(b,"max_players")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
                     case "toggle" -> { c.prepareStatement("UPDATE server_channels SET is_active=1-is_active WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
                     default -> sendJson(ex,400,Map.of("success",false));
                 }
@@ -2234,8 +2241,8 @@ public class AdminApiServer {
             if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM intro_scenes WHERE is_active=1 ORDER BY scene_order"), "scenes");
             else { var b = parseBody(ex);
                 switch(str(b,"action")) {
-                    case "update" -> { c.prepareStatement("UPDATE intro_scenes SET text_vi='"+str(b,"text_vi").replace("'","''")+"',text_en='"+str(b,"text_en").replace("'","''")+"',bg_image='"+str(b,"bg_image").replace("'","")+"',duration="+str(b,"duration")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
-                    case "create" -> { c.prepareStatement("INSERT INTO intro_scenes (scene_order,scene_type,bg_image,text_vi,text_en,bgm_key) VALUES ("+num(b,"scene_order")+",'text','"+str(b,"bg_image").replace("'","")+"','"+str(b,"text_vi").replace("'","''")+"','"+str(b,"text_en").replace("'","''")+"','"+str(b,"bgm_key").replace("'","")+"')").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "update" -> { c.prepareStatement("UPDATE intro_scenes SET text_vi='"+safeStr(b,"text_vi")+"',text_en='"+safeStr(b,"text_en")+"',bg_image='"+safeStr(b,"bg_image")+"',duration="+str(b,"duration")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "create" -> { c.prepareStatement("INSERT INTO intro_scenes (scene_order,scene_type,bg_image,text_vi,text_en,bgm_key) VALUES ("+num(b,"scene_order")+",'text','"+safeStr(b,"bg_image")+"','"+safeStr(b,"text_vi")+"','"+safeStr(b,"text_en")+"','"+safeStr(b,"bgm_key")+"')").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
                     case "delete" -> { c.prepareStatement("UPDATE intro_scenes SET is_active=0 WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
                     case "reorder" -> { c.prepareStatement("UPDATE intro_scenes SET scene_order="+num(b,"scene_order")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
                     default -> sendJson(ex,400,Map.of("success",false));
@@ -2247,7 +2254,7 @@ public class AdminApiServer {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM login_screen_config ORDER BY config_key"), "config");
             else { var b = parseBody(ex);
-                c.prepareStatement("UPDATE login_screen_config SET config_value='"+str(b,"config_value").replace("'","''")+"' WHERE config_key='"+str(b,"config_key").replace("'","")+"'").executeUpdate();
+                c.prepareStatement("UPDATE login_screen_config SET config_value='"+safeStr(b,"config_value")+"' WHERE config_key='"+safeStr(b,"config_key")+"'").executeUpdate();
                 auditLog(ex, "update_login_screen", "config", str(b,"config_key"), str(b,"config_value"));
                 sendJson(ex,200,Map.of("success",true)); }
         }
@@ -2258,7 +2265,7 @@ public class AdminApiServer {
             if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM gacha_currencies ORDER BY id"), "currencies");
             else { var b = parseBody(ex);
                 switch(str(b,"action")) {
-                    case "create" -> { c.prepareStatement("INSERT INTO gacha_currencies (currency_key,display_name,description,diamond_price,diamond_price_10) VALUES ('"+str(b,"currency_key").replace("'","")+"','"+str(b,"display_name").replace("'","")+"','"+str(b,"description").replace("'","")+"',"+num(b,"diamond_price")+","+num(b,"diamond_price_10")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "create" -> { c.prepareStatement("INSERT INTO gacha_currencies (currency_key,display_name,description,diamond_price,diamond_price_10) VALUES ('"+safeStr(b,"currency_key")+"','"+safeStr(b,"display_name")+"','"+safeStr(b,"description")+"',"+num(b,"diamond_price")+","+num(b,"diamond_price_10")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
                     case "update" -> { c.prepareStatement("UPDATE gacha_currencies SET diamond_price="+num(b,"diamond_price")+",diamond_price_10="+num(b,"diamond_price_10")+",is_active="+num(b,"is_active")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
                     default -> sendJson(ex,400,Map.of("success",false));
                 }
@@ -2269,7 +2276,7 @@ public class AdminApiServer {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT gs.*, gc.display_name as currency_name FROM gacha_currency_sources gs JOIN gacha_currencies gc ON gc.id=gs.currency_id ORDER BY gs.currency_id,gs.source_type"), "sources");
             else { var b = parseBody(ex);
-                c.prepareStatement("INSERT INTO gacha_currency_sources (currency_id,source_type,source_id,amount,description) VALUES ("+num(b,"currency_id")+",'"+str(b,"source_type").replace("'","")+"',"+num(b,"source_id")+","+num(b,"amount")+",'"+str(b,"description").replace("'","")+"')").executeUpdate();
+                c.prepareStatement("INSERT INTO gacha_currency_sources (currency_id,source_type,source_id,amount,description) VALUES ("+num(b,"currency_id")+",'"+safeStr(b,"source_type")+"',"+num(b,"source_id")+","+num(b,"amount")+",'"+safeStr(b,"description")+"')").executeUpdate();
                 sendJson(ex,200,Map.of("success",true)); }
         }
     }
@@ -2279,7 +2286,7 @@ public class AdminApiServer {
             if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM gacha_banners ORDER BY id"), "banners");
             else { var b = parseBody(ex);
                 switch(str(b,"action")) {
-                    case "create" -> { c.prepareStatement("INSERT INTO gacha_banners (name,banner_type,cost_single,cost_multi_10,pity_count) VALUES ('"+str(b,"name").replace("'","")+"','"+str(b,"banner_type").replace("'","")+"',"+num(b,"cost_single")+","+num(b,"cost_multi_10")+","+num(b,"pity_count")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "create" -> { c.prepareStatement("INSERT INTO gacha_banners (name,banner_type,cost_single,cost_multi_10,pity_count) VALUES ('"+safeStr(b,"name")+"','"+safeStr(b,"banner_type")+"',"+num(b,"cost_single")+","+num(b,"cost_multi_10")+","+num(b,"pity_count")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
                     case "toggle" -> { c.prepareStatement("UPDATE gacha_banners SET is_active=1-is_active WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
                     default -> sendJson(ex,400,Map.of("success",false));
                 }
@@ -2296,7 +2303,7 @@ public class AdminApiServer {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM push_campaigns ORDER BY created_at DESC"), "campaigns");
             else { var b = parseBody(ex);
-                c.prepareStatement("INSERT INTO push_campaigns (title,body,target,status) VALUES ('"+str(b,"title").replace("'","")+"','"+str(b,"body").replace("'","")+"','"+str(b,"target").replace("'","")+"','draft')").executeUpdate();
+                c.prepareStatement("INSERT INTO push_campaigns (title,body,target,status) VALUES ('"+safeStr(b,"title")+"','"+safeStr(b,"body")+"','"+safeStr(b,"target")+"','draft')").executeUpdate();
                 sendJson(ex,200,Map.of("success",true)); }
         }
     }
@@ -2318,7 +2325,7 @@ public class AdminApiServer {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM tutorial_steps ORDER BY step_order"), "steps");
             else { var b = parseBody(ex);
-                c.prepareStatement("UPDATE tutorial_steps SET title='"+str(b,"title").replace("'","")+"',description='"+str(b,"description").replace("'","")+"' WHERE id="+num(b,"id")).executeUpdate();
+                c.prepareStatement("UPDATE tutorial_steps SET title='"+safeStr(b,"title")+"',description='"+safeStr(b,"description")+"' WHERE id="+num(b,"id")).executeUpdate();
                 sendJson(ex,200,Map.of("success",true)); }
         }
     }
@@ -2327,7 +2334,7 @@ public class AdminApiServer {
             var p = parseQuery(ex.getRequestURI().getQuery()); String lang = p.getOrDefault("lang","vi");
             if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM localization WHERE lang_code='"+lang.replace("'","")+"' ORDER BY category,lang_key"), "strings");
             else { var b = parseBody(ex);
-                c.prepareStatement("INSERT INTO localization (lang_key,lang_code,text_value,category) VALUES ('"+str(b,"lang_key").replace("'","")+"','"+str(b,"lang_code").replace("'","")+"','"+str(b,"text_value").replace("'","")+"','"+str(b,"category").replace("'","")+"') ON DUPLICATE KEY UPDATE text_value=VALUES(text_value)").executeUpdate();
+                c.prepareStatement("INSERT INTO localization (lang_key,lang_code,text_value,category) VALUES ('"+safeStr(b,"lang_key")+"','"+safeStr(b,"lang_code")+"','"+safeStr(b,"text_value")+"','"+safeStr(b,"category")+"') ON DUPLICATE KEY UPDATE text_value=VALUES(text_value)").executeUpdate();
                 sendJson(ex,200,Map.of("success",true)); }
         }
     }
@@ -2335,7 +2342,7 @@ public class AdminApiServer {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM audio_assets ORDER BY asset_type,asset_key"), "audio");
             else { var b = parseBody(ex);
-                c.prepareStatement("INSERT INTO audio_assets (asset_key,asset_type,file_path,description) VALUES ('"+str(b,"asset_key").replace("'","")+"','"+str(b,"asset_type").replace("'","")+"','"+str(b,"file_path").replace("'","")+"','"+str(b,"description").replace("'","")+"') ON DUPLICATE KEY UPDATE file_path=VALUES(file_path)").executeUpdate();
+                c.prepareStatement("INSERT INTO audio_assets (asset_key,asset_type,file_path,description) VALUES ('"+safeStr(b,"asset_key")+"','"+safeStr(b,"asset_type")+"','"+safeStr(b,"file_path")+"','"+safeStr(b,"description")+"') ON DUPLICATE KEY UPDATE file_path=VALUES(file_path)").executeUpdate();
                 sendJson(ex,200,Map.of("success",true)); }
         }
     }
@@ -2384,8 +2391,8 @@ public class AdminApiServer {
             } else {
                 var body = parseBody(ex);
                 c.prepareStatement("UPDATE protection_config SET config_value='" +
-                    str(body,"config_value").replace("'","") + "' WHERE config_key='" +
-                    str(body,"config_key").replace("'","") + "'").executeUpdate();
+                    safeStr(body,"config_value") + "' WHERE config_key='" +
+                    safeStr(body,"config_key") + "'").executeUpdate();
                 auditLog(ex, "update_protection", "config", str(body,"config_key"), str(body,"config_value"));
                 sendJson(ex, 200, Map.of("success", true));
             }
@@ -2400,8 +2407,8 @@ public class AdminApiServer {
             } else {
                 var body = parseBody(ex);
                 c.prepareStatement("INSERT INTO client_integrity (platform,version,checksum_md5,checksum_sha256) VALUES ('" +
-                    str(body,"platform").replace("'","") + "','" + str(body,"version").replace("'","") + "','" +
-                    str(body,"checksum_md5").replace("'","") + "','" + str(body,"checksum_sha256").replace("'","") +
+                    safeStr(body,"platform") + "','" + safeStr(body,"version") + "','" +
+                    safeStr(body,"checksum_md5") + "','" + safeStr(body,"checksum_sha256") +
                     "') ON DUPLICATE KEY UPDATE checksum_md5=VALUES(checksum_md5),checksum_sha256=VALUES(checksum_sha256)").executeUpdate();
                 sendJson(ex, 200, Map.of("success", true));
             }
@@ -2419,9 +2426,9 @@ public class AdminApiServer {
                 sendTableResult(ex, c.prepareStatement(sql), "settings");
             } else {
                 var body = parseBody(ex);
-                c.prepareStatement("UPDATE default_settings SET default_value='" + str(body,"default_value").replace("'","") +
-                    "' WHERE tab_key='" + str(body,"tab_key").replace("'","") +
-                    "' AND setting_key='" + str(body,"setting_key").replace("'","") + "'").executeUpdate();
+                c.prepareStatement("UPDATE default_settings SET default_value='" + safeStr(body,"default_value") +
+                    "' WHERE tab_key='" + safeStr(body,"tab_key") +
+                    "' AND setting_key='" + safeStr(body,"setting_key") + "'").executeUpdate();
                 sendJson(ex,200,Map.of("success",true));
             }
         }
@@ -2453,9 +2460,9 @@ public class AdminApiServer {
                     }
                     case "update_class_map" -> {
                         c.prepareStatement("INSERT INTO class_animation_map (class_id,action_key,animation_state) VALUES (" +
-                            num(body,"class_id") + ",'" + str(body,"action_key").replace("'","") + "','" +
-                            str(body,"animation_state").replace("'","") + "') ON DUPLICATE KEY UPDATE animation_state='" +
-                            str(body,"animation_state").replace("'","") + "'").executeUpdate();
+                            num(body,"class_id") + ",'" + safeStr(body,"action_key") + "','" +
+                            safeStr(body,"animation_state") + "') ON DUPLICATE KEY UPDATE animation_state='" +
+                            safeStr(body,"animation_state") + "'").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
                     default -> sendJson(ex,400,Map.of("success",false));
@@ -2490,12 +2497,12 @@ public class AdminApiServer {
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "update" -> {
-                        c.prepareStatement("UPDATE achievements SET name='" + str(body,"name").replace("'","") +
-                            "',description='" + str(body,"description").replace("'","") +
-                            "',category='" + str(body,"category").replace("'","") +
-                            "',condition_type='" + str(body,"condition_type").replace("'","") +
+                        c.prepareStatement("UPDATE achievements SET name='" + safeStr(body,"name") +
+                            "',description='" + safeStr(body,"description") +
+                            "',category='" + safeStr(body,"category") +
+                            "',condition_type='" + safeStr(body,"condition_type") +
                             "',condition_value=" + num(body,"condition_value") +
-                            ",reward_type='" + str(body,"reward_type").replace("'","") +
+                            ",reward_type='" + safeStr(body,"reward_type") +
                             "',reward_amount=" + num(body,"reward_amount") +
                             ",points=" + num(body,"points") +
                             ",is_active=" + num(body,"is_active") +
@@ -2518,10 +2525,10 @@ public class AdminApiServer {
                 sendTableResult(ex, c.prepareStatement("SELECT * FROM daily_login_rewards ORDER BY day_number"), "rewards");
             } else {
                 var body = parseBody(ex);
-                c.prepareStatement("UPDATE daily_login_rewards SET reward_type='" + str(body,"reward_type").replace("'","") +
+                c.prepareStatement("UPDATE daily_login_rewards SET reward_type='" + safeStr(body,"reward_type") +
                     "',reward_id=" + num(body,"reward_id") +
                     ",reward_amount=" + num(body,"reward_amount") +
-                    ",description='" + str(body,"description").replace("'","") +
+                    ",description='" + safeStr(body,"description") +
                     "' WHERE day_number=" + num(body,"day_number")).executeUpdate();
                 sendJson(ex,200,Map.of("success",true));
             }
@@ -2785,7 +2792,7 @@ public class AdminApiServer {
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "update_pack" -> {
-                        c.prepareStatement("UPDATE sticker_packs SET name='" + str(body,"name").replace("'","") +
+                        c.prepareStatement("UPDATE sticker_packs SET name='" + safeStr(body,"name") +
                             "',price_diamond=" + num(body,"price_diamond") +
                             ",is_free=" + num(body,"is_free") +
                             ",is_active=" + num(body,"is_active") + " WHERE id=" + num(body,"id")).executeUpdate();
@@ -2827,8 +2834,8 @@ public class AdminApiServer {
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "update_role" -> {
-                        c.prepareStatement("UPDATE admin_accounts SET role='" + str(body,"role").replace("'","") +
-                            "',permissions='" + str(body,"permissions").replace("'","") + "' WHERE id=" + num(body,"id")).executeUpdate();
+                        c.prepareStatement("UPDATE admin_accounts SET role='" + safeStr(body,"role") +
+                            "',permissions='" + safeStr(body,"permissions") + "' WHERE id=" + num(body,"id")).executeUpdate();
                         auditLog(ex, "update_admin_role", "admin", String.valueOf(num(body,"id")), str(body,"role"));
                         sendJson(ex,200,Map.of("success",true));
                     }
@@ -2987,9 +2994,9 @@ public class AdminApiServer {
                     case "send_all" -> {
                         // Gui cho tat ca player online
                         c.prepareStatement("INSERT INTO player_mail (recipient_id,sender_type,sender_name,title,content,attachment_json) " +
-                            "SELECT id,'admin','" + str(body,"sender_name").replace("'","") + "','" +
-                            str(body,"title").replace("'","") + "','" + str(body,"content").replace("'","") + "','" +
-                            str(body,"attachment_json").replace("'","") + "' FROM characters WHERE is_deleted=0").executeUpdate();
+                            "SELECT id,'admin','" + safeStr(body,"sender_name") + "','" +
+                            safeStr(body,"title") + "','" + safeStr(body,"content") + "','" +
+                            safeStr(body,"attachment_json") + "' FROM characters WHERE is_deleted=0").executeUpdate();
                         auditLog(ex, "send_mail_all", "system", "all", "Mail blast: " + str(body,"title"));
                         sendJson(ex,200,Map.of("success",true));
                     }
@@ -3015,18 +3022,18 @@ public class AdminApiServer {
                 switch (action) {
                     case "assign" -> {
                         c.prepareStatement("UPDATE player_reports SET status='investigating',assigned_to='" +
-                            str(body,"admin").replace("'","") + "' WHERE id=" + num(body,"id")).executeUpdate();
+                            safeStr(body,"admin") + "' WHERE id=" + num(body,"id")).executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "resolve" -> {
                         c.prepareStatement("UPDATE player_reports SET status='resolved',resolution='" +
-                            str(body,"resolution").replace("'","") + "',resolved_at=NOW() WHERE id=" + num(body,"id")).executeUpdate();
+                            safeStr(body,"resolution") + "',resolved_at=NOW() WHERE id=" + num(body,"id")).executeUpdate();
                         auditLog(ex, "resolve_report", "report", String.valueOf(num(body,"id")), str(body,"resolution"));
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "dismiss" -> {
                         c.prepareStatement("UPDATE player_reports SET status='dismissed',resolution='" +
-                            str(body,"resolution").replace("'","") + "',resolved_at=NOW() WHERE id=" + num(body,"id")).executeUpdate();
+                            safeStr(body,"resolution") + "',resolved_at=NOW() WHERE id=" + num(body,"id")).executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
                     default -> sendJson(ex,400,Map.of("success",false));
@@ -3116,13 +3123,13 @@ public class AdminApiServer {
                     case "reject" -> {
                         c.prepareStatement("UPDATE ai_generation_log SET status='rejected'," +
                             "reviewed_by='" + admin + "',reviewed_at=NOW(),reject_reason='" +
-                            str(body,"reason").replace("'","") + "' WHERE id=" + id).executeUpdate();
+                            safeStr(body,"reason") + "' WHERE id=" + id).executeUpdate();
                         auditLog(ex, "reject_ai", "ai_content", String.valueOf(id), str(body,"reason"));
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "test" -> {
                         c.prepareStatement("UPDATE ai_generation_log SET status='testing'," +
-                            "test_server='" + str(body,"server").replace("'","") + "' WHERE id=" + id).executeUpdate();
+                            "test_server='" + safeStr(body,"server") + "' WHERE id=" + id).executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "publish" -> {
@@ -3209,9 +3216,9 @@ public class AdminApiServer {
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "update" -> {
-                        c.prepareStatement("UPDATE client_assets SET display_name='" + str(body,"display_name").replace("'","") +
-                            "',category='" + str(body,"category").replace("'","") +
-                            "',asset_type='" + str(body,"asset_type").replace("'","") +
+                        c.prepareStatement("UPDATE client_assets SET display_name='" + safeStr(body,"display_name") +
+                            "',category='" + safeStr(body,"category") +
+                            "',asset_type='" + safeStr(body,"asset_type") +
                             "',is_required=" + num(body,"is_required") +
                             " WHERE id=" + num(body,"id")).executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
@@ -3408,8 +3415,8 @@ public class AdminApiServer {
                 String action = str(body, "action");
                 switch (action) {
                     case "update" -> {
-                        c.prepareStatement("UPDATE hot_config SET config_value='" + str(body,"value").replace("'","") +
-                            "',version=version+1,updated_at=NOW() WHERE config_key='" + str(body,"key").replace("'","") + "'").executeUpdate();
+                        c.prepareStatement("UPDATE hot_config SET config_value='" + safeStr(body,"value") +
+                            "',version=version+1,updated_at=NOW() WHERE config_key='" + safeStr(body,"key") + "'").executeUpdate();
                         sendJson(ex,200,Map.of("success",true));
                     }
                     case "create" -> {
