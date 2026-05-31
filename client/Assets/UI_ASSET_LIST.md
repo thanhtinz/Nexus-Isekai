@@ -1,424 +1,362 @@
-# HUD & UI ASSETS — Chi tiet loai + so luong
+# HUD & UI ASSETS REQUIRED
 
-T = Tinh (1 PNG)
-D = Dong (nhieu frame / spritesheet)
-9S = 9-slice (1 PNG, co gian duoc)
+T = Static (1 PNG)
+D = Animated (spritesheet)
+9S = 9-slice (1 PNG, stretchable)
 
-## 1. HUD CHINH
-- Thanh HP frame          | T | 1
-- Thanh HP fill           | T | 1
-- Thanh MP frame          | T | 1
-- Thanh MP fill           | T | 1
-- Thanh EXP frame         | T | 1
-- Thanh EXP fill          | T | 1
-- Khung avatar            | T | 1
-- Badge level             | T | 1
-- Khung minimap           | T | 1
-- Icon minimap player     | T | 1
-- Icon minimap NPC        | T | 1
-- Icon minimap quai       | T | 1
-- Icon minimap quest      | T | 1
-- Icon minimap portal     | T | 1
-- Icon minimap shop       | T | 1
-- Joystick base           | T | 1
-- Joystick knob           | T | 1
-- Nut skill frame         | T | 1 (dung chung 7 slot)
-- Overlay cooldown        | T | 1 (ban trong suot toi dan)
-- Nut auto-attack         | T | 2 (on/off)
-- Slot quick item         | T | 1
-- Nut menu                | T | 1
-- Nut chat                | T | 1
-- Nut bell thong bao      | T | 1
-- Badge so thong bao      | T | 1
-Tong: 26 files
+## 1. MAIN HUD (Gameplay Screen)
+- HP bar frame              | T | 1
+- HP bar fill               | T | 1
+- MP bar frame              | T | 1
+- MP bar fill               | T | 1
+- EXP bar frame             | T | 1
+- EXP bar fill              | T | 1
+- Avatar frame              | T | 1
+- Level badge               | T | 1
+- Minimap frame             | T | 1
+- Minimap icon: player      | T | 1
+- Minimap icon: NPC         | T | 1
+- Minimap icon: monster     | T | 1
+- Minimap icon: quest       | T | 1
+- Minimap icon: portal      | T | 1
+- Minimap icon: shop        | T | 1
+- Joystick base             | T | 1
+- Joystick knob             | T | 1
+- Skill slot frame          | T | 1 (shared for 7 slots)
+- Cooldown overlay          | T | 1 (dark transparent)
+- Auto-attack button        | T | 2 (on/off)
+- Quick item slot           | T | 1
+- Menu button               | T | 1
+- Chat button               | T | 1
+- Notification bell         | T | 1
+- Notification count badge  | T | 1
+Total: 26
 
 ## 2. BUTTONS
-- Button mac dinh         | T | 3 (normal/pressed/disabled)
-- Button xac nhan         | T | 3
-- Button huy              | T | 3
-- Button tab active       | T | 1
-- Button tab inactive     | T | 1
-- Button dong (X)         | T | 1
-- Button quay lai         | T | 1
-- Checkbox                | T | 2 (on/off)
-- Radio                   | T | 2 (on/off)
-- Toggle switch           | T | 2 (on/off)
-- Slider bar              | T | 1
-- Slider handle           | T | 1
-- Dropdown frame          | T | 1
-- Dropdown arrow          | T | 1
-- Scrollbar track         | T | 1
-- Scrollbar thumb         | T | 1
-Tong: 26 files
+- Default button            | T | 3 (normal/pressed/disabled)
+- Confirm button (green)    | T | 3
+- Cancel button (red/gray)  | T | 3
+- Tab active                | T | 1
+- Tab inactive              | T | 1
+- Close button (X)          | T | 1
+- Back button               | T | 1
+- Checkbox                  | T | 2 (on/off)
+- Radio button              | T | 2 (on/off)
+- Toggle switch             | T | 2 (on/off)
+- Slider bar                | T | 1
+- Slider handle             | T | 1
+- Dropdown frame            | T | 1
+- Dropdown arrow            | T | 1
+- Scrollbar track           | T | 1
+- Scrollbar thumb           | T | 1
+Total: 26
 
 ## 3. FRAMES & PANELS
-- Dialog frame            | 9S | 1
-- Panel background        | 9S | 1
-- Tooltip frame           | 9S | 1
-- Input field frame       | 9S | 1
-- Modal overlay           | T  | 1
-- Separator line          | T  | 1
-- Tab bar background      | 9S | 1
-Tong: 7 files
+- Dialog frame              | 9S | 1
+- Panel background          | 9S | 1
+- Tooltip frame             | 9S | 1
+- Input field frame         | 9S | 1
+- Modal dark overlay        | T  | 1
+- Separator line            | T  | 1
+- Tab bar background        | 9S | 1
+Total: 7
 
 ## 4. INVENTORY & EQUIPMENT
-- Slot inventory trong    | T | 1
-- Slot inventory chon     | T | 1
-- Slot trang bi (25 icon rieng) | T | 25
-- Vien Common (trang)     | T | 1
-- Vien Rare (xanh)        | T | 1
-- Vien Epic (tim)         | T | 1
-- Vien Legendary (cam)    | T | 1
-- Vien Mythic (do)        | T | 1
-- Icon khoa/bound         | T | 1
-- Glow cuong hoa          | D | 4 (glow loop 4 frame)
-- Gem socket trong        | T | 1
-- Gem socket da khaam     | T | 1
-- Badge so luong          | T | 1
-Tong: 41 files
+- Inventory slot empty      | T | 1
+- Inventory slot selected   | T | 1
+- Equipment slot icons (25) | T | 25
+  Helmet, Armor, Pants, Boots, Gloves, Shield, Spellbook,
+  Quiver, Talisman, Charm, Skin, Ring x2, Necklace,
+  Earring x2, Bracelet x2, Wings, Cape, Mask, Title,
+  Mount, Pet, Weapon
+- Quality border Common     | T | 1
+- Quality border Rare       | T | 1
+- Quality border Epic       | T | 1
+- Quality border Legendary  | T | 1
+- Quality border Mythic     | T | 1
+- Lock/bound icon           | T | 1
+- Enhancement glow          | D | 4 (loop 4 frames)
+- Gem socket empty          | T | 1
+- Gem socket filled         | T | 1
+- Quantity badge             | T | 1
+Total: 41
 
-## 5. TAO NHAN VAT
-- Card class (7 class)    | T | 7
-- Card class selected     | T | 1 (vien sang)
-- Toggle nam              | T | 1
-- Toggle nu               | T | 1
-- Khung preview           | T | 1
-- Thanh stat preview      | T | 2 (frame + fill)
-- Nut tao nhan vat        | T | 3 (normal/pressed/disabled)
-Tong: 16 files
+## 5. CHARACTER CREATION
+- Class card (7 classes)    | T | 7
+- Class card selected glow  | T | 1
+- Gender toggle male        | T | 1
+- Gender toggle female      | T | 1
+- Preview frame             | T | 1
+- Stat preview bar          | T | 2 (frame + fill)
+- Create button             | T | 3 (normal/pressed/disabled)
+Total: 16
 
 ## 6. CHAT
-- Khung chat bg           | 9S | 1
-- Tab chat active         | T  | 1
-- Tab chat inactive       | T  | 1
-- Input chat frame        | 9S | 1
-- Nut gui                 | T  | 1
-- Nut emoji               | T  | 1
-- Nut sticker             | T  | 1
-- Nut voice               | T  | 2 (idle/recording)
-- Bong chat               | 9S | 1
-- Khung thong bao he thong| 9S | 1
-Tong: 11 files
+- Chat box background      | 9S | 1
+- Chat tab active           | T  | 1
+- Chat tab inactive         | T  | 1
+- Chat input frame          | 9S | 1
+- Send button               | T  | 1
+- Emoji button              | T  | 1
+- Sticker button            | T  | 1
+- Voice button              | T  | 2 (idle/recording)
+- Chat bubble               | 9S | 1
+- System message frame      | 9S | 1
+Total: 11
 
-## 7. SHOP & NAP
-- Khung card san pham     | 9S | 1
-- Icon vang               | T  | 1
-- Icon kim cuong          | T  | 1
-- Icon event token        | T  | 1
-- Nut mua                 | T  | 1
-- Nut ban                 | T  | 1
-- Selector +              | T  | 1
-- Selector -              | T  | 1
-- Khung goi nap           | 9S | 1
-- Badge hot               | T  | 1
-- Badge best              | T  | 1
-- Badge x2                | T  | 1
-- Badge limited           | T  | 1
-- Badge new               | T  | 1
-Tong: 14 files
+## 7. SHOP & TOPUP
+- Product card frame        | 9S | 1
+- Gold icon                 | T  | 1
+- Diamond icon              | T  | 1
+- Event token icon          | T  | 1
+- Buy button                | T  | 1
+- Sell button               | T  | 1
+- Quantity selector +       | T  | 1
+- Quantity selector -       | T  | 1
+- Topup package frame      | 9S | 1
+- Badge hot                 | T  | 1
+- Badge best                | T  | 1
+- Badge x2                  | T  | 1
+- Badge limited             | T  | 1
+- Badge new                 | T  | 1
+Total: 14
 
-## 8. GACHA / TRIEU HOI
-- Khung banner            | 9S | 1
-- Nut keo 1 lan           | T  | 1
-- Nut keo 10 lan          | T  | 1
-- Hieu ung mo hop         | D  | 8 (spritesheet 8 frame)
-- Card ket qua N          | T  | 1
-- Card ket qua R          | T  | 1
-- Card ket qua SR         | T  | 1
-- Card ket qua SSR        | T  | 1
-- Card ket qua UR         | T  | 1
-- Thanh pity frame        | T  | 1
-- Thanh pity fill         | T  | 1
-- Icon ve thuong          | T  | 1
-- Icon ve gioi han        | T  | 1
-- Icon khoa thu cuoi      | T  | 1
-- Icon khoa zuky          | T  | 1
-- Icon manh vu khi        | T  | 1
-Tong: 18 files
+## 8. GACHA / SUMMON
+- Banner frame              | 9S | 1
+- Pull x1 button            | T  | 1
+- Pull x10 button           | T  | 1
+- Summon open effect        | D  | 8 (spritesheet 8 frames)
+- Result card N             | T  | 1
+- Result card R             | T  | 1
+- Result card SR            | T  | 1
+- Result card SSR           | T  | 1
+- Result card UR            | T  | 1
+- Pity bar frame            | T  | 1
+- Pity bar fill             | T  | 1
+- Ticket standard icon      | T  | 1
+- Ticket limited icon       | T  | 1
+- Key pet icon              | T  | 1
+- Key mount icon            | T  | 1
+- Weapon shard icon         | T  | 1
+Total: 18
 
 ## 9. QUEST & DIALOG
-- Khung quest tracker     | 9S | 1
-- Dau ! nhan quest        | T  | 1
-- Dau ? tra quest         | T  | 1
-- Icon quest dang lam     | T  | 1
-- Khung dialog NPC        | 9S | 1
-- Nut lua chon dialog     | T  | 1
-- Khung portrait NPC      | T  | 1
-- Thanh tien trinh quest  | T  | 2 (frame + fill)
-- Slot preview phan thuong| T  | 1
-Tong: 10 files
+- Quest tracker frame       | 9S | 1
+- Quest marker accept (!)   | T  | 1
+- Quest marker complete (?) | T  | 1
+- Quest marker ongoing      | T  | 1
+- NPC dialog box            | 9S | 1
+- Dialog choice button      | T  | 1
+- NPC portrait frame        | T  | 1
+- Quest progress bar        | T  | 2 (frame + fill)
+- Reward preview slot       | T  | 1
+Total: 10
 
 ## 10. PARTY & GUILD
-- Khung member party      | 9S | 1
-- Thanh HP mini           | T  | 2 (frame + fill)
-- Icon leader             | T  | 1
-- Icon officer            | T  | 1
-- Icon member             | T  | 1
-- Khung guild emblem      | T  | 1
-- Dot online              | T  | 1
-- Dot offline             | T  | 1
-Tong: 9 files
+- Party member frame        | 9S | 1
+- Mini HP bar               | T  | 2 (frame + fill)
+- Leader crown icon         | T  | 1
+- Officer icon              | T  | 1
+- Member icon               | T  | 1
+- Guild emblem frame        | T  | 1
+- Online dot (green)        | T  | 1
+- Offline dot (gray)        | T  | 1
+Total: 9
 
-## 11. PVP
-- Icon Bronze             | T  | 1
-- Icon Silver             | T  | 1
-- Icon Gold               | T  | 1
-- Icon Platinum           | T  | 1
-- Icon Diamond            | T  | 1
-- Icon Master             | T  | 1
-- Icon Grandmaster        | T  | 1
-- Thanh ELO frame         | T  | 1
-- Thanh ELO fill          | T  | 1
-- Khung ket qua thang     | T  | 1
-- Khung ket qua thua      | T  | 1
-Tong: 11 files
+## 11. PVP ARENA
+- Tier icon Bronze          | T  | 1
+- Tier icon Silver          | T  | 1
+- Tier icon Gold            | T  | 1
+- Tier icon Platinum        | T  | 1
+- Tier icon Diamond         | T  | 1
+- Tier icon Master          | T  | 1
+- Tier icon Grandmaster     | T  | 1
+- ELO bar frame             | T  | 1
+- ELO bar fill              | T  | 1
+- Victory frame             | T  | 1
+- Defeat frame              | T  | 1
+Total: 11
 
 ## 12. COMBAT
-- Font so sat thuong      | T  | 10 (0-9)
-- Hieu ung chi mang       | D  | 4 (burst 4 frame)
-- Chu MISS                | T  | 1
-- Hieu ung len cap        | D  | 6 (6 frame)
-- Overlay chet            | T  | 1
-- Nut hoi sinh            | T  | 1
-- Icon buff chung         | T  | 10
-- Icon debuff chung       | T  | 10
-Tong: 33 files
+- Damage font digits 0-9   | T  | 10
+- Critical hit burst        | D  | 4 (4 frames)
+- MISS text                 | T  | 1
+- Level up effect           | D  | 6 (6 frames)
+- Death overlay             | T  | 1
+- Respawn button            | T  | 1
+- Buff icons (generic)      | T  | 10
+- Debuff icons (generic)    | T  | 10
+Total: 33
 
 ## 13. NOTIFICATIONS & POPUPS
-- Khung toast             | 9S | 1
-- Banner achievement      | T  | 1
-- Slot daily login (7 o)  | T  | 2 (claimed/unclaimed)
-- Banner world boss       | T  | 1
-- Banner su kien          | T  | 1
-- Thanh loading frame     | T  | 1
-- Thanh loading fill      | T  | 1
-- Background loading      | T  | 1
-- Logo splash             | T  | 1
-Tong: 10 files
+- Toast frame               | 9S | 1
+- Achievement banner        | T  | 1
+- Daily login slot          | T  | 2 (claimed/unclaimed)
+- World boss alert banner   | T  | 1
+- Event banner              | T  | 1
+- Loading bar frame         | T  | 1
+- Loading bar fill          | T  | 1
+- Loading background        | T  | 1
+- Splash logo               | T  | 1
+Total: 10
 
-## 14. SETTINGS
-- Background panel        | 9S | 1
-- Tab active              | T  | 1 (dung chung voi #2)
-Tong: 1 file (con lai dung chung button/toggle/slider)
+## 14. SETTINGS (6 tabs)
+- Settings panel bg         | 9S | 1
+- Tab Game icon             | T  | 1
+- Tab Graphics icon         | T  | 1
+- Tab Audio icon            | T  | 1
+- Tab Controls icon         | T  | 1
+- Tab Network icon          | T  | 1
+- Tab Account icon          | T  | 1
+- Section header bg         | 9S | 1
+- Volume slider bar         | T  | 1 (or shared from #2)
+- Volume slider handle      | T  | 1 (or shared from #2)
+- Quality selector frames   | T  | 5 (Very Low/Low/Medium/High/Ultra)
+- FPS selector frames       | T  | 4 (30/60/90/120)
+- Key binding slot          | T  | 1
+- Reset defaults button     | T  | 1
+- Save button               | T  | 1
+- Joystick size preview     | T  | 1
+- Camera sensitivity preview| T  | 1
+Total: 19
 
 ## 15. MAP
-- Khung fullscreen map    | 9S | 1
-- Nut zoom +              | T  | 1
-- Nut zoom -              | T  | 1
-- Marker waypoint         | T  | 1
-- Icon teleport           | T  | 1
-- Khung ten khu vuc       | 9S | 1
-Tong: 5 files (1 la 9-slice)
+- Fullscreen map frame      | 9S | 1
+- Zoom in button            | T  | 1
+- Zoom out button           | T  | 1
+- Waypoint marker           | T  | 1
+- Teleport icon             | T  | 1
+- Area name label frame     | 9S | 1
+- Fog overlay               | T  | 1
+Total: 7
 
-## 16. CUONG HOA
-- Slot cuong hoa          | T  | 1
-- Slot nguyen lieu        | T  | 1
-- Hieu ung thanh cong     | D  | 6 (6 frame)
-- Hieu ung that bai       | D  | 4 (4 frame)
-- Thanh % ty le           | T  | 2 (frame + fill)
-Tong: 6 files (2 dong)
+## 16. ENHANCEMENT
+- Enhancement center slot   | T  | 1
+- Material slot             | T  | 1
+- Success effect            | D  | 6 (6 frames)
+- Failure effect            | D  | 4 (4 frames)
+- Chance % bar              | T  | 2 (frame + fill)
+- Gem socket UI slot        | T  | 1
+- Gem insert effect         | D  | 4 (4 frames)
+Total: 8
 
-## 17. ICONS HE THONG
-- 7 icon class            | T  | 7
-- 12 icon chi so          | T  | 12
-- 10 icon menu            | T  | 10
-- 4 icon tien te          | T  | 4
-- 5 icon social           | T  | 5
-- 4 icon NPC type         | T  | 4
-Tong: 42 files
-
+## 17. SYSTEM ICONS
+- 7 class icons             | T  | 7
+- 12 stat icons             | T  | 12
+  HP, MP, ATK, DEF, Crit, Dodge,
+  Accuracy, Speed, Lifesteal, Resist, ASPD, MSPD
+- 10 menu icons             | T  | 10
+  Settings, Mail, Friends, Guild, Party,
+  Shop, Inventory, Skills, Quest, Map
+- 4 currency icons          | T  | 4
+  Gold, Diamond, Event Token, Gacha Ticket
+- 5 social icons            | T  | 5
+  Chat, Voice, Sticker, Block, Report
+- 4 NPC type icons          | T  | 4
+  Merchant, Quest giver, Teleporter, Storage
+Total: 42
 
 ## 18. INTRO CUTSCENE
-- Background intro (7 scene)| T | 7
-- Khung text intro          | 9S | 1
-- Nut skip                  | T  | 1
-- Nut tiep tuc              | T  | 1
-- Hieu ung fade overlay     | T  | 1
-Tong: 11 files
+- Intro backgrounds (7)     | T  | 7
+- Text box frame            | 9S | 1
+- Skip button               | T  | 1
+- Continue button           | T  | 1
+- Fade overlay              | T  | 1
+Total: 11
 
 ## 19. MAIL
-- Khung mail list           | 9S | 1
-- Icon mail chua doc        | T  | 1
-- Icon mail da doc          | T  | 1
-- Icon mail co file dinh kem| T  | 1
-- Khung doc mail             | 9S | 1
-- Nut nhan phan thuong      | T  | 1
-- Nut xoa                   | T  | 1
-Tong: 7 files
+- Mail list frame           | 9S | 1
+- Unread mail icon          | T  | 1
+- Read mail icon            | T  | 1
+- Attachment icon           | T  | 1
+- Mail detail frame         | 9S | 1
+- Claim reward button       | T  | 1
+- Delete button             | T  | 1
+Total: 7
 
 ## 20. TRADE
-- Khung trade (2 panel)     | 9S | 1
-- Slot trade (trai + phai)  | T  | 2
-- Nut xac nhan trade        | T  | 1
-- Nut huy trade             | T  | 1
-- Icon khoa giao dich       | T  | 1
-- Thanh vang trade           | T  | 1
-Tong: 7 files
+- Trade window frame        | 9S | 1
+- Trade slot (left + right) | T  | 2
+- Confirm trade button      | T  | 1
+- Cancel trade button       | T  | 1
+- Lock trade icon           | T  | 1
+- Gold input bar            | T  | 1
+Total: 7
 
-## 21. AUCTION
-- Khung auction list        | 9S | 1
-- Card vat pham dau gia     | 9S | 1
-- Nut dau gia               | T  | 1
-- Nut mua ngay              | T  | 1
-- Nut ban                   | T  | 1
-- Tab auction (Mua/Ban/Lich su) | T | 3
-- Icon thoi gian con lai    | T  | 1
-Tong: 9 files
+## 21. AUCTION HOUSE
+- Auction list frame        | 9S | 1
+- Auction item card         | 9S | 1
+- Bid button                | T  | 1
+- Buyout button             | T  | 1
+- Sell button               | T  | 1
+- Tab Buy/Sell/History      | T  | 3
+- Time remaining icon       | T  | 1
+Total: 9
 
 ## 22. ACHIEVEMENT
-- Khung achievement list    | 9S | 1
-- Card thanh tuu (chua dat) | T  | 1
-- Card thanh tuu (da dat)   | T  | 1
-- Thanh tien trinh          | T  | 2 (frame + fill)
-- Nut nhan thuong           | T  | 1
-- Tab danh muc (6 tab)      | T  | 6
-Tong: 12 files
+- Achievement list frame    | 9S | 1
+- Achievement card locked   | T  | 1
+- Achievement card unlocked | T  | 1
+- Progress bar              | T  | 2 (frame + fill)
+- Claim reward button       | T  | 1
+- Category tabs (6)         | T  | 6
+Total: 12
 
 ## 23. TUTORIAL
-- Overlay highlight (vung toi xung quanh) | T | 1
-- Mui ten chi (len/xuong/trai/phai)       | T | 4
-- Khung text huong dan      | 9S | 1
-- Nut tiep tuc              | T  | 1
-- Nut bo qua                | T  | 1
-- Tay chi (tap animation)   | D  | 4 (4 frame)
-Tong: 12 files
+- Highlight overlay (dark)  | T  | 1
+- Arrow up                  | T  | 1
+- Arrow down                | T  | 1
+- Arrow left                | T  | 1
+- Arrow right               | T  | 1
+- Guide text frame          | 9S | 1
+- Continue button           | T  | 1
+- Skip button               | T  | 1
+- Tap hand animation        | D  | 4 (4 frames)
+Total: 12
 
 ## 24. MISSION PASS
-- Khung mission pass        | 9S | 1
-- Slot free reward          | T  | 1
-- Slot premium reward       | T  | 1
-- Slot claimed              | T  | 1
-- Thanh tien trinh level    | T  | 2 (frame + fill)
-- Nut mua premium           | T  | 1
-- Icon khoa premium         | T  | 1
-Tong: 8 files
+- Mission pass frame        | 9S | 1
+- Free reward slot          | T  | 1
+- Premium reward slot       | T  | 1
+- Claimed slot              | T  | 1
+- Level progress bar        | T  | 2 (frame + fill)
+- Buy premium button        | T  | 1
+- Premium lock icon         | T  | 1
+Total: 8
 
 ## 25. LOGIN SCREEN
-- Background login          | T  | 1 (1920x1080)
-- Logo game                 | T  | 1
-- Khung nhap username       | 9S | 1
-- Khung nhap password       | 9S | 1
-- Nut dang nhap             | T  | 1
-- Nut dang ky               | T  | 1
-- Nut Google Sign-In        | T  | 1
-- Nut Facebook Sign-In      | T  | 1
-- Nut Apple Sign-In         | T  | 1
-- Khung thong bao           | 9S | 1
-Tong: 10 files
+- Login background          | T  | 1 (1920x1080)
+- Game logo                 | T  | 1
+- Username input frame      | 9S | 1
+- Password input frame      | 9S | 1
+- Login button              | T  | 1
+- Register button           | T  | 1
+- Google Sign-In button     | T  | 1
+- Facebook Sign-In button   | T  | 1
+- Apple Sign-In button      | T  | 1
+- Notice frame              | 9S | 1
+Total: 10
 
 ## 26. SERVER SELECT
-- Khung danh sach server    | 9S | 1
-- Card server               | 9S | 1
-- Badge Moi                 | T  | 1
+- Server list frame         | 9S | 1
+- Server card               | 9S | 1
+- Badge New                 | T  | 1
 - Badge Hot                 | T  | 1
-- Badge De xuat             | T  | 1
-- Dot smooth (xanh)         | T  | 1
-- Dot normal (vang)         | T  | 1
-- Dot busy (cam)            | T  | 1
-- Dot full (do)             | T  | 1
-- Khung danh sach kenh      | 9S | 1
-- Thanh nguoi choi kenh     | T  | 2 (frame + fill)
-Tong: 12 files
+- Badge Recommended         | T  | 1
+- Status dot smooth (green) | T  | 1
+- Status dot normal (yellow)| T  | 1
+- Status dot busy (orange)  | T  | 1
+- Status dot full (red)     | T  | 1
+- Channel list frame        | 9S | 1
+- Channel player bar        | T  | 2 (frame + fill)
+Total: 12
 
-## ════════════════════════════════
-## TONG KET
+## ════════════════════════════════════
+## SUMMARY
 ##
-## Tinh (PNG don):          ~338 files
-## Dong (spritesheet):        6 sets (~32 frame)
-## 9-slice:                  ~30 files
-## ────────────────────────
-## TONG CONG:             ~360 files PNG
-
-## 18. INTRO CUTSCENE
-- Background intro (7 scene)| T | 7
-- Khung text intro          | 9S | 1
-- Nut skip                  | T  | 1
-- Nut tiep tuc              | T  | 1
-- Hieu ung fade overlay     | T  | 1
-Tong: 11 files
-
-## 19. MAIL
-- Khung mail list           | 9S | 1
-- Icon mail chua doc        | T  | 1
-- Icon mail da doc          | T  | 1
-- Icon mail co file dinh kem| T  | 1
-- Khung doc mail             | 9S | 1
-- Nut nhan phan thuong      | T  | 1
-- Nut xoa                   | T  | 1
-Tong: 7 files
-
-## 20. TRADE
-- Khung trade (2 panel)     | 9S | 1
-- Slot trade (trai + phai)  | T  | 2
-- Nut xac nhan trade        | T  | 1
-- Nut huy trade             | T  | 1
-- Icon khoa giao dich       | T  | 1
-- Thanh vang trade           | T  | 1
-Tong: 7 files
-
-## 21. AUCTION
-- Khung auction list        | 9S | 1
-- Card vat pham dau gia     | 9S | 1
-- Nut dau gia               | T  | 1
-- Nut mua ngay              | T  | 1
-- Nut ban                   | T  | 1
-- Tab auction (Mua/Ban/Lich su) | T | 3
-- Icon thoi gian con lai    | T  | 1
-Tong: 9 files
-
-## 22. ACHIEVEMENT
-- Khung achievement list    | 9S | 1
-- Card thanh tuu (chua dat) | T  | 1
-- Card thanh tuu (da dat)   | T  | 1
-- Thanh tien trinh          | T  | 2 (frame + fill)
-- Nut nhan thuong           | T  | 1
-- Tab danh muc (6 tab)      | T  | 6
-Tong: 12 files
-
-## 23. TUTORIAL
-- Overlay highlight (vung toi xung quanh) | T | 1
-- Mui ten chi (len/xuong/trai/phai)       | T | 4
-- Khung text huong dan      | 9S | 1
-- Nut tiep tuc              | T  | 1
-- Nut bo qua                | T  | 1
-- Tay chi (tap animation)   | D  | 4 (4 frame)
-Tong: 12 files
-
-## 24. MISSION PASS
-- Khung mission pass        | 9S | 1
-- Slot free reward          | T  | 1
-- Slot premium reward       | T  | 1
-- Slot claimed              | T  | 1
-- Thanh tien trinh level    | T  | 2 (frame + fill)
-- Nut mua premium           | T  | 1
-- Icon khoa premium         | T  | 1
-Tong: 8 files
-
-## 25. LOGIN SCREEN
-- Background login          | T  | 1 (1920x1080)
-- Logo game                 | T  | 1
-- Khung nhap username       | 9S | 1
-- Khung nhap password       | 9S | 1
-- Nut dang nhap             | T  | 1
-- Nut dang ky               | T  | 1
-- Nut Google Sign-In        | T  | 1
-- Nut Facebook Sign-In      | T  | 1
-- Nut Apple Sign-In         | T  | 1
-- Khung thong bao           | 9S | 1
-Tong: 10 files
-
-## 26. SERVER SELECT
-- Khung danh sach server    | 9S | 1
-- Card server               | 9S | 1
-- Badge Moi                 | T  | 1
-- Badge Hot                 | T  | 1
-- Badge De xuat             | T  | 1
-- Dot smooth (xanh)         | T  | 1
-- Dot normal (vang)         | T  | 1
-- Dot busy (cam)            | T  | 1
-- Dot full (do)             | T  | 1
-- Khung danh sach kenh      | 9S | 1
-- Thanh nguoi choi kenh     | T  | 2 (frame + fill)
-Tong: 12 files
-
-## ════════════════════════════════
+## Static (single PNG):        ~338
+## Animated (spritesheet):       7 sets (~36 frames)
+## 9-slice (stretchable):      ~30
+## ──────────────────────────────
+## GRAND TOTAL:              ~370 PNG files
+## ════════════════════════════════════
