@@ -919,6 +919,49 @@ public class ExtendedHandlers {
         } catch (Exception e) { msg(session, "Loi luu cai dat."); }
     }
 
+
+    // ═══════════════════════════════════════════════════════════
+    // GACHA
+    // ═══════════════════════════════════════════════════════════
+    public static void handleGachaBannerList(GameSession s, ByteBuf b) { msg(s,"Loading banners..."); }
+    public static void handleGachaPull(GameSession s, ByteBuf b) { int bid=b.readInt(); int cnt=b.readInt(); msg(s,"Gacha pull..."); }
+    public static void handleGachaHistory(GameSession s, ByteBuf b) { msg(s,"Loading history..."); }
+    public static void handleGachaBuyTicket(GameSession s, ByteBuf b) { int cid=b.readInt(); int amt=b.readInt(); msg(s,"Mua ve..."); }
+    public static void handleGachaCurrency(GameSession s, ByteBuf b) { msg(s,"Loading currency..."); }
+
+    // ═══════════════════════════════════════════════════════════
+    // PVP SEASON
+    // ═══════════════════════════════════════════════════════════
+    public static void handlePvpSeasonInfo(GameSession s, ByteBuf b) { msg(s,"PvP season info..."); }
+    public static void handlePvpSeasonRank(GameSession s, ByteBuf b) { msg(s,"PvP ranking..."); }
+    public static void handlePvpSeasonReward(GameSession s, ByteBuf b) { msg(s,"Nhan thuong mua..."); }
+
+    // ═══════════════════════════════════════════════════════════
+    // SOCIAL LOGIN
+    // ═══════════════════════════════════════════════════════════
+    public static void handleSocialLogin(GameSession s, ByteBuf b) { short l=b.readShort(); byte[] pb=new byte[l]; b.readBytes(pb); String provider=new String(pb); msg(s,"Social login: "+provider); }
+    public static void handleSocialLink(GameSession s, ByteBuf b) { msg(s,"Linking..."); }
+    public static void handleSocialUnlink(GameSession s, ByteBuf b) { msg(s,"Unlinking..."); }
+
+    // ═══════════════════════════════════════════════════════════
+    // TUTORIAL
+    // ═══════════════════════════════════════════════════════════
+    public static void handleTutorialProgress(GameSession s, ByteBuf b) { msg(s,"Tutorial progress..."); }
+    public static void handleTutorialSkip(GameSession s, ByteBuf b) { msg(s,"Tutorial skipped."); }
+
+    // ═══════════════════════════════════════════════════════════
+    // LANG + INTRO + LOGIN SCREEN + SERVER
+    // ═══════════════════════════════════════════════════════════
+    public static void handleLangSet(GameSession s, ByteBuf b) { msg(s,"Lang set."); }
+    public static void handleIntroRequest(GameSession s, ByteBuf b) { msg(s,"Intro loading..."); }
+    public static void handleIntroComplete(GameSession s, ByteBuf b) { msg(s,"Intro complete."); }
+    public static void handleIntroSkip(GameSession s, ByteBuf b) { msg(s,"Intro skipped."); }
+    public static void handleLoginScreenCfg(GameSession s, ByteBuf b) { msg(s,"Login config."); }
+    public static void handleServerList(GameSession s, ByteBuf b) { msg(s,"Server list."); }
+    public static void handleServerSelect(GameSession s, ByteBuf b) { int sid=b.readInt(); msg(s,"Server selected: "+sid); }
+    public static void handleChannelList(GameSession s, ByteBuf b) { msg(s,"Channel list."); }
+    public static void handleChannelSelect(GameSession s, ByteBuf b) { int cid=b.readInt(); msg(s,"Channel selected: "+cid); }
+
     // ═══════════════════════════════════════════════════════════
     // Helpers
     // ═══════════════════════════════════════════════════════════

@@ -256,6 +256,43 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_MAIL_CLAIM  -> { requireInGame(); ExtendedHandlers.handleMailClaim(this, toBuf(p)); }
             case PacketOpcode.C2S_MAIL_DELETE  -> { requireInGame(); ExtendedHandlers.handleMailDelete(this, toBuf(p)); }
 
+
+            // ── Gacha ──────────────────────────────────────────────
+            case PacketOpcode.C2S_GACHA_BANNER_LIST -> { requireInGame(); ExtendedHandlers.handleGachaBannerList(this, toBuf(p)); }
+            case PacketOpcode.C2S_GACHA_PULL        -> { requireInGame(); ExtendedHandlers.handleGachaPull(this, toBuf(p)); }
+            case PacketOpcode.C2S_GACHA_HISTORY     -> { requireInGame(); ExtendedHandlers.handleGachaHistory(this, toBuf(p)); }
+            case PacketOpcode.C2S_GACHA_BUY_TICKET  -> { requireInGame(); ExtendedHandlers.handleGachaBuyTicket(this, toBuf(p)); }
+            case PacketOpcode.C2S_GACHA_CURRENCY    -> { requireInGame(); ExtendedHandlers.handleGachaCurrency(this, toBuf(p)); }
+
+            // ── PvP Season ─────────────────────────────────────────
+            case PacketOpcode.C2S_PVP_SEASON_INFO   -> { requireInGame(); ExtendedHandlers.handlePvpSeasonInfo(this, toBuf(p)); }
+            case PacketOpcode.C2S_PVP_SEASON_RANK   -> { requireInGame(); ExtendedHandlers.handlePvpSeasonRank(this, toBuf(p)); }
+            case PacketOpcode.C2S_PVP_SEASON_REWARD -> { requireInGame(); ExtendedHandlers.handlePvpSeasonReward(this, toBuf(p)); }
+
+            // ── Social Login ───────────────────────────────────────
+            case PacketOpcode.C2S_SOCIAL_LOGIN      -> { ExtendedHandlers.handleSocialLogin(this, toBuf(p)); }
+            case PacketOpcode.C2S_SOCIAL_LINK       -> { requireInGame(); ExtendedHandlers.handleSocialLink(this, toBuf(p)); }
+            case PacketOpcode.C2S_SOCIAL_UNLINK     -> { requireInGame(); ExtendedHandlers.handleSocialUnlink(this, toBuf(p)); }
+
+            // ── Tutorial ───────────────────────────────────────────
+            case PacketOpcode.C2S_TUTORIAL_PROGRESS -> { requireInGame(); ExtendedHandlers.handleTutorialProgress(this, toBuf(p)); }
+            case PacketOpcode.C2S_TUTORIAL_SKIP     -> { requireInGame(); ExtendedHandlers.handleTutorialSkip(this, toBuf(p)); }
+
+            // ── Localization ───────────────────────────────────────
+            case PacketOpcode.C2S_LANG_SET          -> { ExtendedHandlers.handleLangSet(this, toBuf(p)); }
+
+            // ── Intro Cutscene ─────────────────────────────────────
+            case PacketOpcode.C2S_INTRO_REQUEST     -> { ExtendedHandlers.handleIntroRequest(this, toBuf(p)); }
+            case PacketOpcode.C2S_INTRO_COMPLETE    -> { ExtendedHandlers.handleIntroComplete(this, toBuf(p)); }
+            case PacketOpcode.C2S_INTRO_SKIP        -> { ExtendedHandlers.handleIntroSkip(this, toBuf(p)); }
+            case PacketOpcode.C2S_LOGIN_SCREEN_CFG  -> { ExtendedHandlers.handleLoginScreenCfg(this, toBuf(p)); }
+
+            // ── Server Selection ───────────────────────────────────
+            case PacketOpcode.C2S_SERVER_LIST       -> { ExtendedHandlers.handleServerList(this, toBuf(p)); }
+            case PacketOpcode.C2S_SERVER_SELECT     -> { ExtendedHandlers.handleServerSelect(this, toBuf(p)); }
+            case PacketOpcode.C2S_CHANNEL_LIST      -> { ExtendedHandlers.handleChannelList(this, toBuf(p)); }
+            case PacketOpcode.C2S_CHANNEL_SELECT    -> { ExtendedHandlers.handleChannelSelect(this, toBuf(p)); }
+
             case PacketOpcode.C2S_EVENT_CURRENCY_EXCHANGE  -> { requireInGame(); ExtendedHandlers.handleEventCurrencyExchange(this, toBuf(p)); }
 
             // Keepalive
