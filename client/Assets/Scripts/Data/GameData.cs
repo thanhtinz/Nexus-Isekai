@@ -408,7 +408,7 @@ namespace NexusIsekai.Data
         public string      Message    { get; set; }
         public bool        IsSelf     { get; set; }  // PM từ bản thân gửi đi
     
-    // ─── Character Appearance (Mana Seed sprite layers) ──────
+    // ─── Character Appearance (class + gender) ──────
 
     [System.Serializable]
     public class CharacterAppearance
