@@ -2821,3 +2821,34 @@ ALTER TABLE gift_codes ADD COLUMN IF NOT EXISTS redeem_per VARCHAR(8) NOT NULL D
 -- Max characters per server
 INSERT IGNORE INTO protection_config VALUES
 ('max_chars_per_server','3','So nhan vat toi da moi account moi server');
+
+-- ═════════════════════════════════════════════════════════════
+-- ALL PER-CHARACTER — Mọi thứ theo nhân vật, không theo account
+-- ═════════════════════════════════════════════════════════════
+
+-- Topup: diamond vào char_id cụ thể (đã có)
+-- Shop: mua item vào char_id cụ thể (đã có)
+-- Gift code: redeem vào char_id (đã có)
+-- Mission pass: progress per char_id
+ALTER TABLE player_passes ADD COLUMN IF NOT EXISTS char_id BIGINT NOT NULL DEFAULT 0;
+-- Gacha pity: đã per char_id ✓
+-- PvP season: đã per char_id ✓
+-- Achievement: đã per char_id ✓
+-- Daily login: per char_id
+ALTER TABLE daily_login_status ADD COLUMN IF NOT EXISTS char_id BIGINT NOT NULL DEFAULT 0;
+-- Tutorial: per char_id (đã có)
+-- Settings: per char_id (đã có)
+-- Mail: per char_id (đã có)
+
+-- Xoá redeem_per vì luôn là per character
+-- ALTER TABLE gift_codes DROP COLUMN IF EXISTS redeem_per;
+-- Mọi gift code đều nhập PER CHARACTER: mỗi char nhập 1 lần
+
+-- VIP level: per character (đã thêm ở trên)
+-- Mỗi nhân vật nạp riêng → VIP riêng
+
+-- NGUYÊN TẮC: Account chỉ là login container
+-- Mọi dữ liệu game = per character:
+--   diamond, gold, inventory, equipment, quest, achievement,
+--   guild, friends, pvp, gacha, daily login, mission pass,
+--   settings, mail, tutorial, vip, topup history, gift code usage
