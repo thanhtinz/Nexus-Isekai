@@ -715,6 +715,20 @@ public class AdminApiServer {
 
 
     /** Copy topup/shop/giftcode config between servers */
+
+    // ── SQL SAFETY HELPERS ──────────────────────────────────
+    /** Validate integer input — prevents SQL injection on numeric fields */
+    private static int safeInt(java.util.Map<String,Object> b, String key) {
+        Object v = b.get(key);
+        if (v instanceof Number n) return n.intValue();
+        try { return Integer.parseInt(String.valueOf(v).replaceAll("[^0-9-]", "")); }
+        catch (Exception e) { return 0; }
+    }
+    /** Whitelist validation for identifiers (table/column names) */
+    private static String safeIdent(String s, java.util.Set<String> allowed, String fallback) {
+        return allowed.contains(s) ? s : fallback;
+    }
+
     private void handleServerCopy(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             var b = parseBody(ex);
@@ -1924,6 +1938,20 @@ public class AdminApiServer {
 
 
     /** Copy topup/shop/giftcode config between servers */
+
+    // ── SQL SAFETY HELPERS ──────────────────────────────────
+    /** Validate integer input — prevents SQL injection on numeric fields */
+    private static int safeInt(java.util.Map<String,Object> b, String key) {
+        Object v = b.get(key);
+        if (v instanceof Number n) return n.intValue();
+        try { return Integer.parseInt(String.valueOf(v).replaceAll("[^0-9-]", "")); }
+        catch (Exception e) { return 0; }
+    }
+    /** Whitelist validation for identifiers (table/column names) */
+    private static String safeIdent(String s, java.util.Set<String> allowed, String fallback) {
+        return allowed.contains(s) ? s : fallback;
+    }
+
     private void handleServerCopy(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             var b = parseBody(ex);
