@@ -663,7 +663,7 @@ namespace NexusIsekai.UI
                 var icon = go.transform.Find("Icon")?.GetComponent<Image>();
                 if (icon)
                 {
-                    var sp = Resources.Load<Sprite>($"Sprites/Items/item_{item.ItemId}");
+                    var sp = AssetPaths.LoadItem(item.ItemId);
                     if (sp) icon.sprite = sp;
                 }
 
@@ -684,7 +684,7 @@ namespace NexusIsekai.UI
             if (selectedDesc)  selectedDesc.text  = item.Description;
             if (selectedIcon)
             {
-                var sp = Resources.Load<Sprite>($"Sprites/Items/item_{item.ItemId}");
+                var sp = AssetPaths.LoadItem(item.ItemId);
                 if (sp) selectedIcon.sprite = sp;
             }
         }
@@ -994,7 +994,7 @@ namespace NexusIsekai.UI
             {
                 Sprite sp = null;
                 if (reward.ItemId > 0)
-                    sp = Resources.Load<Sprite>($"Sprites/Items/item_{reward.ItemId}");
+                    sp = AssetPaths.LoadItem(reward.ItemId);
                 else if (reward.Diamond > 0)
                     sp = Resources.Load<Sprite>("Sprites/Icons/diamond");
                 else if (reward.Gold > 0)
@@ -1408,7 +1408,7 @@ namespace NexusIsekai.UI
 
             if (itemIcon)
             {
-                var sp = Resources.Load<Sprite>($"Sprites/Items/item_{item.itemId}");
+                var sp = AssetPaths.LoadItem(item.itemId);
                 if (sp) itemIcon.sprite = sp;
             }
 

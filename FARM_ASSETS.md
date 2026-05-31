@@ -1,102 +1,79 @@
-# 🎨 DANH SÁCH ICON NÔNG TRẠI — Vọng Linh Giới
+# 🎨 ICON NÔNG TRẠI — theo DANH MỤC (đánh số từ 1)
 
-> File mapping để gắn art vào game. Mỗi dòng: `icon_id` (đã có trong DB) → tên file quy ước + mô tả.
-> Bỏ file ảnh đúng tên vào thư mục asset là khớp tự động (client load theo `icon_id`).
+> Mỗi loại có folder riêng, file đánh số lại từ 1. Client tự load qua `AssetPaths.cs`.
+> `n` = index trong danh mục (= item_id − mốc). Đặt file đúng tên là khớp.
 
-## Quy ước
-- Thư mục: `client/Assets/Resources/Sprites/Farm/`
-- Định dạng: PNG nền trong suốt, khuyến nghị 64×64 (icon) / 96×96 (cây nhiều giai đoạn).
-- Tên file: `farm_<icon_id>.png` (icon đơn) hoặc `crop_<icon_id>_s<stage>.png` (cây theo giai đoạn).
-
----
-
-## 1. HẠT GIỐNG (seed) — icon trong shop/túi
-| icon_id | Tên | File | Mô tả |
+## 1. Hạt giống — `Sprites/Farm/Seed/seed_<n>.png`
+| n | item_id | Tên | Mô tả |
 |---|---|---|---|
-| 6001 | Hạt Lúa Linh | `farm_6001.png` | Túi hạt lúa, ánh linh khí nhạt |
-| 6002 | Hạt Cà Rốt Vàng | `farm_6002.png` | Túi hạt cam |
-| 6003 | Hạt Linh Chi | `farm_6003.png` | Túi hạt nâu, hơi phát sáng |
-| 6004 | Hạt Tiên Đào | `farm_6004.png` | Túi hạt hồng đào |
-| 6005 | Hạt Hỏa Liên | `farm_6005.png` | Túi hạt đỏ rực (hệ hỏa) |
-| 6006 | Hạt Băng Tâm Thảo | `farm_6006.png` | Túi hạt xanh băng (hệ băng) |
-| 6007 | Hạt Tử Vân Quả | `farm_6007.png` | Túi hạt tím quý |
+| 1 | 6001 | Hạt Lúa Linh | túi hạt lúa, linh khí nhạt |
+| 2 | 6002 | Hạt Cà Rốt Vàng | túi hạt cam |
+| 3 | 6003 | Hạt Linh Chi | túi hạt nâu phát sáng |
+| 4 | 6004 | Hạt Tiên Đào | túi hạt hồng đào |
+| 5 | 6005 | Hạt Hỏa Liên | túi hạt đỏ (hệ hỏa) |
+| 6 | 6006 | Hạt Băng Tâm Thảo | túi hạt xanh băng |
+| 7 | 6007 | Hạt Tử Vân Quả | túi hạt tím quý |
 
-## 2. CÂY TRỒNG theo giai đoạn (stage) — vẽ trên ô đất
-> Mỗi cây cần ảnh theo số `stages`. Tên: `crop_<seedId>_s<1..stages>.png`
-| seed id | Tên cây | stages | File | Mô tả tiến trình |
-|---|---|---|---|---|
-| 1 | Lúa Linh | 4 | `crop_1_s1..s4.png` | mầm → mạ → trổ → chín vàng |
-| 2 | Cà Rốt Vàng | 4 | `crop_2_s1..s4.png` | mầm → lá → củ nhú → củ to |
-| 3 | Linh Chi Thảo | 5 | `crop_3_s1..s5.png` | mầm → thân → nấm nhỏ → nấm to → phát sáng |
-| 4 | Tiên Đào | 5 | `crop_4_s1..s5.png` | mầm → cây → hoa → quả xanh → đào hồng |
-| 5 | Hỏa Liên | 5 | `crop_5_s1..s5.png` | mầm → lá đỏ → nụ → hoa → rực lửa |
-| 6 | Băng Tâm Thảo | 5 | `crop_6_s1..s5.png` | mầm → lá băng → nụ → hoa → kết tinh |
-| 7 | Tử Vân Quả | 6 | `crop_7_s1..s6.png` | mầm → cây → hoa tím → quả non → quả → hào quang |
-
-## 3. NÔNG SẢN thu hoạch (produce) — icon túi/kho/bán
-| icon_id | Tên | File | Mô tả |
+## 2. Cây trồng theo giai đoạn — `Sprites/Farm/Crop/crop_<n>_s<stage>.png`
+| n | Cây | stages | Tiến trình |
 |---|---|---|---|
-| 6101 | Lúa Linh | `farm_6101.png` | Bó lúa vàng |
-| 6102 | Cà Rốt Vàng | `farm_6102.png` | Củ cà rốt cam |
-| 6103 | Linh Chi Thảo | `farm_6103.png` | Nấm linh chi phát sáng |
-| 6104 | Tiên Đào | `farm_6104.png` | Quả đào hồng |
-| 6105 | Hỏa Liên | `farm_6105.png` | Hoa sen lửa đỏ |
-| 6106 | Băng Tâm Thảo | `farm_6106.png` | Linh thảo xanh băng |
-| 6107 | Tử Vân Quả | `farm_6107.png` | Quả tím hào quang |
+| 1 | Lúa Linh | 4 | mầm → mạ → trổ → chín |
+| 2 | Cà Rốt Vàng | 4 | mầm → lá → củ nhú → củ to |
+| 3 | Linh Chi Thảo | 5 | mầm → thân → nấm nhỏ → to → sáng |
+| 4 | Tiên Đào | 5 | mầm → cây → hoa → quả xanh → đào |
+| 5 | Hỏa Liên | 5 | mầm → lá đỏ → nụ → hoa → rực lửa |
+| 6 | Băng Tâm Thảo | 5 | mầm → lá băng → nụ → hoa → kết tinh |
+| 7 | Tử Vân Quả | 6 | mầm → cây → hoa → quả non → quả → hào quang |
 
-## 4. THÚ NUÔI — sprite trong chuồng (nên có anim idle)
-| animal id | Tên | type | File | Mô tả |
-|---|---|---|---|---|
-| 1 | Linh Kê | bird | `animal_1.png` | Gà linh lông vàng |
-| 2 | Linh Ngưu | cow | `animal_2.png` | Bò sữa có sừng phát sáng |
-| 3 | Thải Vũ Điểu | bird | `animal_3.png` | Chim lông ngũ sắc |
-| 4 | Linh Tằm | bug | `animal_4.png` | Tằm phát quang nhả tơ |
-| 5 | Linh Ngư | fish | `animal_5.png` | Cá chép linh trong hồ |
+## 3. Nông sản (bán) — `Sprites/Farm/Crop/crop_<n>.png` (icon thu hoạch)
+| n | item_id | Tên |
+|---|---|---|
+| 1 | 6101 | Lúa Linh |
+| 2 | 6102 | Cà Rốt Vàng |
+| 3 | 6103 | Linh Chi Thảo |
+| 4 | 6104 | Tiên Đào |
+| 5 | 6105 | Hỏa Liên |
+| 6 | 6106 | Băng Tâm Thảo |
+| 7 | 6107 | Tử Vân Quả |
 
-## 5. THỨC ĂN THÚ (feed) — icon
-| icon_id | Tên | File | Mô tả |
+## 4. Thú nuôi — `Sprites/Farm/Animal/animal_<n>.png`
+| n | Tên | type | Mô tả |
 |---|---|---|---|
-| 6201 | Cỏ Linh | `farm_6201.png` | Bó cỏ xanh (gia cầm) |
-| 6202 | Cám Tinh Hoa | `farm_6202.png` | Bao cám (gia súc) |
-| 6203 | Linh Ngư Nhĩ | `farm_6203.png` | Mồi cho cá |
+| 1 | Linh Kê | bird | gà linh lông vàng |
+| 2 | Linh Ngưu | cow | bò sừng phát sáng |
+| 3 | Thải Vũ Điểu | bird | chim ngũ sắc |
+| 4 | Linh Tằm | bug | tằm phát quang |
+| 5 | Linh Ngư | fish | cá chép linh |
 
-## 6. SẢN PHẨM THÚ (produce) — icon túi/kho/bán
-| icon_id | Tên | File | Mô tả |
-|---|---|---|---|
-| 6301 | Trứng Linh Kê | `farm_6301.png` | Trứng vàng óng |
-| 6302 | Sữa Linh Ngưu | `farm_6302.png` | Bình sữa |
-| 6303 | Lông Vũ Quý | `farm_6303.png` | Cụm lông ngũ sắc |
-| 6304 | Tơ Linh Tằm | `farm_6304.png` | Cuộn tơ phát sáng |
+## 5. Thức ăn thú — `Sprites/Farm/Feed/feed_<n>.png`
+| n | item_id | Tên |
+|---|---|---|
+| 1 | 6201 | Cỏ Linh |
+| 2 | 6202 | Cám Tinh Hoa |
+| 3 | 6203 | Linh Ngư Nhĩ |
 
-## 7. PHÂN BÓN
-| icon_id | Tên | File | Mô tả |
-|---|---|---|---|
-| 6401 | Phân Linh Thổ | `farm_6401.png` | Túi phân nâu, lấp lánh linh khí |
+## 6. Sản phẩm thú (bán) — `Sprites/Farm/Produce/produce_<n>.png`
+| n | item_id | Tên |
+|---|---|---|
+| 1 | 6301 | Trứng Linh Kê |
+| 2 | 6302 | Sữa Linh Ngưu |
+| 3 | 6303 | Lông Vũ Quý |
+| 4 | 6304 | Tơ Linh Tằm |
 
----
+## 7. Dụng cụ — `Sprites/Farm/Tool/tool_<n>.png`
+| n | item_id | Tên |
+|---|---|---|
+| 1 | 6401 | Phân Linh Thổ |
 
-## 8. ĐỐI TƯỢNG MAP (đặt trên map Vườn Nhà 203) — sprite cảnh
-> Không dùng `icon_id` mà là sprite cảnh, đặt trong `Sprites/Farm/scene/`
+## 8. Sprite cảnh — `Sprites/Farm/scene/`
 | File | Mô tả |
 |---|---|
-| `plot_empty.png` | Ô đất trống chưa trồng |
-| `plot_tilled.png` | Ô đất đã cuốc/sẵn trồng |
-| `plot_watered.png` | Ô đất đã tưới (sẫm màu) |
-| `pen_bird.png` | Chuồng gia cầm |
-| `pen_cow.png` | Chuồng gia súc |
-| `pen_bug.png` | Né tằm |
-| `pond_fish.png` | Hồ cá |
-| `house_exterior.png` | Ảnh ngôi nhà (ngoại thất, có cổng vào) |
-| `barn.png` | Nhà kho (chứa nông sản) |
-| `well.png` | Giếng nước (để tưới) |
+| `plot_empty.png` / `plot_tilled.png` / `plot_watered.png` | ô đất 3 trạng thái |
+| `pen_bird.png` / `pen_cow.png` / `pen_bug.png` | chuồng gia cầm / gia súc / né tằm |
+| `pond_fish.png` | hồ cá |
+| `house_exterior.png` | ngôi nhà (cổng vào) |
+| `barn.png` | nhà kho |
+| `well.png` | giếng nước |
 
 ---
-
-## Cách dùng
-1. Lấy/đặt art (nguồn bạn có quyền) theo đúng **tên file** ở trên.
-2. Bỏ vào `client/Assets/Resources/Sprites/Farm/` (icon) và `.../Farm/scene/` (cảnh).
-3. DB đã có sẵn `icon_id` khớp — client load `Sprites/Farm/farm_<icon_id>.png` tự động.
-4. Nếu muốn đổi `icon_id`, sửa cột `icon_id` trong `items` / hoặc thêm cột sprite cho `farm_seeds`/`farm_animals` — báo tôi gắn.
-
-> Tổng: 7 hạt + 7 cây (nhiều stage) + 7 nông sản + 5 thú + 3 thức ăn + 4 sản phẩm + 1 phân + 10 sprite cảnh.
-> Tất cả ID đã verify khớp DB, không trùng với skill/item khác.
+> Đặt ảnh (nguồn có quyền) đúng tên → client tự load. Xem quy ước chung ở ASSET_HUB.md + ITEM_ID_CONVENTION.md.

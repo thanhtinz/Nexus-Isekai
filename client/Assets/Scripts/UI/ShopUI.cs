@@ -238,8 +238,7 @@ public class ShopUI : MonoBehaviour
     private Sprite GetSprite(int itemId)
     {
         if (_spriteCache.TryGetValue(itemId, out var s)) return s;
-        s = Resources.Load<Sprite>($"Sprites/Items/item_{itemId}")
-            ?? Resources.Load<Sprite>("Sprites/Items/item_default");
+        s = AssetPaths.LoadItem(itemId);
         _spriteCache[itemId] = s;
         return s;
     }

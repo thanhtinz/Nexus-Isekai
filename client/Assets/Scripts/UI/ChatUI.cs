@@ -556,7 +556,7 @@ namespace NexusIsekai.UI
 
             if (itemIcon)
             {
-                var sp = Resources.Load<Sprite>($"Sprites/Items/item_{msg.ItemId}");
+                var sp = AssetPaths.LoadItem(msg.ItemId);
                 if (sp) itemIcon.sprite = sp;
             }
             if (rarityBg)

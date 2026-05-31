@@ -46,7 +46,7 @@ public class InventoryUI : MonoBehaviour
     private List<GameObject>        _slots   = new();
     private InventoryItem           _selected;
 
-    // Sprite cache: load từ Resources/Sprites/Items/item_{id}
+    // Sprite cache: load qua AssetPaths.LoadItem (folder theo danh mục)
     private Dictionary<int, Sprite> _spriteCache = new();
 
     private void Awake()
@@ -277,8 +277,7 @@ public class InventoryUI : MonoBehaviour
     private Sprite GetSprite(int itemId)
     {
         if (_spriteCache.TryGetValue(itemId, out var cached)) return cached;
-        var sp = Resources.Load<Sprite>($"Sprites/Items/item_{itemId}");
-        if (sp == null) sp = Resources.Load<Sprite>("Sprites/Items/item_default");
+        var sp = AssetPaths.LoadItem(itemId);
         _spriteCache[itemId] = sp;
         return sp;
     }

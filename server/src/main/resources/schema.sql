@@ -276,13 +276,13 @@ UPDATE maps SET is_pvp=1 WHERE id=7;
 -- SEED DATA - Items cơ bản
 -- ===================================================
 INSERT INTO items (id,name,description,type,level_req,sell_price,buy_price,icon_id) VALUES
-(1001,'Kiếm Gỗ','Vũ khí khởi đầu của kiếm sĩ',1,1,5,50,1001),
-(1002,'Dao Găm Sắt','Vũ khí khởi đầu của sát thủ',1,1,5,50,1002),
-(1003,'Gậy Phép','Vũ khí khởi đầu của pháp sư',1,1,5,50,1003),
-(1004,'Cung Gỗ','Vũ khí khởi đầu của cung thủ',1,1,5,50,1004),
-(4001,'Bình Máu Nhỏ','Hồi 100 HP',5,1,2,20,4001),
-(4002,'Bình Mana Nhỏ','Hồi 50 MP',5,1,2,20,4002),
-(2001,'Áo Giáp Da','Giáp cơ bản',2,1,10,80,2001);
+(1001,'Kiếm Gỗ','Vũ khí khởi đầu của kiếm sĩ',1,1,5,50,1),
+(1002,'Dao Găm Sắt','Vũ khí khởi đầu của sát thủ',1,1,5,50,2),
+(1003,'Gậy Phép','Vũ khí khởi đầu của pháp sư',1,1,5,50,3),
+(1004,'Cung Gỗ','Vũ khí khởi đầu của cung thủ',1,1,5,50,4),
+(4001,'Bình Máu Nhỏ','Hồi 100 HP',5,1,2,20,1),
+(4002,'Bình Mana Nhỏ','Hồi 50 MP',5,1,2,20,2),
+(2001,'Áo Giáp Da','Giáp cơ bản',2,1,10,80,1);
 
 -- ===================================================
 -- SEED DATA - Classes starter quests (mỗi class có story riêng)
