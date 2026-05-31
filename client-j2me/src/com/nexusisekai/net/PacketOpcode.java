@@ -187,6 +187,9 @@ public interface PacketOpcode {
 
     // ── GACHA ─────────────────────────────────────────────
     short C2S_GACHA_BANNER_LIST = 0x1D01;
+    short C2S_GACHA_BUY_TICKET = 0x1D04;
+    short C2S_GACHA_CURRENCY   = 0x1D05;
+    short S2C_GACHA_CURRENCY   = 0x1D14;
     short C2S_GACHA_PULL        = 0x1D02;
     short S2C_GACHA_RESULT      = 0x1D12;
     // ── PVP SEASON ────────────────────────────────────────

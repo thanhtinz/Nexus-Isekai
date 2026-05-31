@@ -117,6 +117,11 @@ public class PacketWriter {
     }
 
     public static PacketWriter 
+    public static PacketWriter gachaBuyTicket(int currencyId, int amount) {
+        return new PacketWriter(PacketOpcode.C2S_GACHA_BUY_TICKET).writeInt(currencyId).writeInt(amount);
+    }
+    public static PacketWriter gachaCurrency() { return new PacketWriter(PacketOpcode.C2S_GACHA_CURRENCY); }
+
     public static PacketWriter gachaPull(int bannerId, int count) {
         return new PacketWriter(PacketOpcode.C2S_GACHA_PULL).writeInt(bannerId).writeInt(count);
     }

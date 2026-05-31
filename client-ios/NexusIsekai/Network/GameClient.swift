@@ -190,7 +190,11 @@ final class PacketWriter {
         PacketWriter(Op.C2S_CHAR_CREATE).writeString(name).writeByte(UInt8(cls)).writeByte(UInt8(gen)).build()
     }
     static func 
-    static func gachaPull(_ bid: Int, _ cnt: Int) -> Data { PacketWriter(Op.C2S_GACHA_PULL).writeInt(UInt32(bid)).writeInt(UInt32(cnt)).build() }
+    static func gachaBuyTicket(_ cid: Int, _ amt: Int) -> Data { PacketWriter(Op.C2S_GACHA_BUY_TICKET).writeInt(UInt32(cid)).writeInt(UInt32(amt)).build() }
+    static func gachaCurrency() -> Data { PacketWriter(Op.C2S_GACHA_CURRENCY).build() }
+    static func gachaPull(_ bid: Int, _ cnt: Int) -> Data { PacketWriter(Op.C2S_GACHA_BUY_TICKET:UInt16=0x1D04, C2S_GACHA_CURRENCY:UInt16=0x1D05
+    static let S2C_GACHA_CURRENCY:UInt16=0x1D14
+    static let C2S_GACHA_PULL).writeInt(UInt32(bid)).writeInt(UInt32(cnt)).build() }
     static func pvpSeasonInfo() -> Data { PacketWriter(Op.C2S_PVP_SEASON_INFO).build() }
     static func socialLogin(_ p: String, _ t: String) -> Data { PacketWriter(Op.C2S_SOCIAL_LOGIN).writeString(p).writeString(t).build() }
     static func socialLink(_ p: String, _ t: String) -> Data { PacketWriter(Op.C2S_SOCIAL_LINK).writeString(p).writeString(t).build() }

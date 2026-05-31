@@ -96,7 +96,10 @@ class PcPacketWriter {
     static byte[] charList()                           { return new PcPacketWriter(PacketOpcode.C2S_CHAR_LIST).build(); }
     static byte[] charCreate(String n, int cls, int g) { return new PcPacketWriter(PacketOpcode.C2S_CHAR_CREATE).writeString(n).writeByte(cls).writeByte(g).build(); }
     static byte[] 
-    static byte[] gachaPull(int bid, int cnt) { return new PcPacketWriter(PacketOpcode.C2S_GACHA_PULL).writeInt(bid).writeInt(cnt).build(); }
+    static byte[] gachaBuyTicket(int cid, int amt) { return new PcPacketWriter(PacketOpcode.C2S_GACHA_BUY_TICKET).writeInt(cid).writeInt(amt).build(); }
+    static byte[] gachaCurrency() { return new PcPacketWriter(PacketOpcode.C2S_GACHA_CURRENCY).build(); }
+    static byte[] gachaPull(int bid, int cnt) { return new PcPacketWriter(PacketOpcode.C2S_GACHA_BUY_TICKET=0x1D04, C2S_GACHA_CURRENCY=0x1D05, S2C_GACHA_CURRENCY=0x1D14;
+    short C2S_GACHA_PULL).writeInt(bid).writeInt(cnt).build(); }
     static byte[] pvpSeasonInfo() { return new PcPacketWriter(PacketOpcode.C2S_PVP_SEASON_INFO).build(); }
     static byte[] socialLogin(String p, String t) { return new PcPacketWriter(PacketOpcode.C2S_SOCIAL_LOGIN).writeString(p).writeString(t).build(); }
     static byte[] socialLink(String p, String t) { return new PcPacketWriter(PacketOpcode.C2S_SOCIAL_LINK).writeString(p).writeString(t).build(); }

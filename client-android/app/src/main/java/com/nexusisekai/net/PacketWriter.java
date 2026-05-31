@@ -154,8 +154,13 @@ public class PacketWriter {
     public static PacketWriter charCreate(String name, int classId, int gender)
         { return new PacketWriter(Opcodes.C2S_CHAR_CREATE).writeString(name).writeByte(classId).writeByte(gender); }
     public static PacketWriter 
+    public static PacketWriter gachaBuyTicket(int currencyId, int amount)
+        { return new PacketWriter(Opcodes.C2S_GACHA_BUY_TICKET).writeInt(currencyId).writeInt(amount); }
+    public static PacketWriter gachaCurrency()
+        { return new PacketWriter(Opcodes.C2S_GACHA_CURRENCY); }
     public static PacketWriter gachaPull(int bannerId, int count)
-        { return new PacketWriter(Opcodes.C2S_GACHA_PULL).writeInt(bannerId).writeInt(count); }
+        { return new PacketWriter(Opcodes.C2S_GACHA_BUY_TICKET=0x1D04, C2S_GACHA_CURRENCY=0x1D05, S2C_GACHA_CURRENCY=0x1D14;
+    static final short C2S_GACHA_PULL).writeInt(bannerId).writeInt(count); }
     public static PacketWriter pvpSeasonInfo()
         { return new PacketWriter(Opcodes.C2S_PVP_SEASON_INFO); }
     public static PacketWriter socialLogin(String provider, String token)
