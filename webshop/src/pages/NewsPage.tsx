@@ -30,7 +30,7 @@ export default function NewsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8 text-yellow-400">📰 Tin Tức</h1>
+        <h1 className="text-3xl font-bold text-center mb-8 text-yellow-400">Tin Tuc</h1>
         <div className="flex gap-2 mb-6 flex-wrap justify-center">
           {cats.map(c => (
             <button key={c.key} onClick={() => setFilter(c.key)}

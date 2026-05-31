@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import type { TopupPackage, TopupOrder, TopupHistoryItem } from '@/types/api'
 import clsx from 'clsx'
 
-// ─── Package Card ─────────────────────────────────────────────
+//  Package Card 
 function PackageCard({
   pkg, selected, onClick,
 }: {
@@ -74,7 +74,7 @@ function PackageCard({
   )
 }
 
-// ─── Copy Button ──────────────────────────────────────────────
+//  Copy Button 
 function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false)
   const copy = () => {
@@ -93,7 +93,7 @@ function CopyButton({ value }: { value: string }) {
   )
 }
 
-// ─── Transfer Info Row ────────────────────────────────────────
+//  Transfer Info Row 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
@@ -106,7 +106,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-// ─── Status Badge ─────────────────────────────────────────────
+//  Status Badge 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { cls: string; label: string; icon: typeof CheckCircle2 }> = {
     paid:    { cls: 'badge-paid',    label: 'Thành công', icon: CheckCircle2 },
@@ -122,7 +122,7 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-// ─── Main Page ───────────────────────────────────────────────
+//  Main Page 
 export function TopupPage() {
   const { session, updateDiamond, isFirstTopup } = useAuth()
   const [packages, setPackages] = useState<TopupPackage[]>([])

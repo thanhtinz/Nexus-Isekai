@@ -1,3 +1,4 @@
+import { Swords, Trophy, Castle, Gem } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 
@@ -17,21 +18,21 @@ export default function RankingPage() {
   };
 
   const tabs = [
-    { key: 'level', label: 'Cấp Độ', icon: '⚔️' },
-    { key: 'pvp', label: 'PvP', icon: '🏆' },
-    { key: 'guild', label: 'Bang Hội', icon: '🏰' },
-    { key: 'wealth', label: 'Đại Gia', icon: '💎' },
+    { key: 'level', label: 'Cap Do', Icon: Swords },
+    { key: 'pvp', label: 'PvP', Icon: Trophy },
+    { key: 'guild', label: 'Bang Hoi', Icon: Castle },
+    { key: 'wealth', label: 'Dai Gia', Icon: Gem },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8 text-yellow-400">🏆 Bảng Xếp Hạng</h1>
+        <h1 className="text-3xl font-bold text-center mb-8 text-yellow-400">Bang Xep Hang</h1>
         <div className="flex gap-2 mb-6 justify-center">
           {tabs.map(t => (
             <button key={t.key} onClick={() => setTab(t.key as any)}
               className={`px-4 py-2 rounded-lg font-medium transition ${tab === t.key ? 'bg-yellow-500 text-black' : 'bg-gray-700 hover:bg-gray-600'}`}>
-              {t.icon} {t.label}
+              <t.Icon size={16} /> {t.label}
             </button>
           ))}
         </div>
@@ -49,7 +50,7 @@ export default function RankingPage() {
                data.length === 0 ? <tr><td colSpan={5} className="p-8 text-center text-gray-500">Chưa có dữ liệu</td></tr> :
                data.map((r, i) => (
                 <tr key={i} className={`border-t border-gray-700 ${i < 3 ? 'bg-gray-750' : ''}`}>
-                  <td className="p-3 font-bold">{i < 3 ? ['🥇','🥈','🥉'][i] : i+1}</td>
+                  <td className="p-3 font-bold">{i+1}</td>
                   <td className="p-3 font-medium">{r.name}</td>
                   <td className="p-3 text-center">{r.level}</td>
                   <td className="p-3 text-center text-sm text-gray-400">{r.class_name}</td>

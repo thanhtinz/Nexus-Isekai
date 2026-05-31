@@ -25,7 +25,7 @@ http.interceptors.request.use(config => {
 let useAuthStore: any
 export function setAuthStore(store: any) { useAuthStore = store }
 
-// ─── Auth ─────────────────────────────────────────────────────
+//  Auth 
 export const authApi = {
   login: (username: string, password: string) =>
     http.post<LoginResponse>('/weblogin', { username, password }).then(r => r.data),
@@ -35,7 +35,7 @@ export const authApi = {
   },
 }
 
-// ─── Topup ───────────────────────────────────────────────────
+//  Topup 
 export const topupApi = {
   packages: () =>
     http.get<{ success: true; packages: TopupPackage[] }>('/packages')
@@ -58,7 +58,7 @@ export const topupApi = {
       .then(r => r.data.diamond),
 }
 
-// ─── Webshop ─────────────────────────────────────────────────
+//  Webshop 
 export const shopApi = {
   items: (accountId?: number) =>
     http.get<{ success: true; items: WebshopItem[] }>('/shopitems', {

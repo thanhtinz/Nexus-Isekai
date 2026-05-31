@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 
-// ═══════════════════════════════════════════════════════════════
+// 
 // Landing Page — Nexus Isekai
 // React + TypeScript + Tailwind CSS
 // Tich hop vao webshop app, route "/"
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const CLASS_DATA = [
   { id: 1, name: 'Kiem Si',  role: 'Tank / DPS',         desc: 'Chien binh can chien, phong ngu va tan cong can bang.', color: '#e94560' },
@@ -36,9 +36,9 @@ const NEWS = [
   { tag: 'Tin Tuc', title: 'Tong hop Gift Code thang 5/2025', date: '10/05', type: 'news' },
 ];
 
-// ═══════════════════════════════════════════════════════════════
+// 
 // Particles Canvas Component
-// ═══════════════════════════════════════════════════════════════
+// 
 
 function ParticlesBg() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -98,9 +98,9 @@ function ParticlesBg() {
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />;
 }
 
-// ═══════════════════════════════════════════════════════════════
+// 
 // Section Components
-// ═══════════════════════════════════════════════════════════════
+// 
 
 function SectionTitle({ children, sub }: { children: React.ReactNode; sub?: string }) {
   return (
@@ -112,9 +112,9 @@ function SectionTitle({ children, sub }: { children: React.ReactNode; sub?: stri
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
+// 
 // Main Landing Page
-// ═══════════════════════════════════════════════════════════════
+// 
 
 export default function LandingPage() {
   const [newsTab, setNewsTab] = useState('all');
@@ -125,7 +125,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#080818] text-gray-200">
 
-      {/* ═══ NAV ═══ */}
+      {/*  NAV  */}
       <nav className="fixed top-0 w-full z-50 bg-[#080818]/90 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-5">
           <a href="/" className="text-xl font-bold tracking-widest"
@@ -172,7 +172,7 @@ export default function LandingPage() {
         )}
       </nav>
 
-      {/* ═══ HERO ═══ */}
+      {/*  HERO  */}
       <section id="hero" className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
         <ParticlesBg />
         <div className="absolute inset-0 bg-gradient-to-b from-[#080818] via-[#0a0a28]/80 to-[#12122a]" />
@@ -224,7 +224,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ FEATURES ═══ */}
+      {/*  FEATURES  */}
       <section id="features" className="py-20 px-5 bg-[#0d0d24]">
         <div className="max-w-7xl mx-auto">
           <SectionTitle sub="Mot the gioi day du voi hang tram tinh nang cho nguoi choi">
@@ -245,7 +245,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ NEWS ═══ */}
+      {/*  NEWS  */}
       <section id="news" className="py-20 px-5 bg-[#080818]">
         <div className="max-w-3xl mx-auto">
           <SectionTitle sub="Cap nhat moi nhat tu Vong Linh Gioi">Tin Tuc & Su Kien</SectionTitle>
@@ -284,7 +284,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ CLASSES ═══ */}
+      {/*  CLASSES  */}
       <section id="classes" className="py-20 px-5 bg-[#0d0d24]">
         <div className="max-w-5xl mx-auto">
           <SectionTitle sub="Chon huong di rieng trong Vong Linh Gioi">5 Nhanh Nghe</SectionTitle>
@@ -309,7 +309,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ SCREENSHOTS ═══ */}
+      {/*  SCREENSHOTS  */}
       <section className="py-20 px-5 bg-[#080818]">
         <div className="max-w-6xl mx-auto">
           <SectionTitle sub="Kham pha the gioi game qua hinh anh">Hinh Anh</SectionTitle>
@@ -326,7 +326,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ DOWNLOAD ═══ */}
+      {/*  DOWNLOAD  */}
       <section id="download" className="py-20 px-5 bg-gradient-to-b from-[#0d0d24] to-[#080818]">
         <div className="max-w-4xl mx-auto text-center">
           <SectionTitle sub="Choi mien phi tren moi nen tang">Tai Game</SectionTitle>
@@ -361,7 +361,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ SUPPORT ═══ */}
+      {/*  SUPPORT  */}
       <section className="py-20 px-5 bg-[#0d0d24]">
         <div className="max-w-4xl mx-auto">
           <SectionTitle sub="Can giup do? Lien he ngay">Ho Tro</SectionTitle>
@@ -390,7 +390,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ FOOTER ═══ */}
+      {/*  FOOTER  */}
       <footer className="bg-[#050510] border-t border-white/5 py-10 px-5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <span className="text-lg font-bold tracking-widest" style={{ fontFamily: "'Cinzel', serif" }}>

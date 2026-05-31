@@ -8,7 +8,7 @@ import type { PassSeason, PassReward, PlayerPass } from '@/types/api'
 import { useAuth } from '@/hooks/useAuth'
 import clsx from 'clsx'
 
-// ─── Reward Cell ───────────────────────────────────────────────
+//  Reward Cell 
 function RewardCell({
   reward,
   claimed,
@@ -74,7 +74,7 @@ function RewardCell({
   )
 }
 
-// ─── Level Row ────────────────────────────────────────────────
+//  Level Row 
 function LevelRow({
   level,
   freeReward,
@@ -138,7 +138,7 @@ function LevelRow({
   )
 }
 
-// ─── Progress Bar ──────────────────────────────────────────────
+//  Progress Bar 
 function ProgressBar({ current, max }: { current: number; max: number }) {
   const pct = Math.min(100, (current / max) * 100)
   return (
@@ -151,7 +151,7 @@ function ProgressBar({ current, max }: { current: number; max: number }) {
   )
 }
 
-// ─── Main ──────────────────────────────────────────────────────
+//  Main 
 export function PassPage() {
   const { session } = useAuth()
   const [season, setSeason] = useState<PassSeason | null>(null)

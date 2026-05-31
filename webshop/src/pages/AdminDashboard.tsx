@@ -1,16 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 
-// ═══════════════════════════════════════════════════════════════
+// 
 // AdminDashboard — Web-based admin panel
 // Responsive mobile, gọi Admin API qua proxy
 // Route: /admin (trong webshop app)
-// ═══════════════════════════════════════════════════════════════
+// 
 
 const API_BASE = '/admin-api'; // proxy qua webshop server
 
 interface TableRow { [key: string]: string | number | boolean }
 
-// ─── API helper ──────────────────────────────────────────────
+//  API helper 
 
 async function api(path: string, method = 'GET', body?: Record<string, string>) {
   const apiKey = localStorage.getItem('admin_key') || '';
@@ -23,7 +23,7 @@ async function api(path: string, method = 'GET', body?: Record<string, string>) 
   return res.json();
 }
 
-// ─── Components ──────────────────────────────────────────────
+//  Components 
 
 function DataTable({ data, compact }: { data: TableRow[]; compact?: boolean }) {
   if (!data || data.length === 0) return <p className="text-gray-500 text-sm p-4">Khong co du lieu</p>;
@@ -75,7 +75,7 @@ function ActionButton({ children, onClick, variant = 'primary' }: {
   );
 }
 
-// ─── Panel Configs ───────────────────────────────────────────
+//  Panel Configs 
 
 interface PanelConfig {
   key: string;
@@ -144,7 +144,7 @@ const PANELS: PanelConfig[] = [
   { key: 'servers',      label: 'Servers',         group: 'He Thong',   endpoint: '/api/servers',           dataKey: 'servers' },
 ];
 
-// ─── AI Generate Panel ───────────────────────────────────────
+//  AI Generate Panel 
 
 function AIPanel() {
   const [genType, setGenType] = useState('quest');
@@ -214,7 +214,7 @@ function AIPanel() {
   );
 }
 
-// ─── Main Dashboard ──────────────────────────────────────────
+//  Main Dashboard 
 
 export default function AdminDashboard() {
   const [apiKey, setApiKey] = useState(localStorage.getItem('admin_key') || '');
@@ -259,7 +259,7 @@ export default function AdminDashboard() {
     if (authed) loadPanel(activePanel);
   }, [authed]);
 
-  // ── Login screen ──────────────────────────────────────────
+  //  Login screen 
 
   if (!authed) {
     return (
@@ -279,7 +279,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // ── Groups ────────────────────────────────────────────────
+  //  Groups 
 
   const groups = [...new Set(PANELS.map(p => p.group))];
   const currentPanel = PANELS.find(p => p.key === activePanel);
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#080818] text-gray-200 flex">
 
-      {/* ── Sidebar ──────────────────────────────────────── */}
+      {/*  Sidebar  */}
       <aside className={`fixed md:static inset-y-0 left-0 z-40 w-56 bg-[#0a0a1e] border-r border-white/5
         transform transition-transform duration-200
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
@@ -316,12 +316,12 @@ export default function AdminDashboard() {
         </nav>
       </aside>
 
-      {/* ── Overlay (mobile) ─────────────────────────────── */}
+      {/*  Overlay (mobile)  */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* ── Main content ─────────────────────────────────── */}
+      {/*  Main content  */}
       <main className="flex-1 min-w-0">
         {/* Top bar */}
         <header className="sticky top-0 z-20 bg-[#080818]/90 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">

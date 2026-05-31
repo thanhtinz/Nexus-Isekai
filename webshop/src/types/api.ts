@@ -3,7 +3,7 @@
 // Mọi thay đổi ở đây phải phản ánh tương ứng ở server Java
 // ============================================================
 
-// ─── Auth ────────────────────────────────────────────────────
+//  Auth 
 export interface Session {
   accountId: number
   charId: number
@@ -20,7 +20,7 @@ export interface LoginResponse {
   session?: Session
 }
 
-// ─── Topup / Payment ─────────────────────────────────────────
+//  Topup / Payment 
 export interface TopupPackage {
   id: number
   name: string
@@ -61,7 +61,7 @@ export interface TopupHistoryItem {
   paid_at: string | null
 }
 
-// ─── Webshop ─────────────────────────────────────────────────
+//  Webshop 
 export type ItemType = 'skin' | 'cosmetic' | 'pack' | 'mount' | 'pet' | 'pass'
 
 export interface WebshopItem {
@@ -92,14 +92,14 @@ export interface BuyResult {
   message: string
 }
 
-// ─── Gift Code ───────────────────────────────────────────────
+//  Gift Code 
 export interface RedeemResult {
   success: boolean
   message: string
   rewards: string[]
 }
 
-// ─── Mission Pass ─────────────────────────────────────────────
+//  Mission Pass 
 export interface PassSeason {
   id: number
   name: string
@@ -133,7 +133,7 @@ export interface PlayerPass {
   claimed_rewards: string[]
 }
 
-// ─── Title ───────────────────────────────────────────────────
+//  Title 
 export interface Title {
   id: number
   name: string
@@ -143,7 +143,7 @@ export interface Title {
   icon_id: number
 }
 
-// ─── Pet / Mount ─────────────────────────────────────────────
+//  Pet / Mount 
 export type Element = 'fire' | 'ice' | 'lightning' | 'none'
 export type Rarity = 1 | 2 | 3 | 4 | 5
 
@@ -168,7 +168,7 @@ export interface MountTemplate {
   obtain_source: string
 }
 
-// ─── Pagination ───────────────────────────────────────────────
+//  Pagination 
 export interface PaginatedResponse<T> {
   success: boolean
   data: T[]
@@ -177,7 +177,7 @@ export interface PaginatedResponse<T> {
   per_page: number
 }
 
-// ─── Common ──────────────────────────────────────────────────
+//  Common 
 export interface ApiError {
   success: false
   message: string

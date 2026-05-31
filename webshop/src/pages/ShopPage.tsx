@@ -182,7 +182,7 @@ function ItemCard({
   )
 }
 
-// ─── Buy Confirm Modal ────────────────────────────────────────
+//  Buy Confirm Modal 
 function BuyModal({
   item,
   onConfirm,
@@ -277,7 +277,7 @@ function BuyModal({
   )
 }
 
-// ─── Main Page ─────────────────────────────────────────────────
+//  Main Page 
 export function ShopPage() {
   const { session, updateDiamond } = useAuth()
   const [items, setItems] = useState<WebshopItem[]>([])
