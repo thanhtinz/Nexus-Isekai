@@ -21,4 +21,9 @@ public class ExpressionUI : MonoBehaviour
         PacketBuilder.SendPairAction(actionId, targetCharId);
         Close();
     }
+
+    public void ShowPairRequest(long requesterId, string name, int actionId) {
+        // Popup: "{name} muon hanh dong voi ban" → Accept goi SendPairActionAccept
+        gameObject.SetActive(true);
+    }
 }

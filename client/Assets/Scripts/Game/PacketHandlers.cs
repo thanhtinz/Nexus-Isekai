@@ -42,6 +42,20 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_CHAR_DELETE_OK,  OnCharDeleteOk);
             d.Register(PacketOpcode.S2C_CHAR_ENTER_GAME, OnEnterGame);
             d.Register(PacketOpcode.S2C_INTRO_VIDEO_CONFIG, OnIntroVideoConfig);
+            // Extended gameplay S2C
+            d.Register(PacketOpcode.S2C_AUTO_CONFIG,        OnAutoConfig);
+            d.Register(PacketOpcode.S2C_AUTO_PLAY_STATE,    OnAutoPlayState);
+            d.Register(PacketOpcode.S2C_BLOCK_OK,           OnBlockOk);
+            d.Register(PacketOpcode.S2C_CHAR_ACTION,        OnCharAction);
+            d.Register(PacketOpcode.S2C_EMOTE_SHOW,         OnEmoteShow);
+            d.Register(PacketOpcode.S2C_GEM_SOCKET_OK,      OnGemSocketOk);
+            d.Register(PacketOpcode.S2C_INSPECT_DATA,       OnInspectData);
+            d.Register(PacketOpcode.S2C_NEWS_LIST,          OnNewsList);
+            d.Register(PacketOpcode.S2C_PAIR_ACTION_REQ,    OnPairActionReq);
+            d.Register(PacketOpcode.S2C_PAIR_ACTION_PLAY,   OnPairActionPlay);
+            d.Register(PacketOpcode.S2C_REFINE_OK,          OnRefineOk);
+            d.Register(PacketOpcode.S2C_TELEPORT_OK,        OnTeleportOk);
+            d.Register(PacketOpcode.S2C_WAREHOUSE_DATA,     OnWarehouseData);
             d.Register(PacketOpcode.S2C_CLASS_STORY,     OnClassStory);
 
             // World
@@ -353,6 +367,65 @@ namespace NexusIsekai.Game
             bool   fallback= r.ReadBool();
             bool   watched = r.ReadBool();
             IntroVideoPlayer.Instance?.OnConfigReceived(true, url, urlLow, skip, skipSec, fallback, watched);
+        }
+
+
+        private void OnAutoConfig(PacketReader r) {
+            string json = r.ReadString();
+            AutoCombatUI.Instance?.SendMessage("LoadConfig", json, SendMessageOptions.DontRequireReceiver);
+        }
+        private void OnAutoPlayState(PacketReader r) {
+            bool on = r.ReadBool();
+            Debug.Log($"[Auto] state={on}");
+        }
+        private void OnBlockOk(PacketReader r) {
+            UIManager.Instance?.ShowNotification("Đã chặn người chơi", UINotificationType.Success);
+        }
+        private void OnCharAction(PacketReader r) {
+            long charId = r.ReadLong(); int actionId = r.ReadInt();
+            // Phát animation hành động cho nhân vật charId trong zone
+            GameState.Instance?.PlayCharAction(charId, actionId);
+        }
+        private void OnEmoteShow(PacketReader r) {
+            long charId = r.ReadLong(); int emoteId = r.ReadInt();
+            // Hiện biểu cảm trên đầu nhân vật charId
+            GameState.Instance?.ShowEmote(charId, emoteId);
+        }
+        private void OnGemSocketOk(PacketReader r) {
+            UIManager.Instance?.ShowNotification("Khảm ngọc thành công", UINotificationType.Success);
+        }
+        private void OnInspectData(PacketReader r) {
+            long charId = r.ReadLong(); string name = r.ReadString();
+            int classId = r.ReadInt(); int level = r.ReadInt(); int vip = r.ReadInt();
+            InspectUI.Instance?.Show(charId, name, classId, level, vip);
+        }
+        private void OnNewsList(PacketReader r) {
+            int count = r.ReadShort();
+            NewsUI.Instance?.Clear();
+            for (int i = 0; i < count; i++) {
+                int id = r.ReadInt(); string title = r.ReadString(); string cat = r.ReadString();
+                NewsUI.Instance?.AddItem(id, title, cat);
+            }
+        }
+        private void OnPairActionReq(PacketReader r) {
+            long requesterId = r.ReadLong(); string name = r.ReadString(); int actionId = r.ReadInt();
+            // Hiện popup: "{name} muốn {action} với bạn" → Accept/Decline
+            ExpressionUI.Instance?.ShowPairRequest(requesterId, name, actionId);
+        }
+        private void OnPairActionPlay(PacketReader r) {
+            long a = r.ReadLong(); long b = r.ReadLong(); int actionId = r.ReadInt();
+            // Cả 2 nhân vật play pair animation
+            GameState.Instance?.PlayPairAction(a, b, actionId);
+        }
+        private void OnRefineOk(PacketReader r) {
+            UIManager.Instance?.ShowNotification("Tinh luyện thành công", UINotificationType.Success);
+        }
+        private void OnTeleportOk(PacketReader r) {
+            int mapId = r.ReadInt(); float x = r.ReadFloat(); float y = r.ReadFloat();
+            MapManager.Instance?.ChangeMap(mapId, x, y);
+        }
+        private void OnWarehouseData(PacketReader r) {
+            WarehouseUI.Instance?.Open();
         }
 
         private void OnClassStory(PacketReader r)

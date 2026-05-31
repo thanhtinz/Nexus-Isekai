@@ -7,4 +7,7 @@ public class NewsUI : MonoBehaviour {
     public void Open() { isOpen=true; gameObject.SetActive(true); OnOpen(); }
     public void Close() { isOpen=false; gameObject.SetActive(false); }
     void OnOpen() { /* Load data from server */ }
+
+    public void Clear() { /* xoa list tin tuc */ }
+    public void AddItem(int id, string title, string category) { /* them dong tin tuc */ }
 }

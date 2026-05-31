@@ -93,4 +93,9 @@ namespace NexusIsekai.Game
             Mentor = null;
         }
     }
+
+    // ── Visual hooks (animation impl khi co content) ──
+    public void PlayCharAction(long charId, int actionId) { /* play action anim cho char trong zone */ }
+    public void ShowEmote(long charId, int emoteId) { /* hien bieu cam tren dau char */ }
+    public void PlayPairAction(long a, long b, int actionId) { /* play pair anim cho 2 char */ }
 }
