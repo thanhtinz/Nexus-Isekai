@@ -151,6 +151,8 @@ public class AdminApiServer {
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
         httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
         httpServer.createContext("/api/gacha-banners",    ex -> handleAuth(ex, this::handleGachaBanners));
+        httpServer.createContext("/api/intro-scenes",    ex -> handleAuth(ex, this::handleIntroScenes));
+        httpServer.createContext("/api/login-screen",    ex -> handleAuth(ex, this::handleLoginScreen));
         httpServer.createContext("/api/gacha-currencies",ex -> handleAuth(ex, this::handleGachaCurrencies));
         httpServer.createContext("/api/gacha-sources",   ex -> handleAuth(ex, this::handleGachaSources));
         httpServer.createContext("/api/gacha-pool",       ex -> handleAuth(ex, this::handleGachaPool));
@@ -1759,6 +1761,31 @@ public class AdminApiServer {
 
     /** Anti-cheat violations log */
 
+
+
+    private void handleIntroScenes(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM intro_scenes WHERE is_active=1 ORDER BY scene_order"), "scenes");
+            else { var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "update" -> { c.prepareStatement("UPDATE intro_scenes SET text_vi='"+str(b,"text_vi").replace("'","''")+"',text_en='"+str(b,"text_en").replace("'","''")+"',bg_image='"+str(b,"bg_image").replace("'","")+"',duration="+str(b,"duration")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "create" -> { c.prepareStatement("INSERT INTO intro_scenes (scene_order,scene_type,bg_image,text_vi,text_en,bgm_key) VALUES ("+num(b,"scene_order")+",'text','"+str(b,"bg_image").replace("'","")+"','"+str(b,"text_vi").replace("'","''")+"','"+str(b,"text_en").replace("'","''")+"','"+str(b,"bgm_key").replace("'","")+"')").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "delete" -> { c.prepareStatement("UPDATE intro_scenes SET is_active=0 WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "reorder" -> { c.prepareStatement("UPDATE intro_scenes SET scene_order="+num(b,"scene_order")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+    private void handleLoginScreen(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM login_screen_config ORDER BY config_key"), "config");
+            else { var b = parseBody(ex);
+                c.prepareStatement("UPDATE login_screen_config SET config_value='"+str(b,"config_value").replace("'","''")+"' WHERE config_key='"+str(b,"config_key").replace("'","")+"'").executeUpdate();
+                auditLog(ex, "update_login_screen", "config", str(b,"config_key"), str(b,"config_value"));
+                sendJson(ex,200,Map.of("success",true)); }
+        }
+    }
 
     private void handleGachaCurrencies(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {

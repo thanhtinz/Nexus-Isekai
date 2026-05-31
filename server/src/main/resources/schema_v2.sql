@@ -2425,3 +2425,101 @@ INSERT IGNORE INTO gacha_currency_sources (currency_id,source_type,source_id,amo
 -- Shop mua vé bằng diamond (trong game shop)
 -- Dùng cost_type='diamond' + cost_single/cost_multi_10 từ gacha_banners
 -- Hoặc player mua trực tiếp gacha_currency bằng diamond qua API
+
+-- ═════════════════════════════════════════════════════════════
+-- INTRO CUTSCENE — Hoạt ảnh giới thiệu cốt truyện khi vào lần đầu
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS intro_scenes (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    scene_order     INT NOT NULL,
+    scene_type      VARCHAR(16) NOT NULL,           -- text,image,animation,video,transition
+    -- Nội dung
+    bg_image        VARCHAR(128) DEFAULT '',         -- ảnh nền
+    bg_color        VARCHAR(8) DEFAULT '#000000',    -- màu nền (khi không có ảnh)
+    character_image VARCHAR(128) DEFAULT '',         -- ảnh nhân vật/NPC nói
+    character_pos   VARCHAR(8) DEFAULT 'center',     -- left,center,right
+    -- Text
+    narrator        VARCHAR(64) DEFAULT '',          -- tên người kể (trống = narrator)
+    text_vi         TEXT,
+    text_en         TEXT,
+    text_effect     VARCHAR(16) DEFAULT 'typewriter', -- typewriter,fade,instant
+    text_speed      FLOAT NOT NULL DEFAULT 0.05,     -- giây/ký tự
+    -- Timing
+    duration        FLOAT NOT NULL DEFAULT 0,        -- 0 = chờ tap, >0 = tự chuyển sau N giây
+    transition_in   VARCHAR(16) DEFAULT 'fade',      -- fade,slide_left,slide_right,zoom,none
+    transition_out  VARCHAR(16) DEFAULT 'fade',
+    -- Audio
+    bgm_key         VARCHAR(64) DEFAULT '',          -- key từ audio_assets
+    sfx_key         VARCHAR(64) DEFAULT '',
+    -- Flags
+    can_skip        TINYINT NOT NULL DEFAULT 1,
+    is_active       TINYINT NOT NULL DEFAULT 1
+);
+
+-- Cốt truyện intro (7 scenes)
+INSERT IGNORE INTO intro_scenes (scene_order,scene_type,bg_image,narrator,text_vi,text_en,duration,bgm_key) VALUES
+(1,'text','Intro/bg_dark.png','',
+  '5000 năm trước, khi ranh giới giữa các thế giới vẫn còn vững chắc...',
+  '5000 years ago, when the boundaries between worlds were still strong...',
+  0,'bgm_login'),
+(2,'text','Intro/bg_war.png','',
+  'Tiểu Thần Azaroth phát động cuộc chiến Đại Hoành Điểu, nhằm phá vỡ bức tường ngăn cách các chiều không gian.',
+  'The Lesser God Azaroth launched the Great Havoc War, seeking to shatter the walls between dimensions.',
+  0,''),
+(3,'text','Intro/bg_heroes.png','',
+  'Bảy Anh Hùng Thượng Cổ đã hy sinh tính mạng để niêm phong hắn, nhưng để lại những vết nứt không gian rải khắp thế giới.',
+  'Seven Ancient Heroes sacrificed their lives to seal him away, but left spatial cracks scattered across the world.',
+  0,''),
+(4,'text','Intro/bg_crack.png','',
+  'Hiện tại, vết nứt đang mở rộng. Quái vật từ chiều không gian khác tràn vào. Giáo Phái Vọng Linh âm mưu phục sinh Azaroth.',
+  'Now, the cracks are widening. Monsters from other dimensions pour in. The Nexus Cult plots to resurrect Azaroth.',
+  0,''),
+(5,'text','Intro/bg_portal.png','',
+  'Và rồi, một cổng thời không xuất hiện trên bầu trời...',
+  'And then, a temporal gate appeared in the sky...',
+  0,''),
+(6,'text','Intro/bg_player.png','',
+  'Bạn — một Lưu Dân từ thế giới khác — bị cuốn vào Vọng Linh Giới. Sở hữu khả năng hấp thu linh lực đặc biệt, bạn là hy vọng cuối cùng.',
+  'You — a Wanderer from another world — are pulled into the Nexus Realm. With the unique ability to absorb spirit energy, you are the last hope.',
+  0,''),
+(7,'text','Intro/bg_village.png','',
+  'Hành trình bắt đầu tại Làng Khải Nguyên, nơi bạn tỉnh dậy giữa một thế giới xa lạ...',
+  'Your journey begins at Genesis Village, where you awaken in a strange new world...',
+  0,'bgm_village');
+
+-- Player đã xem intro chưa
+CREATE TABLE IF NOT EXISTS player_intro (
+    account_id      BIGINT NOT NULL PRIMARY KEY,
+    watched         TINYINT NOT NULL DEFAULT 0,
+    skipped         TINYINT NOT NULL DEFAULT 0,
+    watched_at      TIMESTAMP NULL
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- LOGIN SCREEN CONFIG — Background, logo, effects
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS login_screen_config (
+    config_key      VARCHAR(64) NOT NULL PRIMARY KEY,
+    config_value    TEXT NOT NULL,
+    description     VARCHAR(128) DEFAULT ''
+);
+
+INSERT IGNORE INTO login_screen_config VALUES
+('bg_image','Login/bg_login.png','Ảnh nền login (1920x1080 hoặc 16:9)'),
+('bg_video','','Video nền login (MP4, loop)'),
+('bg_parallax','true','Hiệu ứng parallax khi nghiêng điện thoại'),
+('logo_image','Login/logo.png','Logo game'),
+('logo_animation','bounce','Hiệu ứng logo: none,bounce,pulse,glow'),
+('particle_effect','firefly','Hiệu ứng hạt: none,firefly,snow,sakura,sparkle,ember'),
+('particle_count','30','Số lượng hạt'),
+('bgm_key','bgm_login','Nhạc nền login'),
+('server_name','Vọng Linh Giới','Tên server hiển thị'),
+('notice_text','','Thông báo trên màn hình login'),
+('notice_color','#FFD700','Màu thông báo'),
+('version_pos','bottom_right','Vị trí số phiên bản'),
+('social_buttons','google,facebook,apple','Nút social login hiển thị'),
+('event_banner','','Banner sự kiện trên login (ảnh, link)'),
+('maintenance_mode','false','Chế độ bảo trì (chặn đăng nhập)'),
+('maintenance_msg','Hệ thống đang bảo trì, vui lòng quay lại sau.','Thông báo bảo trì');

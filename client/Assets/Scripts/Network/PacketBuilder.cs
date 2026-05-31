@@ -445,6 +445,17 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
 
+        // ── INTRO + LOGIN SCREEN ─────────────────────────
+
+        public static void SendIntroRequest()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INTRO_REQUEST));
+        public static void SendIntroComplete()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INTRO_COMPLETE));
+        public static void SendIntroSkip()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INTRO_SKIP));
+        public static void SendLoginScreenConfig()
+            => Send(new PacketBuilder(PacketOpcode.C2S_LOGIN_SCREEN_CFG));
+
         // ── GACHA ───────────────────────────────────────────
 
         public static void SendGachaBannerList()
@@ -702,6 +713,17 @@ namespace NexusIsekai.Network
         public static void SendCharList()
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
+
+        // ── INTRO + LOGIN SCREEN ─────────────────────────
+
+        public static void SendIntroRequest()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INTRO_REQUEST));
+        public static void SendIntroComplete()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INTRO_COMPLETE));
+        public static void SendIntroSkip()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INTRO_SKIP));
+        public static void SendLoginScreenConfig()
+            => Send(new PacketBuilder(PacketOpcode.C2S_LOGIN_SCREEN_CFG));
 
         // ── GACHA ───────────────────────────────────────────
 

@@ -353,6 +353,15 @@ namespace NexusIsekai.Network
         public const short S2C_SOCIAL_LOGIN_OK   = 0x1F11;
         public const short S2C_SOCIAL_LINK_OK    = 0x1F12;
 
+        // ── INTRO CUTSCENE ─────────────────────────────────
+        public const short C2S_INTRO_REQUEST     = 0x2201;
+        public const short C2S_INTRO_COMPLETE    = 0x2202;
+        public const short C2S_INTRO_SKIP        = 0x2203;
+        public const short S2C_INTRO_SCENES      = 0x2211;
+        public const short S2C_INTRO_NOT_NEEDED  = 0x2212;
+        public const short C2S_LOGIN_SCREEN_CFG  = 0x2301;
+        public const short S2C_LOGIN_SCREEN_CFG  = 0x2311;
+
         // ── TUTORIAL ─────────────────────────────────────────
         public const short C2S_TUTORIAL_PROGRESS = 0x2001;
         public const short C2S_TUTORIAL_SKIP     = 0x2002;

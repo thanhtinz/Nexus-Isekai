@@ -148,6 +148,9 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_EVENT_CURRENCY_UPDATE, OnEventCurrencyUpdate);
 
 
+            d.Register(PacketOpcode.S2C_INTRO_SCENES,     OnIntroScenes);
+            d.Register(PacketOpcode.S2C_INTRO_NOT_NEEDED, OnIntroNotNeeded);
+            d.Register(PacketOpcode.S2C_LOGIN_SCREEN_CFG, OnLoginScreenCfg);
             // Gacha + PvP Season + Social + Tutorial + Lang
             d.Register(PacketOpcode.S2C_GACHA_BANNER_LIST, OnGachaBannerList);
             d.Register(PacketOpcode.S2C_GACHA_RESULT,      OnGachaResult);
@@ -1725,6 +1728,10 @@ namespace NexusIsekai.Game
     private void OnStoryCg(PacketReader r) { r.ReadInt(); r.ReadString(); }
 
     // ── GACHA + PVP + SOCIAL + TUTORIAL + LANG ──────────
+
+    private void OnIntroScenes(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadString(); r.ReadString(); r.ReadString(); r.ReadFloat(); r.ReadString(); r.ReadString(); } }
+    private void OnIntroNotNeeded(PacketReader r) { /* skip intro, go to game */ }
+    private void OnLoginScreenCfg(PacketReader r) { string json = r.ReadString(); /* apply login screen config */ }
 
     private void OnGachaBannerList(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadString(); r.ReadInt(); r.ReadInt(); r.ReadInt(); } }
     private void OnGachaResult(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadString(); r.ReadInt(); r.ReadByte(); } UIManager.Instance?.ShowNotification("Trieu hoi thanh cong!", UINotificationType.Success); }

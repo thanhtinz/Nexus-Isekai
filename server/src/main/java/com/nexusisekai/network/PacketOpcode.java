@@ -102,6 +102,17 @@ public final class PacketOpcode {
     public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
 
+    // ── INTRO CUTSCENE (22xx) ────────────────────────────
+    public static final short C2S_INTRO_REQUEST     = (short)0x2201;
+    public static final short C2S_INTRO_COMPLETE    = (short)0x2202;
+    public static final short C2S_INTRO_SKIP        = (short)0x2203;
+    public static final short S2C_INTRO_SCENES      = (short)0x2211;
+    public static final short S2C_INTRO_NOT_NEEDED  = (short)0x2212;
+
+    // ── LOGIN SCREEN (23xx) ──────────────────────────────
+    public static final short C2S_LOGIN_SCREEN_CFG  = (short)0x2301;
+    public static final short S2C_LOGIN_SCREEN_CFG  = (short)0x2311;
+
     // ── TUTORIAL (20xx) ──────────────────────────────────────
     public static final short C2S_TUTORIAL_PROGRESS = (short)0x2001;
     public static final short C2S_TUTORIAL_SKIP     = (short)0x2002;
@@ -491,6 +502,17 @@ public final class PacketOpcode {
     public static final short C2S_SOCIAL_UNLINK     = (short)0x1F03;
     public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
+
+    // ── INTRO CUTSCENE (22xx) ────────────────────────────
+    public static final short C2S_INTRO_REQUEST     = (short)0x2201;
+    public static final short C2S_INTRO_COMPLETE    = (short)0x2202;
+    public static final short C2S_INTRO_SKIP        = (short)0x2203;
+    public static final short S2C_INTRO_SCENES      = (short)0x2211;
+    public static final short S2C_INTRO_NOT_NEEDED  = (short)0x2212;
+
+    // ── LOGIN SCREEN (23xx) ──────────────────────────────
+    public static final short C2S_LOGIN_SCREEN_CFG  = (short)0x2301;
+    public static final short S2C_LOGIN_SCREEN_CFG  = (short)0x2311;
 
     // ── TUTORIAL (20xx) ──────────────────────────────────────
     public static final short C2S_TUTORIAL_PROGRESS = (short)0x2001;
