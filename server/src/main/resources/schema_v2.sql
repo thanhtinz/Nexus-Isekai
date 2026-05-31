@@ -3413,14 +3413,6 @@ ALTER TABLE farm_animals ADD COLUMN IF NOT EXISTS breed_time_min INT NOT NULL DE
 -- NHÀ KHO + BÁN SẢN PHẨM (nông sản, sản phẩm thú)
 -- ═════════════════════════════════════════════════════════════
 
--- Nông sản + sản phẩm thú vào bảng items (có sell_price để bán)
-INSERT IGNORE INTO items (id,name,description,type,level_req,sell_price,buy_price,icon_id) VALUES
- (410,'Lúa Linh','Nông sản thu từ Lúa Linh','material',1,80,0,410),
- (411,'Cà Rốt Vàng','Nông sản quý','material',1,60,0,411),
- (412,'Linh Chi Thảo','Dược liệu hiếm','material',1,200,0,412),
- (401,'Trứng Gà Vàng','Sản phẩm chăn nuôi','material',1,50,0,401),
- (402,'Sữa Linh Ngưu','Sản phẩm chăn nuôi','material',1,120,0,402),
- (403,'Lông Vũ Quý','Sản phẩm chăn nuôi','material',1,90,0,403);
 
 -- Sức chứa kho (mở rộng được)
 CREATE TABLE IF NOT EXISTS warehouse_info (
@@ -3518,14 +3510,14 @@ INSERT IGNORE INTO items (id,name,description,type,level_req,sell_price,buy_pric
  (415,'Băng Tâm Thảo','Linh thảo hệ băng','material',20,1000,0,415),
  (416,'Tử Vân Quả','Quả quý luyện đan','material',30,2200,0,416),
  -- Thức ăn thú
- (301,'Cỏ Linh','Thức ăn cho gia cầm','material',1,0,50,301),
- (302,'Cám Tinh Hoa','Thức ăn cho gia súc','material',1,0,120,302),
- (303,'Linh Ngư Nhĩ','Thức ăn cho thủy sinh','material',1,0,90,303),
+ (601,'Cỏ Linh','Thức ăn cho gia cầm','material',1,0,50,601),
+ (602,'Cám Tinh Hoa','Thức ăn cho gia súc','material',1,0,120,602),
+ (603,'Linh Ngư Nhĩ','Thức ăn cho thủy sinh','material',1,0,90,603),
  -- Sản phẩm thú (thu → bán)
- (401,'Trứng Linh Kê','Sản phẩm chăn nuôi','material',1,50,0,401),
- (402,'Sữa Linh Ngưu','Sản phẩm chăn nuôi','material',1,120,0,402),
- (403,'Lông Vũ Quý','Sản phẩm chăn nuôi','material',1,90,0,403),
- (404,'Tơ Linh Tằm','Sản phẩm cao cấp','material',1,250,0,404),
+ (611,'Trứng Linh Kê','Sản phẩm chăn nuôi','material',1,50,0,611),
+ (612,'Sữa Linh Ngưu','Sản phẩm chăn nuôi','material',1,120,0,612),
+ (613,'Lông Vũ Quý','Sản phẩm chăn nuôi','material',1,90,0,613),
+ (614,'Tơ Linh Tằm','Sản phẩm cao cấp','material',1,250,0,614),
  -- Phân bón
  (320,'Phân Linh Thổ','Bón phân: cây lớn nhanh + sản lượng cao','material',1,0,100,320);
 
@@ -3541,8 +3533,8 @@ INSERT IGNORE INTO farm_seeds (id,name,growth_time_min,stages,harvest_item_id,ha
 
 -- THÚ NUÔI (farm_animals): feed, produce, produce_time, qty, breed_time
 INSERT IGNORE INTO farm_animals (id,name,animal_type,feed_item_id,produce_item_id,produce_time_min,produce_qty,breed_time_min) VALUES
- (1,'Linh Kê',     'bird', 301, 401,  60, 3, 720),
- (2,'Linh Ngưu',   'cow',  302, 402, 120, 2, 1440),
- (3,'Thải Vũ Điểu','bird', 301, 403,  90, 2, 1080),
- (4,'Linh Tằm',    'bug',  301, 404, 150, 1, 1440),
- (5,'Linh Ngư',    'fish', 303, 401,  80, 2, 960);
+ (1,'Linh Kê',     'bird', 601, 611,  60, 3, 720),
+ (2,'Linh Ngưu',   'cow',  602, 612, 120, 2, 1440),
+ (3,'Thải Vũ Điểu','bird', 601, 613,  90, 2, 1080),
+ (4,'Linh Tằm',    'bug',  601, 614, 150, 1, 1440),
+ (5,'Linh Ngư',    'fish', 603, 611,  80, 2, 960);
