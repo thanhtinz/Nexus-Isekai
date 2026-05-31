@@ -938,7 +938,14 @@ public class ExtendedHandlers {
     public static void handleAutoPlay(GameSession s, ByteBuf b)  { boolean on=b.readBoolean(); msg(s,on?"Auto ON":"Auto OFF"); }
     public static void handleEmote(GameSession s, ByteBuf b)     { int id=b.readInt(); /* broadcast emote to nearby */ }
     public static void handleTeleport(GameSession s, ByteBuf b)  { int map=b.readInt(); msg(s,"Teleporting..."); }
-    public static void handleWarehouse(GameSession s, ByteBuf b) { int act=b.readInt(); msg(s,"Warehouse..."); }
+    public static void handleWarehouse(GameSession s, ByteBuf b) {
+        int act=b.readInt(); int itemId=b.readInt(); int qty=b.readInt(); Player p=s.getPlayer(); if(p==null) return;
+        try {
+            boolean ok = act==0 ? com.nexusisekai.game.service.WarehouseService.deposit(p.getCharId(),itemId,qty)
+                                : com.nexusisekai.game.service.WarehouseService.withdraw(p.getCharId(),itemId,qty);
+            msg(s, ok?"Thanh cong":"That bai");
+        } catch(Exception e){ msg(s,"Loi kho do"); }
+    }
     public static void handleGemSocket(GameSession s, ByteBuf b) {
         int slot=b.readInt(); int gem=b.readInt(); int socketIdx=b.readInt();
         Player p = s.getPlayer(); if (p == null) return;
@@ -949,7 +956,11 @@ public class ExtendedHandlers {
             msg(s, "Kham ngoc thanh cong");
         } catch (Exception e) { msg(s, "Loi kham ngoc"); }
     }
-    public static void handleRefine(GameSession s, ByteBuf b)    { int slot=b.readInt(); msg(s,"Refining..."); }
+    public static void handleRefine(GameSession s, ByteBuf b) {
+        long uid=b.readInt(); Player p=s.getPlayer(); if(p==null) return;
+        try { var r=com.nexusisekai.game.service.RefineService.refine(p.getCharId(), uid); msg(s, r.message); }
+        catch(Exception e){ msg(s,"Loi tinh luyen"); }
+    }
     public static void handleNewsList(GameSession s, ByteBuf b)  { msg(s,"Loading news..."); }
     public static void handleBlock(GameSession s, ByteBuf b)     { long id=b.readLong(); msg(s,"Blocked."); }
     public static void handleReport(GameSession s, ByteBuf b)    { long id=b.readLong(); msg(s,"Reported."); }
