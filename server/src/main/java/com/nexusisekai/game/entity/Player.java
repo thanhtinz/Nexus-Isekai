@@ -246,6 +246,8 @@ public class Player {
     public List<PlayerSkill> getSkills()  { return skills; }
     public long getInstanceId()           { return instanceId; }
     public void setInstanceId(long id)    { this.instanceId = id; }
+    public int getGold()                  { return gold; }
+    public void setGold(int gold)         { this.gold = gold; }
     public long getGuildId()              { return guildId; }
     public boolean isInCombat()           { return inCombat; }
     public void setInCombat(boolean b)    { this.inCombat = b; }

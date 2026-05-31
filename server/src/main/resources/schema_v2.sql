@@ -3271,7 +3271,7 @@ INSERT IGNORE INTO maps (id, name, file_name, map_category, instance_scope, is_s
  (200,'Lãnh Địa Bang Hội','guild_hall', 'guild',    'guild',    1, 1, 100, 100),
  (201,'Lễ Đường',         'wedding_hall','wedding',  'party',    1, 1, 120, 100),
  (202,'Tư Gia',           'house',      'housing',  'personal', 1, 1, 140, 100),
- (203,'Nông Trại',        'farm',       'farm',     'personal', 1, 1, 160, 100),
+ (203,'Vườn Nhà',         'home_garden','farm',     'personal', 1, 1, 160, 100),
  (204,'Đấu Trường',       'arena',      'arena',    'room',     0, 1, 180, 100),
  (205,'Sảnh Tiểu Trò Chơi','minigame_hall','minigame','room',   1, 1, 200, 100),
  (206,'Thí Luyện Tân Thủ','tutorial_zone','tutorial','personal',1, 1, 100, 120);
@@ -3284,3 +3284,45 @@ INSERT IGNORE INTO map_portals (map_id, pos_x, pos_y, portal_type, facility_cate
  (1, 420, 200, 'facility', 'farm',     'Nông Trại',     1),
  (1, 460, 200, 'facility', 'arena',    'Đấu Trường',    10),
  (1, 500, 200, 'facility', 'minigame', 'Tiểu Trò Chơi', 1);
+
+-- ═════════════════════════════════════════════════════════════
+-- TƯƠNG TÁC NỘI THẤT + FLOW VƯỜN → NHÀ
+-- Về nhà → ra MAP VƯỜN (trồng trọt/nuôi thú) → có nhà + cổng → MAP NHÀ (nội thất)
+-- ═════════════════════════════════════════════════════════════
+
+-- Loại tương tác cho nội thất: ngồi/nằm/ăn/uống
+ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS interaction_type VARCHAR(16) NOT NULL DEFAULT 'none';
+  -- none, sit (ghế), lie (giường), eat (bàn ăn/thức ăn), drink (nước), bath, mirror
+ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS interact_anim    VARCHAR(32) NOT NULL DEFAULT '';
+  -- tên animation khi tương tác
+ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS restore_hp       INT NOT NULL DEFAULT 0;  -- hồi HP khi dùng (ăn/uống/nằm)
+ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS restore_mp       INT NOT NULL DEFAULT 0;
+ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS buff_json        VARCHAR(256) DEFAULT '';  -- buff tạm khi dùng (vd ăn no +exp%)
+
+-- Gán interaction cho nội thất mẫu đã seed
+UPDATE furniture_catalog SET interaction_type='lie',  interact_anim='lie_down', restore_hp=50, restore_mp=30 WHERE furniture_type='bed';
+UPDATE furniture_catalog SET interaction_type='sit',  interact_anim='sit'       WHERE furniture_type='chair';
+UPDATE furniture_catalog SET interaction_type='eat',  interact_anim='eat',  restore_hp=30 WHERE furniture_type='table';
+
+-- Thêm vài nội thất tương tác mẫu
+INSERT IGNORE INTO furniture_catalog (id,name,furniture_type,width,height,gold_price,interaction_type,interact_anim,restore_hp,restore_mp) VALUES
+ (50,'Bàn Ăn Đầy Đủ','table',2,1,8000,'eat','eat',60,20),
+ (51,'Bình Nước Mát','decoration',1,1,2000,'drink','drink',10,40),
+ (52,'Ghế Sofa Êm','chair',2,1,12000,'sit','sit',0,0),
+ (53,'Giường Hoàng Gia','bed',3,2,50000,'lie','lie_down',120,80),
+ (54,'Bồn Tắm Thư Giãn','decoration',2,2,30000,'bath','bath',80,80);
+
+-- house_furniture: lưu trạng thái đang có người dùng (tránh 2 người cùng ngồi 1 ghế)
+ALTER TABLE house_furniture ADD COLUMN IF NOT EXISTS occupied_by BIGINT NOT NULL DEFAULT 0; -- char_id đang dùng (0=trống)
+
+-- house: thêm map vườn riêng (garden) — về nhà ra đây trước
+ALTER TABLE houses ADD COLUMN IF NOT EXISTS garden_map_id INT NOT NULL DEFAULT 203;
+
+-- Đổi cổng ở làng: "Về Nhà" → ra VƯỜN (farm/garden map 203), bỏ cổng housing trực tiếp
+DELETE FROM map_portals WHERE map_id=1 AND facility_category IN ('housing','farm');
+INSERT IGNORE INTO map_portals (map_id, pos_x, pos_y, portal_type, facility_category, label, level_req) VALUES
+ (1, 380, 200, 'facility', 'farm', 'Về Nhà', 1);
+
+-- Trên MAP VƯỜN (203) đặt cổng vào NHÀ (house interior 202) — kèm "ảnh ngôi nhà"
+INSERT IGNORE INTO map_portals (map_id, pos_x, pos_y, portal_type, facility_category, label, level_req, icon_id) VALUES
+ (203, 250, 150, 'facility', 'housing', 'Vào Nhà', 1, 1);

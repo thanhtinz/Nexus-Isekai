@@ -42,6 +42,10 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_CHAR_DELETE_OK,  OnCharDeleteOk);
             d.Register(PacketOpcode.S2C_CHAR_ENTER_GAME, OnEnterGame);
             d.Register(PacketOpcode.S2C_INTRO_VIDEO_CONFIG, OnIntroVideoConfig);
+            // Tương tác nội thất
+            d.Register(PacketOpcode.S2C_FURNITURE_INTERACT, OnFurnitureInteract);
+            d.Register(PacketOpcode.S2C_FURNITURE_STOP,     OnFurnitureStop);
+            d.Register(PacketOpcode.S2C_FURNITURE_BUY,      OnFurnitureBuy);
             // Facility maps + cổng dịch chuyển
             d.Register(PacketOpcode.S2C_FACILITY_PORTALS, OnFacilityPortals);
             d.Register(PacketOpcode.S2C_FACILITY_ENTER,   OnFacilityEnter);
@@ -530,6 +534,23 @@ namespace NexusIsekai.Game
         private void OnFacilityLeft(PacketReader r) {
             int mapId=r.ReadInt(); float x=r.ReadFloat(); float y=r.ReadFloat();
             MapManager.Instance?.ChangeMap(mapId, x, y);
+        }
+
+
+        private void OnFurnitureInteract(PacketReader r) {
+            long charId=r.ReadLong(); long fid=r.ReadLong();
+            string type=r.ReadString(); string anim=r.ReadString();
+            int hp=r.ReadInt(); int mp=r.ReadInt();
+            // type: sit/lie/eat/drink/bath → play anim cho charId; cập nhật HP/MP nếu là mình
+            HouseInteriorUI.Instance?.OnFurnitureUsed(charId, fid, type, anim, hp, mp);
+        }
+        private void OnFurnitureStop(PacketReader r) {
+            long charId=r.ReadLong();
+            HouseInteriorUI.Instance?.OnFurnitureStop(charId);
+        }
+        private void OnFurnitureBuy(PacketReader r) {
+            int fid=r.ReadInt(); bool ok=r.ReadBool();
+            if(ok) UIManager.Instance?.ShowNotification("Đã mua vật dụng!", UINotificationType.Success);
         }
 
         private void OnClassStory(PacketReader r)

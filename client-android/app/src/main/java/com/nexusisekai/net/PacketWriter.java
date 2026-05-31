@@ -277,4 +277,12 @@ public class PacketWriter {
     public static final short S2C_FACILITY_PORTALS = (short)0x3511;
     public static final short S2C_FACILITY_ENTER = (short)0x3512;
     public static final short S2C_FACILITY_LEFT = (short)0x3513;
+
+    // Furniture interact (36xx)
+    public static final short C2S_FURNITURE_INTERACT = (short)0x3601;
+    public static final short C2S_FURNITURE_STOP = (short)0x3602;
+    public static final short C2S_FURNITURE_BUY = (short)0x3603;
+    public static final short S2C_FURNITURE_INTERACT = (short)0x3611;
+    public static final short S2C_FURNITURE_STOP = (short)0x3612;
+    public static final short S2C_FURNITURE_BUY = (short)0x3613;
 }

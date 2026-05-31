@@ -420,4 +420,12 @@ extension FixedWidthInteger {
     static let S2C_FACILITY_PORTALS: Int16 = 0x3511
     static let S2C_FACILITY_ENTER: Int16 = 0x3512
     static let S2C_FACILITY_LEFT: Int16 = 0x3513
+
+    // Furniture interact (36xx)
+    static let C2S_FURNITURE_INTERACT: Int16 = 0x3601
+    static let C2S_FURNITURE_STOP: Int16 = 0x3602
+    static let C2S_FURNITURE_BUY: Int16 = 0x3603
+    static let S2C_FURNITURE_INTERACT: Int16 = 0x3611
+    static let S2C_FURNITURE_STOP: Int16 = 0x3612
+    static let S2C_FURNITURE_BUY: Int16 = 0x3613
 }

@@ -489,6 +489,13 @@ namespace NexusIsekai.Network
         public const short S2C_FACILITY_PORTALS = 0x3511;
         public const short S2C_FACILITY_ENTER   = 0x3512;
         public const short S2C_FACILITY_LEFT     = 0x3513;
+        // ── TƯƠNG TÁC NỘI THẤT ──
+        public const short C2S_FURNITURE_INTERACT = 0x3601;
+        public const short C2S_FURNITURE_STOP     = 0x3602;
+        public const short C2S_FURNITURE_BUY      = 0x3603;
+        public const short S2C_FURNITURE_INTERACT = 0x3611;
+        public const short S2C_FURNITURE_STOP     = 0x3612;
+        public const short S2C_FURNITURE_BUY      = 0x3613;
 
     }
 }
