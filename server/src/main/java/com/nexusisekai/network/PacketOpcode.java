@@ -102,6 +102,16 @@ public final class PacketOpcode {
     public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
 
+    // ── SERVER SELECTION (24xx) ─────────────────────────
+    public static final short C2S_SERVER_LIST       = (short)0x2401;
+    public static final short C2S_SERVER_SELECT     = (short)0x2402;
+    public static final short C2S_CHANNEL_LIST      = (short)0x2403;
+    public static final short C2S_CHANNEL_SELECT    = (short)0x2404;
+    public static final short S2C_SERVER_LIST       = (short)0x2411;
+    public static final short S2C_CHANNEL_LIST      = (short)0x2412;
+    public static final short S2C_SERVER_FULL       = (short)0x2413;
+    public static final short S2C_CHANNEL_CHANGED   = (short)0x2414;
+
     // ── INTRO CUTSCENE (22xx) ────────────────────────────
     public static final short C2S_INTRO_REQUEST     = (short)0x2201;
     public static final short C2S_INTRO_COMPLETE    = (short)0x2202;
@@ -502,6 +512,16 @@ public final class PacketOpcode {
     public static final short C2S_SOCIAL_UNLINK     = (short)0x1F03;
     public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
+
+    // ── SERVER SELECTION (24xx) ─────────────────────────
+    public static final short C2S_SERVER_LIST       = (short)0x2401;
+    public static final short C2S_SERVER_SELECT     = (short)0x2402;
+    public static final short C2S_CHANNEL_LIST      = (short)0x2403;
+    public static final short C2S_CHANNEL_SELECT    = (short)0x2404;
+    public static final short S2C_SERVER_LIST       = (short)0x2411;
+    public static final short S2C_CHANNEL_LIST      = (short)0x2412;
+    public static final short S2C_SERVER_FULL       = (short)0x2413;
+    public static final short S2C_CHANNEL_CHANGED   = (short)0x2414;
 
     // ── INTRO CUTSCENE (22xx) ────────────────────────────
     public static final short C2S_INTRO_REQUEST     = (short)0x2201;

@@ -2523,3 +2523,51 @@ INSERT IGNORE INTO login_screen_config VALUES
 ('event_banner','','Banner sự kiện trên login (ảnh, link)'),
 ('maintenance_mode','false','Chế độ bảo trì (chặn đăng nhập)'),
 ('maintenance_msg','Hệ thống đang bảo trì, vui lòng quay lại sau.','Thông báo bảo trì');
+
+-- ═════════════════════════════════════════════════════════════
+-- SERVER SELECTION — Chọn server + channel khi vào game
+-- ═════════════════════════════════════════════════════════════
+
+-- Mở rộng game_servers
+ALTER TABLE game_servers
+    ADD COLUMN IF NOT EXISTS group_name    VARCHAR(32) DEFAULT 'Mặc Định',  -- nhóm server (VN, SEA, Global)
+    ADD COLUMN IF NOT EXISTS online_count  INT NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS load_status   TINYINT NOT NULL DEFAULT 0,      -- 0=smooth,1=normal,2=busy,3=full
+    ADD COLUMN IF NOT EXISTS is_new        TINYINT NOT NULL DEFAULT 0,      -- badge "Mới"
+    ADD COLUMN IF NOT EXISTS is_recommend  TINYINT NOT NULL DEFAULT 0,      -- badge "Đề xuất"
+    ADD COLUMN IF NOT EXISTS is_hot        TINYINT NOT NULL DEFAULT 0,      -- badge "Hot"
+    ADD COLUMN IF NOT EXISTS sort_order    INT NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS icon_url      VARCHAR(128) DEFAULT '';
+
+-- Channels trong mỗi server (giảm tải, giống NRO)
+CREATE TABLE IF NOT EXISTS server_channels (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    server_id       INT NOT NULL,
+    channel_number  INT NOT NULL,                    -- 1,2,3...
+    channel_name    VARCHAR(32) NOT NULL,             -- "Kênh 1", "Kênh 2"
+    max_players     INT NOT NULL DEFAULT 200,
+    online_count    INT NOT NULL DEFAULT 0,
+    load_status     TINYINT NOT NULL DEFAULT 0,      -- 0=smooth,1=normal,2=busy,3=full
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    UNIQUE KEY (server_id, channel_number)
+);
+
+-- Seed channels cho server 1
+INSERT IGNORE INTO server_channels (server_id,channel_number,channel_name,max_players) VALUES
+(1,1,'Kenh 1',200),(1,2,'Kenh 2',200),(1,3,'Kenh 3',200),
+(1,4,'Kenh 4',200),(1,5,'Kenh 5',200);
+
+-- Server mà player gần nhất đã chơi (auto-select)
+ALTER TABLE accounts
+    ADD COLUMN IF NOT EXISTS last_server_id  INT DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS last_channel_id INT DEFAULT 1;
+
+-- Server transfer history
+CREATE TABLE IF NOT EXISTS server_transfers (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id         BIGINT NOT NULL,
+    from_server     INT NOT NULL,
+    to_server       INT NOT NULL,
+    transfer_type   VARCHAR(16) NOT NULL DEFAULT 'manual', -- manual,merge,event
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

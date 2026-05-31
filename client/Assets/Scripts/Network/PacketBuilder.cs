@@ -445,6 +445,17 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
 
+        // ── SERVER SELECTION ─────────────────────────────
+
+        public static void SendServerList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_SERVER_LIST));
+        public static void SendServerSelect(int serverId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SERVER_SELECT).WriteInt(serverId));
+        public static void SendChannelList(int serverId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHANNEL_LIST).WriteInt(serverId));
+        public static void SendChannelSelect(int channelId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHANNEL_SELECT).WriteInt(channelId));
+
         // ── INTRO + LOGIN SCREEN ─────────────────────────
 
         public static void SendIntroRequest()
@@ -713,6 +724,17 @@ namespace NexusIsekai.Network
         public static void SendCharList()
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
+
+        // ── SERVER SELECTION ─────────────────────────────
+
+        public static void SendServerList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_SERVER_LIST));
+        public static void SendServerSelect(int serverId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SERVER_SELECT).WriteInt(serverId));
+        public static void SendChannelList(int serverId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHANNEL_LIST).WriteInt(serverId));
+        public static void SendChannelSelect(int channelId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHANNEL_SELECT).WriteInt(channelId));
 
         // ── INTRO + LOGIN SCREEN ─────────────────────────
 

@@ -353,6 +353,16 @@ namespace NexusIsekai.Network
         public const short S2C_SOCIAL_LOGIN_OK   = 0x1F11;
         public const short S2C_SOCIAL_LINK_OK    = 0x1F12;
 
+        // ── SERVER SELECTION ───────────────────────────────
+        public const short C2S_SERVER_LIST       = 0x2401;
+        public const short C2S_SERVER_SELECT     = 0x2402;
+        public const short C2S_CHANNEL_LIST      = 0x2403;
+        public const short C2S_CHANNEL_SELECT    = 0x2404;
+        public const short S2C_SERVER_LIST       = 0x2411;
+        public const short S2C_CHANNEL_LIST      = 0x2412;
+        public const short S2C_SERVER_FULL       = 0x2413;
+        public const short S2C_CHANNEL_CHANGED   = 0x2414;
+
         // ── INTRO CUTSCENE ─────────────────────────────────
         public const short C2S_INTRO_REQUEST     = 0x2201;
         public const short C2S_INTRO_COMPLETE    = 0x2202;

@@ -148,6 +148,10 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_EVENT_CURRENCY_UPDATE, OnEventCurrencyUpdate);
 
 
+            d.Register(PacketOpcode.S2C_SERVER_LIST,      OnServerList);
+            d.Register(PacketOpcode.S2C_CHANNEL_LIST,     OnChannelList);
+            d.Register(PacketOpcode.S2C_SERVER_FULL,      OnServerFull);
+            d.Register(PacketOpcode.S2C_CHANNEL_CHANGED,  OnChannelChanged);
             d.Register(PacketOpcode.S2C_INTRO_SCENES,     OnIntroScenes);
             d.Register(PacketOpcode.S2C_INTRO_NOT_NEEDED, OnIntroNotNeeded);
             d.Register(PacketOpcode.S2C_LOGIN_SCREEN_CFG, OnLoginScreenCfg);
@@ -1728,6 +1732,11 @@ namespace NexusIsekai.Game
     private void OnStoryCg(PacketReader r) { r.ReadInt(); r.ReadString(); }
 
     // ── GACHA + PVP + SOCIAL + TUTORIAL + LANG ──────────
+
+    private void OnServerList(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadString(); r.ReadInt(); r.ReadByte(); r.ReadByte(); r.ReadByte(); r.ReadByte(); } }
+    private void OnChannelList(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadInt(); r.ReadString(); r.ReadInt(); r.ReadByte(); } }
+    private void OnServerFull(PacketReader r) { UIManager.Instance?.ShowNotification("Server day!", UINotificationType.Warning); }
+    private void OnChannelChanged(PacketReader r) { int ch = r.ReadInt(); string name = r.ReadString(); }
 
     private void OnIntroScenes(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadString(); r.ReadString(); r.ReadString(); r.ReadFloat(); r.ReadString(); r.ReadString(); } }
     private void OnIntroNotNeeded(PacketReader r) { /* skip intro, go to game */ }

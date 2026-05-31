@@ -151,6 +151,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
         httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
         httpServer.createContext("/api/gacha-banners",    ex -> handleAuth(ex, this::handleGachaBanners));
+        httpServer.createContext("/api/server-channels", ex -> handleAuth(ex, this::handleServerChannels));
         httpServer.createContext("/api/intro-scenes",    ex -> handleAuth(ex, this::handleIntroScenes));
         httpServer.createContext("/api/login-screen",    ex -> handleAuth(ex, this::handleLoginScreen));
         httpServer.createContext("/api/gacha-currencies",ex -> handleAuth(ex, this::handleGachaCurrencies));
@@ -1762,6 +1763,23 @@ public class AdminApiServer {
     /** Anti-cheat violations log */
 
 
+
+
+    private void handleServerChannels(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT sc.*, gs.name as server_name FROM server_channels sc JOIN game_servers gs ON gs.id=sc.server_id ORDER BY sc.server_id,sc.channel_number"), "channels");
+            } else {
+                var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "create" -> { c.prepareStatement("INSERT INTO server_channels (server_id,channel_number,channel_name,max_players) VALUES ("+num(b,"server_id")+","+num(b,"channel_number")+",'"+str(b,"channel_name").replace("'","")+"',"+num(b,"max_players")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "toggle" -> { c.prepareStatement("UPDATE server_channels SET is_active=1-is_active WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
 
     private void handleIntroScenes(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
