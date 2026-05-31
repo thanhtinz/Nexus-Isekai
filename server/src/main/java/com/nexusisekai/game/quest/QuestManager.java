@@ -22,6 +22,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class QuestManager {
 
     private static final Logger log = LoggerFactory.getLogger(QuestManager.class);
+
+    private static QuestManager INSTANCE;
+    public static synchronized QuestManager getInstance() {
+        if (INSTANCE == null) INSTANCE = new QuestManager();
+        return INSTANCE;
+    }
     private final ObjectMapper mapper = new ObjectMapper();
 
     // Cache quest templates

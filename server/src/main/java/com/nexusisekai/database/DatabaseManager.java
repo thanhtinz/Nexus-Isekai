@@ -17,6 +17,12 @@ public class DatabaseManager {
     private static final Logger log = LoggerFactory.getLogger(DatabaseManager.class);
     private static HikariDataSource ds;
 
+    // Singleton accessor — 353+ call sites dùng DatabaseManager.getInstance().getConnection()
+    private static final DatabaseManager INSTANCE = new DatabaseManager();
+    public static DatabaseManager getInstance() { return INSTANCE; }
+    /** Instance method (delegate to static) cho pattern getInstance().getConnection() */
+    public Connection getConnectionInstance() throws SQLException { return getConnection(); }
+
     public static void init(ServerConfig config) {
         HikariConfig hc = new HikariConfig();
         hc.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8",

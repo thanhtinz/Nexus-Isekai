@@ -20,6 +20,19 @@ public class ServerConfig {
     private int    maxOnline = 2000;
     private Properties props = new Properties(); // lưu lại để getProperty() sau
 
+
+    // Singleton — dùng bởi WebShopServer, AdminApiServer
+    private static ServerConfig INSTANCE;
+    public static synchronized ServerConfig getInstance() {
+        if (INSTANCE == null) INSTANCE = load();
+        return INSTANCE;
+    }
+
+    /** Đọc property tuỳ ý từ server.properties (fallback default) */
+    public String get(String key, String def) {
+        return props.getProperty(key, def);
+    }
+
     public static ServerConfig load() {
         ServerConfig cfg = new ServerConfig();
         File f = new File("server.properties");

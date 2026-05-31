@@ -15,6 +15,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ItemManager {
 
     private static final Logger log = LoggerFactory.getLogger(ItemManager.class);
+
+    // Singleton — dùng bởi QuestManager, GiftCodeManager, MissionPassManager,
+    // FarmingManager, MentorManager, InventoryHandler, ExtendedHandlers...
+    private static ItemManager INSTANCE;
+    public static synchronized ItemManager getInstance() {
+        if (INSTANCE == null) INSTANCE = new ItemManager();
+        return INSTANCE;
+    }
     private final ObjectMapper mapper = new ObjectMapper();
 
     // item_id → ItemTemplate

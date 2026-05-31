@@ -1,6 +1,7 @@
 package com.nexusisekai.network.handler;
 
 import com.nexusisekai.database.DatabaseManager;
+import com.nexusisekai.database.SqlSafe;
 import com.nexusisekai.game.service.*;
 import com.nexusisekai.core.CacheManager;
 import com.nexusisekai.game.entity.Player;
@@ -854,7 +855,7 @@ public class ExtendedHandlers {
         Player p = session.getPlayer(); if (p == null) return;
         long mailId = buf.readLong();
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
-            c.prepareStatement("UPDATE player_mail SET is_read=1 WHERE id=" + mailId + " AND recipient_id=" + p.getCharId()).executeUpdate();
+            SqlSafe.update(c, "UPDATE player_mail SET is_read=1 WHERE id=? AND recipient_id=?", mailId, p.getCharId());
         } catch (Exception e) {}
     }
 
@@ -866,8 +867,22 @@ public class ExtendedHandlers {
             ps.setLong(1, mailId); ps.setLong(2, p.getCharId());
             ResultSet rs = ps.executeQuery();
             if (!rs.next()) { msg(session, "Khong co vat pham."); return; }
-            // TODO: parse attachment_json and give items
-            c.prepareStatement("UPDATE player_mail SET is_claimed=1 WHERE id=" + mailId).executeUpdate();
+            String attachJson = rs.getString("attachment_json");
+            // attachment format: "itemId:qty,itemId:qty" hoặc "gold:1000" / "diamond:50"
+            if (attachJson != null && !attachJson.isBlank()) {
+                for (String part : attachJson.split(",")) {
+                    String[] kv = part.trim().split(":");
+                    if (kv.length != 2) continue;
+                    String key = kv[0].trim();
+                    int amount = Integer.parseInt(kv[1].trim());
+                    switch (key) {
+                        case "gold"    -> SqlSafe.update(c, "UPDATE characters SET gold=gold+? WHERE id=?", amount, p.getCharId());
+                        case "diamond" -> SqlSafe.update(c, "UPDATE characters SET diamond=diamond+? WHERE id=?", amount, p.getCharId());
+                        default        -> com.nexusisekai.game.shop.ItemManager.getInstance().giveItem(p.getCharId(), Integer.parseInt(key), amount);
+                    }
+                }
+            }
+            SqlSafe.update(c, "UPDATE player_mail SET is_claimed=1 WHERE id=? AND recipient_id=?", mailId, p.getCharId());
             msg(session, "Nhan vat pham thanh cong!");
         } catch (Exception e) { msg(session, "Loi."); }
     }
@@ -876,7 +891,7 @@ public class ExtendedHandlers {
         Player p = session.getPlayer(); if (p == null) return;
         long mailId = buf.readLong();
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
-            c.prepareStatement("DELETE FROM player_mail WHERE id=" + mailId + " AND recipient_id=" + p.getCharId()).executeUpdate();
+            SqlSafe.update(c, "DELETE FROM player_mail WHERE id=? AND recipient_id=?", mailId, p.getCharId());
         } catch (Exception e) {}
     }
 

@@ -97,7 +97,6 @@ public class GuildHandler {
         }
         session.send(resp);
     }
-}
 
     // Missing methods needed by GameSession dispatch
 

@@ -208,3 +208,35 @@ RefineService, WarehouseService, AchievementService, SocialAuthService
 ### Phần CONTENT (do bạn làm): art, audio, scenes, balance, load test
 
 **Game giờ đã sẵn sàng về mặt code để cắm content vào và chạy.**
+
+---
+
+## CẬP NHẬT — Pass 4: Tìm & fix lỗi COMPILE thật
+
+Audit toàn bộ 79 file Java phát hiện **lỗi compile nghiêm trọng** (đã fix):
+
+| Lỗi | Mức độ | Tác động |
+|---|---|---|
+| `DatabaseManager.getInstance()` không tồn tại | 🔴 CRITICAL | **353 call sites** — server KHÔNG compile |
+| `ItemManager.getInstance()` không tồn tại | 🔴 | 8 call sites |
+| `QuestManager.getInstance()` không tồn tại | 🔴 | 6 call sites |
+| `ServerConfig.getInstance()` + `get()` không tồn tại | 🔴 | 2 call sites |
+| `GuildHandler.java` thừa 1 dấu `}` | 🔴 | Compile error |
+| `ExtendedHandlers` thiếu import `SqlSafe` | 🟠 | Compile error |
+| Mail attachment chỉ là TODO | 🟡 | Logic thiếu |
+
+**Đã fix tất cả:**
+- Thêm singleton `getInstance()` cho DatabaseManager / ItemManager / QuestManager / ServerConfig
+- Sửa brace GuildHandler (33/33 balanced)
+- Thêm import SqlSafe
+- Implement mail attachment (parse "itemId:qty" → giveItem/gold/diamond)
+- Parameterize mail queries (chống injection)
+
+**Kết quả audit:**
+- 79/79 file Java brace/paren balanced ✓
+- 0 getInstance() thiếu định nghĩa ✓
+- 0 SqlSafe/SafeCrud thiếu import ✓
+- Web: tsc 0 errors, build pass ✓
+- TODO còn lại: 1 (SocialAuth OAuth API — cần key khi deploy, đã ghi rõ)
+
+⚠️ **Lưu ý:** Không thể chạy `mvn compile` trong môi trường này (offline, Maven không tải được plugin). Đã verify bằng static analysis (brace balance, method resolution, import check). **Cần chạy `mvn clean package` trên máy có mạng để xác nhận compile + integration cuối cùng.**
