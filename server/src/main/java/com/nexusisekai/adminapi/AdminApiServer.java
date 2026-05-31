@@ -502,10 +502,21 @@ public class AdminApiServer {
 
     private void handleItems(HttpExchange ex) throws Exception {
         if ("GET".equals(ex.getRequestMethod())) {
+            // ?category=farm_seed để lọc theo danh mục; mặc định tất cả, sắp theo danh mục rồi cat_no
+            String q = ex.getRequestURI().getQuery();
+            String cat = null;
+            if (q != null) for (String kv : q.split("&")) if (kv.startsWith("category=")) cat = kv.substring(9);
             List<Map<String,Object>> list = new ArrayList<>();
-            try (Connection conn = DatabaseManager.getConnection();
-                 ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM items")) {
-                while (rs.next()) list.add(rsToMap(rs, "id","name","description","type","level_req","sell_price","buy_price","icon_id","is_active"));
+            try (Connection conn = DatabaseManager.getConnection()) {
+                PreparedStatement ps;
+                if (cat != null && !cat.isEmpty()) {
+                    ps = conn.prepareStatement("SELECT * FROM items WHERE category=? ORDER BY cat_no");
+                    ps.setString(1, safeStr(cat));
+                } else {
+                    ps = conn.prepareStatement("SELECT * FROM items ORDER BY category, cat_no");
+                }
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) list.add(rsToMap(rs, "id","category","cat_no","name","description","type","level_req","sell_price","buy_price","icon_id","is_active"));
             }
             sendJson(ex, 200, Map.of("items", list));
         } else if ("POST".equals(ex.getRequestMethod())) {
@@ -513,21 +524,24 @@ public class AdminApiServer {
             try (Connection conn = DatabaseManager.getConnection()) {
                 if (body.get("id") != null) {
                     PreparedStatement ps = conn.prepareStatement(
-                            "UPDATE items SET name=?,description=?,type=?,class_req=?,level_req=?,sell_price=?,buy_price=?,icon_id=?,stats_json=?,is_active=? WHERE id=?");
+                            "UPDATE items SET name=?,description=?,type=?,class_req=?,level_req=?,sell_price=?,buy_price=?,icon_id=?,stats_json=?,is_active=?,category=?,cat_no=? WHERE id=?");
                     ps.setString(1,str(body,"name")); ps.setString(2,str(body,"description"));
                     ps.setInt(3,num(body,"type")); ps.setInt(4,num(body,"class_req"));
                     ps.setInt(5,num(body,"level_req")); ps.setInt(6,num(body,"sell_price"));
                     ps.setInt(7,num(body,"buy_price")); ps.setInt(8,num(body,"icon_id"));
                     ps.setString(9,str(body,"stats_json")); ps.setInt(10,num(body,"is_active"));
-                    ps.setInt(11,num(body,"id")); ps.executeUpdate();
+                    ps.setString(11,safeStr(str(body,"category"))); ps.setInt(12,num(body,"cat_no"));
+                    ps.setInt(13,num(body,"id")); ps.executeUpdate();
                 } else {
                     PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO items (name,description,type,class_req,level_req,sell_price,buy_price,icon_id,stats_json) VALUES (?,?,?,?,?,?,?,?,?)");
+                            "INSERT INTO items (name,description,type,class_req,level_req,sell_price,buy_price,icon_id,stats_json,category,cat_no) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
                     ps.setString(1,str(body,"name")); ps.setString(2,str(body,"description"));
                     ps.setInt(3,num(body,"type")); ps.setInt(4,num(body,"class_req"));
                     ps.setInt(5,num(body,"level_req")); ps.setInt(6,num(body,"sell_price"));
                     ps.setInt(7,num(body,"buy_price")); ps.setInt(8,num(body,"icon_id"));
-                    ps.setString(9,str(body,"stats_json")); ps.executeUpdate();
+                    ps.setString(9,str(body,"stats_json"));
+                    ps.setString(10,safeStr(str(body,"category"))); ps.setInt(11,num(body,"cat_no"));
+                    ps.executeUpdate();
                 }
             }
             world.getItemManager().loadAll();

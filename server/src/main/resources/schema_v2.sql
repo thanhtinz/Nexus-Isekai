@@ -3538,3 +3538,25 @@ INSERT IGNORE INTO farm_animals (id,name,animal_type,feed_item_id,produce_item_i
  (3,'Thải Vũ Điểu','bird', 6201, 6303,  90, 2, 1080),
  (4,'Linh Tằm',    'bug',  6201, 6304, 150, 1, 1440),
  (5,'Linh Ngư',    'fish', 6203, 6301,  80, 2, 960);
+
+-- ═════════════════════════════════════════════════════════════
+-- QUẢN LÝ ITEM THEO DANH MỤC: category + cat_no (số thứ tự trong danh mục, từ 1)
+-- id giữ nguyên là khóa duy nhất; admin/asset dùng category + cat_no
+-- ═════════════════════════════════════════════════════════════
+ALTER TABLE items ADD COLUMN IF NOT EXISTS category VARCHAR(24) NOT NULL DEFAULT 'misc';
+ALTER TABLE items ADD COLUMN IF NOT EXISTS cat_no   INT NOT NULL DEFAULT 0;
+
+-- Điền danh mục theo dải id (id = mốc + cat_no)
+UPDATE items SET category='weapon',       cat_no=id-1000 WHERE id BETWEEN 1000 AND 1999;
+UPDATE items SET category='armor',        cat_no=id-2000 WHERE id BETWEEN 2000 AND 2999;
+UPDATE items SET category='accessory',    cat_no=id-3000 WHERE id BETWEEN 3000 AND 3999;
+UPDATE items SET category='consumable',   cat_no=id-4000 WHERE id BETWEEN 4000 AND 4999;
+UPDATE items SET category='material',     cat_no=id-5000 WHERE id BETWEEN 5000 AND 5999;
+UPDATE items SET category='farm_seed',    cat_no=id-6000 WHERE id BETWEEN 6000 AND 6099;
+UPDATE items SET category='farm_crop',    cat_no=id-6100 WHERE id BETWEEN 6100 AND 6199;
+UPDATE items SET category='farm_feed',    cat_no=id-6200 WHERE id BETWEEN 6200 AND 6299;
+UPDATE items SET category='farm_produce', cat_no=id-6300 WHERE id BETWEEN 6300 AND 6399;
+UPDATE items SET category='farm_tool',    cat_no=id-6400 WHERE id BETWEEN 6400 AND 6499;
+UPDATE items SET category='gem',          cat_no=id-7000 WHERE id BETWEEN 7000 AND 7999;
+UPDATE items SET category='cosmetic',     cat_no=id-8000 WHERE id BETWEEN 8000 AND 8999;
+UPDATE items SET category='quest',        cat_no=id-9000 WHERE id BETWEEN 9000 AND 9999;
