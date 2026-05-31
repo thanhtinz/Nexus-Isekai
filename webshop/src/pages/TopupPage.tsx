@@ -50,7 +50,7 @@ function PackageCard({
       </div>
 
       {/* Amount */}
-      <div className="text-2xl font-display font-bold text-surface-100">
+      <div className="text-2xl font-display font-bold text-[#2a2350]">
         {totalDiamond.toLocaleString('vi-VN')}
       </div>
       <div className="text-xs text-gold-500/80 font-medium mt-0.5">
@@ -58,8 +58,8 @@ function PackageCard({
       </div>
 
       {/* Price */}
-      <div className="mt-3 pt-3 border-t border-white/5">
-        <span className="text-surface-100 font-semibold">
+      <div className="mt-3 pt-3 border-t border-[#ece3d0]">
+        <span className="text-[#2a2350] font-semibold">
           {pkg.price_vnd.toLocaleString('vi-VN')}đ
         </span>
       </div>
@@ -67,7 +67,7 @@ function PackageCard({
       {/* Selection indicator */}
       {selected && (
         <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center">
-          <Check size={12} className="text-white" />
+          <Check size={12} className="text-[#2a2350]" />
         </div>
       )}
     </button>
@@ -85,7 +85,7 @@ function CopyButton({ value }: { value: string }) {
   return (
     <button
       onClick={copy}
-      className="p-1.5 rounded hover:bg-white/5 text-surface-200/50 hover:text-surface-200 transition-colors"
+      className="p-1.5 rounded hover:bg-[#f6f1e6] text-[#5b538080] hover:text-[#5b5380] transition-colors"
       title="Sao chép"
     >
       {copied ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
@@ -96,10 +96,10 @@ function CopyButton({ value }: { value: string }) {
 //  Transfer Info Row 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-      <span className="text-xs text-surface-200/50">{label}</span>
+    <div className="flex items-center justify-between py-2 border-b border-[#ece3d0] last:border-0">
+      <span className="text-xs text-[#5b538080]">{label}</span>
       <div className="flex items-center gap-1.5">
-        <span className="text-sm font-medium text-surface-100">{value}</span>
+        <span className="text-sm font-medium text-[#2a2350]">{value}</span>
         <CopyButton value={value} />
       </div>
     </div>
@@ -195,7 +195,7 @@ export function TopupPage() {
             <Star size={18} className="text-gold-500 flex-shrink-0" />
             <div>
               <p className="font-semibold text-gold-400 text-sm">Nạp lần đầu nhận thưởng đặc biệt!</p>
-              <p className="text-xs text-surface-200/60 mt-0.5">
+              <p className="text-xs text-[#5b538099] mt-0.5">
                 Nhận vật phẩm khởi đầu + nhân vật khi nạp lần đầu tiên.
               </p>
             </div>
@@ -204,14 +204,14 @@ export function TopupPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 mb-6 p-1 bg-surface-850 rounded-xl w-fit border border-white/5">
+      <div className="flex items-center gap-1 mb-6 p-1 bg-[#fffdf7] rounded-xl w-fit border border-[#ece3d0]">
         {([['pay', QrCode, 'Nạp Game'], ['history', History, 'Lịch Sử']] as const).map(([key, Icon, label]) => (
           <button
             key={key}
             onClick={() => { setTab(key as any); if (key === 'history') loadHistory() }}
             className={clsx(
               'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-              tab === key ? 'bg-brand-500 text-white shadow' : 'text-surface-200/60 hover:text-surface-200'
+              tab === key ? 'bg-brand-500 text-[#2a2350] shadow' : 'text-[#5b538099] hover:text-[#5b5380]'
             )}
           >
             <Icon size={14} />
@@ -303,15 +303,15 @@ export function TopupPage() {
                     </div>
                   )}
 
-                  <p className="text-xs text-surface-200/40 text-center">
+                  <p className="text-xs text-[#5b5380]/40 text-center">
                     Diamond sẽ được cộng tự động sau khi xác nhận (1-5 phút).
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="card p-8 text-center border-dashed border-2 border-white/10">
+              <div className="card p-8 text-center border-dashed border-2 border-[#ece3d0]">
                 <Gem size={32} className="text-brand-500/40 mx-auto mb-3" />
-                <p className="text-surface-200/50 text-sm">Chọn gói nạp để xem thông tin thanh toán</p>
+                <p className="text-[#5b538080] text-sm">Chọn gói nạp để xem thông tin thanh toán</p>
               </div>
             )}
           </div>
@@ -323,45 +323,45 @@ export function TopupPage() {
           <h2 className="section-header">Lịch sử nạp</h2>
           {history.length === 0 ? (
             <div className="card p-12 text-center">
-              <History size={32} className="text-surface-200/20 mx-auto mb-3" />
-              <p className="text-surface-200/40 text-sm">Chưa có giao dịch nào</p>
+              <History size={32} className="text-[#5b5380]/20 mx-auto mb-3" />
+              <p className="text-[#5b5380]/40 text-sm">Chưa có giao dịch nào</p>
             </div>
           ) : (
             <div className="card overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/5">
-                    <th className="text-left px-4 py-3 text-xs font-medium text-surface-200/50 uppercase tracking-wide">
+                  <tr className="border-b border-[#ece3d0]">
+                    <th className="text-left px-4 py-3 text-xs font-medium text-[#5b538080] uppercase tracking-wide">
                       Thời gian
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-surface-200/50 uppercase tracking-wide">
+                    <th className="text-left px-4 py-3 text-xs font-medium text-[#5b538080] uppercase tracking-wide">
                       Gói nạp
                     </th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-surface-200/50 uppercase tracking-wide">
+                    <th className="text-right px-4 py-3 text-xs font-medium text-[#5b538080] uppercase tracking-wide">
                       Diamond
                     </th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-surface-200/50 uppercase tracking-wide">
+                    <th className="text-right px-4 py-3 text-xs font-medium text-[#5b538080] uppercase tracking-wide">
                       Số tiền
                     </th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-surface-200/50 uppercase tracking-wide">
+                    <th className="text-right px-4 py-3 text-xs font-medium text-[#5b538080] uppercase tracking-wide">
                       Trạng thái
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {history.map(h => (
-                    <tr key={h.id} className="border-b border-white/5 hover:bg-white/2 transition-colors">
-                      <td className="px-4 py-3 text-surface-200/60 tabular-nums text-xs">
+                    <tr key={h.id} className="border-b border-[#ece3d0] hover:bg-white/2 transition-colors">
+                      <td className="px-4 py-3 text-[#5b538099] tabular-nums text-xs">
                         {new Date(h.created_at).toLocaleString('vi-VN')}
                       </td>
-                      <td className="px-4 py-3 text-surface-100">{h.package_name}</td>
+                      <td className="px-4 py-3 text-[#2a2350]">{h.package_name}</td>
                       <td className="px-4 py-3 text-right">
                         <span className="diamond-count text-sm">
                           <Gem size={13} />
                           {(h.diamond + h.bonus_diamond).toLocaleString('vi-VN')}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right text-surface-200/70 tabular-nums">
+                      <td className="px-4 py-3 text-right text-[#5b5380]/70 tabular-nums">
                         {(h.amount_vnd / 1000).toFixed(0)}k
                       </td>
                       <td className="px-4 py-3 text-right">

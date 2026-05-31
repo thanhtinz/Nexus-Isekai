@@ -29,7 +29,7 @@ function RewardCell({
           ? isPremium
             ? 'bg-gold-500/10 border-gold-500/30 hover:border-gold-500/50 cursor-pointer'
             : 'bg-brand-500/10 border-brand-500/30 hover:border-brand-500/50 cursor-pointer'
-          : 'bg-surface-900 border-white/5 opacity-40'
+          : 'bg-[#fffdf7] border-[#ece3d0] opacity-40'
     )}>
       {/* Icon */}
       <div className={clsx(
@@ -46,21 +46,21 @@ function RewardCell({
       </div>
 
       {/* Amount */}
-      <span className="text-xs font-semibold text-surface-100 text-center leading-tight">
+      <span className="text-xs font-semibold text-[#2a2350] text-center leading-tight">
         {reward.item_id > 0 ? `x${reward.item_qty}` : reward.diamond > 0 ? `${reward.diamond}` : `${reward.gold}`}
       </span>
 
       {/* Claimed check */}
       {claimed && (
         <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
-          <CheckCircle2 size={10} className="text-white" />
+          <CheckCircle2 size={10} className="text-[#2a2350]" />
         </div>
       )}
 
       {/* Lock */}
       {!unlocked && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <Lock size={16} className="text-surface-200/30" />
+          <Lock size={16} className="text-[#5b5380]/30" />
         </div>
       )}
 
@@ -101,7 +101,7 @@ function LevelRow({
       {/* Level number */}
       <div className={clsx(
         'w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0',
-        unlocked ? 'bg-brand-500 text-white' : 'bg-surface-900 text-surface-200/30 border border-white/5'
+        unlocked ? 'bg-brand-500 text-[#2a2350]' : 'bg-[#fffdf7] text-[#5b5380]/30 border border-[#ece3d0]'
       )}>
         {level}
       </div>
@@ -115,12 +115,12 @@ function LevelRow({
             unlocked={unlocked}
           />
         ) : (
-          <div className="h-16 rounded-lg border border-dashed border-white/5" />
+          <div className="h-16 rounded-lg border border-dashed border-[#ece3d0]" />
         )}
       </div>
 
       {/* Separator */}
-      <ChevronRight size={14} className="text-surface-200/20 flex-shrink-0" />
+      <ChevronRight size={14} className="text-[#5b5380]/20 flex-shrink-0" />
 
       {/* Premium reward */}
       <div className="flex-1 relative">
@@ -131,7 +131,7 @@ function LevelRow({
             unlocked={unlocked && hasPremium}
           />
         ) : (
-          <div className="h-16 rounded-lg border border-dashed border-white/5" />
+          <div className="h-16 rounded-lg border border-dashed border-[#ece3d0]" />
         )}
       </div>
     </div>
@@ -142,7 +142,7 @@ function LevelRow({
 function ProgressBar({ current, max }: { current: number; max: number }) {
   const pct = Math.min(100, (current / max) * 100)
   return (
-    <div className="w-full bg-surface-900 rounded-full h-2 overflow-hidden border border-white/5">
+    <div className="w-full bg-[#fffdf7] rounded-full h-2 overflow-hidden border border-[#ece3d0]">
       <div
         className="h-full bg-gradient-to-r from-brand-500 to-brand-400 rounded-full transition-all duration-500"
         style={{ width: `${pct}%` }}
@@ -193,7 +193,7 @@ export function PassPage() {
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-6">
         <BookOpen size={22} className="text-brand-400" />
-        <h1 className="font-display text-2xl font-bold text-surface-100">Sổ Sứ Mệnh</h1>
+        <h1 className="font-display text-2xl font-bold text-[#2a2350]">Sổ Sứ Mệnh</h1>
       </div>
 
       {loading ? (
@@ -204,8 +204,8 @@ export function PassPage() {
         </div>
       ) : !season ? (
         <div className="card p-12 text-center">
-          <BookOpen size={36} className="text-surface-200/20 mx-auto mb-3" />
-          <p className="text-surface-200/40">Chưa có season nào đang hoạt động</p>
+          <BookOpen size={36} className="text-[#5b5380]/20 mx-auto mb-3" />
+          <p className="text-[#5b5380]/40">Chưa có season nào đang hoạt động</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -213,9 +213,9 @@ export function PassPage() {
           <div className="card p-5 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="font-display text-lg font-semibold text-surface-100">{season.name}</h2>
-                <p className="text-sm text-surface-200/50 mt-0.5">{season.description}</p>
-                <p className="text-xs text-surface-200/40 mt-1">
+                <h2 className="font-display text-lg font-semibold text-[#2a2350]">{season.name}</h2>
+                <p className="text-sm text-[#5b538080] mt-0.5">{season.description}</p>
+                <p className="text-xs text-[#5b5380]/40 mt-1">
                   {season.start_date} — {season.end_date}
                 </p>
               </div>
@@ -244,11 +244,11 @@ export function PassPage() {
             {/* Progress */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-surface-200/60">
-                  Level <span className="text-surface-100 font-semibold">{playerPass?.pass_level ?? 1}</span>
+                <span className="text-[#5b538099]">
+                  Level <span className="text-[#2a2350] font-semibold">{playerPass?.pass_level ?? 1}</span>
                   /{season.max_level}
                 </span>
-                <span className="text-surface-200/40 text-xs tabular-nums">
+                <span className="text-[#5b5380]/40 text-xs tabular-nums">
                   {playerPass?.pass_exp ?? 0} / 100 EXP
                 </span>
               </div>
@@ -258,8 +258,8 @@ export function PassPage() {
 
           {/* Column headers */}
           <div className="flex items-center gap-3 px-2">
-            <div className="w-10 text-center text-xs font-medium text-surface-200/40 uppercase">Lv</div>
-            <div className="flex-1 text-center text-xs font-medium text-surface-200/60 uppercase">
+            <div className="w-10 text-center text-xs font-medium text-[#5b5380]/40 uppercase">Lv</div>
+            <div className="flex-1 text-center text-xs font-medium text-[#5b538099] uppercase">
               Miễn Phí
             </div>
             <div className="w-5" />
@@ -287,7 +287,7 @@ export function PassPage() {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-4 text-xs text-surface-200/40 px-2">
+          <div className="flex items-center gap-4 text-xs text-[#5b5380]/40 px-2">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-full bg-brand-500" />
               <span>Đã mở khoá</span>

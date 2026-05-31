@@ -20,7 +20,7 @@ const ITEM_TYPE_LABELS: Record<ItemType, string> = {
 }
 
 const RARITY_LABELS = ['', 'Thường', 'Hiếm', 'Sử Thi', 'Huyền Thoại', 'Thiêng Liêng']
-const RARITY_COLORS = ['', 'text-gray-400', 'text-green-400', 'text-blue-400', 'text-purple-400', 'text-amber-400']
+const RARITY_COLORS = ['', 'text-[#5b5380]', 'text-green-400', 'text-blue-400', 'text-purple-400', 'text-amber-400']
 
 function RarityStars({ rarity }: { rarity: number }) {
   return (
@@ -29,7 +29,7 @@ function RarityStars({ rarity }: { rarity: number }) {
         <Star
           key={i}
           size={10}
-          className={i < rarity ? RARITY_COLORS[rarity] : 'text-white/10'}
+          className={i < rarity ? RARITY_COLORS[rarity] : 'text-[#2a2350]/10'}
           fill={i < rarity ? 'currentColor' : 'none'}
         />
       ))}
@@ -89,7 +89,7 @@ function ItemCard({
 
       {/* Discount badge */}
       {hasDiscount && canPurchase && (
-        <div className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
+        <div className="absolute top-2 left-2 z-10 px-2 py-0.5 bg-red-500 text-[#2a2350] text-xs font-bold rounded-full">
           -{discountPct}%
         </div>
       )}
@@ -97,14 +97,14 @@ function ItemCard({
       {/* Overlay: sold out / limit reached */}
       {!canPurchase && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 rounded-xl">
-          <span className="text-white/80 font-bold text-sm bg-black/50 px-3 py-1 rounded-lg">
+          <span className="text-[#2a2350]/80 font-bold text-sm bg-black/50 px-3 py-1 rounded-lg">
             {soldOut ? 'Hết Hàng' : limitReached ? 'Đã Mua Hết Lượt' : 'Không Thể Mua'}
           </span>
         </div>
       )}
 
       {/* Image / icon */}
-      <div className="h-36 bg-surface-900 rounded-t-xl overflow-hidden flex items-center justify-center border-b border-white/5">
+      <div className="h-36 bg-[#fffdf7] rounded-t-xl overflow-hidden flex items-center justify-center border-b border-[#ece3d0]">
         {item.icon_url ? (
           <img
             src={item.icon_url}
@@ -126,10 +126,10 @@ function ItemCard({
           <RarityStars rarity={3} />
         </div>
 
-        <h3 className="font-semibold text-surface-100 text-sm leading-tight">{item.name}</h3>
+        <h3 className="font-semibold text-[#2a2350] text-sm leading-tight">{item.name}</h3>
 
         {item.description && (
-          <p className="text-xs text-surface-200/50 leading-relaxed line-clamp-2">
+          <p className="text-xs text-[#5b538080] leading-relaxed line-clamp-2">
             {item.description}
           </p>
         )}
@@ -145,7 +145,7 @@ function ItemCard({
           {limitText && (
             <div className={clsx(
               'flex items-center gap-1 text-xs',
-              limitReached ? 'text-red-400/80' : 'text-surface-200/50'
+              limitReached ? 'text-red-400/80' : 'text-[#5b538080]'
             )}>
               <Info size={11} />
               <span>Đã mua: {limitText}</span>
@@ -154,14 +154,14 @@ function ItemCard({
         </div>
 
         {/* Price + buy */}
-        <div className="mt-auto pt-2 border-t border-white/5 flex items-center justify-between gap-2">
+        <div className="mt-auto pt-2 border-t border-[#ece3d0] flex items-center justify-between gap-2">
           <div>
             <div className="diamond-count font-bold">
               <Gem size={14} />
               {item.diamond_price.toLocaleString('vi-VN')}
             </div>
             {hasDiscount && (
-              <div className="text-xs text-surface-200/40 line-through">
+              <div className="text-xs text-[#5b5380]/40 line-through">
                 {item.original_price.toLocaleString('vi-VN')}
               </div>
             )}
@@ -204,14 +204,14 @@ function BuyModal({
       <div className="absolute inset-0 bg-black/70" onClick={onCancel} />
       <div className="relative card p-6 w-full max-w-sm space-y-4 animate-in zoom-in-95 duration-150">
         {/* Close */}
-        <button onClick={onCancel} className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-white/5 text-surface-200/50">
+        <button onClick={onCancel} className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-[#f6f1e6] text-[#5b538080]">
           <X size={16} />
         </button>
 
-        <h3 className="font-display text-lg font-semibold text-surface-100">Xác nhận mua hàng</h3>
+        <h3 className="font-display text-lg font-semibold text-[#2a2350]">Xác nhận mua hàng</h3>
 
         {/* Item preview */}
-        <div className="flex items-center gap-3 p-3 bg-surface-900 rounded-lg border border-white/5">
+        <div className="flex items-center gap-3 p-3 bg-[#fffdf7] rounded-lg border border-[#ece3d0]">
           {item.icon_url ? (
             <img src={item.icon_url} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
           ) : (
@@ -220,14 +220,14 @@ function BuyModal({
             </div>
           )}
           <div>
-            <div className="font-medium text-surface-100 text-sm">{item.name}</div>
-            <div className="text-xs text-surface-200/50">{ITEM_TYPE_LABELS[item.item_type]}</div>
+            <div className="font-medium text-[#2a2350] text-sm">{item.name}</div>
+            <div className="text-xs text-[#5b538080]">{ITEM_TYPE_LABELS[item.item_type]}</div>
           </div>
         </div>
 
         {/* Price */}
-        <div className="flex items-center justify-between p-3 bg-surface-900 rounded-lg">
-          <span className="text-sm text-surface-200/70">Chi phí</span>
+        <div className="flex items-center justify-between p-3 bg-[#fffdf7] rounded-lg">
+          <span className="text-sm text-[#5b5380]/70">Chi phí</span>
           <span className="diamond-count font-bold text-lg">
             <Gem size={16} />
             {item.diamond_price.toLocaleString('vi-VN')}
@@ -236,7 +236,7 @@ function BuyModal({
 
         {/* Balance */}
         <div className="flex items-center justify-between text-sm">
-          <span className="text-surface-200/50">Số dư sau giao dịch</span>
+          <span className="text-[#5b538080]">Số dư sau giao dịch</span>
           <span className={clsx('font-semibold', canAfford ? 'text-emerald-400' : 'text-red-400')}>
             {canAfford
               ? `${((session?.diamond ?? 0) - item.diamond_price).toLocaleString('vi-VN')} diamond`
@@ -335,8 +335,8 @@ export function ShopPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-surface-100">Cửa Hàng</h1>
-          <p className="text-surface-200/50 text-sm mt-1">
+          <h1 className="font-display text-2xl font-bold text-[#2a2350]">Cửa Hàng</h1>
+          <p className="text-[#5b538080] text-sm mt-1">
             Vật phẩm độc quyền, trang phục hiếm không có trong shop ingame
           </p>
         </div>
@@ -351,7 +351,7 @@ export function ShopPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-200/40" />
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5b5380]/40" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -360,8 +360,8 @@ export function ShopPage() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <SlidersHorizontal size={15} className="text-surface-200/40 flex-shrink-0" />
-          <div className="flex items-center gap-1 p-1 bg-surface-850 rounded-lg border border-white/5">
+          <SlidersHorizontal size={15} className="text-[#5b5380]/40 flex-shrink-0" />
+          <div className="flex items-center gap-1 p-1 bg-[#fffdf7] rounded-lg border border-[#ece3d0]">
             {types.map(t => (
               <button
                 key={t.value}
@@ -369,8 +369,8 @@ export function ShopPage() {
                 className={clsx(
                   'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
                   filterType === t.value
-                    ? 'bg-brand-500 text-white shadow'
-                    : 'text-surface-200/60 hover:text-surface-200'
+                    ? 'bg-brand-500 text-[#2a2350] shadow'
+                    : 'text-[#5b538099] hover:text-[#5b5380]'
                 )}
               >
                 {t.label}
@@ -389,8 +389,8 @@ export function ShopPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="card p-12 text-center">
-          <ShoppingBag size={32} className="text-surface-200/20 mx-auto mb-3" />
-          <p className="text-surface-200/40">Không tìm thấy vật phẩm</p>
+          <ShoppingBag size={32} className="text-[#5b5380]/20 mx-auto mb-3" />
+          <p className="text-[#5b5380]/40">Không tìm thấy vật phẩm</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">

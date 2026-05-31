@@ -45,25 +45,25 @@ export default function DownloadPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-[#2a2350]">
       <div className="max-w-2xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-center mb-2 text-yellow-400">Tai Game</h1>
-        <p className="text-center text-gray-400 mb-10">Nexus Isekai — Vong Linh Gioi</p>
+        <p className="text-center text-[#5b5380] mb-10">Nexus Isekai — Vong Linh Gioi</p>
         <div className="grid grid-cols-2 gap-3 mb-4">
           {downloads.slice(0,2).map(d => (
-            <a key={d.key} href={getUrl(d.key)} className="bg-gray-950 hover:bg-gray-800 border border-gray-700 hover:border-gray-500 rounded-xl transition-all hover:scale-[1.02]">
+            <a key={d.key} href={getUrl(d.key)} className="bg-[#fbf7ee] hover:bg-[#fffdf7] border border-[#ece3d0] hover:border-gray-500 rounded-xl transition-all hover:scale-[1.02]">
               {d.badge}
             </a>
           ))}
         </div>
         <div className="grid grid-cols-3 gap-3">
           {downloads.slice(2).map(d => (
-            <a key={d.key} href={getUrl(d.key)} className="bg-gray-950 hover:bg-gray-800 border border-gray-700 hover:border-gray-500 rounded-xl transition-all hover:scale-[1.02]">
+            <a key={d.key} href={getUrl(d.key)} className="bg-[#fbf7ee] hover:bg-[#fffdf7] border border-[#ece3d0] hover:border-gray-500 rounded-xl transition-all hover:scale-[1.02]">
               {d.badge}
             </a>
           ))}
         </div>
-        <p className="text-center text-xs text-gray-500 mt-8">Phien ban: v{getVer()}</p>
+        <p className="text-center text-xs text-[#5b5380] mt-8">Phien ban: v{getVer()}</p>
       </div>
     </div>
   );

@@ -29,18 +29,18 @@ export default function SupportPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-[#2a2350]">
       <div className="max-w-lg mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-center mb-2 text-yellow-400">Ho Tro & Cong Dong</h1>
-        <p className="text-center text-gray-400 mb-10">Theo doi & lien he qua cac kenh</p>
+        <p className="text-center text-[#5b5380] mb-10">Theo doi & lien he qua cac kenh</p>
         <div className="grid gap-3">
           {socials.map(s => (
             <a key={s.name} href={(apiLinks[s.name.toLowerCase()]?.url || s.url)} target="_blank" rel="noopener noreferrer"
               className={`flex items-center gap-4 bg-gradient-to-r ${s.color} rounded-xl p-4 hover:scale-[1.02] transition-transform`}>
-              <SocialIcon d={s.icon} color="text-white" />
+              <SocialIcon d={s.icon} color="text-[#2a2350]" />
               <div>
                 <h3 className="font-bold text-lg">{s.name}</h3>
-                <p className="text-sm text-white/70">{s.desc}</p>
+                <p className="text-sm text-[#2a2350]/70">{s.desc}</p>
               </div>
             </a>
           ))}

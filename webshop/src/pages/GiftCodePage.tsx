@@ -48,8 +48,8 @@ export function GiftCodePage() {
                           bg-brand-500/20 border border-brand-500/30 mb-2">
             <Gift size={28} className="text-brand-400" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-surface-100">Gift Code</h1>
-          <p className="text-surface-200/50 text-sm">
+          <h1 className="font-display text-2xl font-bold text-[#2a2350]">Gift Code</h1>
+          <p className="text-[#5b538080] text-sm">
             Nhập mã code để nhận vật phẩm, diamond, danh hiệu và nhiều phần thưởng khác
           </p>
         </div>
@@ -57,11 +57,11 @@ export function GiftCodePage() {
         {/* Input form */}
         <form onSubmit={handleRedeem} className="card p-6 space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-surface-200/70 uppercase tracking-wide">
+            <label className="text-xs font-medium text-[#5b5380]/70 uppercase tracking-wide">
               Mã Gift Code
             </label>
             <div className="relative">
-              <Tag size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-200/40" />
+              <Tag size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5b5380]/40" />
               <input
                 value={code}
                 onChange={e => setCode(e.target.value.toUpperCase())}
@@ -105,11 +105,11 @@ export function GiftCodePage() {
               </span>
             </div>
 
-            <p className="text-sm text-surface-200/70">{result.message}</p>
+            <p className="text-sm text-[#5b5380]/70">{result.message}</p>
 
             {result.success && result.rewards && result.rewards.length > 0 && (
-              <div className="space-y-1.5 pt-2 border-t border-white/5">
-                <p className="text-xs font-medium text-surface-200/50 uppercase tracking-wide">
+              <div className="space-y-1.5 pt-2 border-t border-[#ece3d0]">
+                <p className="text-xs font-medium text-[#5b538080] uppercase tracking-wide">
                   Phần thưởng nhận được
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -126,8 +126,8 @@ export function GiftCodePage() {
 
         {/* Info */}
         <div className="card p-4 space-y-2">
-          <h3 className="text-sm font-semibold text-surface-100">Lưu ý</h3>
-          <ul className="space-y-1.5 text-xs text-surface-200/50">
+          <h3 className="text-sm font-semibold text-[#2a2350]">Lưu ý</h3>
+          <ul className="space-y-1.5 text-xs text-[#5b538080]">
             <li className="flex items-start gap-1.5">
               <span className="text-brand-400 mt-0.5 flex-shrink-0">•</span>
               Mỗi code chỉ có thể sử dụng một lần cho mỗi nhân vật.

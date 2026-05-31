@@ -33,10 +33,10 @@ export function LoginPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl
                           bg-brand-500 mb-4 shadow-lg shadow-brand-500/30">
-            <span className="font-display font-bold text-white text-xl">NI</span>
+            <span className="font-display font-bold text-[#2a2350] text-xl">NI</span>
           </div>
-          <h1 className="font-display text-2xl font-bold text-surface-100">Nexus Isekai</h1>
-          <p className="text-surface-200/60 text-sm mt-1">Đăng nhập để nạp game và mua vật phẩm</p>
+          <h1 className="font-display text-2xl font-bold text-[#2a2350]">Nexus Isekai</h1>
+          <p className="text-[#5b538099] text-sm mt-1">Đăng nhập để nạp game và mua vật phẩm</p>
         </div>
 
         {/* Form */}
@@ -49,11 +49,11 @@ export function LoginPage() {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-surface-200/70 uppercase tracking-wide">
+            <label className="text-xs font-medium text-[#5b5380]/70 uppercase tracking-wide">
               Tên đăng nhập
             </label>
             <div className="relative">
-              <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-200/40" />
+              <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5b5380]/40" />
               <input
                 type="text"
                 value={username}
@@ -67,11 +67,11 @@ export function LoginPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-surface-200/70 uppercase tracking-wide">
+            <label className="text-xs font-medium text-[#5b5380]/70 uppercase tracking-wide">
               Mật khẩu
             </label>
             <div className="relative">
-              <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-200/40" />
+              <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5b5380]/40" />
               <input
                 type={showPw ? 'text' : 'password'}
                 value={password}
@@ -84,7 +84,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPw(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-200/40 hover:text-surface-200/70"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5b5380]/40 hover:text-[#5b5380]/70"
               >
                 {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
@@ -101,7 +101,7 @@ export function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-surface-200/40 mt-4">
+        <p className="text-center text-xs text-[#5b5380]/40 mt-4">
           Sử dụng tài khoản game để đăng nhập.
         </p>
       </div>
