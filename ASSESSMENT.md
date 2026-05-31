@@ -124,3 +124,46 @@ Tập trung: **(1) bịt lỗ SQL injection, (2) viết logic thật, (3) làm c
 - Hoàn thiện anti-cheat integration vào movement/combat handler
 
 **Tiến độ: ~20% → ~28%.** Core service logic giờ đã có thật, không còn toàn stub.
+
+---
+
+## CẬP NHẬT — Pass 2 (Backend service layer hoàn chỉnh)
+
+### ✅ 12 Services với logic THẬT (verified)
+| Service | Logic | Test |
+|---|---|---|
+| GachaService | RNG weighted + soft/hard pity | ✓ |
+| PvpService | Elo rating K=32 + streak | ✓ 4/4 |
+| AntiCheatService | speed/teleport/dmg/flood | ✓ 4/4 |
+| EnhancementService | +1→+15 rate giảm dần | ✓ RNG 0.349≈0.35 |
+| DailyLoginService | 7-day streak | — |
+| RewardService | grant gold/diamond/exp/item/ticket | — |
+| QuestService | accept/progress/complete | ✓ 3/3 |
+| InventoryService | add/remove/equip | — |
+| TopupService | per-char, idempotent, VIP | ✓ 5/5 |
+| GiftCodeService | per-char, server filter, expiry | — |
+| GuildService | create/join/leave | ✓ 4/4 |
+| MailService | send/broadcast/claim | — |
+
+### Tổng: 27 unit test, logic cốt lõi verified chạy đúng
+
+### ⏳ Hard ceiling — KHÔNG thể tự generate
+Những thứ này cần con người/đội ngũ, không phải code:
+- **Art assets** — sprite nhân vật, animation, UI artwork (~400 PNG)
+- **Audio** — nhạc nền, hiệu ứng (cần composer/sound designer)
+- **Unity scenes** — lắp ráp trong Unity Editor (cần GUI)
+- **Game design balance** — số liệu damage/exp/economy (cần designer + playtesting)
+- **Load test thật** — cần infra + nhiều máy
+
+### Kết luận thực tế
+**Backend code: ~70% hoàn chỉnh** (service layer xong, còn wiring + SQL refactor).
+**Toàn dự án: ~48%** (vì content = phần lớn còn thiếu).
+
+Game KHÔNG thể đạt 100% qua code generation. Phần còn lại bắt buộc cần:
+- Artist (2-3 người, 3-4 tháng)
+- Sound designer (1 người, 1-2 tháng)
+- Game designer (balance + content)
+- QA team (playtesting)
+- DevOps (infra, load test, monitoring)
+
+Đây là giới hạn vật lý, không phải thiếu nỗ lực.

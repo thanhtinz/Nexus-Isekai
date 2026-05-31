@@ -1,5 +1,6 @@
 package com.nexusisekai.network.handler;
 
+import com.nexusisekai.game.service.AntiCheatService;
 import com.nexusisekai.game.entity.Player;
 import com.nexusisekai.game.world.WorldManager;
 import com.nexusisekai.game.world.ZoneManager;
@@ -24,6 +25,8 @@ public class MovementHandler {
      * C2S_MOVE (0x0301) - Player gửi vị trí mới
      * Payload: [float x][float y][byte direction]
      */
+    // AntiCheat: validate before applying movement
+    // if (!AntiCheatService.validateMovement(charId, x, y)) { reject(); return; }
     public static void handleMove(GameSession session, ByteBuf buf) {
         Player player = session.getPlayer();
         if (player == null) return;
