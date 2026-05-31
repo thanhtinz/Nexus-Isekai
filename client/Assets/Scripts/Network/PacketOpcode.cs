@@ -321,6 +321,12 @@ namespace NexusIsekai.Network
         public const short S2C_EVENT_CURRENCY_UPDATE   = 0x1613;
 
 
+        // ── SETTINGS (1Cxx) ───────────────────────────────
+        public const short C2S_SETTINGS_LOAD     = 0x1C01;
+        public const short C2S_SETTINGS_SAVE     = 0x1C02;
+        public const short S2C_SETTINGS_DATA     = 0x1C11;
+        public const short S2C_SETTINGS_DEFAULTS = 0x1C12;
+
         // ── CLASS CHANGE ───────────────────────────────────
         public const short C2S_CLASS_CHANGE    = 0x0250;
         public const short S2C_CLASS_CHANGE_OK = 0x0260;

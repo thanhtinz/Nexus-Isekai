@@ -70,6 +70,12 @@ public final class PacketOpcode {
     public static final short S2C_EVENT_CURRENCY_UPDATE = (short)0x1613;
 
 
+    // ── SETTINGS (1Cxx) ───────────────────────────────────
+    public static final short C2S_SETTINGS_LOAD     = (short)0x1C01;
+    public static final short C2S_SETTINGS_SAVE     = (short)0x1C02;
+    public static final short S2C_SETTINGS_DATA     = (short)0x1C11;
+    public static final short S2C_SETTINGS_DEFAULTS = (short)0x1C12;
+
     // ── CLASS CHANGE (chọn class tại NPC) ─────────────────
     public static final short C2S_CLASS_CHANGE      = (short)0x0250;
     public static final short S2C_CLASS_CHANGE_OK   = (short)0x0260;
@@ -414,6 +420,12 @@ public final class PacketOpcode {
     public static final short S2C_EVENT_CURRENCY_SHOP = (short)0x1612;
     public static final short S2C_EVENT_CURRENCY_UPDATE = (short)0x1613;
 
+
+    // ── SETTINGS (1Cxx) ───────────────────────────────────
+    public static final short C2S_SETTINGS_LOAD     = (short)0x1C01;
+    public static final short C2S_SETTINGS_SAVE     = (short)0x1C02;
+    public static final short S2C_SETTINGS_DATA     = (short)0x1C11;
+    public static final short S2C_SETTINGS_DEFAULTS = (short)0x1C12;
 
     // ── CLASS CHANGE (chọn class tại NPC) ─────────────────
     public static final short C2S_CLASS_CHANGE      = (short)0x0250;

@@ -879,6 +879,36 @@ public class ExtendedHandlers {
     }
 
     // ═══════════════════════════════════════════════════════════
+    // SETTINGS
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleSettingsLoad(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT settings_json FROM player_settings WHERE char_id=?")) {
+            ps.setLong(1, p.getCharId()); ResultSet rs = ps.executeQuery();
+            String json = rs.next() ? rs.getString(1) : "{}";
+            ByteBuf pkt = Unpooled.buffer();
+            pkt.writeShort(PacketOpcode.S2C_SETTINGS_DATA);
+            writeStr(pkt, json);
+            session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleSettingsSave(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        short len = buf.readShort(); byte[] b = new byte[len]; buf.readBytes(b);
+        String json = new String(b, java.nio.charset.StandardCharsets.UTF_8);
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "INSERT INTO player_settings (char_id,settings_json) VALUES (?,?) ON DUPLICATE KEY UPDATE settings_json=?")) {
+            ps.setLong(1, p.getCharId()); ps.setString(2, json); ps.setString(3, json);
+            ps.executeUpdate();
+            msg(session, "Luu cai dat thanh cong!");
+        } catch (Exception e) { msg(session, "Loi luu cai dat."); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // Helpers
     // ═══════════════════════════════════════════════════════════
 

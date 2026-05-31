@@ -147,6 +147,8 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_EVENT_CURRENCY_SHOP, OnEventCurrencyShop);
             d.Register(PacketOpcode.S2C_EVENT_CURRENCY_UPDATE, OnEventCurrencyUpdate);
 
+            d.Register(PacketOpcode.S2C_SETTINGS_DATA,     OnSettingsData);
+            d.Register(PacketOpcode.S2C_SETTINGS_DEFAULTS, OnSettingsDefaults);
             d.Register(PacketOpcode.S2C_CLASS_CHANGE_OK, OnClassChangeOk);
             // Achievement + Daily Login + World Boss + Mail
             d.Register(PacketOpcode.S2C_ACHIEVEMENT_LIST,   OnAchievementList);
@@ -1708,6 +1710,9 @@ namespace NexusIsekai.Game
     private void OnEventStart(PacketReader r) { string name = r.ReadString(); UIManager.Instance?.ShowNotification("Su kien: " + name, UINotificationType.Info); }
     private void OnServerMsg(PacketReader r) { string msg = r.ReadString(); UIManager.Instance?.ShowNotification(msg, UINotificationType.Info); }
     private void OnStoryCg(PacketReader r) { r.ReadInt(); r.ReadString(); }
+    private void OnSettingsData(PacketReader r) { string json = r.ReadString(); /* Apply settings */ }
+    private void OnSettingsDefaults(PacketReader r) { string json = r.ReadString(); /* Load default settings */ }
+
     private void OnClassChangeOk(PacketReader r) {
         int classId = r.ReadInt(); string className = r.ReadString();
         UIManager.Instance?.ShowNotification("Chuyen class: " + className, UINotificationType.Success);

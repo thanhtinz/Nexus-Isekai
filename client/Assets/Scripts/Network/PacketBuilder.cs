@@ -555,6 +555,13 @@ namespace NexusIsekai.Network
         public static void SendEventCurrencyExchange(int currencyId, int amount)
             => Send(new PacketBuilder(PacketOpcode.C2S_EVENT_CURRENCY_EXCHANGE).WriteInt(currencyId).WriteInt(amount));
 
+        // ── SETTINGS ─────────────────────────────────────
+
+        public static void SendSettingsLoad()
+            => Send(new PacketBuilder(PacketOpcode.C2S_SETTINGS_LOAD));
+        public static void SendSettingsSave(string settingsJson)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SETTINGS_SAVE).WriteString(settingsJson));
+
         // ── CLASS CHANGE ─────────────────────────────────
 
         public static void SendClassChange(int classId)
@@ -751,6 +758,13 @@ namespace NexusIsekai.Network
             rw.Write(payload);
             return result.ToArray();
         }
+
+        // ── SETTINGS ─────────────────────────────────────
+
+        public static void SendSettingsLoad()
+            => Send(new PacketBuilder(PacketOpcode.C2S_SETTINGS_LOAD));
+        public static void SendSettingsSave(string settingsJson)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SETTINGS_SAVE).WriteString(settingsJson));
 
         // ── CLASS CHANGE ─────────────────────────────────
 

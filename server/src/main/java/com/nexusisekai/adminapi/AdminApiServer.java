@@ -149,6 +149,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/item-templates",   ex -> handleAuth(ex, this::handleItemTemplates));
         httpServer.createContext("/api/enhance-rates",    ex -> handleAuth(ex, this::handleEnhanceRates));
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
+        httpServer.createContext("/api/settings-defaults",ex -> handleAuth(ex, this::handleSettingsDefaults));
         httpServer.createContext("/api/animations",       ex -> handleAuth(ex, this::handleAnimations));
         httpServer.createContext("/api/achievements",       ex -> handleAuth(ex, this::handleAchievements));
         httpServer.createContext("/api/daily-login",         ex -> handleAuth(ex, this::handleDailyLogin));
@@ -1718,6 +1719,26 @@ public class AdminApiServer {
 
 
     /** CRUD Animation states + class mapping */
+
+    private void handleSettingsDefaults(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String tab = params.getOrDefault("tab", "");
+                String sql = tab.isEmpty()
+                    ? "SELECT * FROM default_settings ORDER BY tab_key, sort_order"
+                    : "SELECT * FROM default_settings WHERE tab_key='" + tab.replace("'","") + "' ORDER BY sort_order";
+                sendTableResult(ex, c.prepareStatement(sql), "settings");
+            } else {
+                var body = parseBody(ex);
+                c.prepareStatement("UPDATE default_settings SET default_value='" + str(body,"default_value").replace("'","") +
+                    "' WHERE tab_key='" + str(body,"tab_key").replace("'","") +
+                    "' AND setting_key='" + str(body,"setting_key").replace("'","") + "'").executeUpdate();
+                sendJson(ex,200,Map.of("success",true));
+            }
+        }
+    }
+
     private void handleAnimations(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             var params = parseQuery(ex.getRequestURI().getQuery());

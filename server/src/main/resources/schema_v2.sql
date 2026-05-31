@@ -2347,3 +2347,152 @@ INSERT INTO character_sprite_config (config_key, config_value, description) VALU
 ('charbase_usage', 'preview', 'Character Base dùng cho: preview khi tạo nhân vật, avatar, portrait'),
 ('render_ppu', '32', 'Pixels Per Unit trong Unity (Farmer = 32px tiles)'),
 ('render_scale', '1', 'Scale nhân vật trong game world (1 = 32px, 2 = 64px hiển thị)');
+
+-- ═════════════════════════════════════════════════════════════
+-- 56. PLAYER SETTINGS — 11 tabs, ~100 options
+-- ═════════════════════════════════════════════════════════════
+
+-- Lưu settings mỗi player dạng JSON blob (đơn giản, flexible)
+CREATE TABLE IF NOT EXISTS player_settings (
+    char_id         BIGINT NOT NULL PRIMARY KEY,
+    settings_json   MEDIUMTEXT NOT NULL DEFAULT '{}',
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Default settings (server gửi cho client mới)
+CREATE TABLE IF NOT EXISTS default_settings (
+    tab_key         VARCHAR(32) NOT NULL,
+    setting_key     VARCHAR(64) NOT NULL,
+    setting_type    VARCHAR(16) NOT NULL DEFAULT 'bool',  -- bool,int,float,enum,slider
+    default_value   VARCHAR(64) NOT NULL DEFAULT 'false',
+    display_name    VARCHAR(64) NOT NULL,
+    description     VARCHAR(128) DEFAULT '',
+    enum_values     VARCHAR(256) DEFAULT '',  -- cho type=enum: 'very_low,low,medium,high,ultra'
+    min_val         FLOAT DEFAULT 0,         -- cho slider
+    max_val         FLOAT DEFAULT 100,
+    sort_order      INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (tab_key, setting_key)
+);
+
+-- ── Tab 1: GAME ──────────────────────────────────────────
+INSERT IGNORE INTO default_settings VALUES
+-- Chien dau
+('game','auto_target','bool','true','Auto Target','Tu dong khoa muc tieu','',0,0,1),
+('game','smart_target','bool','true','Smart Target','Uu tien muc tieu gan nhat','',0,0,2),
+('game','priority_player','bool','false','Uu tien Player','Uu tien tan cong nguoi choi','',0,0,3),
+('game','priority_boss','bool','true','Uu tien Boss','Uu tien tan cong boss','',0,0,4),
+('game','priority_elite','bool','false','Uu tien Elite','Uu tien tan cong elite','',0,0,5),
+('game','show_damage','bool','true','Hien sat thuong','Hien so sat thuong','',0,0,6),
+('game','show_crit','bool','true','Hien chi mang','Hien hieu ung chi mang','',0,0,7),
+('game','show_heal','bool','true','Hien hoi mau','Hien so hoi mau','',0,0,8),
+('game','screen_shake','bool','true','Rung khi trung don','Rung man hinh khi nhan sat thuong','',0,0,9),
+-- Nhat do
+('game','auto_loot','bool','true','Tu nhat do','Tu dong nhat do roi','',0,0,10),
+('game','loot_equip_only','bool','false','Chi nhat trang bi','Chi nhat trang bi roi','',0,0,11),
+('game','loot_rare_only','bool','false','Chi nhat hiem','Chi nhat vat pham hiem tro len','',0,0,12),
+('game','loot_gold_only','bool','false','Chi nhat vang','Chi nhat vang roi','',0,0,13),
+('game','loot_filter','bool','false','Bo loc item','Bat bo loc item nang cao','',0,0,14),
+-- Quest
+('game','auto_accept_quest','bool','false','Auto nhan NV','Tu dong nhan nhiem vu','',0,0,15),
+('game','auto_submit_quest','bool','false','Auto tra NV','Tu dong tra nhiem vu','',0,0,16),
+('game','track_main_quest','bool','true','Theo doi NV chinh','Hien nhiem vu chinh tren man hinh','',0,0,17),
+('game','track_side_quest','bool','true','Theo doi NV phu','Hien nhiem vu phu','',0,0,18),
+
+-- ── Tab 2: GRAPHICS ──────────────────────────────────────
+('graphics','quality','enum','medium','Chat luong','Chat luong do hoa','very_low,low,medium,high,ultra',0,0,1),
+('graphics','fps_limit','enum','60','FPS','Gioi han FPS','30,60,90,120',0,0,2),
+('graphics','show_pet','bool','true','Hien pet','Hien thi pet nguoi khac','',0,0,3),
+('graphics','show_mount','bool','true','Hien mount','Hien thi thu cuoi nguoi khac','',0,0,4),
+('graphics','show_skill_fx','bool','true','Hien hieu ung ky nang','Hien hieu ung ky nang','',0,0,5),
+('graphics','show_others_fx','bool','true','Hien hieu ung nguoi khac','Hien hieu ung ky nang nguoi khac','',0,0,6),
+('graphics','show_title','bool','true','Hien danh hieu','Hien danh hieu tren dau','',0,0,7),
+('graphics','show_wings','bool','true','Hien canh','Hien canh nguoi khac','',0,0,8),
+('graphics','max_visible_players','int','50','Gioi han nguoi choi','So nguoi choi hien thi toi da','',5,200,9),
+('graphics','max_visible_pets','int','20','Gioi han pet','So pet hien thi toi da','',0,100,10),
+('graphics','crowd_mode','bool','false','Che do dong nguoi','Giam hieu ung khi dong','',0,0,11),
+('graphics','battery_saver','bool','false','Tiet kiem pin','Giam FPS va hieu ung de tiet kiem pin','',0,0,12),
+
+-- ── Tab 3: UI ────────────────────────────────────────────
+('ui','ui_scale','slider','1.0','Ti le UI','Ti le phong to/thu nho UI','',0.5,2.0,1),
+('ui','minimap_scale','slider','1.0','Ti le minimap','','',0.5,2.0,2),
+('ui','chat_scale','slider','1.0','Ti le chat','','',0.5,2.0,3),
+('ui','show_name','bool','true','Hien ten','Hien ten nguoi choi','',0,0,4),
+('ui','show_guild_tag','bool','true','Hien guild','Hien ten guild','',0,0,5),
+('ui','show_level','bool','true','Hien level','Hien cap do','',0,0,6),
+('ui','show_hp_bar','bool','true','Hien HP','Hien thanh mau','',0,0,7),
+('ui','float_damage','bool','true','Float Damage','Hien so sat thuong bay','',0,0,8),
+('ui','float_exp','bool','true','Float EXP','Hien EXP nhan duoc','',0,0,9),
+('ui','float_gold','bool','true','Float Gold','Hien vang nhan duoc','',0,0,10),
+('ui','float_loot','bool','true','Float Loot','Hien vat pham nhat duoc','',0,0,11),
+
+-- ── Tab 4: CHAT ──────────────────────────────────────────
+('chat','chat_world','bool','true','Chat World','Hien chat the gioi','',0,0,1),
+('chat','chat_guild','bool','true','Chat Guild','Hien chat guild','',0,0,2),
+('chat','chat_party','bool','true','Chat Party','Hien chat nhom','',0,0,3),
+('chat','chat_pm','bool','true','Chat PM','Hien tin nhan rieng','',0,0,4),
+('chat','chat_cross','bool','true','Chat Cross','Hien chat lien server','',0,0,5),
+('chat','chat_system','bool','true','Chat System','Hien thong bao he thong','',0,0,6),
+('chat','voice_enabled','bool','false','Voice Chat','Bat voice chat','',0,0,7),
+('chat','voice_volume','slider','80','Am luong Voice','Am luong voice chat','',0,100,8),
+('chat','voice_auto_play','bool','true','Tu dong phat Voice','Tu dong phat voice message','',0,0,9),
+('chat','block_guild_invite','bool','false','Chan loi moi guild','Chan loi moi gia nhap guild','',0,0,10),
+('chat','block_trade','bool','false','Chan giao dich','Chan yeu cau giao dich','',0,0,11),
+('chat','block_friend','bool','false','Chan ket ban','Chan loi moi ket ban','',0,0,12),
+
+-- ── Tab 5: GUILD ─────────────────────────────────────────
+('guild','notify_guild','bool','true','TB guild','Thong bao guild chung','',0,0,1),
+('guild','notify_guild_war','bool','true','TB chien guild','Thong bao chien tranh guild','',0,0,2),
+('guild','notify_guild_boss','bool','true','TB boss guild','Thong bao boss guild','',0,0,3),
+('guild','notify_member_online','bool','true','TB thanh vien online','Thong bao khi thanh vien vao game','',0,0,4),
+
+-- ── Tab 6: PARTY ─────────────────────────────────────────
+('party','auto_accept_party','bool','false','Tu dong chap nhan','Tu dong vao nhom khi duoc moi','',0,0,1),
+('party','auto_decline_party','bool','false','Tu dong tu choi','Tu dong tu choi loi moi nhom','',0,0,2),
+('party','auto_follow_leader','bool','false','Tu dong theo doi truong','Di chuyen theo doi truong','',0,0,3),
+('party','show_party_pos','bool','true','Hien vi tri dong doi','Hien vi tri thanh vien nhom tren map','',0,0,4),
+('party','show_party_cd','bool','true','Hien CD dong doi','Hien cooldown ky nang dong doi','',0,0,5),
+
+-- ── Tab 7: NOTIFICATIONS ─────────────────────────────────
+('notify','world_boss','bool','true','World Boss','Thong bao world boss spawn','',0,0,1),
+('notify','event_boss','bool','true','Event Boss','Thong bao event boss','',0,0,2),
+('notify','dungeon_boss','bool','true','Dungeon Boss','Thong bao dungeon boss','',0,0,3),
+('notify','double_exp','bool','true','Double EXP','Thong bao su kien double EXP','',0,0,4),
+('notify','mission_pass','bool','true','Mission Pass','Thong bao mission pass moi','',0,0,5),
+('notify','new_event','bool','true','Event moi','Thong bao event moi','',0,0,6),
+('notify','maintenance','bool','true','Bao tri','Thong bao bao tri','',0,0,7),
+('notify','gift_code','bool','true','Gift Code','Thong bao gift code moi','',0,0,8),
+('notify','admin_msg','bool','true','TB Admin','Thong bao tu admin','',0,0,9),
+('notify','auction_sold','bool','true','Dau gia ban duoc','TB khi vat pham ban duoc','',0,0,10),
+('notify','auction_expired','bool','true','Dau gia het han','TB khi vat pham het han','',0,0,11),
+('notify','auction_outbid','bool','true','Bi tra gia cao hon','TB khi bi tra gia cao hon','',0,0,12),
+('notify','farm_ready','bool','true','Cay truong thanh','TB khi cay da truong thanh','',0,0,13),
+('notify','animal_hungry','bool','true','Vat nuoi doi','TB khi vat nuoi doi','',0,0,14),
+('notify','house_visitor','bool','true','Khach ghe tham','TB khi co nguoi vao nha','',0,0,15),
+
+-- ── Tab 8: AUDIO ─────────────────────────────────────────
+('audio','master_volume','slider','80','Master','Am luong tong','',0,100,1),
+('audio','music_volume','slider','60','Music','Nhac nen','',0,100,2),
+('audio','effect_volume','slider','80','Effect','Hieu ung am thanh','',0,100,3),
+('audio','ui_volume','slider','70','UI','Am thanh giao dien','',0,100,4),
+('audio','voice_volume_audio','slider','80','Voice','Am luong giong noi','',0,100,5),
+('audio','ambient_volume','slider','50','Ambient','Am thanh moi truong','',0,100,6),
+
+-- ── Tab 9: CONTROLS ──────────────────────────────────────
+('controls','joystick_size','slider','1.0','Kich thuoc Joystick','','',0.5,2.0,1),
+('controls','skill_btn_size','slider','1.0','Kich thuoc Skill','','',0.5,2.0,2),
+('controls','btn_opacity','slider','0.7','Do trong suot nut','','',0.1,1.0,3),
+('controls','camera_sensitivity','slider','1.0','Do nhay camera','','',0.1,3.0,4),
+('controls','auto_run','bool','false','Auto Run','Tu dong chay','',0,0,5),
+
+-- ── Tab 10: NETWORK ──────────────────────────────────────
+('network','show_ping','bool','true','Hien Ping','Hien do tre mang','',0,0,1),
+('network','show_fps','bool','true','Hien FPS','Hien so khung hinh','',0,0,2),
+('network','data_saver','bool','false','Tiet kiem du lieu','Giam chat luong de tiet kiem 4G','',0,0,3),
+('network','wifi_only_download','bool','false','Chi tai qua WiFi','Chi tai tai nguyen khi co WiFi','',0,0,4),
+('network','auto_patch','bool','true','Tu tai patch','Tu dong tai ban cap nhat','',0,0,5),
+
+-- ── Tab 11: ACCOUNT ──────────────────────────────────────
+('account','font_large','bool','false','Font lon','Tang kich thuoc chu','',0,0,1),
+('account','colorblind_mode','bool','false','Che do mu mau','Dieu chinh mau cho nguoi mu mau','',0,0,2),
+('account','voice_subtitle','bool','false','Phu de Voice','Hien phu de khi nghe voice','',0,0,3),
+('account','one_hand_mode','bool','false','Che do mot tay','Giao dien cho choi 1 tay','',0,0,4);
