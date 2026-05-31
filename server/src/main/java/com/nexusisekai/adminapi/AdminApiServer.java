@@ -2348,11 +2348,14 @@ public class AdminApiServer {
             var params = parseQuery(ex.getRequestURI().getQuery());
             String charId = params.getOrDefault("char_id", "");
             String type = params.getOrDefault("type", "");
-            String sql = "SELECT * FROM anticheat_log WHERE 1=1";
-            if (!charId.isEmpty()) sql += " AND char_id=" + charId;
-            if (!type.isEmpty()) sql += " AND violation_type='" + type.replace("'","") + "'";
-            sql += " ORDER BY created_at DESC LIMIT 100";
-            sendTableResult(ex, c.prepareStatement(sql), "violations");
+            // SAFE: parameterized query
+            StringBuilder sql = new StringBuilder("SELECT * FROM anticheat_log WHERE 1=1");
+            java.util.List<Object> p = new java.util.ArrayList<>();
+            if (!charId.isEmpty()) { sql.append(" AND char_id=?"); p.add(safeInt(java.util.Map.of("v",charId),"v")); }
+            if (!type.isEmpty()) { sql.append(" AND violation_type=?"); p.add(type); }
+            sql.append(" ORDER BY created_at DESC LIMIT 100");
+            var rows = SqlSafe.query(c, sql.toString(), p.toArray());
+            sendJson(ex, 200, java.util.Map.of("violations", rows));
         }
     }
 
