@@ -98,4 +98,7 @@ namespace NexusIsekai.Game
     public void PlayCharAction(long charId, int actionId) { /* play action anim cho char trong zone */ }
     public void ShowEmote(long charId, int emoteId) { /* hien bieu cam tren dau char */ }
     public void PlayPairAction(long a, long b, int actionId) { /* play pair anim cho 2 char */ }
+
+    public void PlayFurnitureAnimation(long charId, string animState){ /* ngồi ghế/nằm giường/ăn/uống */ }
+    public void StopFurnitureAnimation(long charId){ /* đứng dậy */ }
 }

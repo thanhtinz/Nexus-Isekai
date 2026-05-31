@@ -3326,3 +3326,40 @@ INSERT IGNORE INTO map_portals (map_id, pos_x, pos_y, portal_type, facility_cate
 -- Trên MAP VƯỜN (203) đặt cổng vào NHÀ (house interior 202) — kèm "ảnh ngôi nhà"
 INSERT IGNORE INTO map_portals (map_id, pos_x, pos_y, portal_type, facility_category, label, level_req, icon_id) VALUES
  (203, 250, 150, 'facility', 'housing', 'Vào Nhà', 1, 1);
+
+-- ═════════════════════════════════════════════════════════════
+-- NHÀ 2 TẦNG: Vườn (về nhà tới đây) → cổng → Nội thất nhà
+-- + Tương tác nội thất: ngồi ghế, nằm giường, ăn, uống
+-- ═════════════════════════════════════════════════════════════
+
+-- Vườn = "về nhà" tới đây (trồng trọt + nuôi thú + nhà ngoại thất + cổng vào trong)
+UPDATE maps SET name='Vườn Nhà', file_name='home_garden', map_category='home', instance_scope='personal'
+  WHERE id=203;
+-- Nội thất nhà (vào từ cổng trong vườn)
+UPDATE maps SET name='Nội Thất Nhà', file_name='house_interior', map_category='house_interior', instance_scope='personal'
+  WHERE id=202;
+
+-- Cổng "Về Nhà" tại Làng Khải Nguyên → Vườn (thay cổng farm/housing cũ)
+UPDATE map_portals SET facility_category='home', label='Về Nhà' WHERE map_id=1 AND facility_category='farm';
+DELETE FROM map_portals WHERE map_id=1 AND facility_category='housing';
+
+-- Cổng trong Vườn (map 203) → Nội thất nhà
+INSERT IGNORE INTO map_portals (map_id, pos_x, pos_y, portal_type, facility_category, label, level_req) VALUES
+ (203, 250, 150, 'facility', 'house_interior', 'Vào Nhà', 1);
+
+-- Tương tác nội thất
+ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS interaction_type   VARCHAR(16) NOT NULL DEFAULT 'none'; -- sit,lie,eat,drink,none
+ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS animation_state    VARCHAR(32) NOT NULL DEFAULT '';      -- sit_chair,lie_bed,eat,drink
+ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS interaction_effect VARCHAR(256) NOT NULL DEFAULT '';     -- JSON {"hp_regen":50,"buff":"rested","duration":300}
+ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS is_consumable      TINYINT NOT NULL DEFAULT 0;           -- ăn/uống có tốn không
+
+-- Gán tương tác cho nội thất sẵn có
+UPDATE furniture_catalog SET interaction_type='lie',  animation_state='lie_bed',   interaction_effect='{"hp_regen":80,"mp_regen":80,"buff":"rested","duration":600}' WHERE furniture_type='bed';
+UPDATE furniture_catalog SET interaction_type='sit',  animation_state='sit_chair', interaction_effect='{"hp_regen":30,"mp_regen":30}' WHERE furniture_type='chair';
+UPDATE furniture_catalog SET interaction_type='none', animation_state=''          WHERE furniture_type IN ('decoration','storage','table');
+
+-- Đồ ăn/uống đặt trong nhà (ăn/uống được)
+INSERT IGNORE INTO furniture_catalog (id,name,furniture_type,width,height,gold_price,interaction_type,animation_state,interaction_effect,is_consumable) VALUES
+ (50,'Bàn Ăn Thịnh Soạn','table',2,2,8000,'eat','eat','{"hp_regen":150,"buff":"well_fed","duration":1800}',1),
+ (51,'Bình Nước Mát','decoration',1,1,2000,'drink','drink','{"mp_regen":100,"buff":"refreshed","duration":900}',1),
+ (52,'Lò Sưởi','decoration',2,1,12000,'none','','{"buff":"warm","duration":600}',0);

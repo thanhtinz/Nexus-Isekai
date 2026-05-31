@@ -76,7 +76,7 @@ public class FacilityHandler {
 
         // NHÀ CHUNG: nếu vào "housing" mà đã kết hôn → instance theo marriage
         // → cả hai vợ chồng vào CÙNG một căn nhà.
-        if (category.equals("housing")) {
+        if (category.equals("home") || category.equals("house_interior")) {
             try {
                 var marriage = SocialManager.getInstance().getMarriage(p.getCharId());
                 if (marriage != null && "married".equals(marriage.status)) {
@@ -133,5 +133,86 @@ public class FacilityHandler {
             ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_FACILITY_LEFT);
             pkt.writeInt(retMap); pkt.writeFloat(rx); pkt.writeFloat(ry); s.send(pkt);
         } catch (Exception e) { msg(s, "Loi roi khu vuc"); }
+    }
+
+    /** Tương tác nội thất: ngồi ghế / nằm giường / ăn / uống. */
+    public static void handleFurnitureInteract(GameSession s, ByteBuf buf) {
+        if (!s.isInGame()) return;
+        Player p = s.getPlayer();
+        long furnitureInstanceId = buf.readLong();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            // Lấy nội thất + định nghĩa tương tác (phải thuộc nhà người chơi đang ở)
+            var f = SqlSafe.queryOne(c,
+                "SELECT hf.id, hf.pos_x, hf.pos_y, fc.interaction_type, fc.animation_state, fc.interaction_effect, fc.is_consumable, fc.name " +
+                "FROM house_furniture hf JOIN furniture_catalog fc ON fc.id=hf.furniture_id " +
+                "JOIN houses h ON h.id=hf.house_id " +
+                "WHERE hf.id=? AND (h.char_id=? OR h.spouse_id=?)",
+                furnitureInstanceId, p.getCharId(), p.getCharId());
+            if (f == null) { msg(s, "Khong tim thay vat dung"); return; }
+            String type = (String)f.get("interaction_type");
+            if (type == null || type.equals("none")) { msg(s, "Vat dung nay khong tuong tac duoc"); return; }
+
+            String anim = (String)f.get("animation_state");
+            String effectJson = (String)f.get("interaction_effect");
+            boolean consumable = ((Number)f.get("is_consumable")).intValue() == 1;
+
+            // Áp dụng hiệu ứng hồi phục/buff (parse JSON đơn giản)
+            applyInteractionEffect(p, effectJson);
+
+            // Phát animation cho người trong cùng instance (ngồi/nằm/ăn/uống)
+            var zm = WorldManager.getInstance().getZoneManager();
+            ByteBuf bc = Unpooled.buffer(); bc.writeShort(PacketOpcode.S2C_FURNITURE_INTERACT);
+            bc.writeLong(p.getCharId()); writeStr(bc, anim); bc.writeLong(furnitureInstanceId);
+            broadcastToInstance(zm, p, bc);
+
+            // ăn/uống tốn vật phẩm 1 lần dùng (consumable) → có thể trừ ở đây
+            if (consumable) { /* TODO: trừ lượt/đồ ăn nếu thiết kế hữu hạn */ }
+            log.debug("{} tuong tac {} ({})", p.getName(), f.get("name"), type);
+        } catch (Exception e) { log.warn("furniture interact", e); msg(s, "Loi tuong tac"); }
+    }
+
+    /** Dừng tương tác (đứng dậy khỏi ghế/giường). */
+    public static void handleFurnitureStop(GameSession s, ByteBuf buf) {
+        if (!s.isInGame()) return;
+        Player p = s.getPlayer();
+        var zm = WorldManager.getInstance().getZoneManager();
+        ByteBuf bc = Unpooled.buffer(); bc.writeShort(PacketOpcode.S2C_FURNITURE_STOP);
+        bc.writeLong(p.getCharId());
+        broadcastToInstance(zm, p, bc);
+    }
+
+    /** Hồi HP/MP + buff từ interaction_effect JSON. */
+    private static void applyInteractionEffect(Player p, String json) {
+        if (json == null || json.isBlank()) return;
+        try {
+            // parse JSON tối giản (không phụ thuộc lib): tìm "hp_regen":N, "mp_regen":N
+            int hp = extractInt(json, "hp_regen");
+            int mp = extractInt(json, "mp_regen");
+            if (hp > 0) p.setHp(Math.min(p.getMaxHp(), p.getHp() + hp));
+            if (mp > 0) p.setMp(Math.min(p.getMaxMp(), p.getMp() + mp));
+            // buff name + duration → có thể đẩy vào hệ buff nếu cần
+        } catch (Exception ignored) {}
+    }
+
+    private static int extractInt(String json, String key) {
+        int i = json.indexOf("\"" + key + "\"");
+        if (i < 0) return 0;
+        int colon = json.indexOf(':', i);
+        if (colon < 0) return 0;
+        int j = colon + 1;
+        StringBuilder sb = new StringBuilder();
+        while (j < json.length() && (Character.isDigit(json.charAt(j)) || json.charAt(j)=='-')) { sb.append(json.charAt(j)); j++; }
+        return sb.length() > 0 ? Integer.parseInt(sb.toString()) : 0;
+    }
+
+    /** Broadcast tới mọi người trong cùng instance (hoặc map nếu không instance). */
+    private static void broadcastToInstance(com.nexusisekai.game.world.ZoneManager zm, Player p, ByteBuf pkt) {
+        var zone = zm.getZoneOf(p);
+        if (zone == null) { pkt.release(); return; }
+        for (Player other : zone.getPlayers()) {
+            var sess = com.nexusisekai.network.SessionRegistry.getByCharId(other.getCharId());
+            if (sess != null) sess.send(pkt.copy());
+        }
+        pkt.release();
     }
 }
