@@ -327,6 +327,39 @@ namespace NexusIsekai.Network
         public const short S2C_SETTINGS_DATA     = 0x1C11;
         public const short S2C_SETTINGS_DEFAULTS = 0x1C12;
 
+
+        // ── GACHA ─────────────────────────────────────────────
+        public const short C2S_GACHA_BANNER_LIST = 0x1D01;
+        public const short C2S_GACHA_PULL        = 0x1D02;
+        public const short C2S_GACHA_HISTORY     = 0x1D03;
+        public const short S2C_GACHA_BANNER_LIST = 0x1D11;
+        public const short S2C_GACHA_RESULT      = 0x1D12;
+        public const short S2C_GACHA_HISTORY     = 0x1D13;
+
+        // ── PVP SEASON ───────────────────────────────────────
+        public const short C2S_PVP_SEASON_INFO   = 0x1E01;
+        public const short C2S_PVP_SEASON_RANK   = 0x1E02;
+        public const short C2S_PVP_SEASON_REWARD = 0x1E03;
+        public const short S2C_PVP_SEASON_INFO   = 0x1E11;
+        public const short S2C_PVP_SEASON_RANK   = 0x1E12;
+
+        // ── SOCIAL LOGIN ─────────────────────────────────────
+        public const short C2S_SOCIAL_LOGIN      = 0x1F01;
+        public const short C2S_SOCIAL_LINK       = 0x1F02;
+        public const short C2S_SOCIAL_UNLINK     = 0x1F03;
+        public const short S2C_SOCIAL_LOGIN_OK   = 0x1F11;
+        public const short S2C_SOCIAL_LINK_OK    = 0x1F12;
+
+        // ── TUTORIAL ─────────────────────────────────────────
+        public const short C2S_TUTORIAL_PROGRESS = 0x2001;
+        public const short C2S_TUTORIAL_SKIP     = 0x2002;
+        public const short S2C_TUTORIAL_STEP     = 0x2011;
+        public const short S2C_TUTORIAL_COMPLETE = 0x2012;
+
+        // ── LOCALIZATION ─────────────────────────────────────
+        public const short C2S_LANG_SET          = 0x2101;
+        public const short S2C_LANG_PACK         = 0x2111;
+
         // ── CLASS CHANGE ───────────────────────────────────
         public const short C2S_CLASS_CHANGE    = 0x0250;
         public const short S2C_CLASS_CHANGE_OK = 0x0260;

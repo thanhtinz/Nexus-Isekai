@@ -76,6 +76,42 @@ public final class PacketOpcode {
     public static final short S2C_SETTINGS_DATA     = (short)0x1C11;
     public static final short S2C_SETTINGS_DEFAULTS = (short)0x1C12;
 
+
+    // ── GACHA (1Dxx) ─────────────────────────────────────────
+    public static final short C2S_GACHA_BANNER_LIST = (short)0x1D01;
+    public static final short C2S_GACHA_PULL        = (short)0x1D02;
+    public static final short C2S_GACHA_HISTORY     = (short)0x1D03;
+    public static final short S2C_GACHA_BANNER_LIST = (short)0x1D11;
+    public static final short S2C_GACHA_RESULT      = (short)0x1D12;
+    public static final short S2C_GACHA_HISTORY     = (short)0x1D13;
+
+    // ── PVP SEASON (1Exx) ────────────────────────────────────
+    public static final short C2S_PVP_SEASON_INFO   = (short)0x1E01;
+    public static final short C2S_PVP_SEASON_RANK   = (short)0x1E02;
+    public static final short C2S_PVP_SEASON_REWARD = (short)0x1E03;
+    public static final short S2C_PVP_SEASON_INFO   = (short)0x1E11;
+    public static final short S2C_PVP_SEASON_RANK   = (short)0x1E12;
+
+    // ── SOCIAL LOGIN (1Fxx) ──────────────────────────────────
+    public static final short C2S_SOCIAL_LOGIN      = (short)0x1F01;
+    public static final short C2S_SOCIAL_LINK       = (short)0x1F02;
+    public static final short C2S_SOCIAL_UNLINK     = (short)0x1F03;
+    public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
+    public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
+
+    // ── TUTORIAL (20xx) ──────────────────────────────────────
+    public static final short C2S_TUTORIAL_PROGRESS = (short)0x2001;
+    public static final short C2S_TUTORIAL_SKIP     = (short)0x2002;
+    public static final short S2C_TUTORIAL_STEP     = (short)0x2011;
+    public static final short S2C_TUTORIAL_COMPLETE = (short)0x2012;
+
+    // ── LOCALIZATION (21xx) ──────────────────────────────────
+    public static final short C2S_LANG_SET          = (short)0x2101;
+    public static final short S2C_LANG_PACK         = (short)0x2111;
+
+    // ── ANALYTICS (internal, no C2S) ─────────────────────────
+    public static final short S2C_ANALYTICS_EVENT   = (short)0x2211;
+
     // ── CLASS CHANGE (chọn class tại NPC) ─────────────────
     public static final short C2S_CLASS_CHANGE      = (short)0x0250;
     public static final short S2C_CLASS_CHANGE_OK   = (short)0x0260;
@@ -426,6 +462,42 @@ public final class PacketOpcode {
     public static final short C2S_SETTINGS_SAVE     = (short)0x1C02;
     public static final short S2C_SETTINGS_DATA     = (short)0x1C11;
     public static final short S2C_SETTINGS_DEFAULTS = (short)0x1C12;
+
+
+    // ── GACHA (1Dxx) ─────────────────────────────────────────
+    public static final short C2S_GACHA_BANNER_LIST = (short)0x1D01;
+    public static final short C2S_GACHA_PULL        = (short)0x1D02;
+    public static final short C2S_GACHA_HISTORY     = (short)0x1D03;
+    public static final short S2C_GACHA_BANNER_LIST = (short)0x1D11;
+    public static final short S2C_GACHA_RESULT      = (short)0x1D12;
+    public static final short S2C_GACHA_HISTORY     = (short)0x1D13;
+
+    // ── PVP SEASON (1Exx) ────────────────────────────────────
+    public static final short C2S_PVP_SEASON_INFO   = (short)0x1E01;
+    public static final short C2S_PVP_SEASON_RANK   = (short)0x1E02;
+    public static final short C2S_PVP_SEASON_REWARD = (short)0x1E03;
+    public static final short S2C_PVP_SEASON_INFO   = (short)0x1E11;
+    public static final short S2C_PVP_SEASON_RANK   = (short)0x1E12;
+
+    // ── SOCIAL LOGIN (1Fxx) ──────────────────────────────────
+    public static final short C2S_SOCIAL_LOGIN      = (short)0x1F01;
+    public static final short C2S_SOCIAL_LINK       = (short)0x1F02;
+    public static final short C2S_SOCIAL_UNLINK     = (short)0x1F03;
+    public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
+    public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
+
+    // ── TUTORIAL (20xx) ──────────────────────────────────────
+    public static final short C2S_TUTORIAL_PROGRESS = (short)0x2001;
+    public static final short C2S_TUTORIAL_SKIP     = (short)0x2002;
+    public static final short S2C_TUTORIAL_STEP     = (short)0x2011;
+    public static final short S2C_TUTORIAL_COMPLETE = (short)0x2012;
+
+    // ── LOCALIZATION (21xx) ──────────────────────────────────
+    public static final short C2S_LANG_SET          = (short)0x2101;
+    public static final short S2C_LANG_PACK         = (short)0x2111;
+
+    // ── ANALYTICS (internal, no C2S) ─────────────────────────
+    public static final short S2C_ANALYTICS_EVENT   = (short)0x2211;
 
     // ── CLASS CHANGE (chọn class tại NPC) ─────────────────
     public static final short C2S_CLASS_CHANGE      = (short)0x0250;

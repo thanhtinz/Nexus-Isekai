@@ -147,6 +147,18 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_EVENT_CURRENCY_SHOP, OnEventCurrencyShop);
             d.Register(PacketOpcode.S2C_EVENT_CURRENCY_UPDATE, OnEventCurrencyUpdate);
 
+
+            // Gacha + PvP Season + Social + Tutorial + Lang
+            d.Register(PacketOpcode.S2C_GACHA_BANNER_LIST, OnGachaBannerList);
+            d.Register(PacketOpcode.S2C_GACHA_RESULT,      OnGachaResult);
+            d.Register(PacketOpcode.S2C_GACHA_HISTORY,     OnGachaHistory);
+            d.Register(PacketOpcode.S2C_PVP_SEASON_INFO,   OnPvpSeasonInfo);
+            d.Register(PacketOpcode.S2C_PVP_SEASON_RANK,   OnPvpSeasonRank);
+            d.Register(PacketOpcode.S2C_SOCIAL_LOGIN_OK,   OnSocialLoginOk);
+            d.Register(PacketOpcode.S2C_SOCIAL_LINK_OK,    OnSocialLinkOk);
+            d.Register(PacketOpcode.S2C_TUTORIAL_STEP,     OnTutorialStep);
+            d.Register(PacketOpcode.S2C_TUTORIAL_COMPLETE,  OnTutorialComplete);
+            d.Register(PacketOpcode.S2C_LANG_PACK,         OnLangPack);
             d.Register(PacketOpcode.S2C_SETTINGS_DATA,     OnSettingsData);
             d.Register(PacketOpcode.S2C_SETTINGS_DEFAULTS, OnSettingsDefaults);
             d.Register(PacketOpcode.S2C_CLASS_CHANGE_OK, OnClassChangeOk);
@@ -1710,6 +1722,24 @@ namespace NexusIsekai.Game
     private void OnEventStart(PacketReader r) { string name = r.ReadString(); UIManager.Instance?.ShowNotification("Su kien: " + name, UINotificationType.Info); }
     private void OnServerMsg(PacketReader r) { string msg = r.ReadString(); UIManager.Instance?.ShowNotification(msg, UINotificationType.Info); }
     private void OnStoryCg(PacketReader r) { r.ReadInt(); r.ReadString(); }
+
+    // ── GACHA + PVP + SOCIAL + TUTORIAL + LANG ──────────
+
+    private void OnGachaBannerList(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadString(); r.ReadInt(); r.ReadInt(); r.ReadInt(); } }
+    private void OnGachaResult(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadString(); r.ReadInt(); r.ReadByte(); } UIManager.Instance?.ShowNotification("Trieu hoi thanh cong!", UINotificationType.Success); }
+    private void OnGachaHistory(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadString(); r.ReadInt(); r.ReadByte(); r.ReadInt(); } }
+
+    private void OnPvpSeasonInfo(PacketReader r) { r.ReadInt(); r.ReadString(); r.ReadInt(); r.ReadInt(); r.ReadInt(); r.ReadString(); }
+    private void OnPvpSeasonRank(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadString(); r.ReadInt(); r.ReadInt(); r.ReadInt(); r.ReadString(); } }
+
+    private void OnSocialLoginOk(PacketReader r) { bool ok = r.ReadBool(); string msg = r.ReadString(); }
+    private void OnSocialLinkOk(PacketReader r) { string provider = r.ReadString(); bool ok = r.ReadBool(); UIManager.Instance?.ShowNotification("Lien ket " + provider + " thanh cong!", UINotificationType.Success); }
+
+    private void OnTutorialStep(PacketReader r) { string step = r.ReadString(); string title = r.ReadString(); string desc = r.ReadString(); string target = r.ReadString(); string arrow = r.ReadString(); }
+    private void OnTutorialComplete(PacketReader r) { UIManager.Instance?.ShowNotification("Hoan thanh huong dan!", UINotificationType.Success); }
+
+    private void OnLangPack(PacketReader r) { string json = r.ReadString(); /* Apply language pack */ }
+
     private void OnSettingsData(PacketReader r) { string json = r.ReadString(); /* Apply settings */ }
     private void OnSettingsDefaults(PacketReader r) { string json = r.ReadString(); /* Load default settings */ }
 

@@ -150,6 +150,18 @@ public class AdminApiServer {
         httpServer.createContext("/api/enhance-rates",    ex -> handleAuth(ex, this::handleEnhanceRates));
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
         httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
+        httpServer.createContext("/api/gacha-banners",    ex -> handleAuth(ex, this::handleGachaBanners));
+        httpServer.createContext("/api/gacha-pool",       ex -> handleAuth(ex, this::handleGachaPool));
+        httpServer.createContext("/api/pvp-seasons",      ex -> handleAuth(ex, this::handlePvpSeasons));
+        httpServer.createContext("/api/push-campaigns",   ex -> handleAuth(ex, this::handlePushCampaigns));
+        httpServer.createContext("/api/push-tokens",      ex -> handleAuth(ex, this::handlePushTokens));
+        httpServer.createContext("/api/analytics-daily",  ex -> handleAuth(ex, this::handleAnalyticsDaily));
+        httpServer.createContext("/api/analytics-events", ex -> handleAuth(ex, this::handleAnalyticsEvents));
+        httpServer.createContext("/api/analytics-retention",ex-> handleAuth(ex, this::handleAnalyticsRetention));
+        httpServer.createContext("/api/tutorial-steps",   ex -> handleAuth(ex, this::handleTutorialSteps));
+        httpServer.createContext("/api/localization",     ex -> handleAuth(ex, this::handleLocalization));
+        httpServer.createContext("/api/audio-assets",     ex -> handleAuth(ex, this::handleAudioAssets));
+        httpServer.createContext("/api/social-accounts",  ex -> handleAuth(ex, this::handleSocialAccounts));
         httpServer.createContext("/api/anticheat-log",    ex -> handleAuth(ex, this::handleAnticheatLog));
         httpServer.createContext("/api/device-bans",      ex -> handleAuth(ex, this::handleDeviceBans));
         httpServer.createContext("/api/protection-config",ex -> handleAuth(ex, this::handleProtectionConfig));
@@ -1744,6 +1756,76 @@ public class AdminApiServer {
 
 
     /** Anti-cheat violations log */
+
+    private void handleGachaBanners(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM gacha_banners ORDER BY id"), "banners");
+            else { var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "create" -> { c.prepareStatement("INSERT INTO gacha_banners (name,banner_type,cost_single,cost_multi_10,pity_count) VALUES ('"+str(b,"name").replace("'","")+"','"+str(b,"banner_type").replace("'","")+"',"+num(b,"cost_single")+","+num(b,"cost_multi_10")+","+num(b,"pity_count")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "toggle" -> { c.prepareStatement("UPDATE gacha_banners SET is_active=1-is_active WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+    private void handleGachaPool(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) { sendTableResult(ex, c.prepareStatement("SELECT * FROM gacha_pool ORDER BY banner_id,rarity DESC"), "pool"); }
+    }
+    private void handlePvpSeasons(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) { sendTableResult(ex, c.prepareStatement("SELECT * FROM pvp_seasons ORDER BY id DESC"), "seasons"); }
+    }
+    private void handlePushCampaigns(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM push_campaigns ORDER BY created_at DESC"), "campaigns");
+            else { var b = parseBody(ex);
+                c.prepareStatement("INSERT INTO push_campaigns (title,body,target,status) VALUES ('"+str(b,"title").replace("'","")+"','"+str(b,"body").replace("'","")+"','"+str(b,"target").replace("'","")+"','draft')").executeUpdate();
+                sendJson(ex,200,Map.of("success",true)); }
+        }
+    }
+    private void handlePushTokens(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) { sendTableResult(ex, c.prepareStatement("SELECT COUNT(*) as total, platform FROM push_tokens WHERE is_active=1 GROUP BY platform"), "tokens"); }
+    }
+    private void handleAnalyticsDaily(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) { sendTableResult(ex, c.prepareStatement("SELECT * FROM analytics_daily ORDER BY date_key DESC LIMIT 30"), "daily"); }
+    }
+    private void handleAnalyticsEvents(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            var p = parseQuery(ex.getRequestURI().getQuery()); String type = p.getOrDefault("type","login");
+            sendTableResult(ex, c.prepareStatement("SELECT event_type,COUNT(*) as cnt,DATE(created_at) as d FROM analytics_events WHERE event_type='"+type.replace("'","")+"' GROUP BY d ORDER BY d DESC LIMIT 30"), "events"); }
+    }
+    private void handleAnalyticsRetention(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) { sendTableResult(ex, c.prepareStatement("SELECT * FROM analytics_retention ORDER BY cohort_date DESC,day_n LIMIT 100"), "retention"); }
+    }
+    private void handleTutorialSteps(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM tutorial_steps ORDER BY step_order"), "steps");
+            else { var b = parseBody(ex);
+                c.prepareStatement("UPDATE tutorial_steps SET title='"+str(b,"title").replace("'","")+"',description='"+str(b,"description").replace("'","")+"' WHERE id="+num(b,"id")).executeUpdate();
+                sendJson(ex,200,Map.of("success",true)); }
+        }
+    }
+    private void handleLocalization(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            var p = parseQuery(ex.getRequestURI().getQuery()); String lang = p.getOrDefault("lang","vi");
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM localization WHERE lang_code='"+lang.replace("'","")+"' ORDER BY category,lang_key"), "strings");
+            else { var b = parseBody(ex);
+                c.prepareStatement("INSERT INTO localization (lang_key,lang_code,text_value,category) VALUES ('"+str(b,"lang_key").replace("'","")+"','"+str(b,"lang_code").replace("'","")+"','"+str(b,"text_value").replace("'","")+"','"+str(b,"category").replace("'","")+"') ON DUPLICATE KEY UPDATE text_value=VALUES(text_value)").executeUpdate();
+                sendJson(ex,200,Map.of("success",true)); }
+        }
+    }
+    private void handleAudioAssets(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM audio_assets ORDER BY asset_type,asset_key"), "audio");
+            else { var b = parseBody(ex);
+                c.prepareStatement("INSERT INTO audio_assets (asset_key,asset_type,file_path,description) VALUES ('"+str(b,"asset_key").replace("'","")+"','"+str(b,"asset_type").replace("'","")+"','"+str(b,"file_path").replace("'","")+"','"+str(b,"description").replace("'","")+"') ON DUPLICATE KEY UPDATE file_path=VALUES(file_path)").executeUpdate();
+                sendJson(ex,200,Map.of("success",true)); }
+        }
+    }
+    private void handleSocialAccounts(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) { sendTableResult(ex, c.prepareStatement("SELECT a.id,a.username,a.login_method,a.google_id,a.facebook_id,a.apple_id,a.linked_email FROM accounts a WHERE a.login_method!='local' OR a.google_id IS NOT NULL ORDER BY a.id DESC LIMIT 100"), "accounts"); }
+    }
+
     private void handleAnticheatLog(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             var params = parseQuery(ex.getRequestURI().getQuery());

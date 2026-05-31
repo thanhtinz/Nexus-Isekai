@@ -2014,3 +2014,336 @@ INSERT IGNORE INTO protection_config VALUES
 -- Obfuscation
 ('obfuscate_packets','true','Xáo trộn opcode mapping mỗi phiên'),
 ('obfuscate_seed','random','Seed xáo trộn: random hoặc giá trị cố định');
+
+-- ═════════════════════════════════════════════════════════════
+-- GACHA / TRIỆU HỒI
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS gacha_banners (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    name            VARCHAR(64) NOT NULL,
+    banner_type     VARCHAR(16) NOT NULL DEFAULT 'standard',  -- standard,limited,weapon,pet,mount
+    cost_type       VARCHAR(16) NOT NULL DEFAULT 'diamond',
+    cost_single     INT NOT NULL DEFAULT 100,
+    cost_multi_10   INT NOT NULL DEFAULT 900,
+    pity_count      INT NOT NULL DEFAULT 80,        -- guaranteed SSR after N pulls
+    start_date      TIMESTAMP NULL,
+    end_date        TIMESTAMP NULL,
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    banner_image    VARCHAR(128) DEFAULT '',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS gacha_pool (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    banner_id       INT NOT NULL,
+    reward_type     VARCHAR(16) NOT NULL,            -- item,pet,mount,skin,character
+    reward_id       INT NOT NULL,
+    rarity          TINYINT NOT NULL DEFAULT 0,      -- 0=N,1=R,2=SR,3=SSR,4=UR
+    weight          INT NOT NULL DEFAULT 100,        -- tỉ lệ (weight/total_weight)
+    is_featured     TINYINT NOT NULL DEFAULT 0,
+    INDEX idx_banner (banner_id)
+);
+
+CREATE TABLE IF NOT EXISTS gacha_history (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id         BIGINT NOT NULL,
+    banner_id       INT NOT NULL,
+    reward_type     VARCHAR(16) NOT NULL,
+    reward_id       INT NOT NULL,
+    rarity          TINYINT NOT NULL DEFAULT 0,
+    pull_number     INT NOT NULL DEFAULT 1,          -- số lần kéo hiện tại (cho pity)
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_char (char_id, banner_id)
+);
+
+CREATE TABLE IF NOT EXISTS gacha_pity (
+    char_id         BIGINT NOT NULL,
+    banner_id       INT NOT NULL,
+    pull_count      INT NOT NULL DEFAULT 0,
+    last_ssr_pull   INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (char_id, banner_id)
+);
+
+INSERT IGNORE INTO gacha_banners (id,name,banner_type,cost_single,cost_multi_10,pity_count) VALUES
+(1,'Trieu Hoi Thuong','standard',100,900,80),
+(2,'Trieu Hoi Thu Cuoi','mount',200,1800,60),
+(3,'Trieu Hoi Pet','pet',150,1350,50);
+
+-- ═════════════════════════════════════════════════════════════
+-- PVP SEASON
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS pvp_seasons (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    season_name     VARCHAR(64) NOT NULL,
+    start_date      TIMESTAMP NOT NULL,
+    end_date        TIMESTAMP NOT NULL,
+    is_active       TINYINT NOT NULL DEFAULT 0,
+    reset_elo       TINYINT NOT NULL DEFAULT 1,      -- reset ELO mỗi mùa
+    base_elo        INT NOT NULL DEFAULT 1000
+);
+
+CREATE TABLE IF NOT EXISTS pvp_season_rewards (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    season_id       INT NOT NULL,
+    min_rank        INT NOT NULL,                    -- rank tối thiểu
+    max_rank        INT NOT NULL,
+    tier_name       VARCHAR(32) NOT NULL,            -- Bronze,Silver,Gold,Platinum,Diamond,Master,Grandmaster
+    reward_type     VARCHAR(16) NOT NULL,
+    reward_id       INT NOT NULL DEFAULT 0,
+    reward_amount   INT NOT NULL DEFAULT 1,
+    exclusive_skin  INT DEFAULT 0,                   -- skin độc quyền mùa
+    INDEX idx_season (season_id)
+);
+
+CREATE TABLE IF NOT EXISTS pvp_player_season (
+    char_id         BIGINT NOT NULL,
+    season_id       INT NOT NULL,
+    elo             INT NOT NULL DEFAULT 1000,
+    wins            INT NOT NULL DEFAULT 0,
+    losses          INT NOT NULL DEFAULT 0,
+    win_streak      INT NOT NULL DEFAULT 0,
+    max_streak      INT NOT NULL DEFAULT 0,
+    tier            VARCHAR(32) NOT NULL DEFAULT 'Bronze',
+    claimed_reward  TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (char_id, season_id),
+    INDEX idx_elo (season_id, elo DESC)
+);
+
+INSERT IGNORE INTO pvp_seasons (id,season_name,start_date,end_date,is_active) VALUES
+(1,'Mua 1 - Khai Mo','2025-01-01','2025-03-31',1);
+
+-- ═════════════════════════════════════════════════════════════
+-- SOCIAL LOGIN
+-- ═════════════════════════════════════════════════════════════
+
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS google_id VARCHAR(128) DEFAULT NULL;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS facebook_id VARCHAR(128) DEFAULT NULL;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS apple_id VARCHAR(128) DEFAULT NULL;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS login_method VARCHAR(16) NOT NULL DEFAULT 'local'; -- local,google,facebook,apple
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS linked_email VARCHAR(128) DEFAULT NULL;
+
+CREATE TABLE IF NOT EXISTS social_auth_tokens (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    account_id      BIGINT NOT NULL,
+    provider        VARCHAR(16) NOT NULL,            -- google,facebook,apple
+    provider_uid    VARCHAR(128) NOT NULL,
+    access_token    TEXT,
+    refresh_token   TEXT,
+    expires_at      TIMESTAMP NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY (provider, provider_uid),
+    INDEX idx_account (account_id)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- PUSH NOTIFICATIONS (Firebase Cloud Messaging)
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS push_tokens (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    account_id      BIGINT NOT NULL,
+    device_token    VARCHAR(256) NOT NULL,
+    platform        VARCHAR(16) NOT NULL,            -- android,ios
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY (account_id, device_token)
+);
+
+CREATE TABLE IF NOT EXISTS push_campaigns (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    title           VARCHAR(128) NOT NULL,
+    body            TEXT NOT NULL,
+    target          VARCHAR(32) NOT NULL DEFAULT 'all', -- all,active,inactive,vip,custom
+    target_filter   TEXT,                            -- JSON filter cho custom target
+    scheduled_at    TIMESTAMP NULL,
+    sent_at         TIMESTAMP NULL,
+    sent_count      INT NOT NULL DEFAULT 0,
+    status          VARCHAR(16) NOT NULL DEFAULT 'draft', -- draft,scheduled,sending,sent
+    created_by      VARCHAR(64) DEFAULT 'admin',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- ANALYTICS
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS analytics_events (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id         BIGINT DEFAULT 0,
+    account_id      BIGINT DEFAULT 0,
+    event_type      VARCHAR(32) NOT NULL,            -- login,logout,level_up,purchase,gacha_pull,pvp_match,quest_complete,death,trade,chat
+    event_data      JSON,
+    session_id      VARCHAR(64),
+    client_ip       VARCHAR(45),
+    platform        VARCHAR(16),
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_type_date (event_type, created_at),
+    INDEX idx_char (char_id, created_at)
+);
+
+CREATE TABLE IF NOT EXISTS analytics_daily (
+    date_key        DATE NOT NULL,
+    dau             INT NOT NULL DEFAULT 0,          -- Daily Active Users
+    new_users       INT NOT NULL DEFAULT 0,
+    revenue         BIGINT NOT NULL DEFAULT 0,       -- tổng nạp (VND)
+    sessions        INT NOT NULL DEFAULT 0,
+    avg_session_min FLOAT NOT NULL DEFAULT 0,
+    pvp_matches     INT NOT NULL DEFAULT 0,
+    gacha_pulls     INT NOT NULL DEFAULT 0,
+    items_traded    INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (date_key)
+);
+
+CREATE TABLE IF NOT EXISTS analytics_retention (
+    cohort_date     DATE NOT NULL,                   -- ngày đăng ký
+    day_n           INT NOT NULL,                    -- day 1, 3, 7, 14, 30
+    cohort_size     INT NOT NULL DEFAULT 0,
+    retained        INT NOT NULL DEFAULT 0,
+    retention_rate  FLOAT NOT NULL DEFAULT 0,
+    PRIMARY KEY (cohort_date, day_n)
+);
+
+CREATE TABLE IF NOT EXISTS analytics_funnel (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    funnel_name     VARCHAR(64) NOT NULL,            -- tutorial,first_purchase,first_pvp
+    step_order      INT NOT NULL,
+    step_name       VARCHAR(64) NOT NULL,
+    users_entered   INT NOT NULL DEFAULT 0,
+    users_completed INT NOT NULL DEFAULT 0,
+    date_key        DATE NOT NULL,
+    INDEX idx_funnel_date (funnel_name, date_key)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- TUTORIAL SYSTEM
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS tutorial_steps (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    step_key        VARCHAR(32) NOT NULL UNIQUE,
+    step_order      INT NOT NULL,
+    title           VARCHAR(64) NOT NULL,
+    description     TEXT,
+    target_ui       VARCHAR(64) DEFAULT '',           -- UI element to highlight
+    arrow_dir       VARCHAR(16) DEFAULT 'none',       -- none,up,down,left,right
+    require_action  VARCHAR(32) DEFAULT '',            -- tap_button,move,attack,open_inventory,equip_item
+    reward_type     VARCHAR(16) DEFAULT '',
+    reward_amount   INT NOT NULL DEFAULT 0,
+    next_step       VARCHAR(32) DEFAULT '',
+    can_skip        TINYINT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS player_tutorial (
+    char_id         BIGINT NOT NULL PRIMARY KEY,
+    current_step    VARCHAR(32) NOT NULL DEFAULT 'welcome',
+    completed       TINYINT NOT NULL DEFAULT 0,
+    skipped         TINYINT NOT NULL DEFAULT 0,
+    completed_at    TIMESTAMP NULL
+);
+
+INSERT IGNORE INTO tutorial_steps (step_key,step_order,title,description,target_ui,arrow_dir,require_action,reward_type,reward_amount,next_step) VALUES
+('welcome',1,'Chao mung!','Chao mung den Vong Linh Gioi!','','none','tap_button','',0,'move_intro'),
+('move_intro',2,'Di chuyen','Dung joystick de di chuyen nhan vat','joystick','down','move','',0,'attack_intro'),
+('attack_intro',3,'Tan cong','Cham vao nut tan cong de danh quai','btn_attack','right','attack','exp',50,'loot_intro'),
+('loot_intro',4,'Nhat do','Di chuyen den vat pham roi de nhat','loot_item','down','pickup','',0,'inventory_intro'),
+('inventory_intro',5,'Tui do','Mo tui do de xem vat pham','btn_inventory','left','open_inventory','',0,'equip_intro'),
+('equip_intro',6,'Trang bi','Keo vat pham vao o trang bi','equip_slot','up','equip_item','gold',100,'quest_intro'),
+('quest_intro',7,'Nhiem vu','Nhan nhiem vu tu NPC','quest_npc','right','accept_quest','',0,'chat_intro'),
+('chat_intro',8,'Chat','Gui tin nhan cho nguoi choi khac','btn_chat','left','send_chat','diamond',10,'tutorial_complete'),
+('tutorial_complete',9,'Hoan thanh!','Ban da san sang phieu luu!','','none','tap_button','gold',500,'');
+
+-- ═════════════════════════════════════════════════════════════
+-- LOCALIZATION — Tiếng Việt + Tiếng Anh
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS localization (
+    lang_key        VARCHAR(128) NOT NULL,
+    lang_code       VARCHAR(5) NOT NULL,             -- vi, en
+    text_value      TEXT NOT NULL,
+    category        VARCHAR(32) DEFAULT 'ui',        -- ui,quest,item,skill,npc,system,tutorial
+    PRIMARY KEY (lang_key, lang_code),
+    INDEX idx_cat (category, lang_code)
+);
+
+-- Seed UI strings
+INSERT IGNORE INTO localization (lang_key,lang_code,text_value,category) VALUES
+-- UI chung
+('btn_login','vi','Dang Nhap','ui'),('btn_login','en','Login','ui'),
+('btn_register','vi','Dang Ky','ui'),('btn_register','en','Register','ui'),
+('btn_play','vi','Choi','ui'),('btn_play','en','Play','ui'),
+('btn_settings','vi','Cai Dat','ui'),('btn_settings','en','Settings','ui'),
+('btn_inventory','vi','Tui Do','ui'),('btn_inventory','en','Inventory','ui'),
+('btn_skills','vi','Ky Nang','ui'),('btn_skills','en','Skills','ui'),
+('btn_quest','vi','Nhiem Vu','ui'),('btn_quest','en','Quests','ui'),
+('btn_shop','vi','Cua Hang','ui'),('btn_shop','en','Shop','ui'),
+('btn_chat','vi','Chat','ui'),('btn_chat','en','Chat','ui'),
+('btn_guild','vi','Bang Hoi','ui'),('btn_guild','en','Guild','ui'),
+('btn_party','vi','Nhom','ui'),('btn_party','en','Party','ui'),
+('btn_mail','vi','Thu','ui'),('btn_mail','en','Mail','ui'),
+('btn_gacha','vi','Trieu Hoi','ui'),('btn_gacha','en','Summon','ui'),
+('btn_pvp','vi','Dau Truong','ui'),('btn_pvp','en','Arena','ui'),
+('btn_confirm','vi','Xac Nhan','ui'),('btn_confirm','en','Confirm','ui'),
+('btn_cancel','vi','Huy','ui'),('btn_cancel','en','Cancel','ui'),
+('btn_close','vi','Dong','ui'),('btn_close','en','Close','ui'),
+('btn_back','vi','Quay Lai','ui'),('btn_back','en','Back','ui'),
+-- Character creation
+('create_title','vi','Tao Nhan Vat','ui'),('create_title','en','Create Character','ui'),
+('create_name','vi','Ten Nhan Vat','ui'),('create_name','en','Character Name','ui'),
+('create_class','vi','Chon Nghe','ui'),('create_class','en','Select Class','ui'),
+('create_gender','vi','Gioi Tinh','ui'),('create_gender','en','Gender','ui'),
+('gender_male','vi','Nam','ui'),('gender_male','en','Male','ui'),
+('gender_female','vi','Nu','ui'),('gender_female','en','Female','ui'),
+-- Classes
+('class_1','vi','Kiem Si','ui'),('class_1','en','Swordsman','ui'),
+('class_2','vi','Phap Su','ui'),('class_2','en','Mage','ui'),
+('class_3','vi','Xa Thu','ui'),('class_3','en','Gunner','ui'),
+('class_4','vi','Slinger','ui'),('class_4','en','Slinger','ui'),
+('class_5','vi','Axeman','ui'),('class_5','en','Axeman','ui'),
+('class_6','vi','Quyen Su','ui'),('class_6','en','Brawler','ui'),
+('class_7','vi','Cung Thu','ui'),('class_7','en','Archer','ui'),
+-- HUD
+('hud_level','vi','Cap','ui'),('hud_level','en','Lv','ui'),
+('hud_exp','vi','Kinh Nghiem','ui'),('hud_exp','en','EXP','ui'),
+('hud_gold','vi','Vang','ui'),('hud_gold','en','Gold','ui'),
+('hud_diamond','vi','Kim Cuong','ui'),('hud_diamond','en','Diamond','ui'),
+-- System
+('sys_maintenance','vi','He thong dang bao tri','system'),('sys_maintenance','en','System maintenance','system'),
+('sys_update','vi','Co ban cap nhat moi','system'),('sys_update','en','New update available','system'),
+('sys_kicked','vi','Ban bi ngat ket noi','system'),('sys_kicked','en','You have been disconnected','system');
+
+-- Sound/Music config (managed in admin)
+CREATE TABLE IF NOT EXISTS audio_assets (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    asset_key       VARCHAR(64) NOT NULL UNIQUE,     -- bgm_village, sfx_sword_hit, ui_button_click
+    asset_type      VARCHAR(8) NOT NULL,             -- bgm, sfx, ambient, voice, ui
+    file_path       VARCHAR(256) NOT NULL,
+    volume_default  FLOAT NOT NULL DEFAULT 1.0,
+    is_loop         TINYINT NOT NULL DEFAULT 0,
+    description     VARCHAR(128) DEFAULT '',
+    is_active       TINYINT NOT NULL DEFAULT 1
+);
+
+INSERT IGNORE INTO audio_assets (asset_key,asset_type,file_path,is_loop,description) VALUES
+('bgm_login','bgm','Audio/BGM/login.ogg',1,'Nhac man hinh dang nhap'),
+('bgm_village','bgm','Audio/BGM/village.ogg',1,'Nhac lang'),
+('bgm_field','bgm','Audio/BGM/field.ogg',1,'Nhac dong bang'),
+('bgm_dungeon','bgm','Audio/BGM/dungeon.ogg',1,'Nhac dungeon'),
+('bgm_boss','bgm','Audio/BGM/boss.ogg',1,'Nhac danh boss'),
+('bgm_pvp','bgm','Audio/BGM/pvp.ogg',1,'Nhac PvP arena'),
+('sfx_hit','sfx','Audio/SFX/hit.ogg',0,'Am thanh trung don'),
+('sfx_crit','sfx','Audio/SFX/crit.ogg',0,'Am thanh chi mang'),
+('sfx_die','sfx','Audio/SFX/die.ogg',0,'Am thanh chet'),
+('sfx_levelup','sfx','Audio/SFX/levelup.ogg',0,'Am thanh len cap'),
+('sfx_loot','sfx','Audio/SFX/loot.ogg',0,'Am thanh nhat do'),
+('sfx_equip','sfx','Audio/SFX/equip.ogg',0,'Am thanh trang bi'),
+('sfx_enhance_ok','sfx','Audio/SFX/enhance_ok.ogg',0,'Cuong hoa thanh cong'),
+('sfx_enhance_fail','sfx','Audio/SFX/enhance_fail.ogg',0,'Cuong hoa that bai'),
+('sfx_gacha','sfx','Audio/SFX/gacha.ogg',0,'Am thanh trieu hoi'),
+('ui_click','ui','Audio/UI/click.ogg',0,'Click nut'),
+('ui_open','ui','Audio/UI/open.ogg',0,'Mo panel'),
+('ui_close','ui','Audio/UI/close.ogg',0,'Dong panel'),
+('ui_coin','ui','Audio/UI/coin.ogg',0,'Nhan vang'),
+('ambient_village','ambient','Audio/Ambient/village.ogg',1,'Am thanh moi truong lang'),
+('ambient_forest','ambient','Audio/Ambient/forest.ogg',1,'Am thanh rung');

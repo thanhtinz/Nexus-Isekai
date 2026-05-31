@@ -444,6 +444,46 @@ namespace NexusIsekai.Network
         public static void SendCharList()
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
+
+        // ── GACHA ───────────────────────────────────────────
+
+        public static void SendGachaBannerList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_BANNER_LIST));
+        public static void SendGachaPull(int bannerId, int pullCount)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_PULL).WriteInt(bannerId).WriteInt(pullCount));
+        public static void SendGachaHistory(int bannerId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_HISTORY).WriteInt(bannerId));
+
+        // ── PVP SEASON ──────────────────────────────────────
+
+        public static void SendPvpSeasonInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_SEASON_INFO));
+        public static void SendPvpSeasonRank(int page)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_SEASON_RANK).WriteInt(page));
+        public static void SendPvpSeasonReward()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_SEASON_REWARD));
+
+        // ── SOCIAL LOGIN ────────────────────────────────────
+
+        public static void SendSocialLogin(string provider, string token)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SOCIAL_LOGIN).WriteString(provider).WriteString(token));
+        public static void SendSocialLink(string provider, string token)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SOCIAL_LINK).WriteString(provider).WriteString(token));
+        public static void SendSocialUnlink(string provider)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SOCIAL_UNLINK).WriteString(provider));
+
+        // ── TUTORIAL ────────────────────────────────────────
+
+        public static void SendTutorialProgress(string stepKey)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TUTORIAL_PROGRESS).WriteString(stepKey));
+        public static void SendTutorialSkip()
+            => Send(new PacketBuilder(PacketOpcode.C2S_TUTORIAL_SKIP));
+
+        // ── LOCALIZATION ────────────────────────────────────
+
+        public static void SendLangSet(string langCode)
+            => Send(new PacketBuilder(PacketOpcode.C2S_LANG_SET).WriteString(langCode));
+
         // ── SETTINGS ─────────────────────────────────────
 
         public static void SendSettingsLoad()
@@ -656,6 +696,46 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_REGISTER).WriteString(username).WriteString(password));
         public static void SendCharList()
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
+
+
+        // ── GACHA ───────────────────────────────────────────
+
+        public static void SendGachaBannerList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_BANNER_LIST));
+        public static void SendGachaPull(int bannerId, int pullCount)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_PULL).WriteInt(bannerId).WriteInt(pullCount));
+        public static void SendGachaHistory(int bannerId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GACHA_HISTORY).WriteInt(bannerId));
+
+        // ── PVP SEASON ──────────────────────────────────────
+
+        public static void SendPvpSeasonInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_SEASON_INFO));
+        public static void SendPvpSeasonRank(int page)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_SEASON_RANK).WriteInt(page));
+        public static void SendPvpSeasonReward()
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_SEASON_REWARD));
+
+        // ── SOCIAL LOGIN ────────────────────────────────────
+
+        public static void SendSocialLogin(string provider, string token)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SOCIAL_LOGIN).WriteString(provider).WriteString(token));
+        public static void SendSocialLink(string provider, string token)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SOCIAL_LINK).WriteString(provider).WriteString(token));
+        public static void SendSocialUnlink(string provider)
+            => Send(new PacketBuilder(PacketOpcode.C2S_SOCIAL_UNLINK).WriteString(provider));
+
+        // ── TUTORIAL ────────────────────────────────────────
+
+        public static void SendTutorialProgress(string stepKey)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TUTORIAL_PROGRESS).WriteString(stepKey));
+        public static void SendTutorialSkip()
+            => Send(new PacketBuilder(PacketOpcode.C2S_TUTORIAL_SKIP));
+
+        // ── LOCALIZATION ────────────────────────────────────
+
+        public static void SendLangSet(string langCode)
+            => Send(new PacketBuilder(PacketOpcode.C2S_LANG_SET).WriteString(langCode));
 
         // ── SETTINGS ─────────────────────────────────────
 
