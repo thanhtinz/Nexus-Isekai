@@ -2496,3 +2496,96 @@ INSERT IGNORE INTO default_settings VALUES
 ('account','colorblind_mode','bool','false','Che do mu mau','Dieu chinh mau cho nguoi mu mau','',0,0,2),
 ('account','voice_subtitle','bool','false','Phu de Voice','Hien phu de khi nghe voice','',0,0,3),
 ('account','one_hand_mode','bool','false','Che do mot tay','Giao dien cho choi 1 tay','',0,0,4);
+
+-- ═════════════════════════════════════════════════════════════
+-- 57. TÁCH SETTINGS — Mỗi hệ thống quản lý settings riêng
+-- ═════════════════════════════════════════════════════════════
+
+-- NGUYÊN TẮC:
+--   Bảng Settings chính (6 tabs): Game, Graphics, Audio, Controls, Network, Account
+--   Settings theo tính năng → nằm TRONG UI của tính năng đó:
+--     Guild settings    → trong Guild panel
+--     Party settings    → trong Party panel  
+--     Chat settings     → trong Chat panel
+--     Auction settings  → trong Auction UI
+--     Farm/Housing      → trong Farm/Housing UI
+--     Notifications     → trong Notification center
+
+-- Xoá settings cũ của các tab feature-specific
+DELETE FROM default_settings WHERE tab_key IN ('chat','guild','party','notify');
+
+-- Thêm vào player_settings JSON structure mới:
+-- {
+--   "game": { "auto_target": true, ... },
+--   "graphics": { "quality": "medium", ... },
+--   "audio": { "master_volume": 80, ... },
+--   "controls": { "joystick_size": 1.0, ... },
+--   "network": { "show_ping": true, ... },
+--   "account": { "font_large": false, ... }
+-- }
+-- Các settings feature-specific lưu riêng:
+
+-- Chat preferences (hiển thị trong Chat UI, không phải Settings)
+CREATE TABLE IF NOT EXISTS player_chat_prefs (
+    char_id             BIGINT NOT NULL PRIMARY KEY,
+    chat_world          TINYINT NOT NULL DEFAULT 1,
+    chat_guild          TINYINT NOT NULL DEFAULT 1,
+    chat_party          TINYINT NOT NULL DEFAULT 1,
+    chat_pm             TINYINT NOT NULL DEFAULT 1,
+    chat_cross          TINYINT NOT NULL DEFAULT 1,
+    chat_system         TINYINT NOT NULL DEFAULT 1,
+    voice_enabled       TINYINT NOT NULL DEFAULT 0,
+    voice_volume        INT NOT NULL DEFAULT 80,
+    voice_auto_play     TINYINT NOT NULL DEFAULT 1,
+    block_guild_invite  TINYINT NOT NULL DEFAULT 0,
+    block_trade         TINYINT NOT NULL DEFAULT 0,
+    block_friend        TINYINT NOT NULL DEFAULT 0
+);
+
+-- Guild notification prefs (hiển thị trong Guild panel)
+CREATE TABLE IF NOT EXISTS player_guild_prefs (
+    char_id             BIGINT NOT NULL PRIMARY KEY,
+    notify_guild        TINYINT NOT NULL DEFAULT 1,
+    notify_guild_war    TINYINT NOT NULL DEFAULT 1,
+    notify_guild_boss   TINYINT NOT NULL DEFAULT 1,
+    notify_member_online TINYINT NOT NULL DEFAULT 1
+);
+
+-- Party prefs (hiển thị trong Party UI)
+CREATE TABLE IF NOT EXISTS player_party_prefs (
+    char_id             BIGINT NOT NULL PRIMARY KEY,
+    auto_accept         TINYINT NOT NULL DEFAULT 0,
+    auto_decline        TINYINT NOT NULL DEFAULT 0,
+    auto_follow_leader  TINYINT NOT NULL DEFAULT 0,
+    show_party_pos      TINYINT NOT NULL DEFAULT 1,
+    show_party_cd       TINYINT NOT NULL DEFAULT 1
+);
+
+-- Notification prefs (hiển thị trong Notification center / bell icon)
+CREATE TABLE IF NOT EXISTS player_notify_prefs (
+    char_id             BIGINT NOT NULL PRIMARY KEY,
+    world_boss          TINYINT NOT NULL DEFAULT 1,
+    event_boss          TINYINT NOT NULL DEFAULT 1,
+    dungeon_boss        TINYINT NOT NULL DEFAULT 1,
+    double_exp          TINYINT NOT NULL DEFAULT 1,
+    mission_pass        TINYINT NOT NULL DEFAULT 1,
+    new_event           TINYINT NOT NULL DEFAULT 1,
+    maintenance         TINYINT NOT NULL DEFAULT 1,
+    gift_code           TINYINT NOT NULL DEFAULT 1,
+    admin_msg           TINYINT NOT NULL DEFAULT 1,
+    auction_sold        TINYINT NOT NULL DEFAULT 1,
+    auction_expired     TINYINT NOT NULL DEFAULT 1,
+    auction_outbid      TINYINT NOT NULL DEFAULT 1,
+    farm_ready          TINYINT NOT NULL DEFAULT 1,
+    animal_hungry       TINYINT NOT NULL DEFAULT 1,
+    house_visitor       TINYINT NOT NULL DEFAULT 1
+);
+
+-- Giờ bảng Settings chính chỉ còn 6 tabs gọn:
+--   Game (18 options)     — chiến đấu, nhặt đồ, quest
+--   Graphics (12 options) — chất lượng, FPS, hiển thị
+--   Audio (6 options)     — âm lượng
+--   Controls (5 options)  — joystick, skill size, camera
+--   Network (5 options)   — ping, FPS, data saver
+--   Account (4 options)   — accessibility
+-- Tổng: 50 options trong Settings, 30 options phân tán ở các UI khác
