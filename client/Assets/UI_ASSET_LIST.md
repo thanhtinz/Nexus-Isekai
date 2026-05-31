@@ -227,12 +227,198 @@ Tong: 6 files (2 dong)
 - 4 icon NPC type         | T  | 4
 Tong: 42 files
 
+
+## 18. INTRO CUTSCENE
+- Background intro (7 scene)| T | 7
+- Khung text intro          | 9S | 1
+- Nut skip                  | T  | 1
+- Nut tiep tuc              | T  | 1
+- Hieu ung fade overlay     | T  | 1
+Tong: 11 files
+
+## 19. MAIL
+- Khung mail list           | 9S | 1
+- Icon mail chua doc        | T  | 1
+- Icon mail da doc          | T  | 1
+- Icon mail co file dinh kem| T  | 1
+- Khung doc mail             | 9S | 1
+- Nut nhan phan thuong      | T  | 1
+- Nut xoa                   | T  | 1
+Tong: 7 files
+
+## 20. TRADE
+- Khung trade (2 panel)     | 9S | 1
+- Slot trade (trai + phai)  | T  | 2
+- Nut xac nhan trade        | T  | 1
+- Nut huy trade             | T  | 1
+- Icon khoa giao dich       | T  | 1
+- Thanh vang trade           | T  | 1
+Tong: 7 files
+
+## 21. AUCTION
+- Khung auction list        | 9S | 1
+- Card vat pham dau gia     | 9S | 1
+- Nut dau gia               | T  | 1
+- Nut mua ngay              | T  | 1
+- Nut ban                   | T  | 1
+- Tab auction (Mua/Ban/Lich su) | T | 3
+- Icon thoi gian con lai    | T  | 1
+Tong: 9 files
+
+## 22. ACHIEVEMENT
+- Khung achievement list    | 9S | 1
+- Card thanh tuu (chua dat) | T  | 1
+- Card thanh tuu (da dat)   | T  | 1
+- Thanh tien trinh          | T  | 2 (frame + fill)
+- Nut nhan thuong           | T  | 1
+- Tab danh muc (6 tab)      | T  | 6
+Tong: 12 files
+
+## 23. TUTORIAL
+- Overlay highlight (vung toi xung quanh) | T | 1
+- Mui ten chi (len/xuong/trai/phai)       | T | 4
+- Khung text huong dan      | 9S | 1
+- Nut tiep tuc              | T  | 1
+- Nut bo qua                | T  | 1
+- Tay chi (tap animation)   | D  | 4 (4 frame)
+Tong: 12 files
+
+## 24. MISSION PASS
+- Khung mission pass        | 9S | 1
+- Slot free reward          | T  | 1
+- Slot premium reward       | T  | 1
+- Slot claimed              | T  | 1
+- Thanh tien trinh level    | T  | 2 (frame + fill)
+- Nut mua premium           | T  | 1
+- Icon khoa premium         | T  | 1
+Tong: 8 files
+
+## 25. LOGIN SCREEN
+- Background login          | T  | 1 (1920x1080)
+- Logo game                 | T  | 1
+- Khung nhap username       | 9S | 1
+- Khung nhap password       | 9S | 1
+- Nut dang nhap             | T  | 1
+- Nut dang ky               | T  | 1
+- Nut Google Sign-In        | T  | 1
+- Nut Facebook Sign-In      | T  | 1
+- Nut Apple Sign-In         | T  | 1
+- Khung thong bao           | 9S | 1
+Tong: 10 files
+
+## 26. SERVER SELECT
+- Khung danh sach server    | 9S | 1
+- Card server               | 9S | 1
+- Badge Moi                 | T  | 1
+- Badge Hot                 | T  | 1
+- Badge De xuat             | T  | 1
+- Dot smooth (xanh)         | T  | 1
+- Dot normal (vang)         | T  | 1
+- Dot busy (cam)            | T  | 1
+- Dot full (do)             | T  | 1
+- Khung danh sach kenh      | 9S | 1
+- Thanh nguoi choi kenh     | T  | 2 (frame + fill)
+Tong: 12 files
+
 ## ════════════════════════════════
 ## TONG KET
 ##
-## Tinh (PNG don):          ~250 files
-## Dong (spritesheet):        5 sets (~28 frame)
-## 9-slice:                  ~15 files
+## Tinh (PNG don):          ~338 files
+## Dong (spritesheet):        6 sets (~32 frame)
+## 9-slice:                  ~30 files
 ## ────────────────────────
-## TONG CONG:             ~270 files PNG
+## TONG CONG:             ~360 files PNG
+
+## 18. INTRO CUTSCENE
+- Background intro (7 scene)| T | 7
+- Khung text intro          | 9S | 1
+- Nut skip                  | T  | 1
+- Nut tiep tuc              | T  | 1
+- Hieu ung fade overlay     | T  | 1
+Tong: 11 files
+
+## 19. MAIL
+- Khung mail list           | 9S | 1
+- Icon mail chua doc        | T  | 1
+- Icon mail da doc          | T  | 1
+- Icon mail co file dinh kem| T  | 1
+- Khung doc mail             | 9S | 1
+- Nut nhan phan thuong      | T  | 1
+- Nut xoa                   | T  | 1
+Tong: 7 files
+
+## 20. TRADE
+- Khung trade (2 panel)     | 9S | 1
+- Slot trade (trai + phai)  | T  | 2
+- Nut xac nhan trade        | T  | 1
+- Nut huy trade             | T  | 1
+- Icon khoa giao dich       | T  | 1
+- Thanh vang trade           | T  | 1
+Tong: 7 files
+
+## 21. AUCTION
+- Khung auction list        | 9S | 1
+- Card vat pham dau gia     | 9S | 1
+- Nut dau gia               | T  | 1
+- Nut mua ngay              | T  | 1
+- Nut ban                   | T  | 1
+- Tab auction (Mua/Ban/Lich su) | T | 3
+- Icon thoi gian con lai    | T  | 1
+Tong: 9 files
+
+## 22. ACHIEVEMENT
+- Khung achievement list    | 9S | 1
+- Card thanh tuu (chua dat) | T  | 1
+- Card thanh tuu (da dat)   | T  | 1
+- Thanh tien trinh          | T  | 2 (frame + fill)
+- Nut nhan thuong           | T  | 1
+- Tab danh muc (6 tab)      | T  | 6
+Tong: 12 files
+
+## 23. TUTORIAL
+- Overlay highlight (vung toi xung quanh) | T | 1
+- Mui ten chi (len/xuong/trai/phai)       | T | 4
+- Khung text huong dan      | 9S | 1
+- Nut tiep tuc              | T  | 1
+- Nut bo qua                | T  | 1
+- Tay chi (tap animation)   | D  | 4 (4 frame)
+Tong: 12 files
+
+## 24. MISSION PASS
+- Khung mission pass        | 9S | 1
+- Slot free reward          | T  | 1
+- Slot premium reward       | T  | 1
+- Slot claimed              | T  | 1
+- Thanh tien trinh level    | T  | 2 (frame + fill)
+- Nut mua premium           | T  | 1
+- Icon khoa premium         | T  | 1
+Tong: 8 files
+
+## 25. LOGIN SCREEN
+- Background login          | T  | 1 (1920x1080)
+- Logo game                 | T  | 1
+- Khung nhap username       | 9S | 1
+- Khung nhap password       | 9S | 1
+- Nut dang nhap             | T  | 1
+- Nut dang ky               | T  | 1
+- Nut Google Sign-In        | T  | 1
+- Nut Facebook Sign-In      | T  | 1
+- Nut Apple Sign-In         | T  | 1
+- Khung thong bao           | 9S | 1
+Tong: 10 files
+
+## 26. SERVER SELECT
+- Khung danh sach server    | 9S | 1
+- Card server               | 9S | 1
+- Badge Moi                 | T  | 1
+- Badge Hot                 | T  | 1
+- Badge De xuat             | T  | 1
+- Dot smooth (xanh)         | T  | 1
+- Dot normal (vang)         | T  | 1
+- Dot busy (cam)            | T  | 1
+- Dot full (do)             | T  | 1
+- Khung danh sach kenh      | 9S | 1
+- Thanh nguoi choi kenh     | T  | 2 (frame + fill)
+Tong: 12 files
+
 ## ════════════════════════════════
