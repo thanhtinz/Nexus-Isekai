@@ -64,73 +64,72 @@ public class CharHandler {
         int nameLen = buf.getShort() & 0xFFFF;
         byte[] nameBytes = new byte[nameLen];
         buf.get(nameBytes);
-        String name    = new String(nameBytes, StandardCharsets.UTF_8).trim();
-        int classId    = buf.get() & 0xFF;
+        String name     = new String(nameBytes, StandardCharsets.UTF_8).trim();
+        int bodyType    = buf.get() & 0xFF;   // 1-9
+        int skinColor   = buf.get() & 0xFF;   // 0-10
+        int eyeStyle    = buf.get() & 0xFF;   // 0-10
+        int hairStyle   = buf.get() & 0xFF;   // 0-6
+        int hairColor   = buf.get() & 0xFF;   // 0-13
+        int shirtColor  = buf.get() & 0xFF;   // 1-5
+        int pantsColor  = buf.get() & 0xFF;   // 1-5
 
         // Validate
-        if (name.length() < 3 || name.length() > 20) {
-            session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Tên nhân vật phải từ 3-20 ký tự."); return;
+        if (name.length() < 2 || name.length() > 12) {
+            session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Ten nhan vat phai tu 2-12 ky tu."); return;
         }
         if (!name.matches("[\\p{L}\\p{N}_\\s]+")) {
-            session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Tên nhân vật chứa ký tự không hợp lệ."); return;
+            session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Ten chua ky tu khong hop le."); return;
         }
-        if (classId < 1 || classId > 5) {
-            session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Class không hợp lệ."); return;
-        }
-
-        CharacterClass cls = CharacterClassFactory.create(classId);
+        if (bodyType < 1 || bodyType > 9) bodyType = 1;
+        if (skinColor > 10) skinColor = 1;
+        if (eyeStyle > 10) eyeStyle = 0;
+        if (hairStyle > 6) hairStyle = 0;
+        if (hairColor > 13) hairColor = 1;
+        if (shirtColor < 1 || shirtColor > 5) shirtColor = 1;
+        if (pantsColor < 1 || pantsColor > 5) pantsColor = 1;
 
         try (Connection conn = DatabaseManager.getConnection()) {
-            // Kiểm tra tên trùng
+            // Kiem tra ten trung
             PreparedStatement chk = conn.prepareStatement("SELECT id FROM characters WHERE name=?");
             chk.setString(1, name);
             if (chk.executeQuery().next()) {
-                session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Tên nhân vật đã tồn tại."); return;
+                session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Ten nhan vat da ton tai."); return;
             }
 
-            // Tạo nhân vật
+            // Tao nhan vat — class_id=0 (chon sau tai NPC)
             PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO characters (account_id,name,class_id,level,hp,max_hp,mp,max_mp,str_stat,agi_stat,int_stat,vit_stat,map_id,pos_x,pos_y,story_chapter) VALUES (?,?,?,1,?,?,?,?,?,?,?,?,1,5.0,5.0,1)",
+                    "INSERT INTO characters (account_id,name,class_id,level,hp,max_hp,mp,max_mp," +
+                    "body_type,skin_color,eye_style,hair_style,hair_color,shirt_color,pants_color," +
+                    "map_id,pos_x,pos_y) VALUES (?,?,0,1,100,100,50,50,?,?,?,?,?,?,?,1,5.0,5.0)",
                     Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, session.getAccountId());
             ps.setString(2, name);
-            ps.setInt(3, classId);
-            ps.setInt(4, cls.getBaseHp());
-            ps.setInt(5, cls.getBaseHp());
-            ps.setInt(6, cls.getBaseMp());
-            ps.setInt(7, cls.getBaseMp());
-            ps.setInt(8, cls.getBaseStr());
-            ps.setInt(9, cls.getBaseAgi());
-            ps.setInt(10, cls.getBaseInt());
-            ps.setInt(11, cls.getBaseVit());
+            ps.setInt(3, bodyType); ps.setInt(4, skinColor); ps.setInt(5, eyeStyle);
+            ps.setInt(6, hairStyle); ps.setInt(7, hairColor);
+            ps.setInt(8, shirtColor); ps.setInt(9, pantsColor);
             ps.executeUpdate();
 
             ResultSet keys = ps.getGeneratedKeys();
             keys.next();
             long charId = keys.getLong(1);
 
-            // Cấp vũ khí khởi đầu
-            world.getItemManager().giveItem(charId, cls.getStarterWeaponId(), 1);
-
-            // Cấp skill khởi đầu
-            for (int skillId : cls.getStarterSkillIds()) {
-                PreparedStatement sk = conn.prepareStatement(
-                        "INSERT IGNORE INTO character_skills (char_id,skill_id,skill_level) VALUES (?,?,1)");
-                sk.setLong(1, charId); sk.setInt(2, skillId); sk.executeUpdate();
-            }
-
-            // Auto-accept quest đầu tiên
+            // Auto-accept tutorial quest
             PreparedStatement qt = conn.prepareStatement(
-                    "INSERT IGNORE INTO character_quests (char_id,quest_id,status,progress,accepted_at) VALUES (?,?,1,'{}',NOW())");
-            qt.setLong(1, charId); qt.setInt(2, cls.getFirstQuestId()); qt.executeUpdate();
+                    "INSERT IGNORE INTO character_quests (char_id,quest_id,status,progress,accepted_at) VALUES (?,1,1,'{}',NOW())");
+            qt.setLong(1, charId); qt.executeUpdate();
 
             // Response
             byte[] nBytes = name.getBytes(StandardCharsets.UTF_8);
-            ByteBuffer resp = ByteBuffer.allocate(1 + 8 + 2 + nBytes.length + 1);
+            ByteBuffer resp = ByteBuffer.allocate(1 + 8 + 2 + nBytes.length + 7);
             resp.put((byte) 1); resp.putLong(charId);
-            resp.putShort((short) nBytes.length); resp.put(nBytes); resp.put((byte) classId);
+            resp.putShort((short) nBytes.length); resp.put(nBytes);
+            resp.put((byte) bodyType); resp.put((byte) skinColor);
+            resp.put((byte) eyeStyle); resp.put((byte) hairStyle);
+            resp.put((byte) hairColor); resp.put((byte) shirtColor);
+            resp.put((byte) pantsColor);
             session.send(PacketOpcode.S2C_CHAR_CREATE_OK, resp.array());
-            log.info("[CHAR_CREATE] {} tạo nhân vật '{}' class={}", session.getAccountName(), name, cls.getClassName());
+            log.info("[CHAR_CREATE] {} tao '{}' body={} skin={} eye={} hair={}/{}",
+                session.getAccountName(), name, bodyType, skinColor, eyeStyle, hairStyle, hairColor);
         }
     }
 
