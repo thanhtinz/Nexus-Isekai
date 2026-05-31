@@ -97,48 +97,62 @@ public class MainWindow {
 
         String[][] navItems = {
             {"Dashboard",      "Dashboard"},
-            {"Players",        "Players"},
+            // ── Nguoi choi ───────────────────────
+            {"Nguoi Choi",     "Players"},
+            {"Tai Khoan",      "Accounts"},
+            {"Grant Item",     "PlayerGrant"},
+            {"Thu (Mail)",     "PlayerMail"},
+            {"Bao Cao",        "PlayerReports"},
             // ── Noi dung game ────────────────────
             {"Cot Truyen",     "Story"},
             {"Nhiem Vu",       "Quests"},
-            {"NPC & Dialog",   "Dialogs"},
+            {"NPC",            "NPCs"},
+            {"NPC Dialog",     "Dialogs"},
             {"Maps",           "Maps"},
+            {"Portals",        "Portals"},
             {"Monsters",       "Monsters"},
-            {"NPCs",           "NPCs"},
-            {"Items & Kho",    "Registry"},
+            {"Items",          "Items"},
+            {"Kho Tong",       "Registry"},
+            {"Ky Nang",        "Skills"},
             {"Class",          "Classes"},
             // ── Kinh te ──────────────────────────
-            {"Shop",           "Shop"},
+            {"Shop NPC",       "Shop"},
             {"Webshop",        "WebshopAdmin"},
             {"Dau Gia",        "Auction"},
             {"Giao Dich",      "TradeHistory"},
             {"SePay",          "SePay"},
             {"Gift Code",      "GiftCode"},
             {"So Su Menh",     "MissionPass"},
-            {"Kho Item",       "Warehouse"},
+            {"Kho Admin",      "Warehouse"},
             {"Cuong Hoa",      "EnhancementConfig"},
+            {"Tien Te SK",     "EventCurrency"},
             // ── Xa hoi ───────────────────────────
             {"Guilds",         "Guilds"},
-            {"Party",          "PartyActive"},
+            {"Party/Nhom",     "PartyActive"},
             {"PvP",            "PvP"},
             {"BXH",            "Leaderboard"},
-            {"Chat History",   "ChatHistory"},
+            {"Chat",           "ChatHistory"},
             {"Danh Hieu",      "Titles"},
             {"Pet & Mount",    "Pets"},
+            {"Stickers",       "Stickers"},
+            // ── AI & Content ─────────────────────
+            {"AI Generate",    "AIGeneration"},
+            {"AI Review",      "AIReview"},
             // ── He thong ─────────────────────────
             {"Thong Bao",      "Announcements"},
-            {"Tien Te SK",     "EventCurrency"},
-            {"Assets & OTA",   "Assets"},
+            {"Assets OTA",     "Assets"},
             {"Phien Ban",      "ClientVersions"},
             {"Hot Config",     "HotConfig"},
-            {"AI Content",     "AIGeneration"},
+            {"Lich Hen",       "ScheduledTasks"},
+            {"Dungeon",        "Dungeon"},
             {"Nong Trai",      "Farming"},
             {"Nha O",          "Housing"},
             {"Minigame",       "Minigame"},
             {"Rate Limit",     "RateLimit"},
             {"Servers",        "Servers"},
-            {"Tai Khoan",      "Accounts"},
             {"Events",         "Events"},
+            {"Admin Accounts", "AdminAccounts"},
+            {"Audit Log",      "AuditLog"},
             {"Logs",           "Logs"},
             {"Cai Dat",        "Settings"},
         };
@@ -222,6 +236,17 @@ public class MainWindow {
             case "PartyActive"       -> new PartyActivePanel(api, this).getRoot();
             case "RateLimit"         -> new RateLimitPanel(api, this).getRoot();
             case "Dungeon"           -> new DungeonPanel(api, this).getRoot();
+            // ── New panels ──────────────────────────────────
+            case "Skills"            -> new SkillsPanel(api, this).getRoot();
+            case "Stickers"          -> new StickersPanel(api, this).getRoot();
+            case "AdminAccounts"     -> new AdminAccountsPanel(api, this).getRoot();
+            case "Portals"           -> new PortalsPanel(api, this).getRoot();
+            case "PlayerGrant"       -> new PlayerGrantPanel(api, this).getRoot();
+            case "PlayerMail"        -> new PlayerMailPanel(api, this).getRoot();
+            case "PlayerReports"     -> new PlayerReportsPanel(api, this).getRoot();
+            case "AuditLog"          -> new AuditLogPanel(api, this).getRoot();
+            case "ScheduledTasks"    -> new ScheduledTasksPanel(api, this).getRoot();
+            case "AIReview"          -> new AIReviewPanel(api, this).getRoot();
             // ── System ───────────────────────────────────
             case "Logs"        -> new LogsPanel().getRoot();
             case "Settings"    -> new SettingsPanel(this).getRoot();

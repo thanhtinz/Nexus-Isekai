@@ -141,6 +141,13 @@ public class AdminApiServer {
         
         
         
+        
+        httpServer.createContext("/api/skills",           ex -> handleAuth(ex, this::handleSkills));
+        httpServer.createContext("/api/stickers",         ex -> handleAuth(ex, this::handleStickers));
+        httpServer.createContext("/api/admin-accounts",   ex -> handleAuth(ex, this::handleAdminAccounts));
+        httpServer.createContext("/api/portals",          ex -> handleAuth(ex, this::handlePortals));
+        httpServer.createContext("/api/player/inventory", ex -> handleAuth(ex, this::handlePlayerInventory));
+        httpServer.createContext("/api/player/grant",     ex -> handleAuth(ex, this::handlePlayerGrant));
         httpServer.createContext("/api/mail",             ex -> handleAuth(ex, this::handleMailAdmin));
         httpServer.createContext("/api/reports",           ex -> handleAuth(ex, this::handleReports));
         httpServer.createContext("/api/audit-log",         ex -> handleAuth(ex, this::handleAuditLog));
@@ -1495,6 +1502,278 @@ public class AdminApiServer {
     /** POST /api/assets/upload — Upload file asset (multipart hoặc raw bytes) */
 
     // ─── Player Mail ────────────────────────────────────────────
+
+
+    // ═════════════════════════════════════════════════════════════
+    // FULL CRUD — Skills, Stickers, Admin Accounts, Portals, Player Inventory
+    // ═════════════════════════════════════════════════════════════
+
+    /** CRUD Kỹ năng class */
+    private void handleSkills(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String classId = params.getOrDefault("class_id", "");
+                String sql = classId.isEmpty()
+                    ? "SELECT * FROM skill_templates ORDER BY class_id, level_req"
+                    : "SELECT * FROM skill_templates WHERE class_id=" + classId + " ORDER BY level_req";
+                sendTableResult(ex, c.prepareStatement(sql), "skills");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO skill_templates (class_id,name,description,damage_base,damage_scale," +
+                            "mp_cost,cooldown_ms,range_val,aoe_radius,level_req,max_level,icon_id,effect_type,effect_value) " +
+                            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        ps.setInt(1, num(body,"class_id")); ps.setString(2, str(body,"name"));
+                        ps.setString(3, str(body,"description")); ps.setInt(4, num(body,"damage_base"));
+                        ps.setFloat(5, Float.parseFloat(str(body,"damage_scale"))); ps.setInt(6, num(body,"mp_cost"));
+                        ps.setInt(7, num(body,"cooldown_ms")); ps.setInt(8, num(body,"range_val"));
+                        ps.setInt(9, num(body,"aoe_radius")); ps.setInt(10, num(body,"level_req"));
+                        ps.setInt(11, num(body,"max_level")); ps.setInt(12, num(body,"icon_id"));
+                        ps.setString(13, str(body,"effect_type")); ps.setInt(14, num(body,"effect_value"));
+                        ps.executeUpdate();
+                        auditLog(ex, "create_skill", "skill", "", str(body,"name"));
+                        sendJson(ex,200,Map.of("success",true,"message","Skill created"));
+                    }
+                    case "update" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "UPDATE skill_templates SET name=?,description=?,damage_base=?,damage_scale=?," +
+                            "mp_cost=?,cooldown_ms=?,range_val=?,aoe_radius=?,level_req=?,max_level=?,icon_id=?," +
+                            "effect_type=?,effect_value=? WHERE id=?");
+                        ps.setString(1, str(body,"name")); ps.setString(2, str(body,"description"));
+                        ps.setInt(3, num(body,"damage_base")); ps.setFloat(4, Float.parseFloat(str(body,"damage_scale")));
+                        ps.setInt(5, num(body,"mp_cost")); ps.setInt(6, num(body,"cooldown_ms"));
+                        ps.setInt(7, num(body,"range_val")); ps.setInt(8, num(body,"aoe_radius"));
+                        ps.setInt(9, num(body,"level_req")); ps.setInt(10, num(body,"max_level"));
+                        ps.setInt(11, num(body,"icon_id")); ps.setString(12, str(body,"effect_type"));
+                        ps.setInt(13, num(body,"effect_value")); ps.setInt(14, num(body,"id"));
+                        ps.executeUpdate();
+                        auditLog(ex, "update_skill", "skill", String.valueOf(num(body,"id")), str(body,"name"));
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM skill_templates WHERE id=" + num(body,"id")).executeUpdate();
+                        auditLog(ex, "delete_skill", "skill", String.valueOf(num(body,"id")), "");
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** CRUD Sticker packs & items */
+    private void handleStickers(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String type = params.getOrDefault("type", "packs"); // packs hoặc items
+                if (type.equals("items")) {
+                    String packId = params.getOrDefault("pack_id", "");
+                    String sql = packId.isEmpty()
+                        ? "SELECT s.*, sp.name as pack_name FROM stickers s JOIN sticker_packs sp ON sp.id=s.pack_id ORDER BY s.pack_id, s.sort_order"
+                        : "SELECT s.*, sp.name as pack_name FROM stickers s JOIN sticker_packs sp ON sp.id=s.pack_id WHERE s.pack_id=" + packId + " ORDER BY s.sort_order";
+                    sendTableResult(ex, c.prepareStatement(sql), "stickers");
+                } else {
+                    sendTableResult(ex, c.prepareStatement("SELECT sp.*, (SELECT COUNT(*) FROM stickers s WHERE s.pack_id=sp.id) as sticker_count FROM sticker_packs sp ORDER BY sp.id"), "packs");
+                }
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "create_pack" -> {
+                        PreparedStatement ps = c.prepareStatement("INSERT INTO sticker_packs (name,description,icon_asset,price_diamond,is_free,is_active) VALUES (?,?,?,?,?,?)");
+                        ps.setString(1, str(body,"name")); ps.setString(2, str(body,"description"));
+                        ps.setString(3, str(body,"icon_asset")); ps.setInt(4, num(body,"price_diamond"));
+                        ps.setInt(5, num(body,"is_free")); ps.setInt(6, 1);
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "create_sticker" -> {
+                        PreparedStatement ps = c.prepareStatement("INSERT INTO stickers (pack_id,asset_key,name,sort_order) VALUES (?,?,?,?)");
+                        ps.setInt(1, num(body,"pack_id")); ps.setString(2, str(body,"asset_key"));
+                        ps.setString(3, str(body,"name")); ps.setInt(4, num(body,"sort_order"));
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update_pack" -> {
+                        c.prepareStatement("UPDATE sticker_packs SET name='" + str(body,"name").replace("'","") +
+                            "',price_diamond=" + num(body,"price_diamond") +
+                            ",is_free=" + num(body,"is_free") +
+                            ",is_active=" + num(body,"is_active") + " WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete_sticker" -> {
+                        c.prepareStatement("DELETE FROM stickers WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete_pack" -> {
+                        c.prepareStatement("DELETE FROM sticker_packs WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** CRUD Admin accounts (quản lý quyền) */
+    private void handleAdminAccounts(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT id,username,display_name,role,permissions,is_active,last_login,created_at FROM admin_accounts ORDER BY id"), "admins");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "create" -> {
+                        String hash = org.mindrot.jbcrypt.BCrypt.hashpw(str(body,"password"), org.mindrot.jbcrypt.BCrypt.gensalt());
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO admin_accounts (username,password_hash,display_name,role,permissions) VALUES (?,?,?,?,?)");
+                        ps.setString(1, str(body,"username")); ps.setString(2, hash);
+                        ps.setString(3, str(body,"display_name")); ps.setString(4, str(body,"role"));
+                        ps.setString(5, str(body,"permissions"));
+                        ps.executeUpdate();
+                        auditLog(ex, "create_admin", "admin", str(body,"username"), "Role: " + str(body,"role"));
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update_role" -> {
+                        c.prepareStatement("UPDATE admin_accounts SET role='" + str(body,"role").replace("'","") +
+                            "',permissions='" + str(body,"permissions").replace("'","") + "' WHERE id=" + num(body,"id")).executeUpdate();
+                        auditLog(ex, "update_admin_role", "admin", String.valueOf(num(body,"id")), str(body,"role"));
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "toggle" -> {
+                        c.prepareStatement("UPDATE admin_accounts SET is_active=1-is_active WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "reset_password" -> {
+                        String hash = org.mindrot.jbcrypt.BCrypt.hashpw(str(body,"new_password"), org.mindrot.jbcrypt.BCrypt.gensalt());
+                        c.prepareStatement("UPDATE admin_accounts SET password_hash='" + hash + "' WHERE id=" + num(body,"id")).executeUpdate();
+                        auditLog(ex, "reset_admin_pw", "admin", String.valueOf(num(body,"id")), "");
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** CRUD Map portals */
+    private void handlePortals(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String mapId = params.getOrDefault("map_id", "");
+                String sql = mapId.isEmpty()
+                    ? "SELECT mp.*, m1.name as from_map, m2.name as to_map FROM map_portals mp JOIN maps m1 ON m1.id=mp.from_map_id JOIN maps m2 ON m2.id=mp.to_map_id ORDER BY mp.from_map_id"
+                    : "SELECT mp.*, m1.name as from_map, m2.name as to_map FROM map_portals mp JOIN maps m1 ON m1.id=mp.from_map_id JOIN maps m2 ON m2.id=mp.to_map_id WHERE mp.from_map_id=" + mapId;
+                sendTableResult(ex, c.prepareStatement(sql), "portals");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO map_portals (from_map_id,to_map_id,from_x,from_y,to_x,to_y,min_level) VALUES (?,?,?,?,?,?,?)");
+                        ps.setInt(1, num(body,"from_map_id")); ps.setInt(2, num(body,"to_map_id"));
+                        ps.setFloat(3, Float.parseFloat(str(body,"from_x"))); ps.setFloat(4, Float.parseFloat(str(body,"from_y")));
+                        ps.setFloat(5, Float.parseFloat(str(body,"to_x"))); ps.setFloat(6, Float.parseFloat(str(body,"to_y")));
+                        ps.setInt(7, num(body,"min_level"));
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM map_portals WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** Xem/sửa inventory của player cụ thể */
+    private void handlePlayerInventory(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            var params = parseQuery(ex.getRequestURI().getQuery());
+            String charId = params.getOrDefault("char_id", "0");
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT ci.*, i.name, i.type, i.rarity FROM character_inventory ci " +
+                    "JOIN items i ON i.id=ci.item_id WHERE ci.char_id=" + charId + " ORDER BY ci.slot_type, ci.slot_index"), "items");
+            } else {
+                var body = parseBody(ex);
+                String action = str(body, "action");
+                switch (action) {
+                    case "remove" -> {
+                        c.prepareStatement("DELETE FROM character_inventory WHERE id=" + num(body,"inventory_id") +
+                            " AND char_id=" + num(body,"char_id")).executeUpdate();
+                        auditLog(ex, "remove_item", "player", String.valueOf(num(body,"char_id")), "Removed inv#" + num(body,"inventory_id"));
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "set_qty" -> {
+                        c.prepareStatement("UPDATE character_inventory SET qty=" + num(body,"qty") +
+                            " WHERE id=" + num(body,"inventory_id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** Grant item/gold/diamond cho player */
+    private void handlePlayerGrant(HttpExchange ex) throws Exception {
+        if (!ex.getRequestMethod().equals("POST")) { send405(ex); return; }
+        var body = parseBody(ex);
+        long charId = Long.parseLong(str(body, "char_id"));
+        String grantType = str(body, "type"); // item, gold, diamond, exp, event_currency
+
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            switch (grantType) {
+                case "item" -> {
+                    int itemId = num(body, "item_id");
+                    int qty = num(body, "qty");
+                    c.prepareStatement("INSERT INTO character_inventory (char_id,item_id,qty) VALUES (" +
+                        charId + "," + itemId + "," + qty + ")").executeUpdate();
+                    auditLog(ex, "grant_item", "player", String.valueOf(charId), "Item#" + itemId + " x" + qty);
+                }
+                case "gold" -> {
+                    long amount = Long.parseLong(str(body, "amount"));
+                    c.prepareStatement("UPDATE characters SET gold=gold+" + amount + " WHERE id=" + charId).executeUpdate();
+                    auditLog(ex, "grant_gold", "player", String.valueOf(charId), amount + " gold");
+                }
+                case "diamond" -> {
+                    int amount = num(body, "amount");
+                    c.prepareStatement("UPDATE characters SET diamond=diamond+" + amount + " WHERE id=" + charId).executeUpdate();
+                    auditLog(ex, "grant_diamond", "player", String.valueOf(charId), amount + " diamond");
+                }
+                case "exp" -> {
+                    long amount = Long.parseLong(str(body, "amount"));
+                    c.prepareStatement("UPDATE characters SET exp=exp+" + amount + " WHERE id=" + charId).executeUpdate();
+                    auditLog(ex, "grant_exp", "player", String.valueOf(charId), amount + " exp");
+                }
+                case "event_currency" -> {
+                    int curId = num(body, "currency_id");
+                    int amount = num(body, "amount");
+                    c.prepareStatement("INSERT INTO player_event_currencies (char_id,currency_id,amount) VALUES (" +
+                        charId + "," + curId + "," + amount + ") ON DUPLICATE KEY UPDATE amount=amount+" + amount).executeUpdate();
+                    auditLog(ex, "grant_event_currency", "player", String.valueOf(charId), "Currency#" + curId + " +" + amount);
+                }
+                default -> { sendJson(ex,400,Map.of("success",false,"message","Unknown grant type")); return; }
+            }
+            sendJson(ex, 200, Map.of("success", true, "message", "Granted " + grantType + " to char#" + charId));
+
+            // Send player mail notification
+            c.prepareStatement("INSERT INTO player_mail (recipient_id,sender_type,sender_name,title,content) VALUES (" +
+                charId + ",'admin','Admin','Qua Tang','Ban nhan duoc " + grantType + " tu admin.')").executeUpdate();
+        }
+    }
 
     private void handleMailAdmin(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {

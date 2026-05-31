@@ -2383,3 +2383,201 @@ class DungeonPanel extends BasePanel {
         addContent(table);
     }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// Skills, Stickers, Admin Accounts, Portals, Player Grant
+// ═══════════════════════════════════════════════════════════════
+
+class SkillsPanel extends BasePanel {
+    SkillsPanel(ApiClient api, MainWindow main) {
+        super("Ky Nang (Skills)");
+        var table = createTableView("GET", "/api/skills", "skills");
+        var cbClass = new ComboBox<String>();
+        cbClass.getItems().addAll("Tat ca","1-Kiem Si","2-Sat Thu","3-Phap Su","4-Phap Thu","5-Cung Thu");
+        cbClass.setValue("Tat ca");
+        var btnFilter = new Button("Loc");
+        btnFilter.setOnAction(e -> {
+            String sel = cbClass.getValue();
+            String classId = sel.equals("Tat ca") ? "" : sel.substring(0,1);
+            refreshTable(table, "GET", "/api/skills" + (classId.isEmpty() ? "" : "?class_id=" + classId), "skills");
+        });
+        var btnAdd = new Button("Them Skill");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/skills", Map.of("action","create","class_id","1","name","Skill Moi","description","Mo ta",
+                "damage_base","100","damage_scale","1.5","mp_cost","20","cooldown_ms","2000",
+                "range_val","1","aoe_radius","0","level_req","1","max_level","10","icon_id","0","effect_type","damage","effect_value","0"));
+            refreshTable(table, "GET", "/api/skills", "skills");
+        });
+        addToolbar(new Label("Class:"), cbClass, btnFilter, btnAdd);
+        addContent(table);
+    }
+}
+
+class StickersPanel extends BasePanel {
+    StickersPanel(ApiClient api, MainWindow main) {
+        super("Sticker Packs & Items");
+        var tablePacks = createTableView("GET", "/api/stickers?type=packs", "packs");
+        var tableItems = createTableView("GET", "/api/stickers?type=items", "stickers");
+        var tabPane = new TabPane();
+        tabPane.getTabs().addAll(
+            new Tab("Goi Sticker", tablePacks),
+            new Tab("Sticker Items", tableItems)
+        );
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        var btnAddPack = new Button("Them Goi");
+        btnAddPack.setOnAction(e -> {
+            api.post("/api/stickers", Map.of("action","create_pack","name","Goi Moi","description","","icon_asset","","price_diamond","0","is_free","1"));
+            refreshTable(tablePacks, "GET", "/api/stickers?type=packs", "packs");
+        });
+        var btnAddItem = new Button("Them Sticker");
+        addToolbar(btnAddPack, btnAddItem);
+        addContent(tabPane);
+    }
+}
+
+class AdminAccountsPanel extends BasePanel {
+    AdminAccountsPanel(ApiClient api, MainWindow main) {
+        super("Quan Ly Tai Khoan Admin");
+        var table = createTableView("GET", "/api/admin-accounts", "admins");
+        var btnAdd = new Button("Them Admin");
+        btnAdd.setOnAction(e -> {
+            var dialog = new TextInputDialog("gm01");
+            dialog.setTitle("Them Admin"); dialog.setHeaderText("Username:");
+            dialog.showAndWait().ifPresent(username -> {
+                api.post("/api/admin-accounts", Map.of("action","create","username",username,
+                    "password","changeme123","display_name",username,"role","gm","permissions","[\"players\",\"chat\"]"));
+                refreshTable(table, "GET", "/api/admin-accounts", "admins");
+            });
+        });
+        addToolbar(btnAdd, new Label("Roles: super_admin, admin, gm, support, content_editor, viewer"));
+        addContent(table);
+    }
+}
+
+class PortalsPanel extends BasePanel {
+    PortalsPanel(ApiClient api, MainWindow main) {
+        super("Map Portals");
+        var table = createTableView("GET", "/api/portals", "portals");
+        var btnAdd = new Button("Them Portal");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/portals", Map.of("action","create","from_map_id","1","to_map_id","2",
+                "from_x","10","from_y","10","to_x","5","to_y","5","min_level","1"));
+            refreshTable(table, "GET", "/api/portals", "portals");
+        });
+        addToolbar(btnAdd);
+        addContent(table);
+    }
+}
+
+class PlayerGrantPanel extends BasePanel {
+    PlayerGrantPanel(ApiClient api, MainWindow main) {
+        super("Grant Item/Gold/Diamond cho Player");
+        var tfCharId = new TextField(); tfCharId.setPromptText("Char ID...");
+        var cbType = new ComboBox<String>();
+        cbType.getItems().addAll("item","gold","diamond","exp","event_currency");
+        cbType.setValue("gold");
+        var tfItemId = new TextField(); tfItemId.setPromptText("Item ID (neu la item)...");
+        var tfAmount = new TextField(); tfAmount.setPromptText("So luong...");
+        var btnGrant = new Button("Grant");
+        btnGrant.setOnAction(e -> {
+            Map<String,String> body = new java.util.HashMap<>();
+            body.put("char_id", tfCharId.getText().trim());
+            body.put("type", cbType.getValue());
+            body.put("amount", tfAmount.getText().trim());
+            if (cbType.getValue().equals("item")) body.put("item_id", tfItemId.getText().trim());
+            if (cbType.getValue().equals("item")) body.put("qty", tfAmount.getText().trim());
+            String result = api.post("/api/player/grant", body);
+            showAlert("Grant Result", result);
+        });
+        addToolbar(new Label("Char ID:"), tfCharId, new Label("Loai:"), cbType, new Label("Item ID:"), tfItemId, new Label("So luong:"), tfAmount, btnGrant);
+        // Player inventory viewer
+        var tfViewChar = new TextField(); tfViewChar.setPromptText("Char ID xem inventory...");
+        var btnView = new Button("Xem Inventory");
+        var table = createTableView("GET", "/api/player/inventory?char_id=0", "items");
+        btnView.setOnAction(e -> refreshTable(table, "GET", "/api/player/inventory?char_id=" + tfViewChar.getText().trim(), "items"));
+        addContent(new VBox(8, new HBox(8, tfViewChar, btnView), table));
+    }
+}
+
+class AuditLogPanel extends BasePanel {
+    AuditLogPanel(ApiClient api, MainWindow main) {
+        super("Audit Log — Ai lam gi trong admin");
+        addContent(createTableView("GET", "/api/audit-log", "logs"));
+    }
+}
+
+class ScheduledTasksPanel extends BasePanel {
+    ScheduledTasksPanel(ApiClient api, MainWindow main) {
+        super("Lich Hen / Scheduled Tasks");
+        var table = createTableView("GET", "/api/scheduled-tasks", "tasks");
+        var btnAdd = new Button("Them Task");
+        btnAdd.setOnAction(e -> {
+            api.post("/api/scheduled-tasks", Map.of("action","create","task_name","Task Moi",
+                "task_type","double_exp","cron_expression","0 20 * * 5","run_once_at","","parameters","{\"multiplier\":2}"));
+            refreshTable(table, "GET", "/api/scheduled-tasks", "tasks");
+        });
+        addToolbar(btnAdd);
+        addContent(table);
+    }
+}
+
+class AIReviewPanel extends BasePanel {
+    AIReviewPanel(ApiClient api, MainWindow main) {
+        super("AI Content Review");
+        var cbStatus = new ComboBox<String>();
+        cbStatus.getItems().addAll("draft","review","testing","approved","published","rejected");
+        cbStatus.setValue("draft");
+        var table = createTableView("GET", "/api/ai/review?status=draft", "items");
+        var btnFilter = new Button("Loc");
+        btnFilter.setOnAction(e -> refreshTable(table, "GET", "/api/ai/review?status=" + cbStatus.getValue(), "items"));
+        var btnApprove = new Button("Duyet"); 
+        var btnReject = new Button("Tu Choi");
+        var btnTest = new Button("Test tren SV Test");
+        var btnPublish = new Button("Publish Production");
+        addToolbar(new Label("Status:"), cbStatus, btnFilter, btnApprove, btnReject, btnTest, btnPublish);
+        addContent(table);
+    }
+}
+
+class PlayerMailPanel extends BasePanel {
+    PlayerMailPanel(ApiClient api, MainWindow main) {
+        super("Thu Nguoi Choi (Player Mail)");
+        var table = createTableView("GET", "/api/mail", "mails");
+        var btnSend = new Button("Gui Thu");
+        btnSend.setOnAction(e -> {
+            var dialog = new TextInputDialog("");
+            dialog.setTitle("Gui Thu"); dialog.setHeaderText("Char ID nguoi nhan:");
+            dialog.showAndWait().ifPresent(charId -> {
+                api.post("/api/mail", Map.of("action","send","recipient_id",charId,
+                    "sender_name","Admin","title","Thu tu Admin","content","Noi dung...",
+                    "attachment_json","[]","expires_at",""));
+                refreshTable(table, "GET", "/api/mail", "mails");
+            });
+        });
+        var btnBlast = new Button("Gui Tat Ca");
+        btnBlast.setOnAction(e -> {
+            api.post("/api/mail", Map.of("action","send_all",
+                "sender_name","Admin","title","Thong bao","content","Noi dung gui cho tat ca...",
+                "attachment_json","[]"));
+            showAlert("Info", "Da gui cho tat ca nguoi choi!");
+        });
+        addToolbar(btnSend, btnBlast);
+        addContent(table);
+    }
+}
+
+class PlayerReportsPanel extends BasePanel {
+    PlayerReportsPanel(ApiClient api, MainWindow main) {
+        super("Bao Cao / Khieu Nai");
+        var cbStatus = new ComboBox<String>();
+        cbStatus.getItems().addAll("open","investigating","resolved","dismissed");
+        cbStatus.setValue("open");
+        var table = createTableView("GET", "/api/reports?status=open", "reports");
+        var btnFilter = new Button("Loc");
+        btnFilter.setOnAction(e -> refreshTable(table, "GET", "/api/reports?status=" + cbStatus.getValue(), "reports"));
+        var btnResolve = new Button("Giai Quyet");
+        var btnDismiss = new Button("Bo Qua");
+        addToolbar(new Label("Status:"), cbStatus, btnFilter, btnResolve, btnDismiss);
+        addContent(table);
+    }
+}
