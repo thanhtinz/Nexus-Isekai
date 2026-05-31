@@ -2,3 +2,9 @@ node_modules/
 *.class
 target/
 *.jar
+
+# Production secrets — NEVER commit
+deploy/.env
+deploy/certs/
+*.pem
+*.key
