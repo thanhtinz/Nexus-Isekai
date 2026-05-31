@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { http } from '@/api/client'
+import { Menu, X } from 'lucide-react'
 
 /**
  * LandingPage — Vọng Linh Giới (Nexus Isekai)
@@ -21,6 +22,7 @@ interface RankRow { rank: number; name: string; value: number }
 
 export default function LandingPage() {
   const [shown, setShown] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const [servers, setServers] = useState<Server[]>([])
   const [selectedServer, setSelectedServer] = useState<number>(0)
   const [news, setNews] = useState<NewsItem[]>([])
@@ -93,7 +95,7 @@ export default function LandingPage() {
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
 
         {/* HEADER */}
-        <header className="flex items-center justify-between py-5 flex-wrap gap-3">
+        <header className="flex items-center justify-between py-5 gap-3 relative">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl grid place-items-center text-white font-extrabold"
               style={{ background: `linear-gradient(135deg,${palette.violet},${palette.violetDeep})`, fontFamily: "'Cinzel',serif", boxShadow: '0 6px 18px rgba(108,62,243,.35)' }}>VL</div>
@@ -102,13 +104,34 @@ export default function LandingPage() {
               <div className="text-[11px] tracking-[2px]" style={{ color: palette.inkSoft }}>NEXUS ISEKAI</div>
             </div>
           </div>
+
+          {/* Desktop nav */}
           <nav className="hidden lg:flex gap-5 items-center">
             {nav.map((n, i) => (<a key={n} href="#" className="text-sm font-semibold no-underline pb-1"
               style={{ color: i === 0 ? palette.violet : palette.inkSoft, borderBottom: i === 0 ? `2px solid ${palette.gold}` : '2px solid transparent' }}>{n}</a>))}
           </nav>
-          {/* CHỈ ĐĂNG NHẬP — đăng ký trong game */}
-          <Link to="/login" className="text-sm font-bold px-5 py-2 rounded-xl text-white no-underline"
-            style={{ background: `linear-gradient(135deg,${palette.violet},${palette.violetDeep})` }}>Đăng Nhập</Link>
+
+          <div className="flex items-center gap-2">
+            <Link to="/login" className="text-sm font-bold px-4 sm:px-5 py-2 rounded-xl text-white no-underline whitespace-nowrap"
+              style={{ background: `linear-gradient(135deg,${palette.violet},${palette.violetDeep})` }}>Đăng Nhập</Link>
+            {/* Hamburger — chỉ mobile/tablet */}
+            <button className="lg:hidden p-2 rounded-lg border" onClick={() => setMobileOpen(v => !v)} aria-label="Menu"
+              style={{ borderColor: '#ece3d0', color: palette.ink, background: '#fffdf7' }}>
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+
+          {/* Mobile dropdown menu */}
+          {mobileOpen && (
+            <div className="lg:hidden absolute top-full right-0 left-0 mt-1 rounded-2xl border p-2 z-50 shadow-xl"
+              style={{ background: '#fffdf7', borderColor: '#ece3d0' }}>
+              {nav.map((n, i) => (
+                <a key={n} href="#" onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-3 rounded-xl text-sm font-semibold no-underline"
+                  style={{ color: i === 0 ? palette.violet : palette.inkSoft, background: i === 0 ? '#6c3ef310' : 'transparent' }}>{n}</a>
+              ))}
+            </div>
+          )}
         </header>
 
         {/* HERO */}
