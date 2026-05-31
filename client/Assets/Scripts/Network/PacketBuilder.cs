@@ -445,6 +445,36 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
 
+
+        // ── MISSING SENDS ───────────────────────────────────
+
+        public static void SendCastSkill(int skillId, long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CAST_SKILL).WriteInt(skillId).WriteLong(targetId));
+        public static void SendBlock(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_BLOCK_PLAYER).WriteLong(targetId));
+        public static void SendReport(long targetId, string reason)
+            => Send(new PacketBuilder(PacketOpcode.C2S_REPORT_PLAYER).WriteLong(targetId).WriteString(reason));
+        public static void SendMissionPassInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_MISSION_PASS_INFO));
+        public static void SendMissionPassClaim(int level)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MISSION_PASS_CLAIM).WriteInt(level));
+        public static void SendInspectPlayer(long charId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_INSPECT_PLAYER).WriteLong(charId));
+        public static void SendAutoPlay(bool enabled)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUTO_PLAY).WriteBool(enabled));
+        public static void SendEmote(int emoteId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_EMOTE).WriteInt(emoteId));
+        public static void SendTeleport(int mapId, float x, float y)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TELEPORT).WriteInt(mapId).WriteFloat(x).WriteFloat(y));
+        public static void SendWarehouse(int action, int slot)
+            => Send(new PacketBuilder(PacketOpcode.C2S_WAREHOUSE).WriteInt(action).WriteInt(slot));
+        public static void SendGemSocket(int equipSlot, int gemId, int socketIdx)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GEM_SOCKET).WriteInt(equipSlot).WriteInt(gemId).WriteInt(socketIdx));
+        public static void SendRefine(int equipSlot)
+            => Send(new PacketBuilder(PacketOpcode.C2S_REFINE).WriteInt(equipSlot));
+        public static void SendNewsRequest()
+            => Send(new PacketBuilder(PacketOpcode.C2S_NEWS_LIST));
+
         // ── TOPUP IN-GAME ───────────────────────────────
 
         public static void SendTopupPackages()
@@ -733,6 +763,36 @@ namespace NexusIsekai.Network
         public static void SendCharList()
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
+
+
+        // ── MISSING SENDS ───────────────────────────────────
+
+        public static void SendCastSkill(int skillId, long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CAST_SKILL).WriteInt(skillId).WriteLong(targetId));
+        public static void SendBlock(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_BLOCK_PLAYER).WriteLong(targetId));
+        public static void SendReport(long targetId, string reason)
+            => Send(new PacketBuilder(PacketOpcode.C2S_REPORT_PLAYER).WriteLong(targetId).WriteString(reason));
+        public static void SendMissionPassInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_MISSION_PASS_INFO));
+        public static void SendMissionPassClaim(int level)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MISSION_PASS_CLAIM).WriteInt(level));
+        public static void SendInspectPlayer(long charId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_INSPECT_PLAYER).WriteLong(charId));
+        public static void SendAutoPlay(bool enabled)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUTO_PLAY).WriteBool(enabled));
+        public static void SendEmote(int emoteId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_EMOTE).WriteInt(emoteId));
+        public static void SendTeleport(int mapId, float x, float y)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TELEPORT).WriteInt(mapId).WriteFloat(x).WriteFloat(y));
+        public static void SendWarehouse(int action, int slot)
+            => Send(new PacketBuilder(PacketOpcode.C2S_WAREHOUSE).WriteInt(action).WriteInt(slot));
+        public static void SendGemSocket(int equipSlot, int gemId, int socketIdx)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GEM_SOCKET).WriteInt(equipSlot).WriteInt(gemId).WriteInt(socketIdx));
+        public static void SendRefine(int equipSlot)
+            => Send(new PacketBuilder(PacketOpcode.C2S_REFINE).WriteInt(equipSlot));
+        public static void SendNewsRequest()
+            => Send(new PacketBuilder(PacketOpcode.C2S_NEWS_LIST));
 
         // ── TOPUP IN-GAME ───────────────────────────────
 

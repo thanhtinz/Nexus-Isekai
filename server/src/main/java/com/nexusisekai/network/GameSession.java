@@ -287,6 +287,19 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_INTRO_SKIP        -> { ExtendedHandlers.handleIntroSkip(this, toBuf(p)); }
             case PacketOpcode.C2S_LOGIN_SCREEN_CFG  -> { ExtendedHandlers.handleLoginScreenCfg(this, toBuf(p)); }
 
+
+            // ── Extended Gameplay ──────────────────────────────────
+            case PacketOpcode.C2S_INSPECT_PLAYER -> { requireInGame(); ExtendedHandlers.handleInspect(this, toBuf(p)); }
+            case PacketOpcode.C2S_AUTO_PLAY      -> { requireInGame(); ExtendedHandlers.handleAutoPlay(this, toBuf(p)); }
+            case PacketOpcode.C2S_EMOTE          -> { requireInGame(); ExtendedHandlers.handleEmote(this, toBuf(p)); }
+            case PacketOpcode.C2S_TELEPORT       -> { requireInGame(); ExtendedHandlers.handleTeleport(this, toBuf(p)); }
+            case PacketOpcode.C2S_WAREHOUSE      -> { requireInGame(); ExtendedHandlers.handleWarehouse(this, toBuf(p)); }
+            case PacketOpcode.C2S_GEM_SOCKET     -> { requireInGame(); ExtendedHandlers.handleGemSocket(this, toBuf(p)); }
+            case PacketOpcode.C2S_REFINE         -> { requireInGame(); ExtendedHandlers.handleRefine(this, toBuf(p)); }
+            case PacketOpcode.C2S_NEWS_LIST      -> { ExtendedHandlers.handleNewsList(this, toBuf(p)); }
+            case PacketOpcode.C2S_BLOCK_PLAYER   -> { requireInGame(); ExtendedHandlers.handleBlock(this, toBuf(p)); }
+            case PacketOpcode.C2S_REPORT_PLAYER  -> { requireInGame(); ExtendedHandlers.handleReport(this, toBuf(p)); }
+
             // ── Topup In-Game ──────────────────────────────────
             case PacketOpcode.C2S_TOPUP_PACKAGES -> { requireInGame(); ExtendedHandlers.handleTopupPackages(this, toBuf(p)); }
             case PacketOpcode.C2S_TOPUP_BUY      -> { requireInGame(); ExtendedHandlers.handleTopupBuy(this, toBuf(p)); }

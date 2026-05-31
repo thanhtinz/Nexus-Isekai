@@ -353,6 +353,28 @@ namespace NexusIsekai.Network
         public const short S2C_SOCIAL_LOGIN_OK   = 0x1F11;
         public const short S2C_SOCIAL_LINK_OK    = 0x1F12;
 
+
+        // ── EXTENDED GAMEPLAY (26xx-2Axx) ─────────────────────
+        public const short C2S_INSPECT_PLAYER  = 0x2601;
+        public const short S2C_INSPECT_DATA    = 0x2611;
+        public const short C2S_AUTO_PLAY       = 0x2701;
+        public const short S2C_AUTO_PLAY_STATE = 0x2711;
+        public const short C2S_EMOTE           = 0x2801;
+        public const short S2C_EMOTE_SHOW      = 0x2811;
+        public const short C2S_TELEPORT        = 0x2901;
+        public const short S2C_TELEPORT_OK     = 0x2911;
+        public const short C2S_WAREHOUSE       = 0x2A01;
+        public const short S2C_WAREHOUSE_DATA  = 0x2A11;
+        public const short C2S_GEM_SOCKET      = 0x2B01;
+        public const short S2C_GEM_SOCKET_OK   = 0x2B11;
+        public const short C2S_REFINE          = 0x2C01;
+        public const short S2C_REFINE_OK       = 0x2C11;
+        public const short C2S_NEWS_LIST       = 0x2D01;
+        public const short S2C_NEWS_LIST       = 0x2D11;
+        public const short C2S_BLOCK_PLAYER    = 0x2E01;
+        public const short C2S_REPORT_PLAYER   = 0x2E02;
+        public const short S2C_BLOCK_OK        = 0x2E11;
+
         // ── TOPUP IN-GAME ─────────────────────────────────
         public const short C2S_TOPUP_PACKAGES    = 0x2501;
         public const short C2S_TOPUP_BUY         = 0x2502;

@@ -102,6 +102,28 @@ public final class PacketOpcode {
     public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
 
+
+    // ── EXTENDED GAMEPLAY (26xx-2Axx) ─────────────────────
+    public static final short C2S_INSPECT_PLAYER  = (short)0x2601;
+    public static final short S2C_INSPECT_DATA    = (short)0x2611;
+    public static final short C2S_AUTO_PLAY       = (short)0x2701;
+    public static final short S2C_AUTO_PLAY_STATE = (short)0x2711;
+    public static final short C2S_EMOTE           = (short)0x2801;
+    public static final short S2C_EMOTE_SHOW      = (short)0x2811;
+    public static final short C2S_TELEPORT        = (short)0x2901;
+    public static final short S2C_TELEPORT_OK     = (short)0x2911;
+    public static final short C2S_WAREHOUSE       = (short)0x2A01;
+    public static final short S2C_WAREHOUSE_DATA  = (short)0x2A11;
+    public static final short C2S_GEM_SOCKET      = (short)0x2B01;
+    public static final short S2C_GEM_SOCKET_OK   = (short)0x2B11;
+    public static final short C2S_REFINE          = (short)0x2C01;
+    public static final short S2C_REFINE_OK       = (short)0x2C11;
+    public static final short C2S_NEWS_LIST       = (short)0x2D01;
+    public static final short S2C_NEWS_LIST       = (short)0x2D11;
+    public static final short C2S_BLOCK_PLAYER    = (short)0x2E01;
+    public static final short C2S_REPORT_PLAYER   = (short)0x2E02;
+    public static final short S2C_BLOCK_OK        = (short)0x2E11;
+
     // ── TOPUP IN-GAME (25xx) ─────────────────────────────
     public static final short C2S_TOPUP_PACKAGES    = (short)0x2501;
     public static final short C2S_TOPUP_BUY         = (short)0x2502;
@@ -521,6 +543,28 @@ public final class PacketOpcode {
     public static final short C2S_SOCIAL_UNLINK     = (short)0x1F03;
     public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
+
+
+    // ── EXTENDED GAMEPLAY (26xx-2Axx) ─────────────────────
+    public static final short C2S_INSPECT_PLAYER  = (short)0x2601;
+    public static final short S2C_INSPECT_DATA    = (short)0x2611;
+    public static final short C2S_AUTO_PLAY       = (short)0x2701;
+    public static final short S2C_AUTO_PLAY_STATE = (short)0x2711;
+    public static final short C2S_EMOTE           = (short)0x2801;
+    public static final short S2C_EMOTE_SHOW      = (short)0x2811;
+    public static final short C2S_TELEPORT        = (short)0x2901;
+    public static final short S2C_TELEPORT_OK     = (short)0x2911;
+    public static final short C2S_WAREHOUSE       = (short)0x2A01;
+    public static final short S2C_WAREHOUSE_DATA  = (short)0x2A11;
+    public static final short C2S_GEM_SOCKET      = (short)0x2B01;
+    public static final short S2C_GEM_SOCKET_OK   = (short)0x2B11;
+    public static final short C2S_REFINE          = (short)0x2C01;
+    public static final short S2C_REFINE_OK       = (short)0x2C11;
+    public static final short C2S_NEWS_LIST       = (short)0x2D01;
+    public static final short S2C_NEWS_LIST       = (short)0x2D11;
+    public static final short C2S_BLOCK_PLAYER    = (short)0x2E01;
+    public static final short C2S_REPORT_PLAYER   = (short)0x2E02;
+    public static final short S2C_BLOCK_OK        = (short)0x2E11;
 
     // ── TOPUP IN-GAME (25xx) ─────────────────────────────
     public static final short C2S_TOPUP_PACKAGES    = (short)0x2501;

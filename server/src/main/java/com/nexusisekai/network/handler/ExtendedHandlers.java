@@ -920,6 +920,21 @@ public class ExtendedHandlers {
     }
 
 
+
+    // ═══════════════════════════════════════════════════════════
+    // EXTENDED GAMEPLAY
+    // ═══════════════════════════════════════════════════════════
+    public static void handleInspect(GameSession s, ByteBuf b)   { long id=b.readLong(); msg(s,"Inspecting..."); }
+    public static void handleAutoPlay(GameSession s, ByteBuf b)  { boolean on=b.readBoolean(); msg(s,on?"Auto ON":"Auto OFF"); }
+    public static void handleEmote(GameSession s, ByteBuf b)     { int id=b.readInt(); /* broadcast emote to nearby */ }
+    public static void handleTeleport(GameSession s, ByteBuf b)  { int map=b.readInt(); msg(s,"Teleporting..."); }
+    public static void handleWarehouse(GameSession s, ByteBuf b) { int act=b.readInt(); msg(s,"Warehouse..."); }
+    public static void handleGemSocket(GameSession s, ByteBuf b) { int slot=b.readInt(); int gem=b.readInt(); msg(s,"Socketing gem..."); }
+    public static void handleRefine(GameSession s, ByteBuf b)    { int slot=b.readInt(); msg(s,"Refining..."); }
+    public static void handleNewsList(GameSession s, ByteBuf b)  { msg(s,"Loading news..."); }
+    public static void handleBlock(GameSession s, ByteBuf b)     { long id=b.readLong(); msg(s,"Blocked."); }
+    public static void handleReport(GameSession s, ByteBuf b)    { long id=b.readLong(); msg(s,"Reported."); }
+
     // ═══════════════════════════════════════════════════════════
     // TOPUP IN-GAME
     // ═══════════════════════════════════════════════════════════
