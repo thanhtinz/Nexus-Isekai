@@ -104,6 +104,10 @@ public final class PacketOpcode {
 
 
 
+    // ── INTRO VIDEO (30xx) ────────────────────────────────
+    public static final short C2S_INTRO_VIDEO_CONFIG = (short)0x3001;
+    public static final short S2C_INTRO_VIDEO_CONFIG = (short)0x3011;
+
     // ── CHAR ACTIONS + PAIR (2Fxx) ────────────────────────
     public static final short C2S_CHAR_ACTION       = (short)0x2F01;
     public static final short C2S_PAIR_ACTION       = (short)0x2F02;
@@ -556,6 +560,10 @@ public final class PacketOpcode {
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
 
 
+
+    // ── INTRO VIDEO (30xx) ────────────────────────────────
+    public static final short C2S_INTRO_VIDEO_CONFIG = (short)0x3001;
+    public static final short S2C_INTRO_VIDEO_CONFIG = (short)0x3011;
 
     // ── CHAR ACTIONS + PAIR (2Fxx) ────────────────────────
     public static final short C2S_CHAR_ACTION       = (short)0x2F01;

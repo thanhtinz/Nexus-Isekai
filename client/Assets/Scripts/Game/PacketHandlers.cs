@@ -41,6 +41,7 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_CHAR_CREATE_FAIL,OnCharCreateFail);
             d.Register(PacketOpcode.S2C_CHAR_DELETE_OK,  OnCharDeleteOk);
             d.Register(PacketOpcode.S2C_CHAR_ENTER_GAME, OnEnterGame);
+            d.Register(PacketOpcode.S2C_INTRO_VIDEO_CONFIG, OnIntroVideoConfig);
             d.Register(PacketOpcode.S2C_CLASS_STORY,     OnClassStory);
 
             // World
@@ -336,6 +337,22 @@ namespace NexusIsekai.Game
             GameState.Instance.MyPlayer = p;
             Debug.Log($"[EnterGame] {p.Name} Lv{p.Level} {p.ClassDisplayName}");
             SceneManager.LoadScene("Game");
+            // Lần đầu vào game → thử phát video intro (server quyết định đã xem chưa)
+            IntroVideoPlayer.Instance?.RequestAndPlay(() => Debug.Log("[Intro] done, vào game"));
+        }
+
+
+        private void OnIntroVideoConfig(PacketReader r)
+        {
+            bool enabled = r.ReadBool();
+            if (!enabled) { IntroVideoPlayer.Instance?.OnConfigReceived(false, "", "", false, 0, false, true); return; }
+            string url     = r.ReadString();
+            string urlLow  = r.ReadString();
+            bool   skip    = r.ReadBool();
+            int    skipSec = r.ReadInt();
+            bool   fallback= r.ReadBool();
+            bool   watched = r.ReadBool();
+            IntroVideoPlayer.Instance?.OnConfigReceived(true, url, urlLow, skip, skipSec, fallback, watched);
         }
 
         private void OnClassStory(PacketReader r)

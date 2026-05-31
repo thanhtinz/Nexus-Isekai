@@ -447,6 +447,9 @@ namespace NexusIsekai.Network
 
 
 
+        public static void SendIntroVideoConfigRequest()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INTRO_VIDEO_CONFIG));
+
         // ── EXPRESSIONS + ACTIONS + INTERACT ────────────────
 
         public static void SendCharAction(int actionId)
@@ -614,6 +617,9 @@ namespace NexusIsekai.Network
         public static void SendMailDelete(long mailId)
             => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_DELETE).WriteLong(mailId));
 
+
+        public static void SendIntroVideoConfigRequest()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INTRO_VIDEO_CONFIG));
 
         // ── EXPRESSIONS + ACTIONS + INTERACT ────────────────
 
@@ -810,6 +816,9 @@ namespace NexusIsekai.Network
 
 
 
+        public static void SendIntroVideoConfigRequest()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INTRO_VIDEO_CONFIG));
+
         // ── EXPRESSIONS + ACTIONS + INTERACT ────────────────
 
         public static void SendCharAction(int actionId)
@@ -977,6 +986,9 @@ namespace NexusIsekai.Network
         public static void SendMailDelete(long mailId)
             => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_DELETE).WriteLong(mailId));
 
+
+        public static void SendIntroVideoConfigRequest()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INTRO_VIDEO_CONFIG));
 
         // ── EXPRESSIONS + ACTIONS + INTERACT ────────────────
 

@@ -288,6 +288,8 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_LOGIN_SCREEN_CFG  -> { ExtendedHandlers.handleLoginScreenCfg(this, toBuf(p)); }
 
 
+            case PacketOpcode.C2S_INTRO_VIDEO_CONFIG -> { ExtendedHandlers.handleIntroVideoConfig(this, toBuf(p)); }
+
             // ── Char Actions + Pair ────────────────────────────
             case PacketOpcode.C2S_CHAR_ACTION      -> { requireInGame(); ExtendedHandlers.handleCharAction(this, toBuf(p)); }
             case PacketOpcode.C2S_PAIR_ACTION      -> { requireInGame(); ExtendedHandlers.handlePairAction(this, toBuf(p)); }

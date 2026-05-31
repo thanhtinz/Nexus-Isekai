@@ -490,3 +490,11 @@ Total: 20
 Total: 13
 
 ## ════════════════════════════════════
+
+## 33. INTRO VIDEO
+- Video file MP4 cinematic     | Video | 1 (do team làm)
+  + Bản chất lượng thấp (mạng yếu) | Video | 1
+- Skip button                  | T  | 1
+- Progress bar                 | T  | 1
+- Loading spinner              | T  | 1
+Total UI: 3 (video file là content)

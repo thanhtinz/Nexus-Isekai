@@ -938,6 +938,26 @@ public class ExtendedHandlers {
 
 
 
+
+    public static void handleIntroVideoConfig(GameSession s, ByteBuf b) {
+        try (java.sql.Connection c = DatabaseManager.getInstance().getConnection()) {
+            var cfg = SqlSafe.queryOne(c, "SELECT is_enabled,video_url,video_url_low,skippable,skip_after_sec,fallback_to_text FROM intro_video_config WHERE id=1");
+            var watched = SqlSafe.queryOne(c, "SELECT watched FROM player_intro WHERE account_id=?", s.getAccountId());
+            boolean alreadyWatched = watched != null && ((Number)watched.get("watched")).intValue() == 1;
+
+            ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_INTRO_VIDEO_CONFIG);
+            if (cfg == null) { pkt.writeBoolean(false); s.send(pkt); return; }
+            pkt.writeBoolean(((Number)cfg.get("is_enabled")).intValue() == 1);
+            writeStr(pkt, (String)cfg.get("video_url"));
+            writeStr(pkt, cfg.get("video_url_low") != null ? (String)cfg.get("video_url_low") : "");
+            pkt.writeBoolean(((Number)cfg.get("skippable")).intValue() == 1);
+            pkt.writeInt(((Number)cfg.get("skip_after_sec")).intValue());
+            pkt.writeBoolean(((Number)cfg.get("fallback_to_text")).intValue() == 1);
+            pkt.writeBoolean(alreadyWatched);
+            s.send(pkt);
+        } catch (Exception e) { msg(s, "Loi intro config"); }
+    }
+
     // ═══════════════════════════════════════════════════════════
     // CHAR ACTIONS + PAIR
     // ═══════════════════════════════════════════════════════════

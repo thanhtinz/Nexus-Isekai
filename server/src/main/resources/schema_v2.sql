@@ -3097,3 +3097,26 @@ ALTER TABLE player_auto_config ADD COLUMN IF NOT EXISTS config_json TEXT;
 ALTER TABLE character_equipment ADD COLUMN IF NOT EXISTS refine_level INT NOT NULL DEFAULT 0;
 ALTER TABLE characters ADD COLUMN IF NOT EXISTS guild_id INT DEFAULT NULL;
 ALTER TABLE characters ADD COLUMN IF NOT EXISTS guild_rank VARCHAR(16) DEFAULT NULL;
+
+-- ═════════════════════════════════════════════════════════════
+-- INTRO VIDEO CONFIG — Video intro sau khi tạo nhân vật lần đầu
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS intro_video_config (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    is_enabled      TINYINT NOT NULL DEFAULT 1,       -- bật/tắt video intro
+    video_url       VARCHAR(256) NOT NULL,            -- URL MP4 (CDN) hoặc StreamingAssets path
+    video_url_low   VARCHAR(256) DEFAULT '',          -- bản chất lượng thấp cho mạng yếu
+    skippable       TINYINT NOT NULL DEFAULT 1,       -- cho phép skip
+    skip_after_sec  INT NOT NULL DEFAULT 3,           -- hiện nút skip sau N giây
+    show_once       TINYINT NOT NULL DEFAULT 1,       -- chỉ chiếu lần đầu (per account)
+    fallback_to_text TINYINT NOT NULL DEFAULT 1,      -- máy không phát được video → dùng intro text
+    duration_sec    INT NOT NULL DEFAULT 60,          -- độ dài video (cho progress bar)
+    bgm_during      VARCHAR(64) DEFAULT '',           -- nhạc nền (nếu video không có audio)
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT IGNORE INTO intro_video_config (id, is_enabled, video_url, skippable, skip_after_sec, show_once, fallback_to_text)
+VALUES (1, 1, 'Intro/intro_cinematic.mp4', 1, 3, 1, 1);
+
+-- player_intro đã track watched per account (dùng chung cho video + text)

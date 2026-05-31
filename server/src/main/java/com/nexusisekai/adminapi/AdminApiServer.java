@@ -94,6 +94,23 @@ public class AdminApiServer {
         httpServer.setExecutor(Executors.newFixedThreadPool(4));
 
         // Route đăng ký
+        // Intro video config
+        httpServer.createContext("/api/intro-video", ex -> {
+            if (!checkAuth(ex)) return;
+            try (Connection c = DatabaseManager.getInstance().getConnection()) {
+                if (ex.getRequestMethod().equals("GET")) {
+                    var cfg = SqlSafe.queryOne(c, "SELECT * FROM intro_video_config WHERE id=1");
+                    sendJson(ex, 200, java.util.Map.of("config", cfg != null ? cfg : java.util.Map.of()));
+                } else {
+                    var b = parseBody(ex);
+                    SqlSafe.update(c,
+                        "UPDATE intro_video_config SET is_enabled=?, video_url=?, video_url_low=?, skippable=?, skip_after_sec=?, fallback_to_text=? WHERE id=1",
+                        num(b,"is_enabled"), safeStr(b,"video_url"), safeStr(b,"video_url_low"),
+                        num(b,"skippable"), num(b,"skip_after_sec"), num(b,"fallback_to_text"));
+                    sendJson(ex, 200, java.util.Map.of("success", true));
+                }
+            } catch (Exception e) { sendJson(ex, 500, java.util.Map.of("error","db")); }
+        });
         httpServer.createContext("/api/status",    ex -> handleAuth(ex, this::handleStatus));
         httpServer.createContext("/api/players",   ex -> handleAuth(ex, this::handlePlayers));
         httpServer.createContext("/api/kick",       ex -> handleAuth(ex, this::handleKick));

@@ -355,6 +355,10 @@ namespace NexusIsekai.Network
 
 
 
+        // ── INTRO VIDEO ──
+        public const short C2S_INTRO_VIDEO_CONFIG = 0x3001;
+        public const short S2C_INTRO_VIDEO_CONFIG = 0x3011;
+
         // ── CHAR ACTIONS + PAIR (2Fxx) ────────────────────────
         public const short C2S_CHAR_ACTION       = 0x2F01;
         public const short C2S_PAIR_ACTION       = 0x2F02;
