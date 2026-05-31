@@ -111,12 +111,9 @@ public class PacketWriter {
         return new PacketWriter(PacketOpcode.C2S_CHAR_LIST);
     }
 
-    public static PacketWriter charCreate(String name, int bodyType, int skinColor, int eyeStyle, int hairStyle, int hairColor, int shirtColor, int pantsColor) {
+    public static PacketWriter charCreate(String name, int classId, int gender) {
         return new PacketWriter(PacketOpcode.C2S_CHAR_CREATE)
-            .writeString(name)
-            .writeByte(bodyType).writeByte(skinColor).writeByte(eyeStyle)
-            .writeByte(hairStyle).writeByte(hairColor)
-            .writeByte(shirtColor).writeByte(pantsColor);
+            .writeString(name).writeByte(classId).writeByte(gender);
     }
 
     public static PacketWriter settingsLoad() {

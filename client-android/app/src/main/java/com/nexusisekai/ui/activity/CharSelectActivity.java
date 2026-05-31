@@ -95,16 +95,9 @@ public class CharSelectActivity extends AppCompatActivity {
             .setPositiveButton("Tạo", (d, w) -> {
                 String name = etName.getText().toString().trim();
                 if (name.length() < 2) { Toast.makeText(this,"Tên ≥ 2 ký tự", Toast.LENGTH_SHORT).show(); return; }
-                // Appearance — class chọn sau tại NPC
-                int bodyType   = spBody != null ? spBody.getSelectedItemPosition() + 1 : 1;
-                int skinColor  = sbSkin != null ? sbSkin.getProgress() : 1;
-                int eyeStyle   = sbEye  != null ? sbEye.getProgress()  : 0;
-                int hairStyle  = spHair != null ? spHair.getSelectedItemPosition() : 0;
-                int hairColor  = sbHairColor != null ? sbHairColor.getProgress() : 1;
-                int shirtColor = sbShirt != null ? sbShirt.getProgress() + 1 : 1;
-                int pantsColor = sbPants != null ? sbPants.getProgress() + 1 : 1;
-                GameClient.getInstance().send(PacketWriter.charCreate(name,
-                    bodyType, skinColor, eyeStyle, hairStyle, hairColor, shirtColor, pantsColor));
+                int classId = spClass != null ? spClass.getSelectedItemPosition() + 1 : 1;
+                int gender  = rgGender != null ? (rgGender.getCheckedRadioButtonId() == R.id.rbFemale ? 1 : 0) : 0;
+                GameClient.getInstance().send(PacketWriter.charCreate(name, classId, gender));
             })
             .setNegativeButton("Huỷ", null)
             .show();

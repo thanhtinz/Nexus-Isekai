@@ -413,22 +413,20 @@ namespace NexusIsekai.Data
     [System.Serializable]
     public class CharacterAppearance
     {
-        public int BodyType   = 1;   // 1-9
-        public int SkinColor  = 1;   // 0-10 (0bas_humn_vXX)
-        public int EyeStyle   = 0;   // 0-10 (3fac/eye_vXX)
-        public int HairStyle  = 0;   // 0=bob1, 1=bob2, 2=dap1, 3=flat, 4=fro1, 5=pon1, 6=spk2
-        public int HairColor  = 1;   // 0-13
-        public int ShirtColor = 1;   // 1-5 (1out/fstr_vXX)
-        public int PantsColor = 1;   // 1-5 (1out/pfpn_vXX)
+        public int ClassId   = 1;   // 1-7 (chọn lúc tạo nhân vật)
+        public int Gender    = 0;   // 0=nam, 1=nữ
 
-        // Sprite system config
-        public const string PrimarySystem = "2d_sprite";   // 1024x1024, 32px tiles
-        public const int TileSize = 32;
-        public const int SheetSize = 1024;
-        public const int GridSize = 32;                  // 32x32 grid
+        // Sprite system = 2D, loaded from server config
+        public const string SpriteSystem = "2d_sprite";
 
-        // Hair style key mapping
-        public static readonly string[] HairKeys = { "bob1", "bob2", "dap1", "flat", "fro1", "pon1", "spk2" };
+        // Class names
+        public static readonly string[] ClassNames = {
+            "", "Kiem Si", "Phap Su", "Xa Thu", "Slinger", "Axeman", "Quyen Su", "Cung Thu"
+        };
+
+        public string GetClassName() => ClassId >= 1 && ClassId <= 7 ? ClassNames[ClassId] : "Unknown";
+        public string GetSpritePath() => $"Sprites/Characters/class_{ClassId}/{(Gender == 0 ? "male" : "female")}/";
+    };
 
         /// <summary>Sprite path cho body (loaded from server config)</summary>
         public string GetBodySpritePath() => $"Sprites/Characters/{BodyType}/body.png";

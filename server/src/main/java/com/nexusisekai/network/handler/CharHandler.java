@@ -64,49 +64,53 @@ public class CharHandler {
         int nameLen = buf.getShort() & 0xFFFF;
         byte[] nameBytes = new byte[nameLen];
         buf.get(nameBytes);
-        String name     = new String(nameBytes, StandardCharsets.UTF_8).trim();
-        int bodyType    = buf.get() & 0xFF;   // 1-9
-        int skinColor   = buf.get() & 0xFF;   // 0-10
-        int eyeStyle    = buf.get() & 0xFF;   // 0-10
-        int hairStyle   = buf.get() & 0xFF;   // 0-6
-        int hairColor   = buf.get() & 0xFF;   // 0-13
-        int shirtColor  = buf.get() & 0xFF;   // 1-5
-        int pantsColor  = buf.get() & 0xFF;   // 1-5
+        String name    = new String(nameBytes, StandardCharsets.UTF_8).trim();
+        int classId    = buf.get() & 0xFF;   // 1-7
+        int gender     = buf.get() & 0xFF;   // 0=nam, 1=nu
 
         // Validate
         if (name.length() < 2 || name.length() > 12) {
-            session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Ten nhan vat phai tu 2-12 ky tu."); return;
+            session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Ten phai tu 2-12 ky tu."); return;
         }
         if (!name.matches("[\\p{L}\\p{N}_\\s]+")) {
             session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Ten chua ky tu khong hop le."); return;
         }
-        if (bodyType < 1 || bodyType > 9) bodyType = 1;
-        if (skinColor > 10) skinColor = 1;
-        if (eyeStyle > 10) eyeStyle = 0;
-        if (hairStyle > 6) hairStyle = 0;
-        if (hairColor > 13) hairColor = 1;
-        if (shirtColor < 1 || shirtColor > 5) shirtColor = 1;
-        if (pantsColor < 1 || pantsColor > 5) pantsColor = 1;
+        if (classId < 1 || classId > 7) {
+            session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Class khong hop le."); return;
+        }
+        if (gender > 1) gender = 0;
 
         try (Connection conn = DatabaseManager.getConnection()) {
             // Kiem tra ten trung
             PreparedStatement chk = conn.prepareStatement("SELECT id FROM characters WHERE name=?");
             chk.setString(1, name);
             if (chk.executeQuery().next()) {
-                session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Ten nhan vat da ton tai."); return;
+                session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Ten da ton tai."); return;
             }
 
-            // Tao nhan vat — class_id=0 (chon sau tai NPC)
+            // Lay base stats tu class config
+            PreparedStatement cps = conn.prepareStatement("SELECT * FROM class_change_config WHERE class_id=?");
+            cps.setInt(1, classId);
+            ResultSet crs = cps.executeQuery();
+            int baseHp = 100, baseMp = 50, baseAtk = 10, baseDef = 5;
+            String className = "Unknown";
+            if (crs.next()) {
+                baseHp = crs.getInt("base_hp"); baseMp = crs.getInt("base_mp");
+                baseAtk = crs.getInt("base_atk"); baseDef = crs.getInt("base_def");
+                className = crs.getString("class_name");
+            }
+
+            // Tao nhan vat — chon class ngay khi tao (giong NRO)
             PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO characters (account_id,name,class_id,level,hp,max_hp,mp,max_mp," +
-                    "body_type,skin_color,eye_style,hair_style,hair_color,shirt_color,pants_color," +
-                    "map_id,pos_x,pos_y) VALUES (?,?,0,1,100,100,50,50,?,?,?,?,?,?,?,1,5.0,5.0)",
+                    "INSERT INTO characters (account_id,name,class_id,gender,level,hp,max_hp,mp,max_mp," +
+                    "map_id,pos_x,pos_y) VALUES (?,?,?,?,1,?,?,?,?,1,5.0,5.0)",
                     Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, session.getAccountId());
             ps.setString(2, name);
-            ps.setInt(3, bodyType); ps.setInt(4, skinColor); ps.setInt(5, eyeStyle);
-            ps.setInt(6, hairStyle); ps.setInt(7, hairColor);
-            ps.setInt(8, shirtColor); ps.setInt(9, pantsColor);
+            ps.setInt(3, classId);
+            ps.setInt(4, gender);
+            ps.setInt(5, baseHp); ps.setInt(6, baseHp);
+            ps.setInt(7, baseMp); ps.setInt(8, baseMp);
             ps.executeUpdate();
 
             ResultSet keys = ps.getGeneratedKeys();
@@ -115,21 +119,17 @@ public class CharHandler {
 
             // Auto-accept tutorial quest
             PreparedStatement qt = conn.prepareStatement(
-                    "INSERT IGNORE INTO character_quests (char_id,quest_id,status,progress,accepted_at) VALUES (?,1,1,'{}',NOW())");
+                    "INSERT IGNORE INTO character_quests (char_id,quest_id,status,progress,accepted_at) VALUES (?,1,1,\'{}\',NOW())");
             qt.setLong(1, charId); qt.executeUpdate();
 
             // Response
             byte[] nBytes = name.getBytes(StandardCharsets.UTF_8);
-            ByteBuffer resp = ByteBuffer.allocate(1 + 8 + 2 + nBytes.length + 7);
+            ByteBuffer resp = ByteBuffer.allocate(1 + 8 + 2 + nBytes.length + 2);
             resp.put((byte) 1); resp.putLong(charId);
             resp.putShort((short) nBytes.length); resp.put(nBytes);
-            resp.put((byte) bodyType); resp.put((byte) skinColor);
-            resp.put((byte) eyeStyle); resp.put((byte) hairStyle);
-            resp.put((byte) hairColor); resp.put((byte) shirtColor);
-            resp.put((byte) pantsColor);
+            resp.put((byte) classId); resp.put((byte) gender);
             session.send(PacketOpcode.S2C_CHAR_CREATE_OK, resp.array());
-            log.info("[CHAR_CREATE] {} tao '{}' body={} skin={} eye={} hair={}/{}",
-                session.getAccountName(), name, bodyType, skinColor, eyeStyle, hairStyle, hairColor);
+            log.info("[CHAR_CREATE] {} tao \'{}\' class={} gender={}", session.getAccountName(), name, className, gender);
         }
     }
 

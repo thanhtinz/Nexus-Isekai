@@ -151,8 +151,8 @@ public class PacketWriter {
         { return new PacketWriter(Opcodes.C2S_REGISTER).writeString(user).writeString(pass).writeString(email); }
     public static PacketWriter charList()
         { return new PacketWriter(Opcodes.C2S_CHAR_LIST); }
-    public static PacketWriter charCreate(String name, int bodyType, int skinColor, int eyeStyle, int hairStyle, int hairColor, int shirtColor, int pantsColor)
-        { return new PacketWriter(Opcodes.C2S_CHAR_CREATE).writeString(name).writeByte(bodyType).writeByte(skinColor).writeByte(eyeStyle).writeByte(hairStyle).writeByte(hairColor).writeByte(shirtColor).writeByte(pantsColor); }
+    public static PacketWriter charCreate(String name, int classId, int gender)
+        { return new PacketWriter(Opcodes.C2S_CHAR_CREATE).writeString(name).writeByte(classId).writeByte(gender); }
     public static PacketWriter settingsLoad()
         { return new PacketWriter(Opcodes.C2S_SETTINGS_LOAD); }
     public static PacketWriter settingsSave(String json)

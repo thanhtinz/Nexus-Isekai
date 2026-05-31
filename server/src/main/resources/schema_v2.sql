@@ -2589,3 +2589,24 @@ CREATE TABLE IF NOT EXISTS player_notify_prefs (
 --   Network (5 options)   — ping, FPS, data saver
 --   Account (4 options)   — accessibility
 -- Tổng: 50 options trong Settings, 30 options phân tán ở các UI khác
+
+-- ═════════════════════════════════════════════════════════════
+-- 58. NRO-STYLE CHARACTER CREATION — Chọn class + gender lúc tạo
+-- ═════════════════════════════════════════════════════════════
+
+-- Thêm gender column
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS gender TINYINT NOT NULL DEFAULT 0; -- 0=nam, 1=nu
+
+-- Character creation: name + classId(1-7) + gender(0/1)
+-- Class quyết định sprite set, stats, skills
+-- Gender quyết định sprite variant (male/female)
+-- Không còn appearance fields (body_type, skin_color, eye_style, hair...)
+-- Ngoại hình thay đổi bằng trang bị + skin
+
+-- Cập nhật sprite config
+DELETE FROM character_sprite_config WHERE config_key IN ('primary_system','charbase_usage','animation_system');
+INSERT INTO character_sprite_config (config_key, config_value, description) VALUES
+('primary_system', '2d_sprite', 'Generic 2D sprite, loaded per class+gender'),
+('sprite_path_format', 'Sprites/Characters/class_{classId}/{gender}/', 'Duong dan sprite theo class va gioi tinh'),
+('creation_mode', 'class_gender', 'Tao nhan vat: chon class + gioi tinh (giong NRO)')
+ON DUPLICATE KEY UPDATE config_value=VALUES(config_value);
