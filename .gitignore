@@ -8,3 +8,7 @@ deploy/.env
 deploy/certs/
 *.pem
 *.key
+
+# Build artifacts (regenerate via npm run build)
+server/src/main/resources/webshop-static/
+webshop/dist/
