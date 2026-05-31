@@ -300,7 +300,7 @@ public class InventoryHandler {
             item.setQuantity(item.getQuantity() - qty);
             try (Connection c = DatabaseManager.getInstance().getConnection();
                  PreparedStatement ps = c.prepareStatement(
-                         "UPDATE character_inventory SET quantity=? WHERE id=?")) {
+                         "UPDATE character_inventory SET qty=? WHERE id=?")) {
                 ps.setInt(1, item.getQuantity());
                 ps.setInt(2, instanceId);
                 ps.executeUpdate();

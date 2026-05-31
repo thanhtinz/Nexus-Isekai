@@ -3432,3 +3432,23 @@ INSERT IGNORE INTO farm_seeds (id,name,growth_time_min,stages,harvest_item_id,ha
  (10,'Lúa Linh',120,4,410,5,12,310,3,320),
  (11,'Cà Rốt Vàng',90,4,411,4,10,311,2,320),
  (12,'Linh Chi Thảo',240,5,412,2,6,312,4,320);
+
+-- ═════════════════════════════════════════════════════════════
+-- NHÀ KHO + BÁN SẢN PHẨM (nông sản, sản phẩm thú)
+-- ═════════════════════════════════════════════════════════════
+
+-- Nông sản + sản phẩm thú vào bảng items (có sell_price để bán)
+INSERT IGNORE INTO items (id,name,description,type,level_req,sell_price,buy_price,icon_id) VALUES
+ (410,'Lúa Linh','Nông sản thu từ Lúa Linh','material',1,80,0,410),
+ (411,'Cà Rốt Vàng','Nông sản quý','material',1,60,0,411),
+ (412,'Linh Chi Thảo','Dược liệu hiếm','material',1,200,0,412),
+ (401,'Trứng Gà Vàng','Sản phẩm chăn nuôi','material',1,50,0,401),
+ (402,'Sữa Linh Ngưu','Sản phẩm chăn nuôi','material',1,120,0,402),
+ (403,'Lông Vũ Quý','Sản phẩm chăn nuôi','material',1,90,0,403);
+
+-- Sức chứa kho (mở rộng được)
+CREATE TABLE IF NOT EXISTS warehouse_info (
+    char_id    BIGINT NOT NULL PRIMARY KEY,
+    max_slots  INT NOT NULL DEFAULT 50,       -- số ô tối đa
+    expansions INT NOT NULL DEFAULT 0          -- số lần mở rộng đã mua
+);

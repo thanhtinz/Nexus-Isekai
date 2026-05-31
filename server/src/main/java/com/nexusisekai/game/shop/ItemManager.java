@@ -92,20 +92,20 @@ public class ItemManager {
     public void giveItem(long charId, int itemId, int qty) {
         try (Connection conn = DatabaseManager.getConnection()) {
             PreparedStatement ps = conn.prepareStatement(
-                    "SELECT id, quantity FROM character_inventory WHERE char_id=? AND item_id=? AND slot=-1 LIMIT 1");
+                    "SELECT id, qty FROM character_inventory WHERE char_id=? AND item_id=? AND slot=-1 LIMIT 1");
             ps.setLong(1, charId);
             ps.setInt(2, itemId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 int newQty = rs.getInt("quantity") + qty;
                 PreparedStatement upd = conn.prepareStatement(
-                        "UPDATE character_inventory SET quantity=? WHERE id=?");
+                        "UPDATE character_inventory SET qty=? WHERE id=?");
                 upd.setInt(1, newQty);
                 upd.setLong(2, rs.getLong("id"));
                 upd.executeUpdate();
             } else {
                 PreparedStatement ins = conn.prepareStatement(
-                        "INSERT INTO character_inventory (char_id,item_id,quantity,slot) VALUES (?,?,?,-1)");
+                        "INSERT INTO character_inventory (char_id,item_id,qty,slot) VALUES (?,?,?,-1)");
                 ins.setLong(1, charId);
                 ins.setInt(2, itemId);
                 ins.setInt(3, qty);

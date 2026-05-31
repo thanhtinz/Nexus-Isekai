@@ -82,7 +82,7 @@ CREATE TABLE character_inventory (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     char_id     BIGINT NOT NULL,
     item_id     INT NOT NULL,
-    quantity    INT DEFAULT 1,
+    qty         INT DEFAULT 1,
     slot        INT DEFAULT -1,     -- -1=bag, 0-9=equipment slots
     enchant     TINYINT DEFAULT 0,
     durability  INT DEFAULT 100,

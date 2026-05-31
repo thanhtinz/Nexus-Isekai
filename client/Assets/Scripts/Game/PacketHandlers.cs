@@ -444,6 +444,14 @@ namespace NexusIsekai.Game
             MapManager.Instance?.ChangeMap(mapId, x, y);
         }
         private void OnWarehouseData(PacketReader r) {
+            int used=r.ReadInt(); int max=r.ReadInt(); int n=r.ReadShort();
+            WarehouseUI.Instance?.SetCapacity(used, max);
+            WarehouseUI.Instance?.Clear();
+            for(int i=0;i<n;i++){
+                int itemId=r.ReadInt(); int qty=r.ReadInt(); string name=r.ReadString();
+                int sellPrice=r.ReadInt(); int icon=r.ReadInt();
+                WarehouseUI.Instance?.AddItem(itemId, qty, name, sellPrice, icon);
+            }
             WarehouseUI.Instance?.Open();
         }
 

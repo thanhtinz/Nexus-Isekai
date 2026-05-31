@@ -487,8 +487,13 @@ namespace NexusIsekai.Network
                 .WriteByte(ChannelByte(channel))
                 .WriteInt(durationMs)
                 .WriteString(url));
-        public static void SendWarehouse(int action, int slot)
-            => Send(new PacketBuilder(PacketOpcode.C2S_WAREHOUSE).WriteInt(action).WriteInt(slot));
+        // Kho: action 0=cất, 1=lấy, 2=xem danh sách, 3=bán từ kho
+        public static void SendWarehouse(int action, int itemId, int qty)
+            => Send(new PacketBuilder(PacketOpcode.C2S_WAREHOUSE).WriteInt(action).WriteInt(itemId).WriteInt(qty));
+        public static void SendWarehouseList()        => SendWarehouse(2, 0, 0);
+        public static void SendWarehouseDeposit(int itemId, int qty) => SendWarehouse(0, itemId, qty);
+        public static void SendWarehouseWithdraw(int itemId, int qty)=> SendWarehouse(1, itemId, qty);
+        public static void SendWarehouseSell(int itemId, int qty)    => SendWarehouse(3, itemId, qty);
         public static void SendWedding(long targetCharId, int weddingMapId)
             => Send(new PacketBuilder(PacketOpcode.C2S_WEDDING)
                 .WriteLong(targetCharId).WriteInt(weddingMapId));

@@ -1042,10 +1042,36 @@ public class ExtendedHandlers {
     public static void handleWarehouse(GameSession s, ByteBuf b) {
         int act=b.readInt(); int itemId=b.readInt(); int qty=b.readInt(); Player p=s.getPlayer(); if(p==null) return;
         try {
-            boolean ok = act==0 ? com.nexusisekai.game.service.WarehouseService.deposit(p.getCharId(),itemId,qty)
-                                : com.nexusisekai.game.service.WarehouseService.withdraw(p.getCharId(),itemId,qty);
-            msg(s, ok?"Thanh cong":"That bai");
+            switch (act) {
+                case 0 -> msg(s, com.nexusisekai.game.service.WarehouseService.deposit(p.getCharId(),itemId,qty) ? "Da cat vao kho" : "Kho day hoac khong du do");
+                case 1 -> msg(s, com.nexusisekai.game.service.WarehouseService.withdraw(p.getCharId(),itemId,qty) ? "Da lay ra khoi kho" : "That bai");
+                case 2 -> sendWarehouseData(s, p.getCharId());           // xem danh sach
+                case 3 -> {                                              // ban tu kho
+                    long earn = com.nexusisekai.game.service.WarehouseService.sellFromWarehouse(p.getCharId(), itemId, qty);
+                    if (earn < 0) { msg(s, "Khong du san pham de ban"); }
+                    else { msg(s, "Ban duoc " + earn + " vang"); sendWarehouseData(s, p.getCharId()); }
+                }
+                default -> msg(s, "Hanh dong khong hop le");
+            }
         } catch(Exception e){ msg(s,"Loi kho do"); }
+    }
+
+    /** Gui danh sach kho + suc chua. */
+    private static void sendWarehouseData(GameSession s, long charId) throws Exception {
+        var items = com.nexusisekai.game.service.WarehouseService.list(charId);
+        int used = com.nexusisekai.game.service.WarehouseService.usedSlots(charId);
+        int max  = com.nexusisekai.game.service.WarehouseService.maxSlots(charId);
+        ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_WAREHOUSE_DATA);
+        pkt.writeInt(used); pkt.writeInt(max);
+        pkt.writeShort(items.size());
+        for (var it : items) {
+            pkt.writeInt(((Number)it.get("item_id")).intValue());
+            pkt.writeInt(((Number)it.get("quantity")).intValue());
+            writeStr(pkt, (String)it.get("name"));
+            pkt.writeInt(((Number)it.get("sell_price")).intValue());
+            pkt.writeInt(((Number)it.get("icon_id")).intValue());
+        }
+        s.send(pkt);
     }
     public static void handleGemSocket(GameSession s, ByteBuf b) {
         int slot=b.readInt(); int gem=b.readInt(); int socketIdx=b.readInt();
