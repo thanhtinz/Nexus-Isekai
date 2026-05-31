@@ -939,7 +939,16 @@ public class ExtendedHandlers {
     public static void handleEmote(GameSession s, ByteBuf b)     { int id=b.readInt(); /* broadcast emote to nearby */ }
     public static void handleTeleport(GameSession s, ByteBuf b)  { int map=b.readInt(); msg(s,"Teleporting..."); }
     public static void handleWarehouse(GameSession s, ByteBuf b) { int act=b.readInt(); msg(s,"Warehouse..."); }
-    public static void handleGemSocket(GameSession s, ByteBuf b) { int slot=b.readInt(); int gem=b.readInt(); msg(s,"Socketing gem..."); }
+    public static void handleGemSocket(GameSession s, ByteBuf b) {
+        int slot=b.readInt(); int gem=b.readInt(); int socketIdx=b.readInt();
+        Player p = s.getPlayer(); if (p == null) return;
+        try (java.sql.Connection c = DatabaseManager.getInstance().getConnection()) {
+            com.nexusisekai.database.SqlSafe.update(c,
+                "UPDATE character_equipment SET gem_slot_" + (socketIdx+1) + "=? WHERE char_id=? AND equip_slot=?",
+                gem, p.getCharId(), slot);
+            msg(s, "Kham ngoc thanh cong");
+        } catch (Exception e) { msg(s, "Loi kham ngoc"); }
+    }
     public static void handleRefine(GameSession s, ByteBuf b)    { int slot=b.readInt(); msg(s,"Refining..."); }
     public static void handleNewsList(GameSession s, ByteBuf b)  { msg(s,"Loading news..."); }
     public static void handleBlock(GameSession s, ByteBuf b)     { long id=b.readLong(); msg(s,"Blocked."); }

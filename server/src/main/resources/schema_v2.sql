@@ -3013,3 +3013,9 @@ INSERT IGNORE INTO player_interact_menu (menu_key,display_name_vi,display_name_e
 ('action','Hanh dong','Action',9),
 ('block','Chan','Block',10),
 ('report','Bao cao','Report',11);
+
+-- Daily login rewards seed
+INSERT IGNORE INTO daily_login_rewards (day_number, reward_type, reward_amount) VALUES
+(1,'gold',5000),(2,'diamond',10),(3,'gold',10000),(4,'ticket_standard',1),
+(5,'diamond',20),(6,'gold',20000),(7,'ticket_limited',1)
+ON DUPLICATE KEY UPDATE reward_amount=VALUES(reward_amount);

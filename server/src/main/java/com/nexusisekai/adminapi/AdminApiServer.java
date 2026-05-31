@@ -2,6 +2,7 @@ package com.nexusisekai.adminapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexusisekai.database.DatabaseManager;
+import com.nexusisekai.database.SqlSafe;
 import com.nexusisekai.game.world.WorldManager;
 import com.nexusisekai.network.GameNetworkServer;
 import com.sun.net.httpserver.HttpExchange;
