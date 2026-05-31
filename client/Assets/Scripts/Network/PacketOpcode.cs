@@ -45,13 +45,13 @@ namespace NexusIsekai.Network
         public const short C2S_ATTACK          = 0x0401;
         public const short C2S_USE_SKILL       = 0x0402;
         public const short S2C_ATTACK_RESULT   = 0x0411;
-        public const short S2C_SKILL_RESULT    = 0x0412;
+        public const short S2C_SKILL_RESULT    = 0x3B01;
         public const short S2C_MONSTER_DEAD    = 0x0413;
         public const short S2C_PLAYER_DEAD     = 0x0414;
         public const short S2C_MONSTER_RESPAWN = 0x0415;
         public const short S2C_LEVEL_UP        = 0x0416;
-        public const short S2C_SKILL_COOLDOWN  = 0x0417;
-        public const short S2C_MONSTER_MOVE    = 0x0418;
+        public const short S2C_SKILL_COOLDOWN  = 0x3B03;
+        public const short S2C_MONSTER_MOVE    = 0x3B04;
 
         // ── INVENTORY (5xx) ─────────────────────────────────────
         public const short C2S_INVENTORY_LIST  = 0x0501;
@@ -212,7 +212,7 @@ namespace NexusIsekai.Network
         public const short C2S_FARM_HARVEST     = 0x0D23;
         public const short C2S_ANIMAL_FEED      = 0x0D24;
         public const short C2S_ANIMAL_COLLECT   = 0x0D25;
-        public const short S2C_FARM_STATE       = 0x0D31;
+        public const short S2C_FARM_STATE       = 0x3B05;
         public const short S2C_FARM_UPDATE      = 0x0D32;
 
         // ── HOUSING ───────────────────────────────────────────────
@@ -221,7 +221,7 @@ namespace NexusIsekai.Network
         public const short C2S_HOUSE_PLACE      = 0x0E22;
         public const short C2S_HOUSE_REMOVE     = 0x0E23;
         public const short C2S_HOUSE_CATALOG    = 0x0E24;
-        public const short S2C_HOUSE_INFO       = 0x0E31;
+        public const short S2C_HOUSE_INFO       = 0x3B06;
         public const short S2C_HOUSE_FURNITURE  = 0x0E32;
         public const short S2C_HOUSE_CATALOG    = 0x0E33;
 
@@ -234,12 +234,12 @@ namespace NexusIsekai.Network
         public const short C2S_DROP_ITEM         = 0x0508;
         public const short C2S_PVP_ATTACK        = 0x0B22;
         public const short S2C_COMBAT_RESULT     = 0x0411; // alias S2C_ATTACK_RESULT
-        public const short S2C_INVENTORY_UPDATE  = 0x0511;
+        public const short S2C_INVENTORY_UPDATE  = 0x3B07;
         public const short S2C_SHOP_RESULT       = 0x0515;
         public const short S2C_QUEST_UPDATE      = 0x0615; // alias S2C_QUEST_PROGRESS
         public const short S2C_STORY_CG          = 0x0616;
         public const short S2C_EVENT_START       = 0x0915;
-        public const short S2C_PLAYER_REVIVE     = 0x0416;
+        public const short S2C_PLAYER_REVIVE     = 0x3B02;
         public const short S2C_SKILL_EFFECT      = 0x0418;
 
         // ── Aliases & additional sync opcodes ─────────────────────

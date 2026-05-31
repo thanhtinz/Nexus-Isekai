@@ -44,16 +44,16 @@ public interface PacketOpcode {
     short C2S_ATTACK            = 0x0401;
     short C2S_USE_SKILL         = 0x0402;
     short S2C_ATTACK_RESULT     = 0x0411;
-    short S2C_SKILL_RESULT      = 0x0412;
+    short S2C_SKILL_RESULT      = 0x3B01;
     short S2C_MONSTER_DEAD      = 0x0413;
     short S2C_PLAYER_DEAD       = 0x0414;
     short S2C_LEVEL_UP          = 0x0415;
-    short S2C_PLAYER_REVIVE     = 0x0416;
+    short S2C_PLAYER_REVIVE     = 0x3B02;
     short S2C_EXP_GAIN          = 0x0417;
     short S2C_PLAYER_STATS      = 0x041A;
     short S2C_MONSTER_RESPAWN   = 0x041B;
     short S2C_MONSTERS_IN_ZONE  = 0x041C;
-    short S2C_MONSTER_MOVE      = 0x041D;
+    short S2C_MONSTER_MOVE      = 0x3B04;
 
     // ── INVENTORY ────────────────────────────────────────────
     short C2S_INVENTORY_OPEN    = 0x0501;

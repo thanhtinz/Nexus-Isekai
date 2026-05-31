@@ -180,7 +180,7 @@ public final class PacketOpcode {
     public static final short S2C_LANG_PACK         = (short)0x2111;
 
     // ── ANALYTICS (internal, no C2S) ─────────────────────────
-    public static final short S2C_ANALYTICS_EVENT   = (short)0x2211;
+    public static final short S2C_ANALYTICS_EVENT   = (short)0x3B08;
 
     // ── CLASS CHANGE (chọn class tại NPC) ─────────────────
     public static final short C2S_CLASS_CHANGE      = (short)0x0250;
@@ -262,20 +262,20 @@ public final class PacketOpcode {
     // 0x0403 dành cho C2S_USE_ITEM (5xx) — không dùng ở đây
     public static final short S2C_ATTACK_RESULT     = 0x0411;
     public static final short S2C_COMBAT_RESULT     = 0x0411; // alias — server dùng
-    public static final short S2C_SKILL_RESULT      = 0x0412;
+    public static final short S2C_SKILL_RESULT      = 0x3B01;
     public static final short S2C_PLAYER_HP_UPDATE  = 0x0412; // alias (stats update)
     public static final short S2C_MONSTER_DEAD      = 0x0413;
     public static final short S2C_MONSTER_DIE       = 0x0413; // alias — server dùng
     public static final short S2C_PLAYER_DEAD       = 0x0414;
     public static final short S2C_PLAYER_DIE        = 0x0414; // alias — server dùng
     public static final short S2C_MONSTER_RESPAWN   = 0x0415;
-    public static final short S2C_PLAYER_REVIVE     = 0x0416;
+    public static final short S2C_PLAYER_REVIVE     = 0x3B02;
     public static final short S2C_LEVEL_UP          = 0x0416;
     public static final short S2C_EXP_GAIN          = 0x0417;
-    public static final short S2C_SKILL_COOLDOWN    = 0x0417; // alias
+    public static final short S2C_SKILL_COOLDOWN    = 0x3B03; // alias
     public static final short S2C_SKILL_EFFECT      = 0x0418;
     public static final short S2C_MONSTER_HP_UPDATE = 0x0419;
-    public static final short S2C_MONSTER_MOVE      = 0x0418; // client 0x0418
+    public static final short S2C_MONSTER_MOVE      = 0x3B04; // client 0x0418
 
     // ── INVENTORY & SHOP (5xx) ────────────────────────────────
     public static final short C2S_INVENTORY_OPEN    = 0x0501;
@@ -287,7 +287,7 @@ public final class PacketOpcode {
     public static final short C2S_SHOP_SELL         = 0x0507;
     public static final short C2S_DROP_ITEM         = 0x0508;
     public static final short S2C_INVENTORY_LIST    = 0x0511;
-    public static final short S2C_INVENTORY_UPDATE  = 0x0511; // alias — server dùng
+    public static final short S2C_INVENTORY_UPDATE  = 0x3B07; // alias — server dùng
     public static final short S2C_PLAYER_STATS      = 0x0512;
     public static final short S2C_SHOP_DATA         = 0x0513;
     public static final short S2C_ITEM_ERROR        = 0x0514;
@@ -383,7 +383,7 @@ public final class PacketOpcode {
     public static final short C2S_FARM_HARVEST      = 0x0D23;
     public static final short C2S_ANIMAL_FEED       = 0x0D24;
     public static final short C2S_ANIMAL_COLLECT    = 0x0D25;
-    public static final short S2C_FARM_STATE        = 0x0D31;
+    public static final short S2C_FARM_STATE        = 0x3B05;
     public static final short S2C_FARM_UPDATE       = 0x0D32;
 
     // ── HOUSING ───────────────────────────────────────────────
@@ -392,7 +392,7 @@ public final class PacketOpcode {
     public static final short C2S_HOUSE_PLACE       = 0x0E22;
     public static final short C2S_HOUSE_REMOVE      = 0x0E23;
     public static final short C2S_HOUSE_CATALOG     = 0x0E24;
-    public static final short S2C_HOUSE_INFO        = 0x0E31;
+    public static final short S2C_HOUSE_INFO        = 0x3B06;
     public static final short S2C_HOUSE_FURNITURE   = 0x0E32;
     public static final short S2C_HOUSE_CATALOG     = 0x0E33;
 

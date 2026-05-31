@@ -93,10 +93,7 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_MAP_CHANGE_FAILED,OnMapChangeFailed);
 
             // Combat
-            d.Register(PacketOpcode.S2C_ATTACK_RESULT,   OnAttackResult);
             d.Register(PacketOpcode.S2C_SKILL_RESULT,    OnSkillResult);
-            d.Register(PacketOpcode.S2C_MONSTER_DEAD,    OnMonsterDead);
-            d.Register(PacketOpcode.S2C_PLAYER_DEAD,     OnPlayerDead);
             d.Register(PacketOpcode.S2C_MONSTER_RESPAWN, OnMonsterRespawn);
             d.Register(PacketOpcode.S2C_LEVEL_UP,        OnLevelUp);
             d.Register(PacketOpcode.S2C_MONSTER_MOVE,    OnMonsterMove);
@@ -110,7 +107,6 @@ namespace NexusIsekai.Game
             // Quest
             d.Register(PacketOpcode.S2C_QUEST_LIST,      OnQuestList);
             d.Register(PacketOpcode.S2C_QUEST_ACCEPTED,  OnQuestAccepted);
-            d.Register(PacketOpcode.S2C_QUEST_COMPLETED, OnQuestCompleted);
             d.Register(PacketOpcode.S2C_QUEST_ERROR,     OnQuestError);
             d.Register(PacketOpcode.S2C_QUEST_PROGRESS,  OnQuestProgress);
 
@@ -225,9 +221,6 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_MAIL_LIST,          OnMailList);
             d.Register(PacketOpcode.S2C_MAIL_NEW,           OnMailNew);
             // Core game handlers
-            d.Register(PacketOpcode.S2C_LOGIN_RESULT,       OnLoginResult);
-            d.Register(PacketOpcode.S2C_REGISTER_RESULT,    OnRegisterResult);
-            d.Register(PacketOpcode.S2C_CHAR_SELECT_OK,     OnCharSelectOk);
             d.Register(PacketOpcode.S2C_CHAR_ERROR,         OnCharError);
             d.Register(PacketOpcode.S2C_INVENTORY_UPDATE,   OnInventoryUpdate);
             d.Register(PacketOpcode.S2C_MONSTER_LIST,       OnMonsterList);

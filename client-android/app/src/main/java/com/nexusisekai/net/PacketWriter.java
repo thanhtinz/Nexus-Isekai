@@ -25,12 +25,12 @@ class Opcodes {
     static final short S2C_PLAYER_ENTER = 0x0315, S2C_PLAYER_LEAVE = 0x0316;
     static final short S2C_PLAYERS_IN_ZONE = 0x0317, S2C_PLAYER_MOVE = 0x0311;
     static final short S2C_POSITION_CORRECT = 0x0318, S2C_MONSTERS_IN_ZONE = 0x041C;
-    static final short S2C_MONSTER_MOVE = 0x041D;
+    static final short S2C_MONSTER_MOVE = 0x3B04;
     // COMBAT
     static final short C2S_ATTACK = 0x0401, C2S_USE_SKILL = 0x0402;
     static final short S2C_ATTACK_RESULT = 0x0411, S2C_MONSTER_DEAD = 0x0413;
     static final short S2C_PLAYER_DEAD = 0x0414, S2C_LEVEL_UP = 0x0415;
-    static final short S2C_PLAYER_REVIVE = 0x0416, S2C_EXP_GAIN = 0x0417;
+    static final short S2C_PLAYER_REVIVE = 0x3B02, S2C_EXP_GAIN = 0x0417;
     static final short S2C_PLAYER_STATS = 0x041A, S2C_MONSTER_RESPAWN = 0x041B;
     // INVENTORY
     static final short C2S_INVENTORY_OPEN = 0x0501, C2S_USE_ITEM = 0x0502;
@@ -95,7 +95,7 @@ class Opcodes {
     // LEADERBOARD / FARM / HOUSE / MINIGAME
     static final short C2S_FARM_STATE = (short)0x0D20, C2S_FARM_PLANT = (short)0x0D21;
     static final short C2S_FARM_WATER = (short)0x0D22, C2S_FARM_HARVEST = (short)0x0D23;
-    static final short S2C_FARM_STATE = (short)0x0D31, S2C_FARM_UPDATE = (short)0x0D32;
+    static final short S2C_FARM_STATE = (short)0x3B05, S2C_FARM_UPDATE = (short)0x0D32;
     static final short C2S_MINIGAME_ROOM_LIST = (short)0x0C20, C2S_MINIGAME_BET = (short)0x0C24;
     static final short S2C_MINIGAME_ROOM_LIST = (short)0x0C31, S2C_MINIGAME_RESULT = (short)0x0C34;
     static final short C2S_LEADERBOARD = (short)0x0F20, S2C_LEADERBOARD = (short)0x0F31;
