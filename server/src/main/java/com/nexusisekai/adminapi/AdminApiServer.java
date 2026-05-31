@@ -150,6 +150,10 @@ public class AdminApiServer {
         httpServer.createContext("/api/enhance-rates",    ex -> handleAuth(ex, this::handleEnhanceRates));
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
         httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
+        httpServer.createContext("/api/anticheat-log",    ex -> handleAuth(ex, this::handleAnticheatLog));
+        httpServer.createContext("/api/device-bans",      ex -> handleAuth(ex, this::handleDeviceBans));
+        httpServer.createContext("/api/protection-config",ex -> handleAuth(ex, this::handleProtectionConfig));
+        httpServer.createContext("/api/client-integrity", ex -> handleAuth(ex, this::handleClientIntegrity));
         httpServer.createContext("/api/settings-defaults",ex -> handleAuth(ex, this::handleSettingsDefaults));
         httpServer.createContext("/api/animations",       ex -> handleAuth(ex, this::handleAnimations));
         httpServer.createContext("/api/achievements",       ex -> handleAuth(ex, this::handleAchievements));
@@ -1735,6 +1739,70 @@ public class AdminApiServer {
                 default -> "player_chat_prefs";
             };
             sendTableResult(ex, c.prepareStatement("SELECT * FROM " + table + " WHERE char_id=" + charId), "prefs");
+        }
+    }
+
+
+    /** Anti-cheat violations log */
+    private void handleAnticheatLog(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            var params = parseQuery(ex.getRequestURI().getQuery());
+            String charId = params.getOrDefault("char_id", "");
+            String type = params.getOrDefault("type", "");
+            String sql = "SELECT * FROM anticheat_log WHERE 1=1";
+            if (!charId.isEmpty()) sql += " AND char_id=" + charId;
+            if (!type.isEmpty()) sql += " AND violation_type='" + type.replace("'","") + "'";
+            sql += " ORDER BY created_at DESC LIMIT 100";
+            sendTableResult(ex, c.prepareStatement(sql), "violations");
+        }
+    }
+
+    /** Device ban management */
+    private void handleDeviceBans(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT df.*, a.username FROM device_fingerprints df JOIN accounts a ON a.id=df.account_id ORDER BY last_seen DESC LIMIT 100"), "devices");
+            } else {
+                var body = parseBody(ex);
+                String deviceId = str(body, "device_id").replace("'","");
+                int ban = num(body, "is_banned");
+                c.prepareStatement("UPDATE device_fingerprints SET is_banned=" + ban + " WHERE device_id='" + deviceId + "'").executeUpdate();
+                auditLog(ex, ban == 1 ? "device_ban" : "device_unban", "device", deviceId, "");
+                sendJson(ex, 200, Map.of("success", true));
+            }
+        }
+    }
+
+    /** Protection config CRUD */
+    private void handleProtectionConfig(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM protection_config ORDER BY config_key"), "config");
+            } else {
+                var body = parseBody(ex);
+                c.prepareStatement("UPDATE protection_config SET config_value='" +
+                    str(body,"config_value").replace("'","") + "' WHERE config_key='" +
+                    str(body,"config_key").replace("'","") + "'").executeUpdate();
+                auditLog(ex, "update_protection", "config", str(body,"config_key"), str(body,"config_value"));
+                sendJson(ex, 200, Map.of("success", true));
+            }
+        }
+    }
+
+    /** Client integrity checksums */
+    private void handleClientIntegrity(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM client_integrity ORDER BY created_at DESC"), "builds");
+            } else {
+                var body = parseBody(ex);
+                c.prepareStatement("INSERT INTO client_integrity (platform,version,checksum_md5,checksum_sha256) VALUES ('" +
+                    str(body,"platform").replace("'","") + "','" + str(body,"version").replace("'","") + "','" +
+                    str(body,"checksum_md5").replace("'","") + "','" + str(body,"checksum_sha256").replace("'","") +
+                    "') ON DUPLICATE KEY UPDATE checksum_md5=VALUES(checksum_md5),checksum_sha256=VALUES(checksum_sha256)").executeUpdate();
+                sendJson(ex, 200, Map.of("success", true));
+            }
         }
     }
 

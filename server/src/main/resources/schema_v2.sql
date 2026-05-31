@@ -1916,3 +1916,101 @@ CREATE TABLE IF NOT EXISTS class_animation_map (
 INSERT IGNORE INTO class_animation_map VALUES
 (1,'attack','attack'),(2,'attack','cast'),(3,'attack','attack'),
 (4,'attack','attack'),(5,'attack','attack'),(6,'attack','attack'),(7,'attack','attack');
+
+-- ═════════════════════════════════════════════════════════════
+-- GAME PROTECTION SYSTEM — Mã hoá, chống hack, bảo vệ
+-- ═════════════════════════════════════════════════════════════
+
+-- Client integrity check
+CREATE TABLE IF NOT EXISTS client_integrity (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    platform        VARCHAR(16) NOT NULL,        -- android,ios,pc,webgl
+    version         VARCHAR(32) NOT NULL,
+    checksum_md5    VARCHAR(64) NOT NULL,         -- MD5 của client build
+    checksum_sha256 VARCHAR(128) NOT NULL,
+    is_valid        TINYINT NOT NULL DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY (platform, version)
+);
+
+-- Encryption keys (rotate mỗi ngày)
+CREATE TABLE IF NOT EXISTS encryption_keys (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    key_type        VARCHAR(16) NOT NULL,         -- packet,asset,token
+    key_value       VARCHAR(256) NOT NULL,
+    valid_from      TIMESTAMP NOT NULL,
+    valid_to        TIMESTAMP NOT NULL,
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    INDEX idx_type_active (key_type, is_active)
+);
+
+-- Anti-cheat log
+CREATE TABLE IF NOT EXISTS anticheat_log (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id         BIGINT NOT NULL,
+    account_id      BIGINT NOT NULL,
+    violation_type  VARCHAR(32) NOT NULL,          -- speedhack,teleport,dmg_hack,packet_flood,memory_edit,injector
+    severity        TINYINT NOT NULL DEFAULT 1,    -- 1=warn,2=kick,3=ban_temp,4=ban_perm
+    detail          TEXT,
+    client_ip       VARCHAR(45),
+    device_id       VARCHAR(128),
+    action_taken    VARCHAR(32) DEFAULT 'none',    -- none,warn,kick,ban_1d,ban_7d,ban_perm
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_char (char_id),
+    INDEX idx_type (violation_type)
+);
+
+-- Device fingerprint (chống multi-account abuse)
+CREATE TABLE IF NOT EXISTS device_fingerprints (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    account_id      BIGINT NOT NULL,
+    device_id       VARCHAR(128) NOT NULL,
+    device_model    VARCHAR(64),
+    os_version      VARCHAR(32),
+    screen_res      VARCHAR(16),
+    first_seen      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_seen       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    is_banned       TINYINT NOT NULL DEFAULT 0,
+    UNIQUE KEY (account_id, device_id),
+    INDEX idx_device (device_id)
+);
+
+-- Protection config
+CREATE TABLE IF NOT EXISTS protection_config (
+    config_key      VARCHAR(64) NOT NULL PRIMARY KEY,
+    config_value    TEXT NOT NULL,
+    description     VARCHAR(256) DEFAULT ''
+);
+
+INSERT IGNORE INTO protection_config VALUES
+-- Packet encryption
+('packet_encrypt','aes_128','Mã hoá packet: none, xor, aes_128, aes_256'),
+('packet_key_rotate','86400','Thời gian rotate key (giây, 86400=1 ngày)'),
+('packet_compress','lz4','Nén packet: none, lz4, zlib, gzip'),
+('packet_sign','hmac_sha256','Chữ ký packet: none, crc32, hmac_sha256'),
+-- Asset encryption
+('asset_encrypt','aes_128','Mã hoá asset files: none, xor, aes_128'),
+('asset_key','nexus_isekai_2024','Key mã hoá assets (thay đổi mỗi build)'),
+('asset_verify','md5','Kiểm tra tính toàn vẹn asset: none, md5, sha256'),
+-- Anti-cheat
+('speed_check','true','Kiểm tra tốc độ di chuyển bất thường'),
+('speed_max_tiles','8','Tốc độ tối đa (tiles/giây)'),
+('teleport_check','true','Phát hiện teleport hack'),
+('teleport_max_dist','50','Khoảng cách teleport tối đa cho phép (tiles)'),
+('dmg_check','true','Kiểm tra sát thương bất thường'),
+('dmg_max_ratio','3.0','Tỉ lệ sát thương tối đa so với base'),
+('packet_flood_limit','100','Số packet tối đa/giây trước khi kick'),
+('packet_flood_ban','300','Số packet/giây trước khi ban tạm'),
+-- Client integrity
+('integrity_check','true','Kiểm tra checksum client khi connect'),
+('root_detect','true','Phát hiện thiết bị root/jailbreak'),
+('emulator_detect','true','Phát hiện emulator'),
+('injector_detect','true','Phát hiện memory injector (GameGuardian, Cheat Engine)'),
+('debug_detect','true','Phát hiện debugger attach'),
+-- Session
+('session_timeout','1800','Timeout phiên (giây, 1800=30 phút)'),
+('max_sessions','1','Số phiên đồng thời tối đa/tài khoản'),
+('ip_ban_threshold','10','Số lần vi phạm trước khi ban IP'),
+-- Obfuscation
+('obfuscate_packets','true','Xáo trộn opcode mapping mỗi phiên'),
+('obfuscate_seed','random','Seed xáo trộn: random hoặc giá trị cố định');
