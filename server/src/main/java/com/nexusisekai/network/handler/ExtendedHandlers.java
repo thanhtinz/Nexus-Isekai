@@ -1,6 +1,8 @@
 package com.nexusisekai.network.handler;
 
 import com.nexusisekai.database.DatabaseManager;
+import com.nexusisekai.game.service.*;
+import com.nexusisekai.core.CacheManager;
 import com.nexusisekai.game.entity.Player;
 import com.nexusisekai.network.*;
 import io.netty.buffer.ByteBuf;
@@ -1003,7 +1005,25 @@ public class ExtendedHandlers {
     // GACHA
     // ═══════════════════════════════════════════════════════════
     public static void handleGachaBannerList(GameSession s, ByteBuf b) { msg(s,"Loading banners..."); }
-    public static void handleGachaPull(GameSession s, ByteBuf b) { int bid=b.readInt(); int cnt=b.readInt(); msg(s,"Gacha pull..."); }
+    public static void handleGachaPull(GameSession s, ByteBuf b) {
+        int bid = b.readInt(); int cnt = b.readInt();
+        Player p = s.getPlayer(); if (p == null) return;
+        try {
+            if (cnt >= 10) {
+                var results = GachaService.pullTen(p.getCharId(), bid);
+                ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_GACHA_RESULT);
+                pkt.writeShort(results.size());
+                for (var r : results) { writeStr(pkt, r.rewardType); pkt.writeInt(r.rewardId); pkt.writeByte(r.rarity); }
+                s.send(pkt);
+            } else {
+                var r = GachaService.pull(p.getCharId(), bid);
+                if (r == null) { msg(s, "Gacha that bai."); return; }
+                ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_GACHA_RESULT);
+                pkt.writeShort(1); writeStr(pkt, r.rewardType); pkt.writeInt(r.rewardId); pkt.writeByte(r.rarity);
+                s.send(pkt);
+            }
+        } catch (Exception e) { msg(s, "Loi gacha."); log.error("gacha", e); }
+    }
     public static void handleGachaHistory(GameSession s, ByteBuf b) { msg(s,"Loading history..."); }
     public static void handleGachaBuyTicket(GameSession s, ByteBuf b) { int cid=b.readInt(); int amt=b.readInt(); msg(s,"Mua ve..."); }
     public static void handleGachaCurrency(GameSession s, ByteBuf b) { msg(s,"Loading currency..."); }
@@ -1011,7 +1031,25 @@ public class ExtendedHandlers {
     // ═══════════════════════════════════════════════════════════
     // PVP SEASON
     // ═══════════════════════════════════════════════════════════
-    public static void handlePvpSeasonInfo(GameSession s, ByteBuf b) { msg(s,"PvP season info..."); }
+    public static void handlePvpSeasonInfo(GameSession s, ByteBuf b) {
+        Player p = s.getPlayer(); if (p == null) return;
+        try (java.sql.Connection c = DatabaseManager.getInstance().getConnection()) {
+            var season = com.nexusisekai.database.SqlSafe.queryOne(c, "SELECT id,season_name FROM pvp_seasons WHERE is_active=1 LIMIT 1");
+            var mine = season != null ? com.nexusisekai.database.SqlSafe.queryOne(c,
+                "SELECT elo,wins,losses,tier,win_streak FROM pvp_player_season WHERE char_id=? AND season_id=?",
+                p.getCharId(), ((Number)season.get("id")).intValue()) : null;
+            ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_PVP_SEASON_INFO);
+            if (season != null) {
+                pkt.writeInt(((Number)season.get("id")).intValue());
+                writeStr(pkt, (String)season.get("season_name"));
+                pkt.writeInt(mine != null ? ((Number)mine.get("elo")).intValue() : 1000);
+                pkt.writeInt(mine != null ? ((Number)mine.get("wins")).intValue() : 0);
+                pkt.writeInt(mine != null ? ((Number)mine.get("losses")).intValue() : 0);
+                writeStr(pkt, mine != null ? (String)mine.get("tier") : "Bronze");
+            } else { pkt.writeInt(0); writeStr(pkt,""); pkt.writeInt(1000); pkt.writeInt(0); pkt.writeInt(0); writeStr(pkt,"Bronze"); }
+            s.send(pkt);
+        } catch (Exception e) { msg(s, "Loi."); }
+    }
     public static void handlePvpSeasonRank(GameSession s, ByteBuf b) { msg(s,"PvP ranking..."); }
     public static void handlePvpSeasonReward(GameSession s, ByteBuf b) { msg(s,"Nhan thuong mua..."); }
 
