@@ -103,6 +103,17 @@ public final class PacketOpcode {
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
 
 
+
+    // ── CHAR ACTIONS + PAIR (2Fxx) ────────────────────────
+    public static final short C2S_CHAR_ACTION       = (short)0x2F01;
+    public static final short C2S_PAIR_ACTION       = (short)0x2F02;
+    public static final short C2S_PAIR_ACTION_REPLY = (short)0x2F03;
+    public static final short S2C_CHAR_ACTION       = (short)0x2F11;
+    public static final short S2C_PAIR_ACTION_REQ   = (short)0x2F12;
+    public static final short S2C_PAIR_ACTION_PLAY  = (short)0x2F13;
+    public static final short C2S_AUTO_CONFIG       = (short)0x2F04;
+    public static final short S2C_AUTO_CONFIG       = (short)0x2F14;
+
     // ── EXTENDED GAMEPLAY (26xx-2Axx) ─────────────────────
     public static final short C2S_INSPECT_PLAYER  = (short)0x2601;
     public static final short S2C_INSPECT_DATA    = (short)0x2611;
@@ -544,6 +555,17 @@ public final class PacketOpcode {
     public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
 
+
+
+    // ── CHAR ACTIONS + PAIR (2Fxx) ────────────────────────
+    public static final short C2S_CHAR_ACTION       = (short)0x2F01;
+    public static final short C2S_PAIR_ACTION       = (short)0x2F02;
+    public static final short C2S_PAIR_ACTION_REPLY = (short)0x2F03;
+    public static final short S2C_CHAR_ACTION       = (short)0x2F11;
+    public static final short S2C_PAIR_ACTION_REQ   = (short)0x2F12;
+    public static final short S2C_PAIR_ACTION_PLAY  = (short)0x2F13;
+    public static final short C2S_AUTO_CONFIG       = (short)0x2F04;
+    public static final short S2C_AUTO_CONFIG       = (short)0x2F14;
 
     // ── EXTENDED GAMEPLAY (26xx-2Axx) ─────────────────────
     public static final short C2S_INSPECT_PLAYER  = (short)0x2601;

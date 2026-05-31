@@ -354,6 +354,17 @@ namespace NexusIsekai.Network
         public const short S2C_SOCIAL_LINK_OK    = 0x1F12;
 
 
+
+        // ── CHAR ACTIONS + PAIR (2Fxx) ────────────────────────
+        public const short C2S_CHAR_ACTION       = 0x2F01;
+        public const short C2S_PAIR_ACTION       = 0x2F02;
+        public const short C2S_PAIR_ACTION_REPLY = 0x2F03;
+        public const short S2C_CHAR_ACTION       = 0x2F11;
+        public const short S2C_PAIR_ACTION_REQ   = 0x2F12;
+        public const short S2C_PAIR_ACTION_PLAY  = 0x2F13;
+        public const short C2S_AUTO_CONFIG       = 0x2F04;
+        public const short S2C_AUTO_CONFIG       = 0x2F14;
+
         // ── EXTENDED GAMEPLAY (26xx-2Axx) ─────────────────────
         public const short C2S_INSPECT_PLAYER  = 0x2601;
         public const short S2C_INSPECT_DATA    = 0x2611;

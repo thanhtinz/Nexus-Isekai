@@ -375,6 +375,49 @@ Total: 12
 - Page next button          | T  | 1
 Total: 15 files (+ 7 shared)
 
+
+## 28. AUTO COMBAT HUD
+- Auto toggle button        | T  | 2 (on/off)
+- Auto config button (gear) | T  | 1
+- Auto range indicator      | T  | 1
+- Auto status text frame    | 9S | 1
+- Auto config panel bg      | 9S | 1
+- Priority drag icons       | T  | 4 (boss/elite/normal/player)
+- HP potion threshold slider| T  | 1 (shared from #2)
+- MP potion threshold slider| T  | 1 (shared from #2)
+Total: 8
+
+## 29. STICKER / EMOJI (Chat)
+- Sticker panel frame       | 9S | 1
+- Pack tab button            | T  | 2 (active/inactive)
+- Sticker grid slot          | T  | 1
+- Buy pack button            | 2L | 2 (Buy / Mua)
+Total: 6
+
+## 30. CHARACTER EXPRESSIONS
+- Expression wheel frame     | T  | 1
+- 10 expression icons        | T  | 10
+  (happy, sad, angry, love, laugh, cry, shock, sleep, think, cool)
+Total: 11
+
+## 31. CHARACTER ACTIONS
+- Action menu frame          | 9S | 1
+- 8 solo action icons        | T  | 8
+  (sit, wave, dance, bow, cheer, meditate, flex, facepalm)
+- 6 pair action icons        | T  | 6
+  (hug, highfive, handshake, piggyback, dance_pair, arm_wrestle)
+- Pair request popup frame   | 9S | 1
+- Accept/Decline buttons     | 2L | 4 (Accept-Decline / Dong Y-Tu Choi)
+Total: 20
+
+## 32. PLAYER INTERACT MENU
+- Menu panel frame           | 9S | 1
+- 11 menu item icons         | T  | 11
+  (inspect, trade, add_friend, invite_party, invite_guild,
+   duel, whisper, follow, action, block, report)
+- Target name frame          | 9S | 1
+Total: 13
+
 ## ════════════════════════════════════
 ## SUMMARY
 ##
@@ -383,7 +426,7 @@ Total: 15 files (+ 7 shared)
 ## Animated (spritesheet):       7 sets (~36 frames)
 ## 9-slice (stretchable):      ~30
 ## ──────────────────────────────
-## GRAND TOTAL:              ~415 PNG files
+## GRAND TOTAL:              ~475 PNG files
 
 ## 27. LEADERBOARD / BXH (In-Game)
 - Leaderboard panel frame   | 9S | 1
@@ -402,5 +445,48 @@ Total: 15 files (+ 7 shared)
 - Page prev button          | T  | 1
 - Page next button          | T  | 1
 Total: 15 files (+ 7 shared)
+
+
+## 28. AUTO COMBAT HUD
+- Auto toggle button        | T  | 2 (on/off)
+- Auto config button (gear) | T  | 1
+- Auto range indicator      | T  | 1
+- Auto status text frame    | 9S | 1
+- Auto config panel bg      | 9S | 1
+- Priority drag icons       | T  | 4 (boss/elite/normal/player)
+- HP potion threshold slider| T  | 1 (shared from #2)
+- MP potion threshold slider| T  | 1 (shared from #2)
+Total: 8
+
+## 29. STICKER / EMOJI (Chat)
+- Sticker panel frame       | 9S | 1
+- Pack tab button            | T  | 2 (active/inactive)
+- Sticker grid slot          | T  | 1
+- Buy pack button            | 2L | 2 (Buy / Mua)
+Total: 6
+
+## 30. CHARACTER EXPRESSIONS
+- Expression wheel frame     | T  | 1
+- 10 expression icons        | T  | 10
+  (happy, sad, angry, love, laugh, cry, shock, sleep, think, cool)
+Total: 11
+
+## 31. CHARACTER ACTIONS
+- Action menu frame          | 9S | 1
+- 8 solo action icons        | T  | 8
+  (sit, wave, dance, bow, cheer, meditate, flex, facepalm)
+- 6 pair action icons        | T  | 6
+  (hug, highfive, handshake, piggyback, dance_pair, arm_wrestle)
+- Pair request popup frame   | 9S | 1
+- Accept/Decline buttons     | 2L | 4 (Accept-Decline / Dong Y-Tu Choi)
+Total: 20
+
+## 32. PLAYER INTERACT MENU
+- Menu panel frame           | 9S | 1
+- 11 menu item icons         | T  | 11
+  (inspect, trade, add_friend, invite_party, invite_guild,
+   duel, whisper, follow, action, block, report)
+- Target name frame          | 9S | 1
+Total: 13
 
 ## ════════════════════════════════════

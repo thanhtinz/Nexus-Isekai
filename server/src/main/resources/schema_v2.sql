@@ -2852,3 +2852,164 @@ ALTER TABLE daily_login_status ADD COLUMN IF NOT EXISTS char_id BIGINT NOT NULL 
 --   diamond, gold, inventory, equipment, quest, achievement,
 --   guild, friends, pvp, gacha, daily login, mission pass,
 --   settings, mail, tutorial, vip, topup history, gift code usage
+
+-- ═════════════════════════════════════════════════════════════
+-- AUTO COMBAT CONFIG
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS player_auto_config (
+    char_id             BIGINT NOT NULL PRIMARY KEY,
+    auto_enabled        TINYINT NOT NULL DEFAULT 0,
+    -- Target priority (1=highest)
+    priority_boss       INT NOT NULL DEFAULT 1,
+    priority_elite      INT NOT NULL DEFAULT 2,
+    priority_normal     INT NOT NULL DEFAULT 3,
+    priority_player     INT NOT NULL DEFAULT 0,      -- 0=off
+    -- Range
+    auto_range          FLOAT NOT NULL DEFAULT 8.0,
+    -- Skills
+    auto_skill_enabled  TINYINT NOT NULL DEFAULT 1,
+    skill_order         VARCHAR(64) DEFAULT '1,2,3,4,5,6,7', -- skill slot order
+    use_skill_on_cd     TINYINT NOT NULL DEFAULT 1,
+    -- Loot
+    auto_loot           TINYINT NOT NULL DEFAULT 1,
+    loot_rare_only      TINYINT NOT NULL DEFAULT 0,
+    loot_equip_only     TINYINT NOT NULL DEFAULT 0,
+    -- Potion
+    auto_hp_potion      TINYINT NOT NULL DEFAULT 1,
+    hp_threshold        INT NOT NULL DEFAULT 50,      -- % HP de uong thuoc
+    auto_mp_potion      TINYINT NOT NULL DEFAULT 1,
+    mp_threshold        INT NOT NULL DEFAULT 30,
+    -- Movement
+    auto_return          TINYINT NOT NULL DEFAULT 1,   -- quay lai vi tri goc
+    patrol_radius       FLOAT NOT NULL DEFAULT 10.0,
+    -- Safety
+    auto_revive         TINYINT NOT NULL DEFAULT 0,
+    flee_hp_pct         INT NOT NULL DEFAULT 10        -- chay khi HP < X%
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- STICKER / EMOJI IN CHAT (rieng voi bieu cam nhan vat)
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS sticker_packs (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    pack_name       VARCHAR(32) NOT NULL,
+    pack_icon       VARCHAR(128) DEFAULT '',
+    is_free         TINYINT NOT NULL DEFAULT 1,
+    price_diamond   INT NOT NULL DEFAULT 0,
+    sort_order      INT NOT NULL DEFAULT 0,
+    is_active       TINYINT NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS stickers (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    pack_id         INT NOT NULL,
+    sticker_key     VARCHAR(32) NOT NULL,
+    image_path      VARCHAR(128) NOT NULL,
+    is_animated     TINYINT NOT NULL DEFAULT 0,
+    sort_order      INT NOT NULL DEFAULT 0,
+    INDEX idx_pack (pack_id)
+);
+
+CREATE TABLE IF NOT EXISTS player_sticker_packs (
+    char_id         BIGINT NOT NULL,
+    pack_id         INT NOT NULL,
+    purchased_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (char_id, pack_id)
+);
+
+INSERT IGNORE INTO sticker_packs (id,pack_name,is_free) VALUES
+(1,'Default',1),(2,'Chibi',1),(3,'Meme',0);
+
+-- ═════════════════════════════════════════════════════════════
+-- CHARACTER EXPRESSIONS + ACTIONS + PAIR ACTIONS
+-- ═════════════════════════════════════════════════════════════
+
+-- Bieu cam nhan vat (hien tren dau)
+CREATE TABLE IF NOT EXISTS character_expressions (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    expr_key        VARCHAR(32) NOT NULL UNIQUE,
+    display_name_vi VARCHAR(32) NOT NULL,
+    display_name_en VARCHAR(32) NOT NULL,
+    icon_path       VARCHAR(128) DEFAULT '',
+    animation_key   VARCHAR(32) DEFAULT '',           -- Spine animation key
+    duration        FLOAT NOT NULL DEFAULT 2.0,
+    is_free         TINYINT NOT NULL DEFAULT 1,
+    sort_order      INT NOT NULL DEFAULT 0
+);
+
+INSERT IGNORE INTO character_expressions (expr_key,display_name_vi,display_name_en,is_free,sort_order) VALUES
+('happy','Vui','Happy',1,1),
+('sad','Buon','Sad',1,2),
+('angry','Gian','Angry',1,3),
+('love','Yeu','Love',1,4),
+('laugh','Cuoi','Laugh',1,5),
+('cry','Khoc','Cry',1,6),
+('shock','Soc','Shocked',1,7),
+('sleep','Ngu','Sleep',1,8),
+('think','Suy nghi','Thinking',1,9),
+('cool','Cool','Cool',1,10);
+
+-- Hanh dong nhan vat (animation toan than)
+CREATE TABLE IF NOT EXISTS character_actions (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    action_key      VARCHAR(32) NOT NULL UNIQUE,
+    display_name_vi VARCHAR(32) NOT NULL,
+    display_name_en VARCHAR(32) NOT NULL,
+    animation_key   VARCHAR(32) DEFAULT '',
+    duration        FLOAT NOT NULL DEFAULT 3.0,
+    is_pair         TINYINT NOT NULL DEFAULT 0,       -- 0=solo, 1=can nguoi thu 2
+    pair_anim_key   VARCHAR(32) DEFAULT '',            -- anim nguoi thu 2
+    is_free         TINYINT NOT NULL DEFAULT 1,
+    sort_order      INT NOT NULL DEFAULT 0
+);
+
+INSERT IGNORE INTO character_actions (action_key,display_name_vi,display_name_en,is_pair,is_free,sort_order) VALUES
+-- Solo actions
+('sit','Ngoi','Sit',0,1,1),
+('wave','Vay tay','Wave',0,1,2),
+('dance','Nhay','Dance',0,1,3),
+('bow','Cui chao','Bow',0,1,4),
+('cheer','Co vu','Cheer',0,1,5),
+('meditate','Ngoi thien','Meditate',0,1,6),
+('flex','Khoe co','Flex',0,1,7),
+('facepalm','Che mat','Facepalm',0,1,8),
+-- Pair actions (can nguoi thu 2 dong y)
+('hug','Om','Hug',1,1,10),
+('highfive','Dap tay','High Five',1,1,11),
+('handshake','Bat tay','Handshake',1,1,12),
+('piggyback','Cong','Piggyback',1,0,13),
+('dance_pair','Nhay doi','Dance Together',1,0,14),
+('arm_wrestle','Van tay','Arm Wrestle',1,1,15);
+
+-- ═════════════════════════════════════════════════════════════
+-- PLAYER INTERACTION MENU — Cham vao nguoi choi khac
+-- ═════════════════════════════════════════════════════════════
+
+-- Khi tap vao player khac, hien menu:
+-- Config menu items (admin co the bat/tat)
+CREATE TABLE IF NOT EXISTS player_interact_menu (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    menu_key        VARCHAR(32) NOT NULL UNIQUE,
+    display_name_vi VARCHAR(32) NOT NULL,
+    display_name_en VARCHAR(32) NOT NULL,
+    icon_path       VARCHAR(128) DEFAULT '',
+    sort_order      INT NOT NULL DEFAULT 0,
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    require_friend  TINYINT NOT NULL DEFAULT 0,       -- chi hien khi la ban be
+    require_guild   TINYINT NOT NULL DEFAULT 0        -- chi hien khi cung guild
+);
+
+INSERT IGNORE INTO player_interact_menu (menu_key,display_name_vi,display_name_en,sort_order) VALUES
+('inspect','Xem thong tin','Inspect',1),
+('trade','Giao dich','Trade',2),
+('add_friend','Ket ban','Add Friend',3),
+('invite_party','Moi vao nhom','Invite to Party',4),
+('invite_guild','Moi vao guild','Invite to Guild',5),
+('duel','Thach dau','Duel',6),
+('whisper','Nhan tin','Whisper',7),
+('follow','Theo doi','Follow',8),
+('action','Hanh dong','Action',9),
+('block','Chan','Block',10),
+('report','Bao cao','Report',11);

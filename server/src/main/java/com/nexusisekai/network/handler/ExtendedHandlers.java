@@ -922,6 +922,14 @@ public class ExtendedHandlers {
 
 
     // ═══════════════════════════════════════════════════════════
+    // CHAR ACTIONS + PAIR
+    // ═══════════════════════════════════════════════════════════
+    public static void handleCharAction(GameSession s, ByteBuf b) { int id=b.readInt(); /* broadcast action to nearby */ }
+    public static void handlePairAction(GameSession s, ByteBuf b) { int id=b.readInt(); long target=b.readLong(); /* send request to target */ }
+    public static void handlePairActionReply(GameSession s, ByteBuf b) { long req=b.readLong(); boolean ok=b.readBoolean(); /* start pair anim if accepted */ }
+    public static void handleAutoConfig(GameSession s, ByteBuf b) { short l=b.readShort(); byte[] d=new byte[l]; b.readBytes(d); String json=new String(d); /* save to player_auto_config */ }
+
+    // ═══════════════════════════════════════════════════════════
     // EXTENDED GAMEPLAY
     // ═══════════════════════════════════════════════════════════
     public static void handleInspect(GameSession s, ByteBuf b)   { long id=b.readLong(); msg(s,"Inspecting..."); }

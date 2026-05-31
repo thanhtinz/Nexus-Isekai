@@ -446,6 +446,28 @@ namespace NexusIsekai.Network
 
 
 
+
+        // ── EXPRESSIONS + ACTIONS + INTERACT ────────────────
+
+        public static void SendCharAction(int actionId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_ACTION).WriteInt(actionId));
+        public static void SendPairAction(int actionId, long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PAIR_ACTION).WriteInt(actionId).WriteLong(targetId));
+        public static void SendPairActionAccept(long requesterId, bool accept)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PAIR_ACTION_REPLY).WriteLong(requesterId).WriteBool(accept));
+        public static void SendFriendRequest(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_FRIEND_REQUEST).WriteLong(targetId));
+        public static void SendPartyInvite(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PARTY_INVITE).WriteLong(targetId));
+        public static void SendGuildInvite(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_INVITE).WriteLong(targetId));
+        public static void SendDuelRequest(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_DUEL_REQUEST).WriteLong(targetId));
+        public static void SendTrade(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TRADE_REQUEST).WriteLong(targetId));
+        public static void SendAutoConfig(string configJson)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUTO_CONFIG).WriteString(configJson));
+
         // ── MISSING SENDS ───────────────────────────────────
 
         public static void SendCastSkill(int skillId, long targetId)
@@ -591,6 +613,28 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_CLAIM).WriteLong(mailId));
         public static void SendMailDelete(long mailId)
             => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_DELETE).WriteLong(mailId));
+
+
+        // ── EXPRESSIONS + ACTIONS + INTERACT ────────────────
+
+        public static void SendCharAction(int actionId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_ACTION).WriteInt(actionId));
+        public static void SendPairAction(int actionId, long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PAIR_ACTION).WriteInt(actionId).WriteLong(targetId));
+        public static void SendPairActionAccept(long requesterId, bool accept)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PAIR_ACTION_REPLY).WriteLong(requesterId).WriteBool(accept));
+        public static void SendFriendRequest(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_FRIEND_REQUEST).WriteLong(targetId));
+        public static void SendPartyInvite(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PARTY_INVITE).WriteLong(targetId));
+        public static void SendGuildInvite(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_INVITE).WriteLong(targetId));
+        public static void SendDuelRequest(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_DUEL_REQUEST).WriteLong(targetId));
+        public static void SendTrade(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TRADE_REQUEST).WriteLong(targetId));
+        public static void SendAutoConfig(string configJson)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUTO_CONFIG).WriteString(configJson));
 
         // ── MISSING SENDS ────────────────────────────────────
 
@@ -765,6 +809,28 @@ namespace NexusIsekai.Network
 
 
 
+
+        // ── EXPRESSIONS + ACTIONS + INTERACT ────────────────
+
+        public static void SendCharAction(int actionId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_ACTION).WriteInt(actionId));
+        public static void SendPairAction(int actionId, long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PAIR_ACTION).WriteInt(actionId).WriteLong(targetId));
+        public static void SendPairActionAccept(long requesterId, bool accept)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PAIR_ACTION_REPLY).WriteLong(requesterId).WriteBool(accept));
+        public static void SendFriendRequest(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_FRIEND_REQUEST).WriteLong(targetId));
+        public static void SendPartyInvite(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PARTY_INVITE).WriteLong(targetId));
+        public static void SendGuildInvite(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_INVITE).WriteLong(targetId));
+        public static void SendDuelRequest(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_DUEL_REQUEST).WriteLong(targetId));
+        public static void SendTrade(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TRADE_REQUEST).WriteLong(targetId));
+        public static void SendAutoConfig(string configJson)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUTO_CONFIG).WriteString(configJson));
+
         // ── MISSING SENDS ───────────────────────────────────
 
         public static void SendCastSkill(int skillId, long targetId)
@@ -910,6 +976,28 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_CLAIM).WriteLong(mailId));
         public static void SendMailDelete(long mailId)
             => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_DELETE).WriteLong(mailId));
+
+
+        // ── EXPRESSIONS + ACTIONS + INTERACT ────────────────
+
+        public static void SendCharAction(int actionId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_ACTION).WriteInt(actionId));
+        public static void SendPairAction(int actionId, long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PAIR_ACTION).WriteInt(actionId).WriteLong(targetId));
+        public static void SendPairActionAccept(long requesterId, bool accept)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PAIR_ACTION_REPLY).WriteLong(requesterId).WriteBool(accept));
+        public static void SendFriendRequest(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_FRIEND_REQUEST).WriteLong(targetId));
+        public static void SendPartyInvite(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PARTY_INVITE).WriteLong(targetId));
+        public static void SendGuildInvite(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_GUILD_INVITE).WriteLong(targetId));
+        public static void SendDuelRequest(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_DUEL_REQUEST).WriteLong(targetId));
+        public static void SendTrade(long targetId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TRADE_REQUEST).WriteLong(targetId));
+        public static void SendAutoConfig(string configJson)
+            => Send(new PacketBuilder(PacketOpcode.C2S_AUTO_CONFIG).WriteString(configJson));
 
         // ── MISSING SENDS ────────────────────────────────────
 
