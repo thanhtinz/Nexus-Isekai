@@ -435,6 +435,15 @@ namespace NexusIsekai.Network
         public static void SendEventCurrencyExchange(int currencyId, int amount)
             => Send(new PacketBuilder(PacketOpcode.C2S_EVENT_CURRENCY_EXCHANGE).WriteInt(currencyId).WriteInt(amount));
 
+        // ── AUTH ─────────────────────────────────────────
+
+        public static void SendLogin(string username, string password)
+            => Send(new PacketBuilder(PacketOpcode.C2S_LOGIN).WriteString(username).WriteString(password));
+        public static void SendRegister(string username, string password)
+            => Send(new PacketBuilder(PacketOpcode.C2S_REGISTER).WriteString(username).WriteString(password));
+        public static void SendCharList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
+
         // ── SETTINGS ─────────────────────────────────────
 
         public static void SendSettingsLoad()
@@ -638,6 +647,15 @@ namespace NexusIsekai.Network
             rw.Write(payload);
             return result.ToArray();
         }
+
+        // ── AUTH ─────────────────────────────────────────
+
+        public static void SendLogin(string username, string password)
+            => Send(new PacketBuilder(PacketOpcode.C2S_LOGIN).WriteString(username).WriteString(password));
+        public static void SendRegister(string username, string password)
+            => Send(new PacketBuilder(PacketOpcode.C2S_REGISTER).WriteString(username).WriteString(password));
+        public static void SendCharList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
         // ── SETTINGS ─────────────────────────────────────
 
