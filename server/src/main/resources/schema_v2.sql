@@ -1869,3 +1869,317 @@ INSERT IGNORE INTO event_currency_shop (id,currency_id,item_id,item_name,price,s
 (1,1,1001,'Thuoc Hoi Mau x10',50,-1,0,1),
 (2,1,2001,'Tui Do Mo Rong',200,100,1,2),
 (3,1,3001,'Skin Doc Quyen Tet',500,50,1,3);
+
+-- ═════════════════════════════════════════════════════════════
+-- 49. CHARACTER APPEARANCE — Ngoại hình nhân vật (Mana Seed layers)
+-- ═════════════════════════════════════════════════════════════
+
+-- Tạo nhân vật: chỉ chọn ngoại hình + tên. Class chọn sau.
+ALTER TABLE characters
+    ADD COLUMN IF NOT EXISTS body_type   TINYINT NOT NULL DEFAULT 1,   -- 1=p1, 2=pONE1, 3=pONE2, 4=pONE3
+    ADD COLUMN IF NOT EXISTS skin_color  TINYINT NOT NULL DEFAULT 1,   -- 0-10 (v00-v10)
+    ADD COLUMN IF NOT EXISTS hair_style  TINYINT NOT NULL DEFAULT 0,   -- 0=bob1, 1=dap1
+    ADD COLUMN IF NOT EXISTS hair_color  TINYINT NOT NULL DEFAULT 1,   -- 0-13 (v00-v13)
+    ADD COLUMN IF NOT EXISTS shirt_color TINYINT NOT NULL DEFAULT 1,   -- 1-5 (v01-v05)
+    ADD COLUMN IF NOT EXISTS pants_color TINYINT NOT NULL DEFAULT 1;   -- 1-5 (v01-v05)
+
+-- class_id = 0 khi mới tạo (chưa chọn class)
+-- Player chọn class tại NPC Class Master trong game (sau tutorial)
+
+-- Sprite asset mapping (để server/client biết đường dẫn sprite)
+CREATE TABLE IF NOT EXISTS character_sprite_config (
+    config_key      VARCHAR(64) NOT NULL PRIMARY KEY,
+    config_value    TEXT NOT NULL,
+    description     VARCHAR(256) DEFAULT ''
+);
+
+INSERT IGNORE INTO character_sprite_config VALUES
+('body_types','[{"id":1,"key":"body_1","label":"Than Hinh 1"},{"id":2,"key":"body_2","label":"Than Hinh 2"},{"id":3,"key":"body_3","label":"Than Hinh 3"},{"id":4,"key":"body_4","label":"Than Hinh 4"}]','Cac loai than hinh'),
+('skin_colors','11','So luong mau da (v00-v10)'),
+('hair_styles','[{"id":0,"key":"bob1","label":"Toc Ngan"},{"id":1,"key":"dap1","label":"Toc Dai"}]','Kieu toc'),
+('hair_colors','14','So luong mau toc (v00-v13)'),
+('shirt_colors','5','So luong mau ao (v01-v05)'),
+('pants_colors','5','So luong mau quan (v01-v05)'),
+('sprite_size','64','Kich thuoc sprite (px)'),
+('sheet_cols','8','So cot trong spritesheet'),
+('sheet_rows','8','So hang trong spritesheet'),
+('class_npc_id','0','NPC ID de chon class (0=chua set)');
+
+-- Class change quest (NPC cho chọn class)
+CREATE TABLE IF NOT EXISTS class_change_config (
+    class_id        INT NOT NULL PRIMARY KEY,
+    class_name      VARCHAR(32) NOT NULL,
+    required_level  INT NOT NULL DEFAULT 1,      -- level tối thiểu để chọn class
+    npc_id          INT NOT NULL DEFAULT 0,      -- NPC cho phép chọn class
+    quest_id        INT NOT NULL DEFAULT 0,      -- quest phải hoàn thành trước
+    description     TEXT,
+    base_hp         INT NOT NULL DEFAULT 100,
+    base_mp         INT NOT NULL DEFAULT 50,
+    base_atk        INT NOT NULL DEFAULT 10,
+    base_def        INT NOT NULL DEFAULT 5,
+    hp_per_level    INT NOT NULL DEFAULT 20,
+    mp_per_level    INT NOT NULL DEFAULT 10,
+    atk_per_level   INT NOT NULL DEFAULT 3,
+    def_per_level   INT NOT NULL DEFAULT 2,
+    is_active       TINYINT NOT NULL DEFAULT 1
+);
+
+INSERT IGNORE INTO class_change_config VALUES
+(1,'Kiem Si',1,0,0,'Chien binh can chien, phong ngu va tan cong can bang.',120,40,12,8,25,8,4,3,1),
+(2,'Sat Thu',1,0,0,'Diet dich nhanh, ne tranh, chi mang.',90,50,15,4,18,10,5,2,1),
+(3,'Phap Su',1,0,0,'Phap thuat tam xa, sat thuong dien rong.',80,80,8,4,15,15,3,1,1),
+(4,'Phap Thu',1,0,0,'Hoi mau, tang buff, bao ve dong doi.',100,90,6,6,20,18,2,3,1),
+(5,'Cung Thu',1,0,0,'Tan cong tam xa, ban tinh, khu vuc.',85,60,13,5,17,12,4,2,1);
+
+-- ═════════════════════════════════════════════════════════════
+-- 50. EQUIPMENT SYSTEM — Trang bị toàn diện
+-- ═════════════════════════════════════════════════════════════
+
+-- 7 classes mới
+DELETE FROM class_change_config;
+INSERT INTO class_change_config (class_id,class_name,required_level,description,base_hp,base_mp,base_atk,base_def,hp_per_level,mp_per_level,atk_per_level,def_per_level) VALUES
+(1,'Kiem Si',1,'Chien binh can chien su dung kiem, can bang tan cong va phong ngu.',130,40,14,10,28,6,4,3),
+(2,'Phap Su',1,'Phap su tam xa, phep thuat manh nhung phong ngu yeu.',80,120,6,4,14,20,2,1),
+(3,'Xa Thu',1,'Su dung sung, tan cong nhanh tam trung.',95,50,16,5,18,8,5,2),
+(4,'Slinger',1,'Su dung na, linh hoat va ne tranh cao.',90,60,13,6,17,10,4,2),
+(5,'Axeman',1,'Chien binh rìu, sat thuong vat ly cao nhat.',140,30,18,8,30,4,5,3),
+(6,'Quyen Su',1,'Vo su, chan tay, chi mang va hut mau.',100,50,15,7,22,8,5,2),
+(7,'Cung Thu',1,'Cung thu tam xa, ban tinh va khu vuc.',85,60,14,5,16,10,4,2);
+
+-- Equipment slots (25 slots)
+CREATE TABLE IF NOT EXISTS equipment_slots (
+    slot_id         INT NOT NULL PRIMARY KEY,
+    slot_name       VARCHAR(32) NOT NULL,
+    slot_type       VARCHAR(16) NOT NULL,   -- main,sub,jewelry,accessory
+    slot_key        VARCHAR(32) NOT NULL UNIQUE,
+    max_per_char    INT NOT NULL DEFAULT 1,
+    sort_order      INT NOT NULL DEFAULT 0
+);
+
+INSERT IGNORE INTO equipment_slots VALUES
+-- Trang bi chinh
+(1,'Mu','main','helmet',1,1),
+(2,'Ao Giap','main','armor',1,2),
+(3,'Quan','main','pants',1,3),
+(4,'Giay','main','boots',1,4),
+(5,'Gang Tay','main','gloves',1,5),
+-- Trang bi phu
+(6,'Khien','sub','shield',1,6),
+(7,'Sach Ma Phap','sub','spellbook',1,7),
+(8,'Bao Ten','sub','quiver',1,8),
+(9,'Bua Ho Menh','sub','talisman',1,9),
+(10,'Ho Phu','sub','charm',1,10),
+(11,'Skin','sub','skin',1,11),
+-- Trang suc
+(12,'Nhan 1','jewelry','ring_1',1,12),
+(13,'Nhan 2','jewelry','ring_2',1,13),
+(14,'Day Chuyen','jewelry','necklace',1,14),
+(15,'Khuyen Tai 1','jewelry','earring_1',1,15),
+(16,'Khuyen Tai 2','jewelry','earring_2',1,16),
+(17,'Vong Tay 1','jewelry','bracelet_1',1,17),
+(18,'Vong Tay 2','jewelry','bracelet_2',1,18),
+-- Phu kien
+(19,'Canh','accessory','wings',1,19),
+(20,'Ao Choang','accessory','cape',1,20),
+(21,'Mat Na','accessory','mask',1,21),
+(22,'Danh Hieu','accessory','title_slot',1,22),
+(23,'Thu Cuoi','accessory','mount_slot',1,23),
+(24,'Pet','accessory','pet_slot',1,24),
+-- Vu khi (tuy class)
+(25,'Vu Khi','main','weapon',1,0);
+
+-- Item templates mo rong — voi 12 chi so
+DROP TABLE IF EXISTS item_templates;
+CREATE TABLE IF NOT EXISTS item_templates (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    name            VARCHAR(64) NOT NULL,
+    description     TEXT,
+    item_type       VARCHAR(32) NOT NULL,       -- weapon,helmet,armor,pants,boots,gloves,shield,spellbook,quiver,talisman,charm,skin,ring,necklace,earring,bracelet,wings,cape,mask,consumable,material,quest_item,gem,scroll
+    equip_slot      VARCHAR(32) DEFAULT NULL,    -- key tu equipment_slots
+    class_restrict  VARCHAR(64) DEFAULT '',      -- '1,3,7' = chi Kiem Si, Xa Thu, Cung Thu. '' = tat ca
+    level_req       INT NOT NULL DEFAULT 1,
+    quality         TINYINT NOT NULL DEFAULT 0,  -- 0=Common,1=Rare,2=Epic,3=Legendary,4=Mythic
+    icon_asset      VARCHAR(128) DEFAULT 'Icons/Items/default',
+    sprite_asset    VARCHAR(128) DEFAULT '',     -- sprite khi trang bi (layer)
+    -- 12 chi so
+    stat_hp         INT NOT NULL DEFAULT 0,
+    stat_mp         INT NOT NULL DEFAULT 0,
+    stat_patk       INT NOT NULL DEFAULT 0,      -- cong vat ly
+    stat_matk       INT NOT NULL DEFAULT 0,      -- cong phep
+    stat_def        INT NOT NULL DEFAULT 0,
+    stat_crit       INT NOT NULL DEFAULT 0,      -- ti le chi mang (x0.01%)
+    stat_dodge      INT NOT NULL DEFAULT 0,      -- ne tranh
+    stat_accuracy   INT NOT NULL DEFAULT 0,      -- chinh xac
+    stat_aspd       INT NOT NULL DEFAULT 0,      -- toc danh
+    stat_mspd       INT NOT NULL DEFAULT 0,      -- toc chay
+    stat_lifesteal  INT NOT NULL DEFAULT 0,      -- hut mau (x0.01%)
+    stat_resist     INT NOT NULL DEFAULT 0,      -- khang hieu ung
+    -- Nang cap
+    max_enhance     INT NOT NULL DEFAULT 15,     -- +1 den +15
+    gem_slots       INT NOT NULL DEFAULT 0,      -- so luong o khảm ngoc
+    can_refine      TINYINT NOT NULL DEFAULT 0,  -- co the tinh luyen
+    can_awaken      TINYINT NOT NULL DEFAULT 0,  -- co the thuc tinh
+    -- Kinh te
+    buy_price       INT NOT NULL DEFAULT 0,
+    sell_price      INT NOT NULL DEFAULT 0,
+    is_tradeable    TINYINT NOT NULL DEFAULT 1,
+    is_stackable    TINYINT NOT NULL DEFAULT 0,
+    max_stack       INT NOT NULL DEFAULT 1,
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_type (item_type),
+    INDEX idx_quality (quality),
+    INDEX idx_slot (equip_slot)
+);
+
+-- Player equipped items
+CREATE TABLE IF NOT EXISTS character_equipment (
+    char_id         BIGINT NOT NULL,
+    slot_key        VARCHAR(32) NOT NULL,        -- tu equipment_slots.slot_key
+    inventory_id    BIGINT NOT NULL,             -- ID trong character_inventory
+    item_id         INT NOT NULL,
+    enhance_level   INT NOT NULL DEFAULT 0,
+    gem_1           INT DEFAULT 0,
+    gem_2           INT DEFAULT 0,
+    gem_3           INT DEFAULT 0,
+    refine_level    INT NOT NULL DEFAULT 0,
+    awaken_level    INT NOT NULL DEFAULT 0,
+    quality_bonus   INT NOT NULL DEFAULT 0,      -- nang cap pham chat: +0 den +5
+    PRIMARY KEY (char_id, slot_key)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 51. ENHANCEMENT SYSTEM — Cuong hoa, kham ngoc, tinh luyen, thuc tinh
+-- ═════════════════════════════════════════════════════════════
+
+-- Cuong hoa +1 den +15 (ti le giam dan)
+CREATE TABLE IF NOT EXISTS enhance_rates (
+    level           INT NOT NULL PRIMARY KEY,     -- 1-15
+    success_rate    FLOAT NOT NULL,               -- 0.0-1.0
+    gold_cost       INT NOT NULL DEFAULT 0,
+    material_id     INT DEFAULT 0,                -- item cuong hoa (da cuong hoa)
+    material_qty    INT NOT NULL DEFAULT 1,
+    on_fail         VARCHAR(16) NOT NULL DEFAULT 'nothing', -- nothing,downgrade,destroy
+    stat_bonus_pct  FLOAT NOT NULL DEFAULT 0.05   -- +5% stats per level
+);
+
+INSERT IGNORE INTO enhance_rates VALUES
+(1, 1.0,   500,  0,1,'nothing',0.03),
+(2, 1.0,   1000, 0,1,'nothing',0.03),
+(3, 0.95,  2000, 0,1,'nothing',0.04),
+(4, 0.90,  4000, 0,1,'nothing',0.04),
+(5, 0.80,  8000, 0,1,'nothing',0.05),
+(6, 0.70,  15000,0,2,'nothing',0.05),
+(7, 0.60,  25000,0,2,'downgrade',0.06),
+(8, 0.50,  40000,0,3,'downgrade',0.06),
+(9, 0.40,  60000,0,3,'downgrade',0.07),
+(10,0.30,  80000,0,4,'downgrade',0.07),
+(11,0.20, 100000,0,5,'downgrade',0.08),
+(12,0.15, 150000,0,5,'downgrade',0.09),
+(13,0.10, 200000,0,6,'destroy', 0.10),
+(14,0.05, 300000,0,8,'destroy', 0.12),
+(15,0.03, 500000,0,10,'destroy',0.15);
+
+-- Ngoc (gem) — kham vao trang bi
+CREATE TABLE IF NOT EXISTS gem_templates (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    name            VARCHAR(64) NOT NULL,
+    gem_type        VARCHAR(16) NOT NULL,        -- atk,def,hp,mp,crit,dodge,aspd,mspd
+    stat_value      INT NOT NULL DEFAULT 0,
+    quality         TINYINT NOT NULL DEFAULT 0,  -- 0-4
+    icon_asset      VARCHAR(128) DEFAULT '',
+    is_active       TINYINT NOT NULL DEFAULT 1
+);
+
+INSERT IGNORE INTO gem_templates (id,name,gem_type,stat_value,quality) VALUES
+(1,'Ngoc Luc','atk',10,0),(2,'Ngoc Do','hp',50,0),(3,'Ngoc Xanh','def',8,0),
+(4,'Ngoc Vang','crit',20,0),(5,'Ngoc Tim','dodge',15,0),
+(6,'Ngoc Luc Cao','atk',30,1),(7,'Ngoc Do Cao','hp',150,1),(8,'Ngoc Xanh Cao','def',25,1),
+(9,'Ngoc Luc Quy','atk',80,2),(10,'Ngoc Do Quy','hp',400,2);
+
+-- Tinh luyen (refine) — tang stats an
+CREATE TABLE IF NOT EXISTS refine_config (
+    level           INT NOT NULL PRIMARY KEY,
+    stat_bonus_pct  FLOAT NOT NULL DEFAULT 0.02,
+    gold_cost       INT NOT NULL DEFAULT 0,
+    material_id     INT DEFAULT 0,
+    success_rate    FLOAT NOT NULL DEFAULT 1.0
+);
+
+INSERT IGNORE INTO refine_config VALUES
+(1,0.02,5000,0,1.0),(2,0.04,10000,0,0.9),(3,0.06,20000,0,0.8),
+(4,0.08,40000,0,0.7),(5,0.10,80000,0,0.5);
+
+-- Thuc tinh (awaken) — mo khoa skill dac biet
+CREATE TABLE IF NOT EXISTS awaken_config (
+    level           INT NOT NULL PRIMARY KEY,
+    required_enhance INT NOT NULL DEFAULT 10,    -- can cuong hoa +X truoc
+    required_quality INT NOT NULL DEFAULT 2,     -- can pham chat Epic+
+    gold_cost       INT NOT NULL DEFAULT 0,
+    material_id     INT DEFAULT 0,
+    bonus_skill_id  INT DEFAULT 0,               -- unlock skill dac biet
+    stat_multiplier FLOAT NOT NULL DEFAULT 1.0
+);
+
+INSERT IGNORE INTO awaken_config VALUES
+(1,10,2,100000,0,0,1.10),(2,12,3,300000,0,0,1.25),(3,15,4,1000000,0,0,1.50);
+
+-- ═════════════════════════════════════════════════════════════
+-- 52. ADMIN ASSET PACK UPLOAD — Tải ZIP, tự động unzip
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS asset_packs (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    pack_name       VARCHAR(128) NOT NULL,
+    original_filename VARCHAR(256) NOT NULL,
+    extract_path    VARCHAR(256) NOT NULL,        -- đường dẫn sau khi giải nén
+    file_count      INT NOT NULL DEFAULT 0,
+    total_size      BIGINT NOT NULL DEFAULT 0,
+    pack_type       VARCHAR(32) DEFAULT 'sprite', -- sprite,audio,map,ui,effect
+    status          VARCHAR(16) NOT NULL DEFAULT 'uploaded', -- uploaded,extracting,ready,error
+    uploaded_by     VARCHAR(64) DEFAULT 'admin',
+    notes           TEXT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_type (pack_type, status)
+);
+
+-- Seed pack hiện tại
+INSERT IGNORE INTO asset_packs (id,pack_name,original_filename,extract_path,file_count,total_size,pack_type,status) VALUES
+(1,'Mana Seed Character Base Demo','FREE_Mana_Seed_Character_Base_Demo_2_0.zip','Character/',334,0,'sprite','ready'),
+(2,'Character Base 2.5c','20_01a_-_Character_Base_2_5c.zip','Character/',335,0,'sprite','ready'),
+(3,'Hairstyle Pack v0.5.3','21_01a_-_Hairstyle_Pack_v0_5_3.zip','Character/',437,0,'sprite','ready');
+
+-- Seed items — vu khi cho 7 class
+INSERT IGNORE INTO item_templates (id,name,item_type,equip_slot,class_restrict,level_req,quality,stat_patk,stat_aspd,buy_price) VALUES
+(10001,'Kiem Go','weapon','weapon','1',1,0,15,5,100),
+(10002,'Kiem Sat','weapon','weapon','1',10,1,35,8,2000),
+(10003,'Gay Phap','weapon','weapon','2',1,0,5,3,100),
+(10004,'Gay Phap Xanh','weapon','weapon','2',10,1,15,5,2000),
+(10005,'Sung Ngan','weapon','weapon','3',1,0,18,10,100),
+(10006,'Sung Truong','weapon','weapon','3',10,1,40,12,2000),
+(10007,'Na Dan','weapon','weapon','4',1,0,16,8,100),
+(10008,'Rìu Go','weapon','weapon','5',1,0,22,3,100),
+(10009,'Rìu Sat','weapon','weapon','5',10,1,50,5,2000),
+(10010,'Quyen Sach','weapon','weapon','6',1,0,12,15,100),
+(10011,'Cung Ngan','weapon','weapon','7',1,0,14,7,100),
+(10012,'Cung Dai','weapon','weapon','7',10,1,32,10,2000);
+
+-- Seed trang bi co ban
+INSERT IGNORE INTO item_templates (id,name,item_type,equip_slot,level_req,quality,stat_def,stat_hp,buy_price) VALUES
+(20001,'Non La','helmet','helmet',1,0,3,10,50),
+(20002,'Mu Sat','helmet','helmet',10,1,8,30,1000),
+(20003,'Ao Vai','armor','armor',1,0,5,15,80),
+(20004,'Giap Sat','armor','armor',10,1,12,50,1500),
+(20005,'Quan Vai','pants','pants',1,0,3,10,60),
+(20006,'Quan Giap','pants','pants',10,1,8,30,1000),
+(20007,'Giay Co','boots','boots',1,0,2,5,40),
+(20008,'Giay Sat','boots','boots',10,1,6,20,800),
+(20009,'Gang Vai','gloves','gloves',1,0,2,5,40),
+(20010,'Gang Sat','gloves','gloves',10,1,5,15,700);
+
+-- Seed trang suc
+INSERT IGNORE INTO item_templates (id,name,item_type,equip_slot,level_req,quality,stat_patk,stat_crit,stat_dodge,buy_price) VALUES
+(30001,'Nhan Dong','ring','ring_1',5,0,3,5,0,500),
+(30002,'Day Chuyen Dong','necklace','necklace',5,0,2,3,3,600),
+(30003,'Khuyen Tai Dong','earring','earring_1',5,0,2,0,5,400),
+(30004,'Vong Tay Dong','bracelet','bracelet_1',5,0,1,3,3,350);

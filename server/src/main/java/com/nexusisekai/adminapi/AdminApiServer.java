@@ -143,6 +143,12 @@ public class AdminApiServer {
         
         
         
+        httpServer.createContext("/api/assets/upload-pack",ex -> handleAuth(ex, this::handleAssetPackUpload));
+        httpServer.createContext("/api/assets/packs",    ex -> handleAuth(ex, this::handleAssetPacks));
+        httpServer.createContext("/api/equipment-slots",  ex -> handleAuth(ex, this::handleEquipmentSlots));
+        httpServer.createContext("/api/item-templates",   ex -> handleAuth(ex, this::handleItemTemplates));
+        httpServer.createContext("/api/enhance-rates",    ex -> handleAuth(ex, this::handleEnhanceRates));
+        httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
         httpServer.createContext("/api/achievements",       ex -> handleAuth(ex, this::handleAchievements));
         httpServer.createContext("/api/daily-login",         ex -> handleAuth(ex, this::handleDailyLogin));
         httpServer.createContext("/api/world-bosses",        ex -> handleAuth(ex, this::handleWorldBosses));
@@ -1521,6 +1527,193 @@ public class AdminApiServer {
     // ═══════════════════════════════════════════════════════════
     // Achievements, Daily Login, World Boss, Monster Drops, Spawn Zones
     // ═══════════════════════════════════════════════════════════
+
+
+    // ═══════════════════════════════════════════════════════════
+    // ZIP Pack Upload + Equipment/Item Templates
+    // ═══════════════════════════════════════════════════════════
+
+    /** POST /api/assets/upload-pack — Tải lên ZIP, tự động giải nén */
+    private void handleAssetPackUpload(HttpExchange ex) throws Exception {
+        if (!ex.getRequestMethod().equals("POST")) { send405(ex); return; }
+        String packName = ex.getRequestHeaders().getFirst("X-Pack-Name");
+        String packType = ex.getRequestHeaders().getFirst("X-Pack-Type");
+        if (packName == null) packName = "Pack_" + System.currentTimeMillis();
+        if (packType == null) packType = "sprite";
+
+        byte[] zipBytes = ex.getRequestBody().readAllBytes();
+        if (zipBytes.length == 0) { sendJson(ex,400,Map.of("success",false,"message","Empty file")); return; }
+        if (zipBytes.length > 100 * 1024 * 1024) { sendJson(ex,400,Map.of("success",false,"message","Max 100MB")); return; }
+
+        // Luu ZIP
+        String safeName = packName.replaceAll("[^a-zA-Z0-9_-]", "_");
+        java.nio.file.Path zipPath = ADMIN_ASSETS_DIR.resolve("packs/" + safeName + ".zip");
+        java.nio.file.Files.createDirectories(zipPath.getParent());
+        java.nio.file.Files.write(zipPath, zipBytes);
+
+        // Giai nen
+        java.nio.file.Path extractDir = ADMIN_ASSETS_DIR.resolve("packs/" + safeName);
+        java.nio.file.Files.createDirectories(extractDir);
+        int fileCount = 0; long totalSize = 0;
+        try (java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(zipBytes))) {
+            java.util.zip.ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                java.nio.file.Path outPath = extractDir.resolve(entry.getName().replace("..", ""));
+                if (entry.isDirectory()) { java.nio.file.Files.createDirectories(outPath); }
+                else {
+                    java.nio.file.Files.createDirectories(outPath.getParent());
+                    java.nio.file.Files.write(outPath, zis.readAllBytes());
+                    fileCount++; totalSize += entry.getSize();
+                }
+                zis.closeEntry();
+            }
+        }
+
+        // Log vao DB
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "INSERT INTO asset_packs (pack_name,original_filename,extract_path,file_count,total_size,pack_type,status) VALUES (?,?,?,?,?,?,?)")) {
+            ps.setString(1, packName); ps.setString(2, safeName + ".zip");
+            ps.setString(3, "packs/" + safeName); ps.setInt(4, fileCount);
+            ps.setLong(5, totalSize); ps.setString(6, packType); ps.setString(7, "ready");
+            ps.executeUpdate();
+        }
+
+        auditLog(ex, "upload_pack", "asset_pack", safeName, packName + " (" + fileCount + " files, " + totalSize/1024 + "KB)");
+        sendJson(ex, 200, Map.of("success",true,"pack_name",packName,"files",fileCount,"size_kb",totalSize/1024,
+            "extract_path","packs/" + safeName));
+        log.info("[PACK] Uploaded & extracted: {} ({} files)", packName, fileCount);
+    }
+
+    /** GET /api/assets/packs — Danh sach pack da tai len */
+    private void handleAssetPacks(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            sendTableResult(ex, c.prepareStatement("SELECT * FROM asset_packs ORDER BY created_at DESC"), "packs");
+        }
+    }
+
+    /** CRUD Equipment slots */
+    private void handleEquipmentSlots(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM equipment_slots ORDER BY sort_order"), "slots");
+            } else {
+                var body = parseBody(ex);
+                switch (str(body,"action")) {
+                    case "create" -> {
+                        c.prepareStatement("INSERT INTO equipment_slots (slot_id,slot_name,slot_type,slot_key,max_per_char,sort_order) VALUES (" +
+                            num(body,"slot_id") + ",'" + str(body,"slot_name").replace("'","") + "','" +
+                            str(body,"slot_type").replace("'","") + "','" + str(body,"slot_key").replace("'","") + "'," +
+                            num(body,"max_per_char") + "," + num(body,"sort_order") + ")").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** CRUD Item templates (trang bi + consumable + material) */
+    private void handleItemTemplates(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String type = params.getOrDefault("type", "");
+                String quality = params.getOrDefault("quality", "");
+                String slot = params.getOrDefault("slot", "");
+                String q = params.getOrDefault("q", "");
+                String where = "WHERE is_active=1";
+                if (!type.isEmpty()) where += " AND item_type='" + type.replace("'","") + "'";
+                if (!quality.isEmpty()) where += " AND quality=" + quality;
+                if (!slot.isEmpty()) where += " AND equip_slot='" + slot.replace("'","") + "'";
+                if (!q.isEmpty()) where += " AND name LIKE '%" + q.replace("'","") + "%'";
+                sendTableResult(ex, c.prepareStatement(
+                    "SELECT * FROM item_templates " + where + " ORDER BY item_type, level_req, quality LIMIT 200"), "items");
+            } else {
+                var body = parseBody(ex);
+                switch (str(body,"action")) {
+                    case "create" -> {
+                        PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO item_templates (name,description,item_type,equip_slot,class_restrict,level_req,quality," +
+                            "icon_asset,sprite_asset,stat_hp,stat_mp,stat_patk,stat_matk,stat_def,stat_crit,stat_dodge," +
+                            "stat_accuracy,stat_aspd,stat_mspd,stat_lifesteal,stat_resist,max_enhance,gem_slots," +
+                            "can_refine,can_awaken,buy_price,sell_price,is_tradeable,is_stackable,max_stack) " +
+                            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                        ps.setString(1,str(body,"name")); ps.setString(2,str(body,"description"));
+                        ps.setString(3,str(body,"item_type")); ps.setString(4,str(body,"equip_slot"));
+                        ps.setString(5,str(body,"class_restrict")); ps.setInt(6,num(body,"level_req"));
+                        ps.setInt(7,num(body,"quality")); ps.setString(8,str(body,"icon_asset"));
+                        ps.setString(9,str(body,"sprite_asset"));
+                        ps.setInt(10,num(body,"stat_hp")); ps.setInt(11,num(body,"stat_mp"));
+                        ps.setInt(12,num(body,"stat_patk")); ps.setInt(13,num(body,"stat_matk"));
+                        ps.setInt(14,num(body,"stat_def")); ps.setInt(15,num(body,"stat_crit"));
+                        ps.setInt(16,num(body,"stat_dodge")); ps.setInt(17,num(body,"stat_accuracy"));
+                        ps.setInt(18,num(body,"stat_aspd")); ps.setInt(19,num(body,"stat_mspd"));
+                        ps.setInt(20,num(body,"stat_lifesteal")); ps.setInt(21,num(body,"stat_resist"));
+                        ps.setInt(22,num(body,"max_enhance")); ps.setInt(23,num(body,"gem_slots"));
+                        ps.setInt(24,num(body,"can_refine")); ps.setInt(25,num(body,"can_awaken"));
+                        ps.setInt(26,num(body,"buy_price")); ps.setInt(27,num(body,"sell_price"));
+                        ps.setInt(28,num(body,"is_tradeable")); ps.setInt(29,num(body,"is_stackable"));
+                        ps.setInt(30,num(body,"max_stack"));
+                        ps.executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "update" -> {
+                        c.prepareStatement("UPDATE item_templates SET name='" + str(body,"name").replace("'","") +
+                            "',quality=" + num(body,"quality") + ",stat_patk=" + num(body,"stat_patk") +
+                            ",stat_def=" + num(body,"stat_def") + ",stat_hp=" + num(body,"stat_hp") +
+                            ",buy_price=" + num(body,"buy_price") + ",is_active=" + num(body,"is_active") +
+                            " WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("UPDATE item_templates SET is_active=0 WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+
+    /** CRUD enhance rates */
+    private void handleEnhanceRates(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM enhance_rates ORDER BY level"), "rates");
+            } else {
+                var body = parseBody(ex);
+                c.prepareStatement("UPDATE enhance_rates SET success_rate=" + str(body,"success_rate") +
+                    ",gold_cost=" + num(body,"gold_cost") + ",on_fail='" + str(body,"on_fail").replace("'","") +
+                    "' WHERE level=" + num(body,"level")).executeUpdate();
+                sendJson(ex,200,Map.of("success",true));
+            }
+        }
+    }
+
+    /** CRUD gems */
+    private void handleGems(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM gem_templates ORDER BY quality, gem_type"), "gems");
+            } else {
+                var body = parseBody(ex);
+                switch (str(body,"action")) {
+                    case "create" -> {
+                        c.prepareStatement("INSERT INTO gem_templates (name,gem_type,stat_value,quality) VALUES ('" +
+                            str(body,"name").replace("'","") + "','" + str(body,"gem_type").replace("'","") + "'," +
+                            num(body,"stat_value") + "," + num(body,"quality") + ")").executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    case "delete" -> {
+                        c.prepareStatement("DELETE FROM gem_templates WHERE id=" + num(body,"id")).executeUpdate();
+                        sendJson(ex,200,Map.of("success",true));
+                    }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
 
     private void handleAchievements(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
