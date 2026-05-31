@@ -3,6 +3,11 @@
 T = Static (1 PNG)
 D = Animated (spritesheet)
 9S = 9-slice (1 PNG, stretchable)
+2L = Bilingual (need VI + EN version = x2 files)
+
+NOTE: Most UI elements are text-free frames/icons.
+Text is rendered dynamically from localization (vi.json / en.json).
+Items marked 2L have baked text in the image and need both languages.
 
 ## 1. MAIN HUD (Gameplay Screen)
 - HP bar frame              | T | 1
@@ -33,9 +38,9 @@ D = Animated (spritesheet)
 Total: 26
 
 ## 2. BUTTONS
-- Default button            | T | 3 (normal/pressed/disabled)
-- Confirm button (green)    | T | 3
-- Cancel button (red/gray)  | T | 3
+- Default button            | T | 3 (normal/pressed/disabled) text-free frame
+- Confirm button (green)    | T | 3 text-free frame
+- Cancel button (red/gray)  | T | 3 text-free frame
 - Tab active                | T | 1
 - Tab inactive              | T | 1
 - Close button (X)          | T | 1
@@ -88,7 +93,7 @@ Total: 41
 - Gender toggle female      | T | 1
 - Preview frame             | T | 1
 - Stat preview bar          | T | 2 (frame + fill)
-- Create button             | T | 3 (normal/pressed/disabled)
+- Create button             | 2L | 6 (Create / Tao NV, 3 states each)
 Total: 16
 
 ## 6. CHAT
@@ -96,7 +101,7 @@ Total: 16
 - Chat tab active           | T  | 1
 - Chat tab inactive         | T  | 1
 - Chat input frame          | 9S | 1
-- Send button               | T  | 1
+- Send button               | 2L | 2 (Send / Gui)
 - Emoji button              | T  | 1
 - Sticker button            | T  | 1
 - Voice button              | T  | 2 (idle/recording)
@@ -109,22 +114,22 @@ Total: 11
 - Gold icon                 | T  | 1
 - Diamond icon              | T  | 1
 - Event token icon          | T  | 1
-- Buy button                | T  | 1
-- Sell button               | T  | 1
+- Buy button                | 2L | 2 (Buy / Mua)
+- Sell button               | 2L | 2 (Sell / Ban)
 - Quantity selector +       | T  | 1
 - Quantity selector -       | T  | 1
 - Topup package frame      | 9S | 1
-- Badge hot                 | T  | 1
-- Badge best                | T  | 1
-- Badge x2                  | T  | 1
-- Badge limited             | T  | 1
-- Badge new                 | T  | 1
-Total: 14
+- Badge hot                 | 2L | 2 (Hot / Hot)
+- Badge best                | 2L | 2 (Best Value / Gia Tri Nhat)
+- Badge x2                  | T  | 1 (x2 - no text needed)
+- Badge limited             | 2L | 2 (Limited / Gioi Han)
+- Badge new                 | 2L | 2 (New / Moi)
+Total: 18
 
 ## 8. GACHA / SUMMON
 - Banner frame              | 9S | 1
-- Pull x1 button            | T  | 1
-- Pull x10 button           | T  | 1
+- Pull x1 button            | 2L | 2 (Pull x1 / Keo x1)
+- Pull x10 button           | 2L | 2 (Pull x10 / Keo x10)
 - Summon open effect        | D  | 8 (spritesheet 8 frames)
 - Result card N             | T  | 1
 - Result card R             | T  | 1
@@ -173,17 +178,17 @@ Total: 9
 - Tier icon Grandmaster     | T  | 1
 - ELO bar frame             | T  | 1
 - ELO bar fill              | T  | 1
-- Victory frame             | T  | 1
-- Defeat frame              | T  | 1
+- Victory frame             | 2L | 2 (Victory / Chien Thang)
+- Defeat frame              | 2L | 2 (Defeat / That Bai)
 Total: 11
 
 ## 12. COMBAT
 - Damage font digits 0-9   | T  | 10
 - Critical hit burst        | D  | 4 (4 frames)
-- MISS text                 | T  | 1
+- MISS text                 | 2L | 2 (MISS / Truot)
 - Level up effect           | D  | 6 (6 frames)
 - Death overlay             | T  | 1
-- Respawn button            | T  | 1
+- Respawn button            | 2L | 2 (Respawn / Hoi Sinh)
 - Buff icons (generic)      | T  | 10
 - Debuff icons (generic)    | T  | 10
 Total: 33
@@ -214,8 +219,8 @@ Total: 10
 - Quality selector frames   | T  | 5 (Very Low/Low/Medium/High/Ultra)
 - FPS selector frames       | T  | 4 (30/60/90/120)
 - Key binding slot          | T  | 1
-- Reset defaults button     | T  | 1
-- Save button               | T  | 1
+- Reset defaults button     | 2L | 2 (Reset / Mac Dinh)
+- Save button               | 2L | 2 (Save / Luu)
 - Joystick size preview     | T  | 1
 - Camera sensitivity preview| T  | 1
 Total: 19
@@ -259,8 +264,8 @@ Total: 42
 ## 18. INTRO CUTSCENE
 - Intro backgrounds (7)     | T  | 7
 - Text box frame            | 9S | 1
-- Skip button               | T  | 1
-- Continue button           | T  | 1
+- Skip button               | 2L | 2 (Skip / Bo Qua)
+- Continue button           | 2L | 2 (Continue / Tiep Tuc)
 - Fade overlay              | T  | 1
 Total: 11
 
@@ -270,15 +275,15 @@ Total: 11
 - Read mail icon            | T  | 1
 - Attachment icon           | T  | 1
 - Mail detail frame         | 9S | 1
-- Claim reward button       | T  | 1
+- Claim reward button       | 2L | 2 (Claim / Nhan)
 - Delete button             | T  | 1
 Total: 7
 
 ## 20. TRADE
 - Trade window frame        | 9S | 1
 - Trade slot (left + right) | T  | 2
-- Confirm trade button      | T  | 1
-- Cancel trade button       | T  | 1
+- Confirm trade button      | 2L | 2 (Confirm / Xac Nhan)
+- Cancel trade button       | 2L | 2 (Cancel / Huy)
 - Lock trade icon           | T  | 1
 - Gold input bar            | T  | 1
 Total: 7
@@ -286,10 +291,10 @@ Total: 7
 ## 21. AUCTION HOUSE
 - Auction list frame        | 9S | 1
 - Auction item card         | 9S | 1
-- Bid button                | T  | 1
-- Buyout button             | T  | 1
-- Sell button               | T  | 1
-- Tab Buy/Sell/History      | T  | 3
+- Bid button                | 2L | 2 (Bid / Dau Gia)
+- Buyout button             | 2L | 2 (Buyout / Mua Ngay)
+- Sell button               | 2L | 2 (Sell / Ban)
+- Tab Buy/Sell/History      | 2L | 6 (Buy-Sell-History / Mua-Ban-Lich Su)
 - Time remaining icon       | T  | 1
 Total: 9
 
@@ -298,7 +303,7 @@ Total: 9
 - Achievement card locked   | T  | 1
 - Achievement card unlocked | T  | 1
 - Progress bar              | T  | 2 (frame + fill)
-- Claim reward button       | T  | 1
+- Claim reward button       | 2L | 2 (Claim / Nhan)
 - Category tabs (6)         | T  | 6
 Total: 12
 
@@ -309,8 +314,8 @@ Total: 12
 - Arrow left                | T  | 1
 - Arrow right               | T  | 1
 - Guide text frame          | 9S | 1
-- Continue button           | T  | 1
-- Skip button               | T  | 1
+- Continue button           | 2L | 2 (Continue / Tiep Tuc)
+- Skip button               | 2L | 2 (Skip / Bo Qua)
 - Tap hand animation        | D  | 4 (4 frames)
 Total: 12
 
@@ -320,7 +325,7 @@ Total: 12
 - Premium reward slot       | T  | 1
 - Claimed slot              | T  | 1
 - Level progress bar        | T  | 2 (frame + fill)
-- Buy premium button        | T  | 1
+- Buy premium button        | 2L | 2 (Buy Premium / Mua Premium)
 - Premium lock icon         | T  | 1
 Total: 8
 
@@ -329,8 +334,8 @@ Total: 8
 - Game logo                 | T  | 1
 - Username input frame      | 9S | 1
 - Password input frame      | 9S | 1
-- Login button              | T  | 1
-- Register button           | T  | 1
+- Login button              | 2L | 2 (Login / Dang Nhap)
+- Register button           | 2L | 2 (Register / Dang Ky)
 - Google Sign-In button     | T  | 1
 - Facebook Sign-In button   | T  | 1
 - Apple Sign-In button      | T  | 1
@@ -340,9 +345,9 @@ Total: 10
 ## 26. SERVER SELECT
 - Server list frame         | 9S | 1
 - Server card               | 9S | 1
-- Badge New                 | T  | 1
-- Badge Hot                 | T  | 1
-- Badge Recommended         | T  | 1
+- Badge New                 | 2L | 2 (New / Moi)
+- Badge Hot                 | 2L | 2 (Hot / Hot)
+- Badge Recommended         | 2L | 2 (Recommended / De Xuat)
 - Status dot smooth (green) | T  | 1
 - Status dot normal (yellow)| T  | 1
 - Status dot busy (orange)  | T  | 1
@@ -354,9 +359,10 @@ Total: 12
 ## ════════════════════════════════════
 ## SUMMARY
 ##
-## Static (single PNG):        ~338
+## Static (single PNG):        ~300
+## Bilingual (VI+EN pairs):     ~60 (30 items x2)
 ## Animated (spritesheet):       7 sets (~36 frames)
 ## 9-slice (stretchable):      ~30
 ## ──────────────────────────────
-## GRAND TOTAL:              ~370 PNG files
+## GRAND TOTAL:              ~400 PNG files
 ## ════════════════════════════════════
