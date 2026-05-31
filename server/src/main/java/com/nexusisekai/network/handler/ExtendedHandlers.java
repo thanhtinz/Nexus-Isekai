@@ -714,6 +714,170 @@ public class ExtendedHandlers {
         session.send(pkt);
     }
 
+
+    // ═══════════════════════════════════════════════════════════
+    // ACHIEVEMENTS
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleAchievementList(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT a.*, COALESCE(pa.progress,0) as progress, COALESCE(pa.completed,0) as completed, COALESCE(pa.claimed,0) as claimed " +
+                 "FROM achievements a LEFT JOIN player_achievements pa ON pa.achievement_id=a.id AND pa.char_id=? WHERE a.is_active=1 ORDER BY a.category,a.sort_order")) {
+            ps.setLong(1, p.getCharId()); ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_ACHIEVEMENT_LIST);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeInt(rs.getInt("id")); writeStr(tmp, rs.getString("name"));
+                writeStr(tmp, rs.getString("description")); writeStr(tmp, rs.getString("category"));
+                writeStr(tmp, rs.getString("condition_type")); tmp.writeInt(rs.getInt("condition_value"));
+                tmp.writeInt(rs.getInt("progress")); tmp.writeByte(rs.getInt("completed"));
+                tmp.writeByte(rs.getInt("claimed")); tmp.writeInt(rs.getInt("points"));
+                writeStr(tmp, rs.getString("reward_type")); tmp.writeInt(rs.getInt("reward_amount"));
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp); session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleAchievementClaim(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        int achievementId = buf.readInt();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement(
+                "SELECT pa.completed, pa.claimed, a.reward_type, a.reward_id, a.reward_amount FROM player_achievements pa " +
+                "JOIN achievements a ON a.id=pa.achievement_id WHERE pa.char_id=? AND pa.achievement_id=?");
+            ps.setLong(1, p.getCharId()); ps.setInt(2, achievementId);
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next() || rs.getInt("completed") == 0 || rs.getInt("claimed") == 1) {
+                msg(session, "Khong the nhan thuong."); return;
+            }
+            String rewardType = rs.getString("reward_type"); int amount = rs.getInt("reward_amount");
+            switch (rewardType) {
+                case "gold" -> c.prepareStatement("UPDATE characters SET gold=gold+" + amount + " WHERE id=" + p.getCharId()).executeUpdate();
+                case "diamond" -> c.prepareStatement("UPDATE characters SET diamond=diamond+" + amount + " WHERE id=" + p.getCharId()).executeUpdate();
+                case "exp" -> c.prepareStatement("UPDATE characters SET exp=exp+" + amount + " WHERE id=" + p.getCharId()).executeUpdate();
+            }
+            c.prepareStatement("UPDATE player_achievements SET claimed=1 WHERE char_id=" + p.getCharId() + " AND achievement_id=" + achievementId).executeUpdate();
+            msg(session, "Nhan thuong thanh tuu thanh cong!");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // DAILY LOGIN
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleDailyLoginInfo(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement("SELECT * FROM player_daily_login WHERE char_id=?");
+            ps.setLong(1, p.getCharId()); ResultSet rs = ps.executeQuery();
+            int currentDay = 0, streak = 0, claimed = 0;
+            if (rs.next()) { currentDay = rs.getInt("current_day"); streak = rs.getInt("streak_count"); claimed = rs.getInt("claimed_today"); }
+            // Rewards config
+            PreparedStatement rps = c.prepareStatement("SELECT * FROM daily_login_rewards ORDER BY day_number");
+            ResultSet rrs = rps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_DAILY_LOGIN_INFO);
+            pkt.writeInt(currentDay); pkt.writeInt(streak); pkt.writeByte(claimed);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rrs.next()) {
+                tmp.writeInt(rrs.getInt("day_number")); writeStr(tmp, rrs.getString("reward_type"));
+                tmp.writeInt(rrs.getInt("reward_amount")); writeStr(tmp, rrs.getString("description"));
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp); session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleDailyLoginClaim(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            c.prepareStatement("INSERT INTO player_daily_login (char_id,current_day,streak_count,last_login_date,total_logins,claimed_today) " +
+                "VALUES (" + p.getCharId() + ",1,1,CURDATE(),1,1) ON DUPLICATE KEY UPDATE " +
+                "current_day=IF(last_login_date=CURDATE()-1,current_day%7+1,1)," +
+                "streak_count=IF(last_login_date=CURDATE()-1,streak_count+1,1)," +
+                "last_login_date=CURDATE(),total_logins=total_logins+1,claimed_today=1").executeUpdate();
+            msg(session, "Nhan thuong dang nhap thanh cong!");
+            ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_DAILY_LOGIN_CLAIMED);
+            pkt.writeBoolean(true); session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // WORLD BOSS
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleWorldBossInfo(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT * FROM world_bosses WHERE is_active=1 ORDER BY id")) {
+            ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_WORLD_BOSS_SPAWN);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeInt(rs.getInt("id")); writeStr(tmp, rs.getString("name"));
+                tmp.writeInt(rs.getInt("map_id")); tmp.writeInt(rs.getInt("hp"));
+                writeStr(tmp, rs.getString("spawn_cron")); tmp.writeInt(rs.getInt("duration_min"));
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp); session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // PLAYER MAIL
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleMailList(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT * FROM player_mail WHERE recipient_id=? AND (expires_at IS NULL OR expires_at>NOW()) ORDER BY created_at DESC LIMIT 50")) {
+            ps.setLong(1, p.getCharId()); ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_MAIL_LIST);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeLong(rs.getLong("id")); writeStr(tmp, rs.getString("sender_name"));
+                writeStr(tmp, rs.getString("title")); writeStr(tmp, rs.getString("content"));
+                tmp.writeByte(rs.getInt("is_read")); tmp.writeByte(rs.getInt("is_claimed"));
+                String att = rs.getString("attachment_json"); writeStr(tmp, att != null ? att : "");
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp); session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleMailRead(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long mailId = buf.readLong();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            c.prepareStatement("UPDATE player_mail SET is_read=1 WHERE id=" + mailId + " AND recipient_id=" + p.getCharId()).executeUpdate();
+        } catch (Exception e) {}
+    }
+
+    public static void handleMailClaim(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long mailId = buf.readLong();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement("SELECT attachment_json FROM player_mail WHERE id=? AND recipient_id=? AND is_claimed=0");
+            ps.setLong(1, mailId); ps.setLong(2, p.getCharId());
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) { msg(session, "Khong co vat pham."); return; }
+            // TODO: parse attachment_json and give items
+            c.prepareStatement("UPDATE player_mail SET is_claimed=1 WHERE id=" + mailId).executeUpdate();
+            msg(session, "Nhan vat pham thanh cong!");
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleMailDelete(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        long mailId = buf.readLong();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            c.prepareStatement("DELETE FROM player_mail WHERE id=" + mailId + " AND recipient_id=" + p.getCharId()).executeUpdate();
+        } catch (Exception e) {}
+    }
+
     // ═══════════════════════════════════════════════════════════
     // Helpers
     // ═══════════════════════════════════════════════════════════

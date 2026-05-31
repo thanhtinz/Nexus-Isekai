@@ -543,6 +543,46 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_EVENT_CURRENCY_BUY).WriteInt(shopItemId));
         public static void SendEventCurrencyExchange(int currencyId, int amount)
             => Send(new PacketBuilder(PacketOpcode.C2S_EVENT_CURRENCY_EXCHANGE).WriteInt(currencyId).WriteInt(amount));
+
+        // ── ACHIEVEMENT ──────────────────────────────────────
+
+        public static void SendAchievementList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_ACHIEVEMENT_LIST));
+        public static void SendAchievementClaim(int achievementId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_ACHIEVEMENT_CLAIM).WriteInt(achievementId));
+
+        // ── DAILY LOGIN ──────────────────────────────────────
+
+        public static void SendDailyLoginInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_DAILY_LOGIN_INFO));
+        public static void SendDailyLoginClaim()
+            => Send(new PacketBuilder(PacketOpcode.C2S_DAILY_LOGIN_CLAIM));
+
+        // ── WORLD BOSS ───────────────────────────────────────
+
+        public static void SendWorldBossInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_WORLD_BOSS_INFO));
+
+        // ── MAIL ─────────────────────────────────────────────
+
+        public static void SendMailList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_LIST));
+        public static void SendMailRead(long mailId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_READ).WriteLong(mailId));
+        public static void SendMailClaim(long mailId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_CLAIM).WriteLong(mailId));
+        public static void SendMailDelete(long mailId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_DELETE).WriteLong(mailId));
+
+        // ── MISSING SENDS ────────────────────────────────────
+
+        public static void SendInventoryList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INVENTORY_LIST));
+        public static void SendMinigameAction(long roomId, int actionType, int value)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_ACTION).WriteLong(roomId).WriteInt(actionType).WriteInt(value));
+        public static void SendPvPAttack(long targetCharId, int skillId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_ATTACK).WriteLong(targetCharId).WriteInt(skillId));
+
     }
 
     /// <summary>
@@ -695,6 +735,46 @@ namespace NexusIsekai.Network
             rw.Write(payload);
             return result.ToArray();
         }
+
+        // ── ACHIEVEMENT ──────────────────────────────────────
+
+        public static void SendAchievementList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_ACHIEVEMENT_LIST));
+        public static void SendAchievementClaim(int achievementId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_ACHIEVEMENT_CLAIM).WriteInt(achievementId));
+
+        // ── DAILY LOGIN ──────────────────────────────────────
+
+        public static void SendDailyLoginInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_DAILY_LOGIN_INFO));
+        public static void SendDailyLoginClaim()
+            => Send(new PacketBuilder(PacketOpcode.C2S_DAILY_LOGIN_CLAIM));
+
+        // ── WORLD BOSS ───────────────────────────────────────
+
+        public static void SendWorldBossInfo()
+            => Send(new PacketBuilder(PacketOpcode.C2S_WORLD_BOSS_INFO));
+
+        // ── MAIL ─────────────────────────────────────────────
+
+        public static void SendMailList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_LIST));
+        public static void SendMailRead(long mailId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_READ).WriteLong(mailId));
+        public static void SendMailClaim(long mailId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_CLAIM).WriteLong(mailId));
+        public static void SendMailDelete(long mailId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MAIL_DELETE).WriteLong(mailId));
+
+        // ── MISSING SENDS ────────────────────────────────────
+
+        public static void SendInventoryList()
+            => Send(new PacketBuilder(PacketOpcode.C2S_INVENTORY_LIST));
+        public static void SendMinigameAction(long roomId, int actionType, int value)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_ACTION).WriteLong(roomId).WriteInt(actionType).WriteInt(value));
+        public static void SendPvPAttack(long targetCharId, int skillId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_PVP_ATTACK).WriteLong(targetCharId).WriteInt(skillId));
+
     }
 
     /// <summary>

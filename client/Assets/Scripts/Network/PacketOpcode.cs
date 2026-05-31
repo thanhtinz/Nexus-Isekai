@@ -320,5 +320,33 @@ namespace NexusIsekai.Network
         public const short S2C_EVENT_CURRENCY_SHOP     = 0x1612;
         public const short S2C_EVENT_CURRENCY_UPDATE   = 0x1613;
 
+
+        // ── ACHIEVEMENT (18xx) ────────────────────────────────
+        public const short C2S_ACHIEVEMENT_LIST   = 0x1801;
+        public const short C2S_ACHIEVEMENT_CLAIM  = 0x1802;
+        public const short S2C_ACHIEVEMENT_LIST   = 0x1811;
+        public const short S2C_ACHIEVEMENT_UPDATE = 0x1812;
+        public const short S2C_ACHIEVEMENT_UNLOCK = 0x1813;
+
+        // ── DAILY LOGIN (19xx) ────────────────────────────────
+        public const short C2S_DAILY_LOGIN_INFO   = 0x1901;
+        public const short C2S_DAILY_LOGIN_CLAIM  = 0x1902;
+        public const short S2C_DAILY_LOGIN_INFO   = 0x1911;
+        public const short S2C_DAILY_LOGIN_CLAIMED= 0x1912;
+
+        // ── WORLD BOSS (1Axx) ─────────────────────────────────
+        public const short C2S_WORLD_BOSS_INFO    = 0x1A01;
+        public const short S2C_WORLD_BOSS_SPAWN   = 0x1A11;
+        public const short S2C_WORLD_BOSS_DEAD    = 0x1A12;
+        public const short S2C_WORLD_BOSS_UPDATE  = 0x1A13;
+
+        // ── PLAYER MAIL (1Bxx) ────────────────────────────────
+        public const short C2S_MAIL_LIST          = 0x1B01;
+        public const short C2S_MAIL_READ          = 0x1B02;
+        public const short C2S_MAIL_CLAIM         = 0x1B03;
+        public const short C2S_MAIL_DELETE        = 0x1B04;
+        public const short S2C_MAIL_LIST          = 0x1B11;
+        public const short S2C_MAIL_NEW           = 0x1B12;
+
     }
 }

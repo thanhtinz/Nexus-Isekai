@@ -147,6 +147,44 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_EVENT_CURRENCY_SHOP, OnEventCurrencyShop);
             d.Register(PacketOpcode.S2C_EVENT_CURRENCY_UPDATE, OnEventCurrencyUpdate);
 
+            // Achievement + Daily Login + World Boss + Mail
+            d.Register(PacketOpcode.S2C_ACHIEVEMENT_LIST,   OnAchievementList);
+            d.Register(PacketOpcode.S2C_ACHIEVEMENT_UPDATE, OnAchievementUpdate);
+            d.Register(PacketOpcode.S2C_ACHIEVEMENT_UNLOCK, OnAchievementUnlock);
+            d.Register(PacketOpcode.S2C_DAILY_LOGIN_INFO,   OnDailyLoginInfo);
+            d.Register(PacketOpcode.S2C_DAILY_LOGIN_CLAIMED,OnDailyLoginClaimed);
+            d.Register(PacketOpcode.S2C_WORLD_BOSS_SPAWN,   OnWorldBossSpawn);
+            d.Register(PacketOpcode.S2C_WORLD_BOSS_DEAD,    OnWorldBossDead);
+            d.Register(PacketOpcode.S2C_WORLD_BOSS_UPDATE,  OnWorldBossUpdate);
+            d.Register(PacketOpcode.S2C_MAIL_LIST,          OnMailList);
+            d.Register(PacketOpcode.S2C_MAIL_NEW,           OnMailNew);
+            // Core game handlers
+            d.Register(PacketOpcode.S2C_LOGIN_RESULT,       OnLoginResult);
+            d.Register(PacketOpcode.S2C_REGISTER_RESULT,    OnRegisterResult);
+            d.Register(PacketOpcode.S2C_CHAR_SELECT_OK,     OnCharSelectOk);
+            d.Register(PacketOpcode.S2C_CHAR_ERROR,         OnCharError);
+            d.Register(PacketOpcode.S2C_INVENTORY_UPDATE,   OnInventoryUpdate);
+            d.Register(PacketOpcode.S2C_MONSTER_LIST,       OnMonsterList);
+            d.Register(PacketOpcode.S2C_NPC_LIST,           OnNpcList);
+            d.Register(PacketOpcode.S2C_MONSTER_HP_UPDATE,  OnMonsterHpUpdate);
+            d.Register(PacketOpcode.S2C_MONSTER_DIE,        OnMonsterDie);
+            d.Register(PacketOpcode.S2C_PLAYER_HP_UPDATE,   OnPlayerHpUpdate);
+            d.Register(PacketOpcode.S2C_PLAYER_DIE,         OnPlayerDie);
+            d.Register(PacketOpcode.S2C_PLAYER_REVIVE,      OnPlayerRevive);
+            d.Register(PacketOpcode.S2C_PLAYER_ONLINE,      OnPlayerOnline);
+            d.Register(PacketOpcode.S2C_COMBAT_RESULT,      OnCombatResult);
+            d.Register(PacketOpcode.S2C_EXP_GAIN,           OnExpGain);
+            d.Register(PacketOpcode.S2C_QUEST_UPDATE,       OnQuestUpdate);
+            d.Register(PacketOpcode.S2C_QUEST_COMPLETE,     OnQuestComplete);
+            d.Register(PacketOpcode.S2C_SHOP_RESULT,        OnShopResult);
+            d.Register(PacketOpcode.S2C_SKILL_EFFECT,       OnSkillEffect);
+            d.Register(PacketOpcode.S2C_SKILL_COOLDOWN,     OnSkillCooldown);
+            d.Register(PacketOpcode.S2C_GUILD_MSG,          OnGuildMsg);
+            d.Register(PacketOpcode.S2C_EVENT_START,        OnEventStart);
+            d.Register(PacketOpcode.S2C_SERVER_MSG,         OnServerMsg);
+            d.Register(PacketOpcode.S2C_STORY_CG,           OnStoryCg);
+            d.Register(PacketOpcode.S2C_PING_FROM_SERVER,   OnPingFromServer);
+
             // System
             d.Register(PacketOpcode.S2C_PONG,            OnPong);
             d.Register(PacketOpcode.S2C_KICK,            OnKick);
@@ -1624,4 +1662,51 @@ namespace NexusIsekai.Game
         int currencyId = r.ReadInt(); int newAmount = r.ReadInt();
         UIManager.Instance?.ShowNotification($"Token cap nhat: {newAmount}", UINotificationType.Info);
     }
+
+    // ═══════════════════════════════════════════════════════════
+    // ACHIEVEMENT + DAILY LOGIN + WORLD BOSS + MAIL + CORE
+    // ═══════════════════════════════════════════════════════════
+
+    private void OnAchievementList(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadString(); r.ReadString(); r.ReadString(); r.ReadInt(); r.ReadInt(); r.ReadByte(); r.ReadByte(); r.ReadInt(); r.ReadString(); r.ReadInt(); } }
+    private void OnAchievementUpdate(PacketReader r) { r.ReadInt(); r.ReadInt(); }
+    private void OnAchievementUnlock(PacketReader r) { string name = r.ReadString(); UIManager.Instance?.ShowNotification("Thanh tuu: " + name, UINotificationType.Success); }
+
+    private void OnDailyLoginInfo(PacketReader r) { int day = r.ReadInt(); int streak = r.ReadInt(); bool claimed = r.ReadBool(); int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadInt(); r.ReadString(); } }
+    private void OnDailyLoginClaimed(PacketReader r) { bool ok = r.ReadBool(); UIManager.Instance?.ShowNotification("Nhan thuong dang nhap!", UINotificationType.Success); }
+
+    private void OnWorldBossSpawn(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadInt(); r.ReadInt(); r.ReadString(); r.ReadInt(); } }
+    private void OnWorldBossDead(PacketReader r) { string boss = r.ReadString(); string killer = r.ReadString(); UIManager.Instance?.ShowNotification(killer + " ha " + boss + "!", UINotificationType.Info); }
+    private void OnWorldBossUpdate(PacketReader r) { r.ReadInt(); r.ReadInt(); }
+
+    private void OnMailList(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadLong(); r.ReadString(); r.ReadString(); r.ReadString(); r.ReadByte(); r.ReadByte(); r.ReadString(); } }
+    private void OnMailNew(PacketReader r) { string sender = r.ReadString(); string title = r.ReadString(); UIManager.Instance?.ShowNotification("Thu moi: " + title, UINotificationType.Info); }
+
+    // ─── Core game handlers ───────────────────────────────────
+
+    private void OnLoginResult(PacketReader r) { bool ok = r.ReadBool(); string msg = r.ReadString(); if (!ok) UIManager.Instance?.ShowNotification(msg, UINotificationType.Error); }
+    private void OnRegisterResult(PacketReader r) { bool ok = r.ReadBool(); string msg = r.ReadString(); UIManager.Instance?.ShowNotification(msg, ok ? UINotificationType.Success : UINotificationType.Error); }
+    private void OnCharSelectOk(PacketReader r) { /* Load game scene */ }
+    private void OnCharError(PacketReader r) { string msg = r.ReadString(); UIManager.Instance?.ShowNotification(msg, UINotificationType.Error); }
+    private void OnInventoryUpdate(PacketReader r) { /* Refresh inventory UI */ }
+    private void OnMonsterList(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadLong(); r.ReadInt(); r.ReadFloat(); r.ReadFloat(); r.ReadInt(); } }
+    private void OnNpcList(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadFloat(); r.ReadFloat(); } }
+    private void OnMonsterHpUpdate(PacketReader r) { r.ReadLong(); r.ReadInt(); r.ReadInt(); }
+    private void OnMonsterDie(PacketReader r) { r.ReadLong(); r.ReadInt(); r.ReadInt(); }
+    private void OnPlayerHpUpdate(PacketReader r) { r.ReadLong(); r.ReadInt(); r.ReadInt(); r.ReadInt(); }
+    private void OnPlayerDie(PacketReader r) { r.ReadLong(); UIManager.Instance?.ShowNotification("Ban da chet!", UINotificationType.Error); }
+    private void OnPlayerRevive(PacketReader r) { r.ReadLong(); r.ReadFloat(); r.ReadFloat(); }
+    private void OnPlayerOnline(PacketReader r) { string name = r.ReadString(); bool on = r.ReadBool(); }
+    private void OnCombatResult(PacketReader r) { r.ReadLong(); r.ReadInt(); r.ReadBool(); }
+    private void OnExpGain(PacketReader r) { int exp = r.ReadInt(); int total = r.ReadInt(); }
+    private void OnQuestUpdate(PacketReader r) { r.ReadInt(); r.ReadInt(); r.ReadInt(); }
+    private void OnQuestComplete(PacketReader r) { int qid = r.ReadInt(); UIManager.Instance?.ShowNotification("Hoan thanh nhiem vu!", UINotificationType.Success); }
+    private void OnShopResult(PacketReader r) { bool ok = r.ReadBool(); string msg = r.ReadString(); UIManager.Instance?.ShowNotification(msg, ok ? UINotificationType.Success : UINotificationType.Warning); }
+    private void OnSkillEffect(PacketReader r) { r.ReadLong(); r.ReadInt(); r.ReadFloat(); r.ReadFloat(); }
+    private void OnSkillCooldown(PacketReader r) { r.ReadInt(); r.ReadInt(); }
+    private void OnGuildMsg(PacketReader r) { string msg = r.ReadString(); }
+    private void OnEventStart(PacketReader r) { string name = r.ReadString(); UIManager.Instance?.ShowNotification("Su kien: " + name, UINotificationType.Info); }
+    private void OnServerMsg(PacketReader r) { string msg = r.ReadString(); UIManager.Instance?.ShowNotification(msg, UINotificationType.Info); }
+    private void OnStoryCg(PacketReader r) { r.ReadInt(); r.ReadString(); }
+    private void OnPingFromServer(PacketReader r) { /* pong */ }
+
 }

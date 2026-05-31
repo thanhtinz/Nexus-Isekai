@@ -233,6 +233,24 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_EVENT_CURRENCY_LIST     -> { requireInGame(); ExtendedHandlers.handleEventCurrencyList(this, toBuf(p)); }
             case PacketOpcode.C2S_EVENT_CURRENCY_SHOP     -> { requireInGame(); ExtendedHandlers.handleEventCurrencyShop(this, toBuf(p)); }
             case PacketOpcode.C2S_EVENT_CURRENCY_BUY      -> { requireInGame(); ExtendedHandlers.handleEventCurrencyBuy(this, toBuf(p)); }
+
+            // ── Achievement ────────────────────────────────────────────
+            case PacketOpcode.C2S_ACHIEVEMENT_LIST  -> { requireInGame(); ExtendedHandlers.handleAchievementList(this, toBuf(p)); }
+            case PacketOpcode.C2S_ACHIEVEMENT_CLAIM -> { requireInGame(); ExtendedHandlers.handleAchievementClaim(this, toBuf(p)); }
+
+            // ── Daily Login ────────────────────────────────────────────
+            case PacketOpcode.C2S_DAILY_LOGIN_INFO  -> { requireInGame(); ExtendedHandlers.handleDailyLoginInfo(this, toBuf(p)); }
+            case PacketOpcode.C2S_DAILY_LOGIN_CLAIM -> { requireInGame(); ExtendedHandlers.handleDailyLoginClaim(this, toBuf(p)); }
+
+            // ── World Boss ─────────────────────────────────────────────
+            case PacketOpcode.C2S_WORLD_BOSS_INFO   -> { requireInGame(); ExtendedHandlers.handleWorldBossInfo(this, toBuf(p)); }
+
+            // ── Player Mail ────────────────────────────────────────────
+            case PacketOpcode.C2S_MAIL_LIST   -> { requireInGame(); ExtendedHandlers.handleMailList(this, toBuf(p)); }
+            case PacketOpcode.C2S_MAIL_READ   -> { requireInGame(); ExtendedHandlers.handleMailRead(this, toBuf(p)); }
+            case PacketOpcode.C2S_MAIL_CLAIM  -> { requireInGame(); ExtendedHandlers.handleMailClaim(this, toBuf(p)); }
+            case PacketOpcode.C2S_MAIL_DELETE  -> { requireInGame(); ExtendedHandlers.handleMailDelete(this, toBuf(p)); }
+
             case PacketOpcode.C2S_EVENT_CURRENCY_EXCHANGE  -> { requireInGame(); ExtendedHandlers.handleEventCurrencyExchange(this, toBuf(p)); }
 
             // Keepalive
