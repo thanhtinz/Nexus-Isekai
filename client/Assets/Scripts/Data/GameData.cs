@@ -429,13 +429,11 @@ namespace NexusIsekai.Data
     };
 
         /// <summary>Sprite path cho body (loaded from server config)</summary>
-        public string GetBodySpritePath() => $"Sprites/Characters/{BodyType}/body.png";
 
         /// <summary>Sprite path cho hair</summary>
-        public string GetHairSpritePath() => $"Sprites/Characters/{BodyType}/hair_{HairStyle}.png";
 
         /// <summary>Sprite paths (generic, loaded from server sprite config)</summary>
-        public string GetPreviewPath() => $"Sprites/Characters/{BodyType}/preview.png";
+
     }
 
     // Animation state (loaded from server config)
