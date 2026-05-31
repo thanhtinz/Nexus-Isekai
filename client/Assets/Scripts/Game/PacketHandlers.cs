@@ -42,6 +42,8 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_CHAR_DELETE_OK,  OnCharDeleteOk);
             d.Register(PacketOpcode.S2C_CHAR_ENTER_GAME, OnEnterGame);
             d.Register(PacketOpcode.S2C_INTRO_VIDEO_CONFIG, OnIntroVideoConfig);
+            d.Register(PacketOpcode.S2C_FARM_VISIT,   OnFarmVisit);
+            d.Register(PacketOpcode.S2C_ANIMAL_BREED, OnAnimalBreed);
             d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
             d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
             d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
@@ -571,6 +573,18 @@ namespace NexusIsekai.Game
         private void OnChildNpcMove(PacketReader r) {
             long childId=r.ReadLong(); float x=r.ReadFloat(); float y=r.ReadFloat();
             GameState.Instance?.MoveChildNpc(childId, x, y);
+        }
+
+
+        private void OnFarmVisit(PacketReader r) {
+            long owner=r.ReadLong(); int n=r.ReadShort();
+            FarmUI.Instance?.BeginVisit(owner);
+            for(int i=0;i<n;i++){ int plot=r.ReadInt(); int seed=r.ReadInt(); int stage=r.ReadInt();
+                FarmUI.Instance?.AddVisitPlot(plot, seed, stage); }
+        }
+        private void OnAnimalBreed(PacketReader r) {
+            // server gửi qua S2C_SYSTEM_MSG là chính; hook để refresh nếu cần
+            FarmUI.Instance?.RefreshAnimals();
         }
 
         private void OnClassStory(PacketReader r)

@@ -438,4 +438,11 @@ extension FixedWidthInteger {
     static let S2C_CHILD_BUY: Int16 = 0x3712
     static let S2C_CHILD_INTERACT: Int16 = 0x3713
     static let S2C_CHILD_NPC_MOVE: Int16 = 0x3714
+
+    // Farm extended (38xx)
+    static let C2S_FARM_FERTILIZE: Int16 = 0x3801
+    static let C2S_ANIMAL_BREED: Int16 = 0x3802
+    static let C2S_FARM_VISIT: Int16 = 0x3803
+    static let S2C_FARM_VISIT: Int16 = 0x3811
+    static let S2C_ANIMAL_BREED: Int16 = 0x3812
 }

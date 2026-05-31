@@ -144,6 +144,10 @@ namespace NexusIsekai.Network
         public static void SendClassSkillList()
             => Send(new PacketBuilder(PacketOpcode.C2S_SKILL_CLASS_LIST));
         public static void SendCosmeticEquip(long id)   { var p=new PacketBuilder(PacketOpcode.C2S_COSMETIC_EQUIP); p.WriteLong(id); Send(p); }
+        public static void SendFarmFertilize(int plotIndex){ var p=new PacketBuilder(PacketOpcode.C2S_FARM_FERTILIZE); p.WriteInt(plotIndex); Send(p); }
+        public static void SendAnimalBreed(int penIndex){ var p=new PacketBuilder(PacketOpcode.C2S_ANIMAL_BREED); p.WriteInt(penIndex); Send(p); }
+        public static void SendFarmVisit(long ownerCharId){ var p=new PacketBuilder(PacketOpcode.C2S_FARM_VISIT); p.WriteLong(ownerCharId); Send(p); }
+
         public static void SendChildShop() => Send(new PacketBuilder(PacketOpcode.C2S_CHILD_SHOP));
         public static void SendChildBuy(long childId, int itemId){ var p=new PacketBuilder(PacketOpcode.C2S_CHILD_BUY); p.WriteLong(childId); p.WriteInt(itemId); Send(p); }
         public static void SendChildHireNanny(long childId, int itemId){ var p=new PacketBuilder(PacketOpcode.C2S_CHILD_HIRE_NANNY); p.WriteLong(childId); p.WriteInt(itemId); Send(p); }

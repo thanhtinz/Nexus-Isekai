@@ -179,6 +179,9 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_FARM_HARVEST  -> { requireInGame(); FarmingHandler.handleHarvest(this, toBuf(p)); }
             case PacketOpcode.C2S_ANIMAL_FEED   -> { requireInGame(); FarmingHandler.handleAnimalFeed(this, toBuf(p)); }
             case PacketOpcode.C2S_ANIMAL_COLLECT-> { requireInGame(); FarmingHandler.handleAnimalCollect(this, toBuf(p)); }
+            case PacketOpcode.C2S_FARM_FERTILIZE-> { requireInGame(); FarmingHandler.handleFertilize(this, toBuf(p)); }
+            case PacketOpcode.C2S_ANIMAL_BREED  -> { requireInGame(); FarmingHandler.handleAnimalBreed(this, toBuf(p)); }
+            case PacketOpcode.C2S_FARM_VISIT    -> { requireInGame(); FarmingHandler.handleFarmVisit(this, toBuf(p)); }
 
             // ── Housing ───────────────────────────────────────────────
             case PacketOpcode.C2S_HOUSE_INFO     -> { requireInGame(); HousingHandler.handleHouseInfo(this, toBuf(p)); }

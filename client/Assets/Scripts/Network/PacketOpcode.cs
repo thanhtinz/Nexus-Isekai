@@ -505,6 +505,12 @@ namespace NexusIsekai.Network
         public const short S2C_CHILD_BUY        = 0x3712;
         public const short S2C_CHILD_INTERACT   = 0x3713;
         public const short S2C_CHILD_NPC_MOVE   = 0x3714;
+        // ── NÔNG TRẠI MỞ RỘNG ──
+        public const short C2S_FARM_FERTILIZE = 0x3801;
+        public const short C2S_ANIMAL_BREED   = 0x3802;
+        public const short C2S_FARM_VISIT     = 0x3803;
+        public const short S2C_FARM_VISIT     = 0x3811;
+        public const short S2C_ANIMAL_BREED   = 0x3812;
 
     }
 }

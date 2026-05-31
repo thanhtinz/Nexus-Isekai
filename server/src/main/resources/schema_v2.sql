@@ -3401,3 +3401,34 @@ INSERT IGNORE INTO child_shop_items (id,name,category,gold_price,diamond_price,e
  (6,'Bộ Đồ Phi Hành Gia','fashion',0,80,'','body',201,0),
  (7,'Bảo Mẫu 8 Giờ',  'nanny', 5000,0,'','',0,8),
  (8,'Bảo Mẫu 24 Giờ', 'nanny', 0,50,'','',0,24);
+
+-- ═════════════════════════════════════════════════════════════
+-- NÂNG CẤP NÔNG TRẠI (học cơ chế Avatar-Sv)
+-- + Sức khoẻ cây ảnh hưởng sản lượng, bón phân
+-- + Thú: sức khoẻ, sản xuất theo thời gian, sinh sản, chết nếu bỏ bê
+-- ═════════════════════════════════════════════════════════════
+
+-- Cây: sức khoẻ (sucKhoe) + bón phân
+ALTER TABLE farm_plots ADD COLUMN IF NOT EXISTS health      INT NOT NULL DEFAULT 100; -- 0-100, ảnh hưởng sản lượng
+ALTER TABLE farm_plots ADD COLUMN IF NOT EXISTS fertilized  TINYINT NOT NULL DEFAULT 0; -- đã bón phân
+ALTER TABLE farm_plots ADD COLUMN IF NOT EXISTS last_water  TIMESTAMP NULL;             -- lần tưới gần nhất (để tính héo)
+
+-- Phân bón giảm thời gian trưởng thành (% )
+ALTER TABLE farm_seeds ADD COLUMN IF NOT EXISTS fertilizer_item_id INT NOT NULL DEFAULT 0;
+
+-- Thú: sức khoẻ + chu kỳ sản xuất + sinh sản + sống/chết
+ALTER TABLE animal_pens ADD COLUMN IF NOT EXISTS health         INT NOT NULL DEFAULT 100;
+ALTER TABLE animal_pens ADD COLUMN IF NOT EXISTS is_alive       TINYINT NOT NULL DEFAULT 1;
+ALTER TABLE animal_pens ADD COLUMN IF NOT EXISTS produce_ready_at DATETIME NULL;          -- khi nào có sản phẩm
+ALTER TABLE animal_pens ADD COLUMN IF NOT EXISTS breed_ready    TINYINT NOT NULL DEFAULT 0; -- sẵn sàng sinh sản
+ALTER TABLE animal_pens ADD COLUMN IF NOT EXISTS level          INT NOT NULL DEFAULT 1;     -- cấp thú (sản lượng tăng)
+ALTER TABLE animal_pens ADD COLUMN IF NOT EXISTS last_fed       TIMESTAMP NULL;
+
+-- Thú: thông tin sinh sản
+ALTER TABLE farm_animals ADD COLUMN IF NOT EXISTS breed_time_min INT NOT NULL DEFAULT 720; -- phút để sẵn sàng sinh sản
+
+-- Phân bón mẫu (item)
+INSERT IGNORE INTO farm_seeds (id,name,growth_time_min,stages,harvest_item_id,harvest_qty_min,harvest_qty_max,seed_item_id,water_needed,fertilizer_item_id) VALUES
+ (10,'Lúa Linh',120,4,410,5,12,310,3,320),
+ (11,'Cà Rốt Vàng',90,4,411,4,10,311,2,320),
+ (12,'Linh Chi Thảo',240,5,412,2,6,312,4,320);

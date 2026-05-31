@@ -572,4 +572,11 @@ public final class PacketOpcode {
     public static final short S2C_CHILD_BUY       = (short)0x3712;
     public static final short S2C_CHILD_INTERACT  = (short)0x3713;
     public static final short S2C_CHILD_NPC_MOVE  = (short)0x3714;
+
+    // ── NÔNG TRẠI MỞ RỘNG (38xx) ───────────────────────────
+    public static final short C2S_FARM_FERTILIZE = (short)0x3801;
+    public static final short C2S_ANIMAL_BREED   = (short)0x3802;
+    public static final short C2S_FARM_VISIT     = (short)0x3803;
+    public static final short S2C_FARM_VISIT     = (short)0x3811;
+    public static final short S2C_ANIMAL_BREED   = (short)0x3812;
 }

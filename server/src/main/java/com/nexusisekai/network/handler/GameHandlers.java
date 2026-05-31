@@ -286,4 +286,43 @@ class LeaderboardHandler {
             session.send(resp);
         } catch (Exception e) { session.sendError(PacketOpcode.S2C_SYSTEM_MSG, e.getMessage()); }
     }
+
+    static void handleFertilize(GameSession session, ByteBuf buf) {
+        if (!session.isInGame() || buf.readableBytes() < 4) return;
+        int plotIndex = buf.readInt();
+        try {
+            FarmingManager.getInstance().fertilize(session.getPlayer().getCharId(), plotIndex);
+            session.sendError(PacketOpcode.S2C_SYSTEM_MSG, "Đã bón phân! Cây lớn nhanh hơn.");
+            handleFarmState(session, Unpooled.EMPTY_BUFFER);
+        } catch (Exception e) { session.sendError(PacketOpcode.S2C_SYSTEM_MSG, e.getMessage()); }
+    }
+
+    static void handleAnimalBreed(GameSession session, ByteBuf buf) {
+        if (!session.isInGame() || buf.readableBytes() < 4) return;
+        int penIndex = buf.readInt();
+        try {
+            Map<String,Object> r = FarmingManager.getInstance().breedAnimal(session.getPlayer().getCharId(), penIndex);
+            String t = (String) r.get("type");
+            session.sendError(PacketOpcode.S2C_SYSTEM_MSG,
+                "offspring".equals(t) ? "Thú đã sinh con!" : "Nhận được con giống!");
+        } catch (Exception e) { session.sendError(PacketOpcode.S2C_SYSTEM_MSG, e.getMessage()); }
+    }
+
+    static void handleFarmVisit(GameSession session, ByteBuf buf) {
+        if (!session.isInGame() || buf.readableBytes() < 8) return;
+        long ownerCharId = buf.readLong();
+        try {
+            java.util.List<Map<String,Object>> state = FarmingManager.getInstance().visitFarm(ownerCharId);
+            ByteBuf out = Unpooled.buffer();
+            out.writeShort(PacketOpcode.S2C_FARM_VISIT);
+            out.writeLong(ownerCharId);
+            out.writeShort(state.size());
+            for (Map<String,Object> row : state) {
+                out.writeInt(((Number) row.getOrDefault("plot_index",0)).intValue());
+                out.writeInt(((Number) row.getOrDefault("seed_id",0)).intValue());
+                out.writeInt(((Number) row.getOrDefault("stage",0)).intValue());
+            }
+            session.send(out);
+        } catch (Exception e) { session.sendError(PacketOpcode.S2C_SYSTEM_MSG, e.getMessage()); }
+    }
 }
