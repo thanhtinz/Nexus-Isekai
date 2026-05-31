@@ -184,4 +184,26 @@ public interface PacketOpcode {
     short S2C_MAIL_LIST         = 0x1B11;
     short S2C_MAIL_NEW          = 0x1B12;
 
+
+    // ── GACHA ─────────────────────────────────────────────
+    short C2S_GACHA_BANNER_LIST = 0x1D01;
+    short C2S_GACHA_PULL        = 0x1D02;
+    short S2C_GACHA_RESULT      = 0x1D12;
+    // ── PVP SEASON ────────────────────────────────────────
+    short C2S_PVP_SEASON_INFO   = 0x1E01;
+    short C2S_PVP_SEASON_RANK   = 0x1E02;
+    short S2C_PVP_SEASON_INFO   = 0x1E11;
+    // ── SOCIAL ────────────────────────────────────────────
+    short C2S_SOCIAL_LOGIN      = 0x1F01;
+    short C2S_SOCIAL_LINK       = 0x1F02;
+    short C2S_SOCIAL_UNLINK     = 0x1F03;
+    short S2C_SOCIAL_LOGIN_OK   = 0x1F11;
+    // ── TUTORIAL ──────────────────────────────────────────
+    short C2S_TUTORIAL_PROGRESS = 0x2001;
+    short C2S_TUTORIAL_SKIP     = 0x2002;
+    short S2C_TUTORIAL_STEP     = 0x2011;
+    // ── LANG ──────────────────────────────────────────────
+    short C2S_LANG_SET          = 0x2101;
+    short S2C_LANG_PACK         = 0x2111;
+
 }
