@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import TopupPage from './TopupPage';
 import ShopPage from './ShopPage';
-import RankingPage from './RankingPage';
+
 
 const TABS = [
   { key: 'topup', label: '💎 Nạp', component: TopupPage },
   { key: 'shop', label: '🛒 Shop', component: ShopPage },
-  { key: 'ranking', label: '🏆 BXH', component: RankingPage },
+
 ];
 
 export default function GameStorePage() {

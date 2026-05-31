@@ -22,6 +22,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         
+            <Route path="/ranking" element={<RankingPage />} />
             <Route path="/store" element={<GameStorePage />} />
             <Route path="/download" element={<DownloadPage />} />
             <Route path="/news" element={<NewsPage />} />
