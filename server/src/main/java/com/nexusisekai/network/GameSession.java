@@ -334,6 +334,7 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
+        if (player != null) SessionRegistry.unregister(player.getCharId(), accountId);
         handleDisconnect();
     }
 

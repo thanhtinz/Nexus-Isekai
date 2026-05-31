@@ -926,18 +926,84 @@ public class ExtendedHandlers {
     // ═══════════════════════════════════════════════════════════
     // CHAR ACTIONS + PAIR
     // ═══════════════════════════════════════════════════════════
-    public static void handleCharAction(GameSession s, ByteBuf b) { int id=b.readInt(); /* broadcast action to nearby */ }
-    public static void handlePairAction(GameSession s, ByteBuf b) { int id=b.readInt(); long target=b.readLong(); /* send request to target */ }
-    public static void handlePairActionReply(GameSession s, ByteBuf b) { long req=b.readLong(); boolean ok=b.readBoolean(); /* start pair anim if accepted */ }
-    public static void handleAutoConfig(GameSession s, ByteBuf b) { short l=b.readShort(); byte[] d=new byte[l]; b.readBytes(d); String json=new String(d); /* save to player_auto_config */ }
+    public static void handleCharAction(GameSession s, ByteBuf b) {
+        int actionId=b.readInt(); Player p=s.getPlayer(); if(p==null) return;
+        ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_CHAR_ACTION);
+        pkt.writeLong(p.getCharId()); pkt.writeInt(actionId);
+        WorldBroadcast.toNearby(p, pkt);
+    }
+    public static void handlePairAction(GameSession s, ByteBuf b) {
+        int actionId=b.readInt(); long targetId=b.readLong(); Player p=s.getPlayer(); if(p==null) return;
+        GameSession ts=SessionRegistry.getByCharId(targetId);
+        if(ts==null){msg(s,"Nguoi choi khong online"); return;}
+        ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_PAIR_ACTION_REQ);
+        pkt.writeLong(p.getCharId()); writeStr(pkt,p.getName()); pkt.writeInt(actionId); ts.send(pkt);
+    }
+    public static void handlePairActionReply(GameSession s, ByteBuf b) {
+        long requesterId=b.readLong(); boolean accept=b.readBoolean(); int actionId=b.readInt();
+        Player p=s.getPlayer(); if(p==null) return;
+        GameSession rs=SessionRegistry.getByCharId(requesterId);
+        if(rs==null) return;
+        if(accept){
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_PAIR_ACTION_PLAY);
+            pkt.writeLong(requesterId); pkt.writeLong(p.getCharId()); pkt.writeInt(actionId);
+            rs.send(pkt); s.send(pkt.copy());
+        } else msg(rs,"Tu choi hanh dong");
+    }
+    public static void handleAutoConfig(GameSession s, ByteBuf b) {
+        short l=b.readShort(); byte[] d=new byte[l]; b.readBytes(d); String json=new String(d);
+        Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            SqlSafe.update(c,"INSERT INTO player_auto_config (char_id,config_json) VALUES (?,?) ON DUPLICATE KEY UPDATE config_json=?",p.getCharId(),json,json);
+            msg(s,"Da luu cau hinh auto");
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
 
     // ═══════════════════════════════════════════════════════════
     // EXTENDED GAMEPLAY
     // ═══════════════════════════════════════════════════════════
-    public static void handleInspect(GameSession s, ByteBuf b)   { long id=b.readLong(); msg(s,"Inspecting..."); }
-    public static void handleAutoPlay(GameSession s, ByteBuf b)  { boolean on=b.readBoolean(); msg(s,on?"Auto ON":"Auto OFF"); }
-    public static void handleEmote(GameSession s, ByteBuf b)     { int id=b.readInt(); /* broadcast emote to nearby */ }
-    public static void handleTeleport(GameSession s, ByteBuf b)  { int map=b.readInt(); msg(s,"Teleporting..."); }
+    public static void handleInspect(GameSession s, ByteBuf b) {
+        long targetId=b.readLong();
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var ch=SqlSafe.queryOne(c,"SELECT name,class_id,level,vip_level FROM characters WHERE id=?",targetId);
+            if(ch==null){msg(s,"Khong tim thay"); return;}
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_INSPECT_DATA);
+            pkt.writeLong(targetId); writeStr(pkt,(String)ch.get("name"));
+            pkt.writeInt(((Number)ch.get("class_id")).intValue());
+            pkt.writeInt(((Number)ch.get("level")).intValue());
+            pkt.writeInt(((Number)ch.getOrDefault("vip_level",0)).intValue());
+            // equipped items
+            var equips=SqlSafe.query(c,"SELECT equip_slot,item_id,enhance_level FROM character_equipment WHERE char_id=? AND equipped=1",targetId);
+            pkt.writeShort(equips.size());
+            for(var e:equips){pkt.writeInt(((Number)e.get("equip_slot")).intValue());pkt.writeInt(((Number)e.get("item_id")).intValue());pkt.writeByte(((Number)e.get("enhance_level")).intValue());}
+            s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handleAutoPlay(GameSession s, ByteBuf b) {
+        boolean on=b.readBoolean(); Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            SqlSafe.update(c,"INSERT INTO player_auto_config (char_id,auto_enabled) VALUES (?,?) ON DUPLICATE KEY UPDATE auto_enabled=?",p.getCharId(),on?1:0,on?1:0);
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_AUTO_PLAY_STATE); pkt.writeBoolean(on); s.send(pkt);
+        } catch(Exception e){}
+    }
+    public static void handleEmote(GameSession s, ByteBuf b) {
+        int emoteId=b.readInt(); Player p=s.getPlayer(); if(p==null) return;
+        ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_EMOTE_SHOW);
+        pkt.writeLong(p.getCharId()); pkt.writeInt(emoteId);
+        WorldBroadcast.toNearby(p, pkt);
+    }
+    public static void handleTeleport(GameSession s, ByteBuf b) {
+        int mapId=b.readInt(); float x=b.readFloat(); float y=b.readFloat();
+        Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var map=SqlSafe.queryOne(c,"SELECT unlock_level FROM maps WHERE id=?",mapId);
+            if(map==null){msg(s,"Map khong ton tai"); return;}
+            int req=((Number)map.getOrDefault("unlock_level",1)).intValue();
+            if(p.getLevel()<req){msg(s,"Can level "+req); return;}
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_TELEPORT_OK);
+            pkt.writeInt(mapId); pkt.writeFloat(x); pkt.writeFloat(y); s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi teleport"); }
+    }
     public static void handleWarehouse(GameSession s, ByteBuf b) {
         int act=b.readInt(); int itemId=b.readInt(); int qty=b.readInt(); Player p=s.getPlayer(); if(p==null) return;
         try {
@@ -961,9 +1027,29 @@ public class ExtendedHandlers {
         try { var r=com.nexusisekai.game.service.RefineService.refine(p.getCharId(), uid); msg(s, r.message); }
         catch(Exception e){ msg(s,"Loi tinh luyen"); }
     }
-    public static void handleNewsList(GameSession s, ByteBuf b)  { msg(s,"Loading news..."); }
-    public static void handleBlock(GameSession s, ByteBuf b)     { long id=b.readLong(); msg(s,"Blocked."); }
-    public static void handleReport(GameSession s, ByteBuf b)    { long id=b.readLong(); msg(s,"Reported."); }
+    public static void handleNewsList(GameSession s, ByteBuf b) {
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var news=SqlSafe.query(c,"SELECT id,title,category,summary,published_at FROM news_articles WHERE is_published=1 ORDER BY is_pinned DESC,published_at DESC LIMIT 20");
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_NEWS_LIST); pkt.writeShort(news.size());
+            for(var n:news){pkt.writeInt(((Number)n.get("id")).intValue());writeStr(pkt,(String)n.get("title"));writeStr(pkt,(String)n.get("category"));writeStr(pkt,n.get("summary")!=null?(String)n.get("summary"):"");}
+            s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handleBlock(GameSession s, ByteBuf b) {
+        long targetId=b.readLong(); Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            SqlSafe.update(c,"INSERT IGNORE INTO character_blocks (char_id,blocked_char_id) VALUES (?,?)",p.getCharId(),targetId);
+            msg(s,"Da chan");
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handleReport(GameSession s, ByteBuf b) {
+        long targetId=b.readLong(); short l=b.readShort(); byte[] rb=new byte[l]; b.readBytes(rb); String reason=new String(rb);
+        Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            SqlSafe.update(c,"INSERT INTO player_reports (reporter_id,reported_id,reason,status,created_at) VALUES (?,?,?,'pending',NOW())",p.getCharId(),targetId,reason);
+            msg(s,"Da bao cao");
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
 
     // ═══════════════════════════════════════════════════════════
     // TOPUP IN-GAME
@@ -1024,7 +1110,14 @@ public class ExtendedHandlers {
     // ═══════════════════════════════════════════════════════════
     // GACHA
     // ═══════════════════════════════════════════════════════════
-    public static void handleGachaBannerList(GameSession s, ByteBuf b) { msg(s,"Loading banners..."); }
+    public static void handleGachaBannerList(GameSession s, ByteBuf b) {
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var banners=SqlSafe.query(c,"SELECT id,banner_name,currency_id,cost_currency_single,cost_currency_multi,pity_count FROM gacha_banners WHERE is_active=1");
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_GACHA_RESULT); pkt.writeShort(banners.size());
+            for(var bn:banners){pkt.writeInt(((Number)bn.get("id")).intValue());writeStr(pkt,(String)bn.get("banner_name"));pkt.writeInt(((Number)bn.get("currency_id")).intValue());pkt.writeInt(((Number)bn.get("cost_currency_single")).intValue());pkt.writeInt(((Number)bn.get("pity_count")).intValue());}
+            s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
     public static void handleGachaPull(GameSession s, ByteBuf b) {
         int bid = b.readInt(); int cnt = b.readInt();
         Player p = s.getPlayer(); if (p == null) return;
@@ -1044,9 +1137,38 @@ public class ExtendedHandlers {
             }
         } catch (Exception e) { msg(s, "Loi gacha."); log.error("gacha", e); }
     }
-    public static void handleGachaHistory(GameSession s, ByteBuf b) { msg(s,"Loading history..."); }
-    public static void handleGachaBuyTicket(GameSession s, ByteBuf b) { int cid=b.readInt(); int amt=b.readInt(); msg(s,"Mua ve..."); }
-    public static void handleGachaCurrency(GameSession s, ByteBuf b) { msg(s,"Loading currency..."); }
+    public static void handleGachaHistory(GameSession s, ByteBuf b) {
+        int bannerId=b.readInt(); Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var hist=SqlSafe.query(c,"SELECT reward_type,reward_id,rarity FROM gacha_history WHERE char_id=? AND banner_id=? ORDER BY id DESC LIMIT 50",p.getCharId(),bannerId);
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_GACHA_HISTORY); pkt.writeShort(hist.size());
+            for(var h:hist){writeStr(pkt,(String)h.get("reward_type"));pkt.writeInt(((Number)h.get("reward_id")).intValue());pkt.writeByte(((Number)h.get("rarity")).intValue());}
+            s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handleGachaBuyTicket(GameSession s, ByteBuf b) {
+        int currencyId=b.readInt(); int amount=b.readInt(); Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var cur=SqlSafe.queryOne(c,"SELECT diamond_price FROM gacha_currencies WHERE id=?",currencyId);
+            if(cur==null){msg(s,"Loai ve khong ton tai"); return;}
+            int cost=((Number)cur.get("diamond_price")).intValue()*amount;
+            var ch=SqlSafe.queryOne(c,"SELECT diamond FROM characters WHERE id=?",p.getCharId());
+            if(((Number)ch.get("diamond")).longValue()<cost){msg(s,"Thieu diamond"); return;}
+            SqlSafe.update(c,"UPDATE characters SET diamond=diamond-? WHERE id=?",cost,p.getCharId());
+            RewardService.grant(c,p.getCharId(),switchCurrency(currencyId),amount);
+            msg(s,"Mua "+amount+" ve thanh cong");
+        } catch(Exception e){ msg(s,"Loi mua ve"); }
+    }
+    private static String switchCurrency(int id){return switch(id){case 1->"ticket_standard";case 2->"ticket_limited";case 3->"key_pet";case 4->"key_mount";default->"shard_weapon";};}
+    public static void handleGachaCurrency(GameSession s, ByteBuf b) {
+        Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var curs=SqlSafe.query(c,"SELECT currency_id,amount FROM player_gacha_currency WHERE char_id=?",p.getCharId());
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_GACHA_CURRENCY); pkt.writeShort(curs.size());
+            for(var cu:curs){pkt.writeInt(((Number)cu.get("currency_id")).intValue());pkt.writeInt(((Number)cu.get("amount")).intValue());}
+            s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
 
     // ═══════════════════════════════════════════════════════════
     // PVP SEASON
@@ -1070,34 +1192,162 @@ public class ExtendedHandlers {
             s.send(pkt);
         } catch (Exception e) { msg(s, "Loi."); }
     }
-    public static void handlePvpSeasonRank(GameSession s, ByteBuf b) { msg(s,"PvP ranking..."); }
-    public static void handlePvpSeasonReward(GameSession s, ByteBuf b) { msg(s,"Nhan thuong mua..."); }
+    public static void handlePvpSeasonRank(GameSession s, ByteBuf b) {
+        int page=b.readInt();
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var season=SqlSafe.queryOne(c,"SELECT id FROM pvp_seasons WHERE is_active=1 LIMIT 1");
+            if(season==null){msg(s,"Chua co mua"); return;}
+            int sid=((Number)season.get("id")).intValue();
+            var ranks=SqlSafe.query(c,"SELECT ps.char_id,ch.name,ch.class_id,ps.elo,ps.tier FROM pvp_player_season ps JOIN characters ch ON ch.id=ps.char_id WHERE ps.season_id=? ORDER BY ps.elo DESC LIMIT 50 OFFSET ?",sid,page*50);
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_PVP_SEASON_RANK); pkt.writeShort(ranks.size());
+            int rank=page*50+1;
+            for(var r:ranks){pkt.writeInt(rank++);pkt.writeLong(((Number)r.get("char_id")).longValue());writeStr(pkt,(String)r.get("name"));pkt.writeInt(((Number)r.get("class_id")).intValue());pkt.writeInt(((Number)r.get("elo")).intValue());writeStr(pkt,(String)r.get("tier"));}
+            s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handlePvpSeasonReward(GameSession s, ByteBuf b) {
+        Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var season=SqlSafe.queryOne(c,"SELECT id FROM pvp_seasons WHERE is_active=0 ORDER BY id DESC LIMIT 1");
+            if(season==null){msg(s,"Chua co mua ket thuc"); return;}
+            int sid=((Number)season.get("id")).intValue();
+            var ps=SqlSafe.queryOne(c,"SELECT tier,reward_claimed FROM pvp_player_season WHERE char_id=? AND season_id=?",p.getCharId(),sid);
+            if(ps==null||((Number)ps.getOrDefault("reward_claimed",1)).intValue()==1){msg(s,"Da nhan hoac khong du dieu kien"); return;}
+            String tier=(String)ps.get("tier");
+            int diamond=switch(tier){case "Grandmaster"->1000;case "Master"->500;case "Diamond"->300;case "Platinum"->150;case "Gold"->80;case "Silver"->40;default->20;};
+            RewardService.grant(c,p.getCharId(),"diamond",diamond);
+            SqlSafe.update(c,"UPDATE pvp_player_season SET reward_claimed=1 WHERE char_id=? AND season_id=?",p.getCharId(),sid);
+            msg(s,"Nhan thuong mua: +"+diamond+" diamond");
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
 
     // ═══════════════════════════════════════════════════════════
     // SOCIAL LOGIN
     // ═══════════════════════════════════════════════════════════
-    public static void handleSocialLogin(GameSession s, ByteBuf b) { short l=b.readShort(); byte[] pb=new byte[l]; b.readBytes(pb); String provider=new String(pb); msg(s,"Social login: "+provider); }
-    public static void handleSocialLink(GameSession s, ByteBuf b) { msg(s,"Linking..."); }
-    public static void handleSocialUnlink(GameSession s, ByteBuf b) { msg(s,"Unlinking..."); }
+    public static void handleSocialLogin(GameSession s, ByteBuf b) {
+        short pl=b.readShort(); byte[] pb=new byte[pl]; b.readBytes(pb); String provider=new String(pb);
+        short tl=b.readShort(); byte[] tb=new byte[tl]; b.readBytes(tb); String token=new String(tb);
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            // Verify token voi provider (Google/FB/Apple) — production can goi API verify
+            String socialId=SocialAuthService.verifyToken(provider, token);
+            if(socialId==null){msg(s,"Token khong hop le"); return;}
+            String col=provider.equals("google")?"google_id":provider.equals("facebook")?"facebook_id":"apple_id";
+            var acc=SqlSafe.queryOne(c,"SELECT id FROM accounts WHERE "+col+"=?",socialId);
+            long accId;
+            if(acc==null){ accId=SqlSafe.insert(c,"INSERT INTO accounts (username,"+col+",created_at) VALUES (?,?,NOW())","social_"+socialId.substring(0,Math.min(8,socialId.length())),socialId); }
+            else accId=((Number)acc.get("id")).longValue();
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_SOCIAL_LOGIN_OK); pkt.writeLong(accId); s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi dang nhap"); }
+    }
+    public static void handleSocialLink(GameSession s, ByteBuf b) {
+        short pl=b.readShort(); byte[] pb=new byte[pl]; b.readBytes(pb); String provider=new String(pb);
+        short tl=b.readShort(); byte[] tb=new byte[tl]; b.readBytes(tb); String token=new String(tb);
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            String socialId=SocialAuthService.verifyToken(provider, token);
+            if(socialId==null){msg(s,"Token khong hop le"); return;}
+            String col=provider.equals("google")?"google_id":provider.equals("facebook")?"facebook_id":"apple_id";
+            SqlSafe.update(c,"UPDATE accounts SET "+col+"=? WHERE id=?",socialId,s.getAccountId());
+            msg(s,"Lien ket "+provider+" thanh cong");
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handleSocialUnlink(GameSession s, ByteBuf b) {
+        short pl=b.readShort(); byte[] pb=new byte[pl]; b.readBytes(pb); String provider=new String(pb);
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            String col=provider.equals("google")?"google_id":provider.equals("facebook")?"facebook_id":"apple_id";
+            SqlSafe.update(c,"UPDATE accounts SET "+col+"=NULL WHERE id=?",s.getAccountId());
+            msg(s,"Huy lien ket "+provider);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
 
     // ═══════════════════════════════════════════════════════════
     // TUTORIAL
     // ═══════════════════════════════════════════════════════════
-    public static void handleTutorialProgress(GameSession s, ByteBuf b) { msg(s,"Tutorial progress..."); }
-    public static void handleTutorialSkip(GameSession s, ByteBuf b) { msg(s,"Tutorial skipped."); }
+    public static void handleTutorialProgress(GameSession s, ByteBuf b) {
+        short l=b.readShort(); byte[] sb=new byte[l]; b.readBytes(sb); String step=new String(sb);
+        Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            SqlSafe.update(c,"INSERT INTO character_tutorial (char_id,current_step) VALUES (?,?) ON DUPLICATE KEY UPDATE current_step=?",p.getCharId(),step,step);
+        } catch(Exception e){}
+    }
+    public static void handleTutorialSkip(GameSession s, ByteBuf b) {
+        Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            SqlSafe.update(c,"INSERT INTO character_tutorial (char_id,completed) VALUES (?,1) ON DUPLICATE KEY UPDATE completed=1",p.getCharId());
+        } catch(Exception e){}
+    }
 
     // ═══════════════════════════════════════════════════════════
     // LANG + INTRO + LOGIN SCREEN + SERVER
     // ═══════════════════════════════════════════════════════════
-    public static void handleLangSet(GameSession s, ByteBuf b) { msg(s,"Lang set."); }
-    public static void handleIntroRequest(GameSession s, ByteBuf b) { msg(s,"Intro loading..."); }
-    public static void handleIntroComplete(GameSession s, ByteBuf b) { msg(s,"Intro complete."); }
-    public static void handleIntroSkip(GameSession s, ByteBuf b) { msg(s,"Intro skipped."); }
-    public static void handleLoginScreenCfg(GameSession s, ByteBuf b) { msg(s,"Login config."); }
-    public static void handleServerList(GameSession s, ByteBuf b) { msg(s,"Server list."); }
-    public static void handleServerSelect(GameSession s, ByteBuf b) { int sid=b.readInt(); msg(s,"Server selected: "+sid); }
-    public static void handleChannelList(GameSession s, ByteBuf b) { msg(s,"Channel list."); }
-    public static void handleChannelSelect(GameSession s, ByteBuf b) { int cid=b.readInt(); msg(s,"Channel selected: "+cid); }
+    public static void handleLangSet(GameSession s, ByteBuf b) {
+        short l=b.readShort(); byte[] lb=new byte[l]; b.readBytes(lb); String lang=new String(lb);
+        Player p=s.getPlayer(); if(p==null) return;
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            SqlSafe.update(c,"INSERT INTO character_settings (char_id,language) VALUES (?,?) ON DUPLICATE KEY UPDATE language=?",p.getCharId(),lang,lang);
+        } catch(Exception e){}
+    }
+    public static void handleIntroRequest(GameSession s, ByteBuf b) {
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var watched=SqlSafe.queryOne(c,"SELECT watched FROM player_intro WHERE account_id=?",s.getAccountId());
+            if(watched!=null&&((Number)watched.get("watched")).intValue()==1){
+                ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_INTRO_NOT_NEEDED); s.send(pkt); return;
+            }
+            var scenes=SqlSafe.query(c,"SELECT scene_order,bg_image,text_vi,text_en,bgm_key FROM intro_scenes WHERE is_active=1 ORDER BY scene_order");
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_INTRO_SCENES); pkt.writeShort(scenes.size());
+            for(var sc:scenes){pkt.writeInt(((Number)sc.get("scene_order")).intValue());writeStr(pkt,sc.get("bg_image")!=null?(String)sc.get("bg_image"):"");writeStr(pkt,(String)sc.get("text_vi"));writeStr(pkt,(String)sc.get("text_en"));writeStr(pkt,sc.get("bgm_key")!=null?(String)sc.get("bgm_key"):"");}
+            s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handleIntroComplete(GameSession s, ByteBuf b) {
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            SqlSafe.update(c,"INSERT INTO player_intro (account_id,watched,watched_at) VALUES (?,1,NOW()) ON DUPLICATE KEY UPDATE watched=1,watched_at=NOW()",s.getAccountId());
+        } catch(Exception e){}
+    }
+    public static void handleIntroSkip(GameSession s, ByteBuf b) {
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            SqlSafe.update(c,"INSERT INTO player_intro (account_id,watched,skipped,watched_at) VALUES (?,1,1,NOW()) ON DUPLICATE KEY UPDATE watched=1,skipped=1",s.getAccountId());
+        } catch(Exception e){}
+    }
+    public static void handleLoginScreenCfg(GameSession s, ByteBuf b) {
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var cfg=SqlSafe.query(c,"SELECT config_key,config_value FROM login_screen_config");
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_LOGIN_SCREEN_CFG); pkt.writeShort(cfg.size());
+            for(var cf:cfg){writeStr(pkt,(String)cf.get("config_key"));writeStr(pkt,(String)cf.get("config_value"));}
+            s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handleServerList(GameSession s, ByteBuf b) {
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var servers=SqlSafe.query(c,"SELECT id,name,group_name,online_count,load_status,is_new,is_recommend,is_hot FROM game_servers WHERE status=1 ORDER BY sort_order");
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_SERVER_LIST); pkt.writeShort(servers.size());
+            for(var sv:servers){pkt.writeInt(((Number)sv.get("id")).intValue());writeStr(pkt,(String)sv.get("name"));writeStr(pkt,sv.get("group_name")!=null?(String)sv.get("group_name"):"");pkt.writeInt(((Number)sv.get("online_count")).intValue());pkt.writeByte(((Number)sv.get("load_status")).intValue());pkt.writeByte(((Number)sv.get("is_new")).intValue());pkt.writeByte(((Number)sv.get("is_recommend")).intValue());pkt.writeByte(((Number)sv.get("is_hot")).intValue());}
+            s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handleServerSelect(GameSession s, ByteBuf b) {
+        int sid=b.readInt();
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var sv=SqlSafe.queryOne(c,"SELECT online_count,max_players,status FROM game_servers WHERE id=?",sid);
+            if(sv==null||((Number)sv.get("status")).intValue()!=1){ByteBuf pkt=Unpooled.buffer();pkt.writeShort(PacketOpcode.S2C_SERVER_FULL);s.send(pkt);return;}
+            SqlSafe.update(c,"UPDATE accounts SET last_server_id=? WHERE id=?",sid,s.getAccountId());
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handleChannelList(GameSession s, ByteBuf b) {
+        int sid=b.readInt();
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            var chans=SqlSafe.query(c,"SELECT id,channel_number,channel_name,online_count,max_players,load_status FROM server_channels WHERE server_id=? AND is_active=1 ORDER BY channel_number",sid);
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_CHANNEL_LIST); pkt.writeShort(chans.size());
+            for(var ch:chans){pkt.writeInt(((Number)ch.get("id")).intValue());pkt.writeInt(((Number)ch.get("channel_number")).intValue());writeStr(pkt,(String)ch.get("channel_name"));pkt.writeInt(((Number)ch.get("online_count")).intValue());pkt.writeByte(((Number)ch.get("load_status")).intValue());}
+            s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
+    public static void handleChannelSelect(GameSession s, ByteBuf b) {
+        int cid=b.readInt();
+        try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
+            SqlSafe.update(c,"UPDATE accounts SET last_channel_id=? WHERE id=?",cid,s.getAccountId());
+            ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_CHANNEL_CHANGED); pkt.writeInt(cid); writeStr(pkt,"Kenh "+cid); s.send(pkt);
+        } catch(Exception e){ msg(s,"Loi"); }
+    }
 
     // ═══════════════════════════════════════════════════════════
     // Helpers

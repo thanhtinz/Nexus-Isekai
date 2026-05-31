@@ -3019,3 +3019,81 @@ INSERT IGNORE INTO daily_login_rewards (day_number, reward_type, reward_amount) 
 (1,'gold',5000),(2,'diamond',10),(3,'gold',10000),(4,'ticket_standard',1),
 (5,'diamond',20),(6,'gold',20000),(7,'ticket_limited',1)
 ON DUPLICATE KEY UPDATE reward_amount=VALUES(reward_amount);
+
+-- ═════════════════════════════════════════════════════════════
+-- TABLES cho handler logic mới
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS character_blocks (
+    char_id BIGINT NOT NULL, blocked_char_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (char_id, blocked_char_id)
+);
+
+CREATE TABLE IF NOT EXISTS player_reports (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    reporter_id BIGINT NOT NULL, reported_id BIGINT NOT NULL,
+    reason VARCHAR(256), status VARCHAR(16) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX idx_reported (reported_id)
+);
+
+CREATE TABLE IF NOT EXISTS character_tutorial (
+    char_id BIGINT NOT NULL PRIMARY KEY,
+    current_step VARCHAR(32) DEFAULT 'welcome', completed TINYINT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS character_settings (
+    char_id BIGINT NOT NULL PRIMARY KEY,
+    language VARCHAR(8) DEFAULT 'vi', settings_json TEXT
+);
+
+CREATE TABLE IF NOT EXISTS character_warehouse (
+    char_id BIGINT NOT NULL, item_id INT NOT NULL, quantity INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (char_id, item_id)
+);
+
+CREATE TABLE IF NOT EXISTS gacha_history (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id BIGINT NOT NULL, banner_id INT NOT NULL,
+    reward_type VARCHAR(16), reward_id INT, rarity TINYINT, pull_number INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX idx_char_banner (char_id, banner_id)
+);
+
+CREATE TABLE IF NOT EXISTS gacha_pity (
+    char_id BIGINT NOT NULL, banner_id INT NOT NULL,
+    pull_count INT NOT NULL DEFAULT 0, last_ssr_pull INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (char_id, banner_id)
+);
+
+CREATE TABLE IF NOT EXISTS pvp_player_season (
+    char_id BIGINT NOT NULL, season_id INT NOT NULL,
+    elo INT NOT NULL DEFAULT 1000, wins INT NOT NULL DEFAULT 0, losses INT NOT NULL DEFAULT 0,
+    win_streak INT NOT NULL DEFAULT 0, max_streak INT NOT NULL DEFAULT 0,
+    tier VARCHAR(16) DEFAULT 'Bronze', reward_claimed TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (char_id, season_id)
+);
+
+CREATE TABLE IF NOT EXISTS character_mail (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id BIGINT NOT NULL, subject VARCHAR(128), body TEXT,
+    reward_type VARCHAR(16), reward_amount INT DEFAULT 0,
+    is_read TINYINT NOT NULL DEFAULT 0, claimed TINYINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX idx_char (char_id)
+);
+
+CREATE TABLE IF NOT EXISTS character_quests (
+    char_id BIGINT NOT NULL, quest_id INT NOT NULL,
+    status VARCHAR(16) DEFAULT 'in_progress', progress INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (char_id, quest_id)
+);
+
+CREATE TABLE IF NOT EXISTS character_achievements (
+    char_id BIGINT NOT NULL, achievement_id INT NOT NULL,
+    progress INT NOT NULL DEFAULT 0, completed TINYINT NOT NULL DEFAULT 0, claimed TINYINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (char_id, achievement_id)
+);
+
+ALTER TABLE player_auto_config ADD COLUMN IF NOT EXISTS config_json TEXT;
+ALTER TABLE character_equipment ADD COLUMN IF NOT EXISTS refine_level INT NOT NULL DEFAULT 0;
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS guild_id INT DEFAULT NULL;
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS guild_rank VARCHAR(16) DEFAULT NULL;
