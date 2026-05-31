@@ -19,12 +19,13 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 export function App() {
   return (
     <BrowserRouter>
-      <ServerProvider>
+      <AuthProvider>
+        <ServerProvider>
         <Routes>
         <Route path="/" element={<LandingPage />} />
         
-            <Route path="/ranking" element={<RankingPage />} />
-            <Route path="/store" element={<GameStorePage />} />
+            <Route path="/ranking" element={<ProtectedRoute><RankingPage /></ProtectedRoute>} />
+            <Route path="/store" element={<ProtectedRoute><GameStorePage /></ProtectedRoute>} />
             <Route path="/download" element={<DownloadPage />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/support" element={<SupportPage />} />
@@ -34,7 +35,8 @@ export function App() {
           path="/*"
           element={
             <Layout>
-              <ServerProvider>
+              <AuthProvider>
+        <ServerProvider>
         <Routes>
 </PrivateRoute>} />
 </PrivateRoute>} />
@@ -42,11 +44,13 @@ export function App() {
                 <Route path="/pass" element={<PrivateRoute><PassPage /></PrivateRoute>} />
               </Routes>
         </ServerProvider>
+        </AuthProvider>
             </Layout>
           }
         />
       </Routes>
         </ServerProvider>
+        </AuthProvider>
     </BrowserRouter>
   )
 }

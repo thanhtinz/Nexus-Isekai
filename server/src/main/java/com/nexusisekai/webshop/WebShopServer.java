@@ -101,6 +101,38 @@ public class WebShopServer {
                 sendJson(ex, 200, Map.of("articles", list));
             } catch(Exception e) { sendJson(ex, 500, Map.of("error","db")); }
         });
+        httpServer.createContext("/api/web-login", ex -> {
+            if (!ex.getRequestMethod().equals("POST")) { sendJson(ex,405,Map.of("error","POST only")); return; }
+            var body = parseBody(ex);
+            String user = str(body,"username").replace("'",""), pass = str(body,"password").replace("'","");
+            try (Connection conn = DatabaseManager.getInstance().getConnection()) {
+                PreparedStatement ps = conn.prepareStatement("SELECT id,password_hash FROM accounts WHERE username=?");
+                ps.setString(1, user); ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    String hash = rs.getString("password_hash");
+                    if (hash.equals(org.apache.commons.codec.digest.DigestUtils.sha256Hex(pass)) || hash.equals(pass)) {
+                        long accId = rs.getLong("id");
+                        String token = java.util.UUID.randomUUID().toString();
+                        sendJson(ex, 200, Map.of("success",true,"account_id",accId,"token",token));
+                    } else sendJson(ex, 200, Map.of("success",false,"error","Wrong password"));
+                } else sendJson(ex, 200, Map.of("success",false,"error","Account not found"));
+            } catch(Exception e) { sendJson(ex, 500, Map.of("error","db")); }
+        });
+        httpServer.createContext("/api/characters", ex -> {
+            var p = parseQuery(ex.getRequestURI().getQuery());
+            long accId = Long.parseLong(p.getOrDefault("account_id","0"));
+            int serverId = Integer.parseInt(p.getOrDefault("server_id","0"));
+            try (Connection conn = DatabaseManager.getInstance().getConnection()) {
+                PreparedStatement ps = conn.prepareStatement(
+                    "SELECT c.id,c.name,c.class_id,c.level,c.gender FROM characters c " +
+                    "JOIN accounts a ON a.id=c.account_id WHERE a.id=? AND a.last_server_id=?");
+                ps.setLong(1, accId); ps.setInt(2, serverId);
+                ResultSet rs = ps.executeQuery();
+                var list = new java.util.ArrayList<Map<String,Object>>();
+                while(rs.next()) list.add(Map.of("id",rs.getInt("id"),"name",rs.getString("name"),"class_id",rs.getInt("class_id"),"level",rs.getInt("level"),"gender",rs.getInt("gender")));
+                sendJson(ex, 200, Map.of("characters", list));
+            } catch(Exception e) { sendJson(ex, 500, Map.of("error","db")); }
+        });
         httpServer.createContext("/api/servers", ex -> {
             try (Connection conn = DatabaseManager.getInstance().getConnection()) {
                 ResultSet rs = conn.prepareStatement("SELECT id,name,status,group_name,online_count,is_new,is_recommend,is_hot FROM game_servers WHERE status>0 ORDER BY sort_order,id").executeQuery();
