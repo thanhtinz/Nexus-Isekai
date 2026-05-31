@@ -172,7 +172,8 @@ public class PacketWriter {
     public static PacketWriter tutorialSkip()
         { return new PacketWriter(Opcodes.C2S_TUTORIAL_SKIP); }
     public static PacketWriter langSet(String lang)
-        { return new PacketWriter(Opcodes.C2S_SERVER_LIST=0x2401, C2S_SERVER_SELECT=0x2402, C2S_CHANNEL_LIST=0x2403, C2S_CHANNEL_SELECT=0x2404;
+        { return new PacketWriter(Opcodes.static final short C2S_TOPUP_PACKAGES=0x2501, C2S_TOPUP_BUY=0x2502, S2C_TOPUP_URL=0x2512;
+    C2S_SERVER_LIST=0x2401, C2S_SERVER_SELECT=0x2402, C2S_CHANNEL_LIST=0x2403, C2S_CHANNEL_SELECT=0x2404;
     static final short S2C_SERVER_LIST=0x2411, S2C_CHANNEL_LIST=0x2412;
     static final short C2S_INTRO_REQUEST=0x2201, C2S_INTRO_SKIP=0x2203, S2C_INTRO_SCENES=0x2211;
     static final short C2S_LOGIN_SCREEN_CFG=0x2301, S2C_LOGIN_SCREEN_CFG=0x2311;

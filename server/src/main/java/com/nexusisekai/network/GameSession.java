@@ -287,6 +287,11 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_INTRO_SKIP        -> { ExtendedHandlers.handleIntroSkip(this, toBuf(p)); }
             case PacketOpcode.C2S_LOGIN_SCREEN_CFG  -> { ExtendedHandlers.handleLoginScreenCfg(this, toBuf(p)); }
 
+            // ── Topup In-Game ──────────────────────────────────
+            case PacketOpcode.C2S_TOPUP_PACKAGES -> { requireInGame(); ExtendedHandlers.handleTopupPackages(this, toBuf(p)); }
+            case PacketOpcode.C2S_TOPUP_BUY      -> { requireInGame(); ExtendedHandlers.handleTopupBuy(this, toBuf(p)); }
+            case PacketOpcode.C2S_TOPUP_HISTORY  -> { requireInGame(); ExtendedHandlers.handleTopupHistory(this, toBuf(p)); }
+
             // ── Server Selection ───────────────────────────────────
             case PacketOpcode.C2S_SERVER_LIST       -> { ExtendedHandlers.handleServerList(this, toBuf(p)); }
             case PacketOpcode.C2S_SERVER_SELECT     -> { ExtendedHandlers.handleServerSelect(this, toBuf(p)); }

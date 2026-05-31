@@ -921,6 +921,62 @@ public class ExtendedHandlers {
 
 
     // ═══════════════════════════════════════════════════════════
+    // TOPUP IN-GAME
+    // ═══════════════════════════════════════════════════════════
+
+    public static void handleTopupPackages(GameSession session, ByteBuf buf) {
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT * FROM topup_packages WHERE is_active=1 ORDER BY sort_order")) {
+            ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_TOPUP_PACKAGES);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeInt(rs.getInt("id"));
+                writeStr(tmp, rs.getString("display_name")); writeStr(tmp, rs.getString("description"));
+                tmp.writeInt(rs.getInt("price_vnd")); tmp.writeInt(rs.getInt("diamond_base"));
+                tmp.writeInt(rs.getInt("diamond_bonus")); writeStr(tmp, rs.getString("badge"));
+                writeStr(tmp, rs.getString("bonus_type"));
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp); session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleTopupBuy(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        int packageId = buf.readInt();
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            PreparedStatement ps = c.prepareStatement("SELECT * FROM topup_packages WHERE id=? AND is_active=1");
+            ps.setInt(1, packageId); ResultSet rs = ps.executeQuery();
+            if (!rs.next()) { msg(session, "Goi nap khong ton tai."); return; }
+            // Tạo URL thanh toán SePay
+            String url = "https://sepay.vn/pay?amount=" + rs.getInt("price_vnd") +
+                "&note=NI_" + session.getAccountId() + "_" + packageId +
+                "&bank=MB&acc=NEXUSISEKAI";
+            ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_TOPUP_URL);
+            writeStr(pkt, url); session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    public static void handleTopupHistory(GameSession session, ByteBuf buf) {
+        Player p = session.getPlayer(); if (p == null) return;
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT tl.*, tp.display_name FROM topup_purchase_log tl JOIN topup_packages tp ON tp.id=tl.package_id WHERE tl.account_id=? ORDER BY tl.created_at DESC LIMIT 20")) {
+            ps.setLong(1, session.getAccountId()); ResultSet rs = ps.executeQuery();
+            ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_TOPUP_HISTORY);
+            ByteBuf tmp = Unpooled.buffer(); int count = 0;
+            while (rs.next()) {
+                tmp.writeInt(rs.getInt("package_id")); writeStr(tmp, rs.getString("display_name"));
+                tmp.writeInt(rs.getInt("price_vnd")); tmp.writeInt(rs.getInt("diamond_received"));
+                writeStr(tmp, rs.getString("created_at") != null ? rs.getString("created_at") : "");
+                count++;
+            }
+            pkt.writeShort(count); pkt.writeBytes(tmp); session.send(pkt);
+        } catch (Exception e) { msg(session, "Loi."); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // GACHA
     // ═══════════════════════════════════════════════════════════
     public static void handleGachaBannerList(GameSession s, ByteBuf b) { msg(s,"Loading banners..."); }

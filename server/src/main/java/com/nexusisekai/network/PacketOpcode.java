@@ -102,6 +102,15 @@ public final class PacketOpcode {
     public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
 
+    // ── TOPUP IN-GAME (25xx) ─────────────────────────────
+    public static final short C2S_TOPUP_PACKAGES    = (short)0x2501;
+    public static final short C2S_TOPUP_BUY         = (short)0x2502;
+    public static final short C2S_TOPUP_HISTORY     = (short)0x2503;
+    public static final short S2C_TOPUP_PACKAGES    = (short)0x2511;
+    public static final short S2C_TOPUP_URL         = (short)0x2512;  // URL trang nạp, client mở browser/webview
+    public static final short S2C_TOPUP_SUCCESS     = (short)0x2513;
+    public static final short S2C_TOPUP_HISTORY     = (short)0x2514;
+
     // ── SERVER SELECTION (24xx) ─────────────────────────
     public static final short C2S_SERVER_LIST       = (short)0x2401;
     public static final short C2S_SERVER_SELECT     = (short)0x2402;
@@ -512,6 +521,15 @@ public final class PacketOpcode {
     public static final short C2S_SOCIAL_UNLINK     = (short)0x1F03;
     public static final short S2C_SOCIAL_LOGIN_OK   = (short)0x1F11;
     public static final short S2C_SOCIAL_LINK_OK    = (short)0x1F12;
+
+    // ── TOPUP IN-GAME (25xx) ─────────────────────────────
+    public static final short C2S_TOPUP_PACKAGES    = (short)0x2501;
+    public static final short C2S_TOPUP_BUY         = (short)0x2502;
+    public static final short C2S_TOPUP_HISTORY     = (short)0x2503;
+    public static final short S2C_TOPUP_PACKAGES    = (short)0x2511;
+    public static final short S2C_TOPUP_URL         = (short)0x2512;  // URL trang nạp, client mở browser/webview
+    public static final short S2C_TOPUP_SUCCESS     = (short)0x2513;
+    public static final short S2C_TOPUP_HISTORY     = (short)0x2514;
 
     // ── SERVER SELECTION (24xx) ─────────────────────────
     public static final short C2S_SERVER_LIST       = (short)0x2401;

@@ -148,6 +148,10 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_EVENT_CURRENCY_UPDATE, OnEventCurrencyUpdate);
 
 
+            d.Register(PacketOpcode.S2C_TOPUP_PACKAGES,  OnTopupPackages);
+            d.Register(PacketOpcode.S2C_TOPUP_URL,       OnTopupUrl);
+            d.Register(PacketOpcode.S2C_TOPUP_SUCCESS,   OnTopupSuccess);
+            d.Register(PacketOpcode.S2C_TOPUP_HISTORY,   OnTopupHistory);
             d.Register(PacketOpcode.S2C_SERVER_LIST,      OnServerList);
             d.Register(PacketOpcode.S2C_CHANNEL_LIST,     OnChannelList);
             d.Register(PacketOpcode.S2C_SERVER_FULL,      OnServerFull);
@@ -1732,6 +1736,11 @@ namespace NexusIsekai.Game
     private void OnStoryCg(PacketReader r) { r.ReadInt(); r.ReadString(); }
 
     // ── GACHA + PVP + SOCIAL + TUTORIAL + LANG ──────────
+
+    private void OnTopupPackages(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadString(); r.ReadInt(); r.ReadInt(); r.ReadInt(); r.ReadString(); r.ReadString(); } }
+    private void OnTopupUrl(PacketReader r) { string url = r.ReadString(); Application.OpenURL(url); }
+    private void OnTopupSuccess(PacketReader r) { int diamond = r.ReadInt(); UIManager.Instance?.ShowNotification("Nap thanh cong! +" + diamond + " diamond", UINotificationType.Success); }
+    private void OnTopupHistory(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadInt(); r.ReadInt(); r.ReadString(); } }
 
     private void OnServerList(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadString(); r.ReadString(); r.ReadInt(); r.ReadByte(); r.ReadByte(); r.ReadByte(); r.ReadByte(); } }
     private void OnChannelList(PacketReader r) { int count = r.ReadShort(); for (int i=0;i<count;i++) { r.ReadInt(); r.ReadInt(); r.ReadString(); r.ReadInt(); r.ReadByte(); } }

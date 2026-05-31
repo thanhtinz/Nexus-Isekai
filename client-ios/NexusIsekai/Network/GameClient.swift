@@ -200,7 +200,9 @@ final class PacketWriter {
     static func socialLink(_ p: String, _ t: String) -> Data { PacketWriter(Op.C2S_SOCIAL_LINK).writeString(p).writeString(t).build() }
     static func tutorialProgress(_ s: String) -> Data { PacketWriter(Op.C2S_TUTORIAL_PROGRESS).writeString(s).build() }
     static func tutorialSkip() -> Data { PacketWriter(Op.C2S_TUTORIAL_SKIP).build() }
-    static func langSet(_ l: String) -> Data { PacketWriter(Op.C2S_SERVER_LIST:UInt16=0x2401, C2S_SERVER_SELECT:UInt16=0x2402
+    static func langSet(_ l: String) -> Data { PacketWriter(Op.static let C2S_TOPUP_PACKAGES:UInt16=0x2501, C2S_TOPUP_BUY:UInt16=0x2502
+    static let S2C_TOPUP_PACKAGES:UInt16=0x2511, S2C_TOPUP_URL:UInt16=0x2512, S2C_TOPUP_SUCCESS:UInt16=0x2513
+    C2S_SERVER_LIST:UInt16=0x2401, C2S_SERVER_SELECT:UInt16=0x2402
     static let C2S_CHANNEL_LIST:UInt16=0x2403, C2S_CHANNEL_SELECT:UInt16=0x2404
     static let S2C_SERVER_LIST:UInt16=0x2411, S2C_CHANNEL_LIST:UInt16=0x2412
     static let C2S_INTRO_REQUEST:UInt16=0x2201, C2S_INTRO_SKIP:UInt16=0x2203

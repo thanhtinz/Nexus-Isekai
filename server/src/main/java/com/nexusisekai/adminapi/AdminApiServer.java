@@ -151,6 +151,8 @@ public class AdminApiServer {
         httpServer.createContext("/api/gems",             ex -> handleAuth(ex, this::handleGems));
         httpServer.createContext("/api/player-prefs",     ex -> handleAuth(ex, this::handlePlayerPrefs));
         httpServer.createContext("/api/gacha-banners",    ex -> handleAuth(ex, this::handleGachaBanners));
+        httpServer.createContext("/api/topup-packages", ex -> handleAuth(ex, this::handleTopupPackages));
+        httpServer.createContext("/api/topup-cards",    ex -> handleAuth(ex, this::handleTopupCards));
         httpServer.createContext("/api/server-manage",  ex -> handleAuth(ex, this::handleServerManage));
         httpServer.createContext("/api/server-merge",   ex -> handleAuth(ex, this::handleServerMerge));
         httpServer.createContext("/api/server-monitor",  ex -> handleAuth(ex, this::handleServerMonitor));
@@ -1770,6 +1772,26 @@ public class AdminApiServer {
 
 
     /** Full server CRUD — tạo, sửa, bảo trì, xoá server */
+
+    private void handleTopupPackages(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM topup_packages ORDER BY sort_order"), "packages");
+            else { var b = parseBody(ex);
+                switch(str(b,"action")) {
+                    case "create" -> { c.prepareStatement("INSERT INTO topup_packages (package_key,display_name,price_vnd,price_usd,diamond_base,diamond_bonus,bonus_type,badge,sort_order) VALUES ('"+str(b,"package_key").replace("'","")+"','"+str(b,"display_name").replace("'","")+"',"+num(b,"price_vnd")+","+str(b,"price_usd")+","+num(b,"diamond_base")+","+num(b,"diamond_bonus")+",'"+str(b,"bonus_type").replace("'","")+"','"+str(b,"badge").replace("'","")+"',"+num(b,"sort_order")+")").executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    case "update" -> { c.prepareStatement("UPDATE topup_packages SET display_name='"+str(b,"display_name").replace("'","")+"',price_vnd="+num(b,"price_vnd")+",diamond_base="+num(b,"diamond_base")+",diamond_bonus="+num(b,"diamond_bonus")+",badge='"+str(b,"badge").replace("'","")+"',is_active="+num(b,"is_active")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+                    default -> sendJson(ex,400,Map.of("success",false));
+                }
+            }
+        }
+    }
+    private void handleTopupCards(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM topup_card_config ORDER BY id"), "cards");
+            else { var b = parseBody(ex); c.prepareStatement("UPDATE topup_card_config SET exchange_rate="+str(b,"exchange_rate")+",fee_pct="+num(b,"fee_pct")+",is_active="+num(b,"is_active")+" WHERE id="+num(b,"id")).executeUpdate(); sendJson(ex,200,Map.of("success",true)); }
+        }
+    }
+
     private void handleServerManage(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             if (ex.getRequestMethod().equals("GET")) {

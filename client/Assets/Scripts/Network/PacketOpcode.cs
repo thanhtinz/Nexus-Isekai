@@ -353,6 +353,15 @@ namespace NexusIsekai.Network
         public const short S2C_SOCIAL_LOGIN_OK   = 0x1F11;
         public const short S2C_SOCIAL_LINK_OK    = 0x1F12;
 
+        // ── TOPUP IN-GAME ─────────────────────────────────
+        public const short C2S_TOPUP_PACKAGES    = 0x2501;
+        public const short C2S_TOPUP_BUY         = 0x2502;
+        public const short C2S_TOPUP_HISTORY     = 0x2503;
+        public const short S2C_TOPUP_PACKAGES    = 0x2511;
+        public const short S2C_TOPUP_URL         = 0x2512;
+        public const short S2C_TOPUP_SUCCESS     = 0x2513;
+        public const short S2C_TOPUP_HISTORY     = 0x2514;
+
         // ── SERVER SELECTION ───────────────────────────────
         public const short C2S_SERVER_LIST       = 0x2401;
         public const short C2S_SERVER_SELECT     = 0x2402;

@@ -206,6 +206,8 @@ public interface PacketOpcode {
     short C2S_TUTORIAL_SKIP     = 0x2002;
     short S2C_TUTORIAL_STEP     = 0x2011;
     // ── LANG ──────────────────────────────────────────────
+    short C2S_TOPUP_PACKAGES=0x2501; short C2S_TOPUP_BUY=0x2502;
+    short S2C_TOPUP_PACKAGES=0x2511; short S2C_TOPUP_URL=0x2512; short S2C_TOPUP_SUCCESS=0x2513;
     short C2S_SERVER_LIST=0x2401; short C2S_SERVER_SELECT=0x2402;
     short C2S_CHANNEL_LIST=0x2403; short C2S_CHANNEL_SELECT=0x2404;
     short S2C_SERVER_LIST=0x2411; short S2C_CHANNEL_LIST=0x2412;

@@ -2626,3 +2626,75 @@ ALTER TABLE maintenance_schedule
     ADD COLUMN IF NOT EXISTS auto_kick TINYINT NOT NULL DEFAULT 1,
     ADD COLUMN IF NOT EXISTS kick_message VARCHAR(256) DEFAULT 'He thong sap bao tri, vui long dang xuat.',
     ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP NULL;
+
+-- ═════════════════════════════════════════════════════════════
+-- IN-GAME TOPUP UI — Gói nạp hiển thị trong game
+-- ═════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS topup_packages (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    package_key     VARCHAR(32) NOT NULL UNIQUE,
+    display_name    VARCHAR(64) NOT NULL,
+    description     VARCHAR(128) DEFAULT '',
+    -- Giá tiền thật
+    price_vnd       INT NOT NULL DEFAULT 0,
+    price_usd       FLOAT NOT NULL DEFAULT 0,
+    -- Nhận được
+    diamond_base    INT NOT NULL DEFAULT 0,           -- diamond cơ bản
+    diamond_bonus   INT NOT NULL DEFAULT 0,           -- diamond bonus (lần đầu x2, hoặc khuyến mãi)
+    bonus_type      VARCHAR(16) DEFAULT 'first',      -- first=lần đầu, always=luôn có, event=sự kiện, none
+    -- Hiển thị
+    icon_asset      VARCHAR(128) DEFAULT '',
+    badge           VARCHAR(16) DEFAULT '',            -- hot,best,new,limited,x2
+    bg_color        VARCHAR(8) DEFAULT '#1a1a2e',
+    border_color    VARCHAR(8) DEFAULT '#e94560',
+    sort_order      INT NOT NULL DEFAULT 0,
+    is_active       TINYINT NOT NULL DEFAULT 1,
+    -- Khuyến mãi
+    promo_start     TIMESTAMP NULL,
+    promo_end       TIMESTAMP NULL,
+    promo_bonus_pct INT NOT NULL DEFAULT 0             -- % bonus thêm khi khuyến mãi
+);
+
+INSERT IGNORE INTO topup_packages (id,package_key,display_name,price_vnd,price_usd,diamond_base,diamond_bonus,bonus_type,badge,sort_order) VALUES
+(1,'pack_10k','Gói Khởi Đầu',10000,0.40,10,10,'first','',1),
+(2,'pack_20k','Gói Tiết Kiệm',20000,0.80,22,22,'first','',2),
+(3,'pack_50k','Gói Phổ Biến',50000,2.00,60,60,'first','hot',3),
+(4,'pack_100k','Gói Giá Trị',100000,4.00,130,130,'first','best',4),
+(5,'pack_200k','Gói Cao Cấp',200000,8.00,280,280,'first','',5),
+(6,'pack_500k','Gói VIP',500000,20.00,750,750,'first','x2',6),
+(7,'pack_1m','Gói Đại Gia',1000000,40.00,1600,1600,'first','limited',7),
+(8,'pack_2m','Gói Thần Thoại',2000000,80.00,3500,3500,'first','',8);
+
+-- Lịch sử nạp per package (track lần đầu để tính bonus)
+CREATE TABLE IF NOT EXISTS topup_purchase_log (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    account_id      BIGINT NOT NULL,
+    char_id         BIGINT NOT NULL,
+    package_id      INT NOT NULL,
+    price_vnd       INT NOT NULL,
+    diamond_received INT NOT NULL,
+    is_first_buy    TINYINT NOT NULL DEFAULT 0,
+    payment_method  VARCHAR(16) DEFAULT 'sepay',      -- sepay,google_play,app_store,momo
+    transaction_id  VARCHAR(128) DEFAULT '',
+    status          VARCHAR(16) NOT NULL DEFAULT 'completed',
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_account (account_id),
+    INDEX idx_char (char_id)
+);
+
+-- Nạp thẻ cào (nếu cần)
+CREATE TABLE IF NOT EXISTS topup_card_config (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    telco           VARCHAR(16) NOT NULL,             -- viettel,mobifone,vinaphone,vnpt,zing
+    display_name    VARCHAR(32) NOT NULL,
+    denominations   VARCHAR(256) NOT NULL,            -- '10000,20000,50000,100000,200000,500000'
+    exchange_rate   FLOAT NOT NULL DEFAULT 1.0,       -- 1 VND = X diamond
+    fee_pct         INT NOT NULL DEFAULT 20,          -- phí chiết khấu %
+    is_active       TINYINT NOT NULL DEFAULT 1
+);
+
+INSERT IGNORE INTO topup_card_config (telco,display_name,denominations,exchange_rate,fee_pct) VALUES
+('viettel','Viettel','10000,20000,50000,100000,200000,500000',0.001,20),
+('mobifone','Mobifone','10000,20000,50000,100000,200000,500000',0.001,25),
+('vinaphone','Vinaphone','10000,20000,50000,100000,200000,500000',0.001,25);

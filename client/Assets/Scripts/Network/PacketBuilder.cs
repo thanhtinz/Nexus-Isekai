@@ -445,6 +445,15 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
 
+        // ── TOPUP IN-GAME ───────────────────────────────
+
+        public static void SendTopupPackages()
+            => Send(new PacketBuilder(PacketOpcode.C2S_TOPUP_PACKAGES));
+        public static void SendTopupBuy(int packageId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TOPUP_BUY).WriteInt(packageId));
+        public static void SendTopupHistory()
+            => Send(new PacketBuilder(PacketOpcode.C2S_TOPUP_HISTORY));
+
         // ── SERVER SELECTION ─────────────────────────────
 
         public static void SendServerList()
@@ -724,6 +733,15 @@ namespace NexusIsekai.Network
         public static void SendCharList()
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_LIST));
 
+
+        // ── TOPUP IN-GAME ───────────────────────────────
+
+        public static void SendTopupPackages()
+            => Send(new PacketBuilder(PacketOpcode.C2S_TOPUP_PACKAGES));
+        public static void SendTopupBuy(int packageId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_TOPUP_BUY).WriteInt(packageId));
+        public static void SendTopupHistory()
+            => Send(new PacketBuilder(PacketOpcode.C2S_TOPUP_HISTORY));
 
         // ── SERVER SELECTION ─────────────────────────────
 
