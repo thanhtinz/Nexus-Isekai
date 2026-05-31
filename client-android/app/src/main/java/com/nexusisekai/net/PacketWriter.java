@@ -248,4 +248,25 @@ public class PacketWriter {
     public static PacketWriter farmPlant(int slotId, int seedId) { return new PacketWriter(Opcodes.C2S_FARM_PLANT).writeInt(slotId).writeInt(seedId); }
     public static PacketWriter farmHarvest(int slotId) { return new PacketWriter(Opcodes.C2S_FARM_HARVEST).writeInt(slotId); }
     public static PacketWriter minigameRoomList() { return new PacketWriter(Opcodes.C2S_MINIGAME_ROOM_LIST); }
+
+    // Progression opcodes (31xx-34xx)
+    public static final short C2S_COSMETIC_LIST = (short)0x3101;
+    public static final short C2S_COSMETIC_EQUIP = (short)0x3102;
+    public static final short C2S_COSMETIC_UPGRADE = (short)0x3103;
+    public static final short S2C_COSMETIC_LIST = (short)0x3111;
+    public static final short S2C_COSMETIC_EQUIP = (short)0x3112;
+    public static final short S2C_COSMETIC_UPGRADE = (short)0x3113;
+    public static final short C2S_REPUTATION_LIST = (short)0x3201;
+    public static final short C2S_REPUTATION_CLAIM = (short)0x3202;
+    public static final short S2C_REPUTATION_LIST = (short)0x3211;
+    public static final short S2C_REPUTATION_CLAIM = (short)0x3212;
+    public static final short S2C_REPUTATION_GAIN = (short)0x3213;
+    public static final short C2S_BESTIARY_LIST = (short)0x3301;
+    public static final short C2S_BESTIARY_CLAIM = (short)0x3302;
+    public static final short S2C_BESTIARY_LIST = (short)0x3311;
+    public static final short S2C_BESTIARY_CLAIM = (short)0x3312;
+    public static final short S2C_BESTIARY_UNLOCK = (short)0x3313;
+    public static final short C2S_SET_INFO = (short)0x3401;
+    public static final short S2C_SET_INFO = (short)0x3411;
+    public static final short S2C_SET_BONUS_UPDATE = (short)0x3412;
 }

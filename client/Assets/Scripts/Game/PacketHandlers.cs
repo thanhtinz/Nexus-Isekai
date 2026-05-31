@@ -42,6 +42,18 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_CHAR_DELETE_OK,  OnCharDeleteOk);
             d.Register(PacketOpcode.S2C_CHAR_ENTER_GAME, OnEnterGame);
             d.Register(PacketOpcode.S2C_INTRO_VIDEO_CONFIG, OnIntroVideoConfig);
+            // Progression: Cánh/Hào quang, Danh vọng, Bestiary, Set
+            d.Register(PacketOpcode.S2C_COSMETIC_LIST,      OnCosmeticList);
+            d.Register(PacketOpcode.S2C_COSMETIC_EQUIP,     OnCosmeticEquip);
+            d.Register(PacketOpcode.S2C_COSMETIC_UPGRADE,   OnCosmeticUpgrade);
+            d.Register(PacketOpcode.S2C_REPUTATION_LIST,    OnReputationList);
+            d.Register(PacketOpcode.S2C_REPUTATION_CLAIM,   OnReputationClaim);
+            d.Register(PacketOpcode.S2C_REPUTATION_GAIN,    OnReputationGain);
+            d.Register(PacketOpcode.S2C_BESTIARY_LIST,      OnBestiaryList);
+            d.Register(PacketOpcode.S2C_BESTIARY_CLAIM,     OnBestiaryClaim);
+            d.Register(PacketOpcode.S2C_BESTIARY_UNLOCK,    OnBestiaryUnlock);
+            d.Register(PacketOpcode.S2C_SET_INFO,           OnSetInfo);
+            d.Register(PacketOpcode.S2C_SET_BONUS_UPDATE,   OnSetBonusUpdate);
             // Extended gameplay S2C
             d.Register(PacketOpcode.S2C_AUTO_CONFIG,        OnAutoConfig);
             d.Register(PacketOpcode.S2C_AUTO_PLAY_STATE,    OnAutoPlayState);
@@ -426,6 +438,74 @@ namespace NexusIsekai.Game
         }
         private void OnWarehouseData(PacketReader r) {
             WarehouseUI.Instance?.Open();
+        }
+
+
+        private void OnCosmeticList(PacketReader r) {
+            int n = r.ReadShort();
+            CosmeticUI.Instance?.Clear();
+            for (int i=0;i<n;i++){
+                long id=r.ReadLong(); int tpl=r.ReadInt(); string name=r.ReadString();
+                string type=r.ReadString(); int rarity=r.ReadByte(); int lvl=r.ReadInt();
+                int maxLvl=r.ReadInt(); bool equipped=r.ReadBool(); string stats=r.ReadString(); int sprite=r.ReadInt();
+                CosmeticUI.Instance?.AddItem(id, name, type, rarity, lvl, maxLvl, equipped, stats, sprite);
+            }
+        }
+        private void OnCosmeticEquip(PacketReader r) {
+            long id=r.ReadLong(); bool ok=r.ReadBool();
+            if(ok) CosmeticUI.Instance?.OnEquipped(id);
+        }
+        private void OnCosmeticUpgrade(PacketReader r) {
+            long id=r.ReadLong(); int lvl=r.ReadInt();
+            CosmeticUI.Instance?.OnUpgraded(id, lvl);
+        }
+        private void OnReputationList(PacketReader r) {
+            int n=r.ReadShort();
+            ReputationUI.Instance?.Clear();
+            for(int i=0;i<n;i++){
+                int id=r.ReadInt(); string name=r.ReadString(); string desc=r.ReadString();
+                int icon=r.ReadInt(); int rep=r.ReadInt(); int maxRep=r.ReadInt(); int tier=r.ReadInt();
+                ReputationUI.Instance?.AddFaction(id, name, desc, rep, maxRep, tier);
+            }
+        }
+        private void OnReputationClaim(PacketReader r) {
+            int faction=r.ReadInt(); int tier=r.ReadInt(); bool ok=r.ReadBool();
+            if(ok) UIManager.Instance?.ShowNotification("Nhận quà danh vọng!", UINotificationType.Success);
+        }
+        private void OnReputationGain(PacketReader r) {
+            int faction=r.ReadInt(); int amount=r.ReadInt(); int total=r.ReadInt();
+            UIManager.Instance?.ShowNotification($"+{amount} danh vọng", UINotificationType.Info);
+        }
+        private void OnBestiaryList(PacketReader r) {
+            int n=r.ReadShort();
+            BestiaryUI.Instance?.Clear();
+            for(int i=0;i<n;i++){
+                int mid=r.ReadInt(); string lore=r.ReadString(); string weak=r.ReadString();
+                int kills=r.ReadInt(); int need=r.ReadInt(); bool unlocked=r.ReadBool();
+                bool claimed=r.ReadBool(); bool boss=r.ReadBool();
+                BestiaryUI.Instance?.AddEntry(mid, lore, weak, kills, need, unlocked, claimed, boss);
+            }
+        }
+        private void OnBestiaryClaim(PacketReader r) {
+            int mid=r.ReadInt(); bool ok=r.ReadBool();
+            if(ok) UIManager.Instance?.ShowNotification("Nhận quà sổ tay!", UINotificationType.Success);
+        }
+        private void OnBestiaryUnlock(PacketReader r) {
+            int mid=r.ReadInt();
+            UIManager.Instance?.ShowNotification("Mở khoá mục sổ tay mới!", UINotificationType.Info);
+        }
+        private void OnSetInfo(PacketReader r) {
+            int n=r.ReadShort();
+            SetBonusUI.Instance?.Clear();
+            for(int i=0;i<n;i++){
+                int setId=r.ReadInt(); string name=r.ReadString(); int pieces=r.ReadInt();
+                int nb=r.ReadShort();
+                for(int j=0;j<nb;j++){ int req=r.ReadInt(); string stats=r.ReadString(); string desc=r.ReadString();
+                    SetBonusUI.Instance?.AddBonus(setId, name, pieces, req, stats, desc); }
+            }
+        }
+        private void OnSetBonusUpdate(PacketReader r) {
+            SetBonusUI.Instance?.Refresh();
         }
 
         private void OnClassStory(PacketReader r)

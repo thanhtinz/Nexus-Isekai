@@ -391,4 +391,25 @@ extension FixedWidthInteger {
     var bigEndianBytes: [UInt8] {
         withUnsafeBytes(of: self.bigEndian, Array.init)
     }
+
+    // Progression opcodes (31xx-34xx)
+    static let C2S_COSMETIC_LIST: Int16 = 0x3101
+    static let C2S_COSMETIC_EQUIP: Int16 = 0x3102
+    static let C2S_COSMETIC_UPGRADE: Int16 = 0x3103
+    static let S2C_COSMETIC_LIST: Int16 = 0x3111
+    static let S2C_COSMETIC_EQUIP: Int16 = 0x3112
+    static let S2C_COSMETIC_UPGRADE: Int16 = 0x3113
+    static let C2S_REPUTATION_LIST: Int16 = 0x3201
+    static let C2S_REPUTATION_CLAIM: Int16 = 0x3202
+    static let S2C_REPUTATION_LIST: Int16 = 0x3211
+    static let S2C_REPUTATION_CLAIM: Int16 = 0x3212
+    static let S2C_REPUTATION_GAIN: Int16 = 0x3213
+    static let C2S_BESTIARY_LIST: Int16 = 0x3301
+    static let C2S_BESTIARY_CLAIM: Int16 = 0x3302
+    static let S2C_BESTIARY_LIST: Int16 = 0x3311
+    static let S2C_BESTIARY_CLAIM: Int16 = 0x3312
+    static let S2C_BESTIARY_UNLOCK: Int16 = 0x3313
+    static let C2S_SET_INFO: Int16 = 0x3401
+    static let S2C_SET_INFO: Int16 = 0x3411
+    static let S2C_SET_BONUS_UPDATE: Int16 = 0x3412
 }

@@ -290,6 +290,15 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
 
             case PacketOpcode.C2S_INTRO_VIDEO_CONFIG -> { ExtendedHandlers.handleIntroVideoConfig(this, toBuf(p)); }
 
+            case PacketOpcode.C2S_COSMETIC_LIST -> ProgressionHandler.handleCosmeticList(this, toBuf(p));
+            case PacketOpcode.C2S_COSMETIC_EQUIP -> ProgressionHandler.handleCosmeticEquip(this, toBuf(p));
+            case PacketOpcode.C2S_COSMETIC_UPGRADE -> ProgressionHandler.handleCosmeticUpgrade(this, toBuf(p));
+            case PacketOpcode.C2S_REPUTATION_LIST -> ProgressionHandler.handleReputationList(this, toBuf(p));
+            case PacketOpcode.C2S_REPUTATION_CLAIM -> ProgressionHandler.handleReputationClaim(this, toBuf(p));
+            case PacketOpcode.C2S_BESTIARY_LIST -> ProgressionHandler.handleBestiaryList(this, toBuf(p));
+            case PacketOpcode.C2S_BESTIARY_CLAIM -> ProgressionHandler.handleBestiaryClaim(this, toBuf(p));
+            case PacketOpcode.C2S_SET_INFO -> ProgressionHandler.handleSetInfo(this, toBuf(p));
+
             // ── Char Actions + Pair ────────────────────────────
             case PacketOpcode.C2S_CHAR_ACTION      -> { requireInGame(); ExtendedHandlers.handleCharAction(this, toBuf(p)); }
             case PacketOpcode.C2S_PAIR_ACTION      -> { requireInGame(); ExtendedHandlers.handlePairAction(this, toBuf(p)); }

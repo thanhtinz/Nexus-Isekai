@@ -166,6 +166,7 @@ public class CombatHandler {
 
         // Quest progress update
         world.getQuestManager().onMonsterKill(player, monster.getMonsterId(), monster.getInstanceId(), session);
+        ProgressionHandler.recordKill(session, monster.getMonsterId()); // bestiary tracking
 
         // Schedule respawn
         world.getZoneManager().scheduleRespawn(monster);

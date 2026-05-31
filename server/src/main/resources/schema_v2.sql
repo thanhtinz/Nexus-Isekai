@@ -3120,3 +3120,115 @@ INSERT IGNORE INTO intro_video_config (id, is_enabled, video_url, skippable, ski
 VALUES (1, 1, 'Intro/intro_cinematic.mp4', 1, 3, 1, 1);
 
 -- player_intro đã track watched per account (dùng chung cho video + text)
+
+-- ═════════════════════════════════════════════════════════════
+-- 1. CÁNH / HÀO QUANG (Wing / Aura) — cosmetic + chỉ số
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS cosmetic_templates (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(64) NOT NULL,
+    cosmetic_type VARCHAR(16) NOT NULL DEFAULT 'wing',  -- 'wing','aura','halo'
+    rarity        TINYINT NOT NULL DEFAULT 1,            -- 1=common..5=legendary
+    stat_bonus    VARCHAR(256) DEFAULT '',               -- JSON {"hp":500,"atk":50,"def":30}
+    effect_id     INT NOT NULL DEFAULT 0,                -- hiệu ứng visual
+    icon_id       INT NOT NULL DEFAULT 0,
+    sprite_id     INT NOT NULL DEFAULT 0,                -- sprite cánh/hào quang
+    max_level     INT NOT NULL DEFAULT 10,               -- nâng cấp tăng chỉ số
+    upgrade_cost  VARCHAR(256) DEFAULT '',               -- JSON cost mỗi cấp
+    obtain_source VARCHAR(64),
+    is_active     TINYINT NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS player_cosmetics (
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id       BIGINT NOT NULL,
+    template_id   INT NOT NULL,
+    level         INT NOT NULL DEFAULT 1,
+    is_equipped   TINYINT NOT NULL DEFAULT 0,
+    obtained_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_char_tpl (char_id, template_id),
+    INDEX idx_char (char_id)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 2. DANH VỌNG / PHE PHÁI (Reputation / Faction)
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS factions (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(64) NOT NULL,
+    description   TEXT,
+    icon_id       INT NOT NULL DEFAULT 0,
+    max_rep       INT NOT NULL DEFAULT 30000,
+    is_active     TINYINT NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS faction_rep_tiers (    -- mốc danh vọng
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    faction_id    INT NOT NULL,
+    tier_order    INT NOT NULL,                    -- 1=Lạ mặt,2=Thân thiện,3=Tôn kính,4=Sùng bái
+    tier_name     VARCHAR(32) NOT NULL,
+    rep_required  INT NOT NULL,
+    reward_json   VARCHAR(256) DEFAULT '',         -- quà khi đạt mốc
+    unlock_shop   TINYINT NOT NULL DEFAULT 0,      -- mở shop phe phái
+    INDEX idx_faction (faction_id)
+);
+CREATE TABLE IF NOT EXISTS player_reputation (
+    char_id       BIGINT NOT NULL,
+    faction_id    INT NOT NULL,
+    reputation    INT NOT NULL DEFAULT 0,
+    current_tier  INT NOT NULL DEFAULT 1,
+    PRIMARY KEY (char_id, faction_id)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 3. BESTIARY / SỔ TAY QUÁI VẬT (backend)
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS bestiary_entries (     -- mục sổ tay (gắn với monster)
+    monster_id    INT NOT NULL PRIMARY KEY,
+    lore_text     TEXT,                            -- mô tả/cốt truyện quái
+    weakness      VARCHAR(64) DEFAULT '',          -- hệ khắc chế
+    kills_to_unlock INT NOT NULL DEFAULT 10,       -- số lần giết để mở full info
+    reward_json   VARCHAR(256) DEFAULT '',         -- quà khi mở khoá
+    is_boss       TINYINT NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS character_bestiary (   -- tiến độ sưu tập per char
+    char_id       BIGINT NOT NULL,
+    monster_id    INT NOT NULL,
+    kill_count    INT NOT NULL DEFAULT 0,
+    is_unlocked   TINYINT NOT NULL DEFAULT 0,      -- đã đạt kills_to_unlock
+    reward_claimed TINYINT NOT NULL DEFAULT 0,
+    first_killed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (char_id, monster_id),
+    INDEX idx_char (char_id)
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- 4. BỘ TRANG BỊ / SET BONUS
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS equipment_sets (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(64) NOT NULL,
+    description   TEXT,
+    rarity        TINYINT NOT NULL DEFAULT 3,
+    is_active     TINYINT NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS equipment_set_items (  -- item nào thuộc set nào
+    set_id        INT NOT NULL,
+    item_id       INT NOT NULL,
+    PRIMARY KEY (set_id, item_id),
+    INDEX idx_item (item_id)
+);
+CREATE TABLE IF NOT EXISTS equipment_set_bonuses ( -- bonus theo số mảnh
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    set_id        INT NOT NULL,
+    pieces_required INT NOT NULL,                  -- 2/4/6 mảnh
+    stat_bonus    VARCHAR(256) NOT NULL,           -- JSON {"atk":100,"crit":5}
+    effect_desc   VARCHAR(128) DEFAULT '',
+    INDEX idx_set (set_id)
+);
+
+-- Seed mẫu
+INSERT IGNORE INTO factions (id, name, description) VALUES
+ (1,'Liên Minh Khải Nguyên','Phe phòng thủ vết nứt, bảo vệ Vọng Linh Giới'),
+ (2,'Hội Thợ Săn Linh Thú','Phe săn bắt và thuần hoá quái vật'),
+ (3,'Giáo Đoàn Ánh Sáng','Phe tu luyện, đối kháng Giáo Phái Vọng Linh');
+INSERT IGNORE INTO faction_rep_tiers (faction_id, tier_order, tier_name, rep_required) VALUES
+ (1,1,'Lạ Mặt',0),(1,2,'Thân Thiện',3000),(1,3,'Tôn Kính',9000),(1,4,'Sùng Bái',21000);

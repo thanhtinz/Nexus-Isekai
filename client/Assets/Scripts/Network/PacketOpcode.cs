@@ -256,7 +256,6 @@ namespace NexusIsekai.Network
         public const short S2C_QUEST_COMPLETE        = 0x0613; // = S2C_QUEST_COMPLETED
         public const short S2C_GUILD_MEMBERS         = 0x0812; // = S2C_GUILD_MSG (alias)
         public const short S2C_PING_FROM_SERVER      = 0x0910;
-    }
 
         // ── TRADE (10xx) ──────────────────────────────────────────
         public const short C2S_TRADE_REQUEST     = 0x1001;
@@ -459,5 +458,29 @@ namespace NexusIsekai.Network
         public const short S2C_MAIL_LIST          = 0x1B11;
         public const short S2C_MAIL_NEW           = 0x1B12;
 
+    
+        // ── COSMETIC Cánh/Hào quang ──
+        public const short C2S_COSMETIC_LIST    = 0x3101;
+        public const short C2S_COSMETIC_EQUIP   = 0x3102;
+        public const short C2S_COSMETIC_UPGRADE = 0x3103;
+        public const short S2C_COSMETIC_LIST    = 0x3111;
+        public const short S2C_COSMETIC_EQUIP   = 0x3112;
+        public const short S2C_COSMETIC_UPGRADE = 0x3113;
+        // ── REPUTATION ──
+        public const short C2S_REPUTATION_LIST  = 0x3201;
+        public const short C2S_REPUTATION_CLAIM = 0x3202;
+        public const short S2C_REPUTATION_LIST  = 0x3211;
+        public const short S2C_REPUTATION_CLAIM = 0x3212;
+        public const short S2C_REPUTATION_GAIN  = 0x3213;
+        // ── BESTIARY ──
+        public const short C2S_BESTIARY_LIST    = 0x3301;
+        public const short C2S_BESTIARY_CLAIM   = 0x3302;
+        public const short S2C_BESTIARY_LIST    = 0x3311;
+        public const short S2C_BESTIARY_CLAIM   = 0x3312;
+        public const short S2C_BESTIARY_UNLOCK  = 0x3313;
+        // ── EQUIPMENT SET ──
+        public const short C2S_SET_INFO         = 0x3401;
+        public const short S2C_SET_INFO         = 0x3411;
+        public const short S2C_SET_BONUS_UPDATE = 0x3412;
     }
 }
