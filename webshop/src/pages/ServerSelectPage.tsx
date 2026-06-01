@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const CLASS_NAMES = ['','Swordsman','Mage','Gunner','Slinger','Axeman','Brawler','Archer'];
+const CLASS_NAMES = ['','Swordsman','Mage','Gunner','Slinger','Axeman','Brawler','Archer','Assassin'];
 
 export default function ServerSelectPage() {
   const navigate = useNavigate();

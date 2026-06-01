@@ -218,7 +218,7 @@ public class CharHandler {
         while (slotRs.next()) {
             int slot = slotRs.getInt("slot_index");
             int skillId = slotRs.getInt("skill_id");
-            if (slot >= 0 && slot < 7) player.setSkillSlot(slot, skillId);
+            if (slot >= 0 && slot < 5) player.setSkillSlot(slot, skillId);
         }
     }
 

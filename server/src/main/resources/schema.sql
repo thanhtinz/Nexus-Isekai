@@ -28,7 +28,7 @@ CREATE TABLE characters (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     account_id  BIGINT NOT NULL,
     name        VARCHAR(32) NOT NULL UNIQUE,
-    class_id    TINYINT NOT NULL,           -- 1=Kiếm Sĩ,2=Sát Thủ,3=Pháp Sư,4=Pháp Thủ,5=Cung Thủ
+    class_id    TINYINT NOT NULL,           -- 1=Kiếm Sĩ,2=Pháp Sư,3=Xạ Thủ,4=Slinger,5=Axeman,6=Quyền Sư,7=Cung Thủ,8=Sát Thủ
     level       INT DEFAULT 1,
     exp         BIGINT DEFAULT 0,
     hp          INT DEFAULT 100,

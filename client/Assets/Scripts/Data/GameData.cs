@@ -421,10 +421,10 @@ namespace NexusIsekai.Data
 
         // Class names
         public static readonly string[] ClassNames = {
-            "", "Kiem Si", "Phap Su", "Xa Thu", "Slinger", "Axeman", "Quyen Su", "Cung Thu"
+            "", "Kiem Si", "Phap Su", "Xa Thu", "Slinger", "Axeman", "Quyen Su", "Cung Thu", "Sat Thu"
         };
 
-        public string GetClassName() => ClassId >= 1 && ClassId <= 7 ? ClassNames[ClassId] : "Unknown";
+        public string GetClassName() => ClassId >= 1 && ClassId <= 8 ? ClassNames[ClassId] : "Unknown";
         public string GetSpritePath() => $"Sprites/Characters/class_{ClassId}/{(Gender == 0 ? "male" : "female")}/";
     };
 

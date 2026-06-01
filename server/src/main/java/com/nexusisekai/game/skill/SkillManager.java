@@ -74,7 +74,7 @@ public class SkillManager {
     }
 
     public int[] getActiveSlots(long charId) throws SQLException {
-        int[] slots = new int[7];
+        int[] slots = new int[5];
         Arrays.fill(slots, 0);
         try (Connection c = DatabaseManager.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(
@@ -83,14 +83,14 @@ public class SkillManager {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 int idx = rs.getInt("slot_index");
-                if (idx >= 0 && idx < 7) slots[idx] = rs.getInt("skill_id");
+                if (idx >= 0 && idx < 5) slots[idx] = rs.getInt("skill_id");
             }
         }
         return slots;
     }
 
     public void setActiveSlot(long charId, int slot, int skillId) throws Exception {
-        if (slot < 0 || slot >= 7) throw new IllegalArgumentException("Slot 0-6.");
+        if (slot < 0 || slot >= 5) throw new IllegalArgumentException("Slot 0-4.");
         if (skillId != 0) {
             // Verify player has this skill
             try (Connection c = DatabaseManager.getInstance().getConnection();

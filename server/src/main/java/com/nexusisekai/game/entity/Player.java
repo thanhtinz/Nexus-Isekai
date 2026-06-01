@@ -54,6 +54,7 @@ public class Player {
 
     // Skills đang sở hữu
     private final List<PlayerSkill> skills = new ArrayList<>();
+    private final int[] skillSlots = new int[5];   // 5 ô kỹ năng trang bị
 
     // Guild
     private long guildId = -1;
@@ -236,6 +237,8 @@ public class Player {
     public int getVit()                   { return vit; }
     public int getStatPoints()            { return statPoints; }
     public int getSkillPoints()           { return skillPoints; }
+    public void setSkillSlot(int slot, int skillId) { if (slot >= 0 && slot < skillSlots.length) skillSlots[slot] = skillId; }
+    public int[] getSkillSlots()          { return skillSlots; }
     public int getMapId()                 { return mapId; }
     public void setMapId(int mapId)       { this.mapId = mapId; }
     public float getX()                   { return x; }

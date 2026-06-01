@@ -11,7 +11,7 @@ Nexus Isekai là MMORPG đa nền tảng (Unity + mobile + PC + web). Phần bac
 
 **Thời gian:** 3-4 tháng
 **Nhiệm vụ:**
-- Vẽ sprite nhân vật cho 7 class (Kiếm Sĩ, Pháp Sư, Xạ Thủ, Slinger, Axeman, Quyền Sư, Cung Thủ), mỗi class 2 giới tính
+- Vẽ sprite nhân vật cho 8 class (Kiếm Sĩ, Pháp Sư, Xạ Thủ, Slinger, Axeman, Quyền Sư, Cung Thủ, Sát Thủ), mỗi class 2 giới tính
 - Animation: idle, walk, run, attack, skill, hit, die (Spine 2D hoặc spritesheet)
 - ~475 asset UI/HUD (xem `client/Assets/UI_ASSET_LIST.md` — đã có spec chi tiết: kích thước, tĩnh/động, song ngữ)
 - Icon item, skill, buff/debuff
