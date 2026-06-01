@@ -4,6 +4,7 @@ import SpineViewer from './SpineViewer';
 import CompositePreview from './CompositePreview';
 import EffectComposer from './EffectComposer';
 import PartComposer from './PartComposer';
+import MapEditorPro from './MapEditorPro';
 
 /* ──────────────────────────────────────────────────────────────
    NEXUS STUDIO — tool bien tap data DOC LAP (project rieng, build/deploy rieng)
@@ -162,7 +163,7 @@ export default function StudioApp() {
             {section.key === 'kho'
               ? <AssetLibrary setMsg={setMsg} />
               : section.key === 'map' && selected
-              ? <MapBuilder map={draft} setMsg={setMsg} />
+              ? <MapEditorPro map={draft} setMsg={setMsg} />
               : tab === 'spine' ? <SpineViewer setMsg={setMsg} />
               : tab === 'vfx' ? <VfxEditor draft={draft} setDraft={setDraft} setMsg={setMsg} />
               : tab === 'fxc' ? <EffectComposer draft={draft} setDraft={setDraft} setMsg={setMsg} />
