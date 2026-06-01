@@ -204,19 +204,24 @@ public class CombatHandler {
 
         // Roll loot
         List<int[]> loot = CombatEngine.rollLoot(monster.getLootJson());
-        // Hoạt Động X2 Tỉ Lệ Rơi: quay loot thêm lần nữa khi sự kiện đang bật
-        if (ActivityHandler.activeMultiplier("x2_drop") > 1.0f) {
+        // Hoạt Động: NHÂN tỉ lệ rơi theo multiplier cấu hình (x2/x4/x5...) — quay thêm (mult-1) lần
+        float dropMult = ActivityHandler.activeMultiplier("x2_drop");
+        for (int extra = 1; extra < Math.round(dropMult); extra++) {
             loot.addAll(CombatEngine.rollLoot(monster.getLootJson()));
         }
         // Hoạt Động rớt bị động: item sự kiện (vd Bảo Vật để đổi thưởng)
         loot.addAll(ActivityHandler.rollEventDrops(player.getCharId()));
 
+        // Hoạt Động: NHÂN exp/vàng theo multiplier cấu hình (x2/x4/x5...)
+        int expGain  = (int)(monster.getExpReward()  * ActivityHandler.activeMultiplier("x2_exp"));
+        int goldGain = (int)(monster.getGoldReward() * ActivityHandler.activeMultiplier("gold_boost"));
+
         // Build death packet: [4 monsterInstanceId][8 killerId][4 exp][4 gold][N loot items]
         ByteBuffer resp = ByteBuffer.allocate(4 + 8 + 4 + 4 + loot.size() * 8);
         resp.putInt(monster.getInstanceId());
         resp.putLong(player.getCharId());
-        resp.putInt(monster.getExpReward());
-        resp.putInt(monster.getGoldReward());
+        resp.putInt(expGain);
+        resp.putInt(goldGain);
         for (int[] item : loot) {
             resp.putInt(item[0]); // item_id
             resp.putInt(item[1]); // qty
@@ -226,9 +231,7 @@ public class CombatHandler {
         world.getNetworkServer().broadcastToMap(player.getMapId(),
                 PacketOpcode.S2C_MONSTER_DIE, resp.array());
 
-        // Cộng EXP cho người kill — áp hệ số sự kiện X2 EXP (Hoạt Động) nếu đang bật
-        float expMult = ActivityHandler.activeMultiplier("x2_exp");
-        int expGain = (int)(monster.getExpReward() * expMult);
+        // Cộng EXP cho người kill (đã nhân hệ số sự kiện)
         int levelsUp = player.gainExp(expGain);
         // Hoạt Động: cộng tiến độ sự kiện tích EXP
         ActivityHandler.fire(player.getCharId(), "gain_exp", expGain);

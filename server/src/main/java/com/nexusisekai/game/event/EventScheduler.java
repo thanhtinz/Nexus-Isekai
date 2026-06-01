@@ -53,6 +53,9 @@ public class EventScheduler {
         // Hoạt Động đua top: phát thưởng theo hạng khi sự kiện kết thúc (mỗi 60s)
         scheduler.scheduleAtFixedRate(this::activityRankingTask, 40, 60, TimeUnit.SECONDS);
 
+        // Hoạt Động lặp: reset tiến độ theo chu kỳ daily/weekly/monthly (mỗi 5 phút)
+        scheduler.scheduleAtFixedRate(this::activityResetTask, 60, 300, TimeUnit.SECONDS);
+
         log.info("[EVENT] Scheduler started.");
     }
 
@@ -156,6 +159,30 @@ public class EventScheduler {
 
     public void stop() {
         if (scheduler != null) scheduler.shutdownNow();
+    }
+
+    /** Reset tiến độ hoạt động lặp theo chu kỳ (daily/weekly/monthly). */
+    private void activityResetTask() {
+        try (Connection c = DatabaseManager.getConnection()) {
+            // daily: reset khi sang ngày mới
+            resetIfDue(c, "daily",   "last_reset_at IS NULL OR DATE(last_reset_at) < CURDATE()");
+            // weekly: reset khi sang tuần mới (YEARWEEK)
+            resetIfDue(c, "weekly",  "last_reset_at IS NULL OR YEARWEEK(last_reset_at,1) < YEARWEEK(NOW(),1)");
+            // monthly: reset khi sang tháng mới
+            resetIfDue(c, "monthly", "last_reset_at IS NULL OR DATE_FORMAT(last_reset_at,'%Y%m') < DATE_FORMAT(NOW(),'%Y%m')");
+        } catch (Exception e) {
+            log.warn("activityResetTask error: {}", e.getMessage());
+        }
+    }
+    private void resetIfDue(Connection c, String period, String dueCond) throws Exception {
+        java.util.List<java.util.Map<String,Object>> due = com.nexusisekai.database.SqlSafe.query(c,
+            "SELECT id FROM activities WHERE reset_period=? AND (" + dueCond + ")", period);
+        for (java.util.Map<String,Object> a : due) {
+            int id = ((Number) a.get("id")).intValue();
+            com.nexusisekai.database.SqlSafe.update(c, "DELETE FROM activity_progress WHERE activity_id=?", id);
+            com.nexusisekai.database.SqlSafe.update(c, "UPDATE activities SET last_reset_at=NOW() WHERE id=?", id);
+            log.info("[ACTIVITY] Reset {} hoat dong {}", period, id);
+        }
     }
 
     /** Phát thưởng đua top cho các hoạt động ranking đã kết thúc mà chưa phát. */

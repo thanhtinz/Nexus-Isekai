@@ -3871,3 +3871,17 @@ INSERT IGNORE INTO activities (id,activity_type,name,description,is_enabled,acti
 INSERT IGNORE INTO activity_milestones (activity_id,milestone_order,requirement,reward_json,item_cost_id,item_cost_qty,exchange_limit,label) VALUES
  (22,1,0,'{"diamond":100}',9100,10,5,'Đổi 10 Bảo Vật -> 100 KC'),
  (22,2,0,'{"items":[[8001,1]]}',9100,50,1,'Đổi 50 Bảo Vật -> Cánh hiếm');
+
+-- ───── Thêm biến thể CHUNG cho mọi type ─────
+-- Chu kỳ lặp: none (1 lần) | daily | weekly | monthly — scheduler reset progress
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS reset_period VARCHAR(8) NOT NULL DEFAULT 'none';
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS last_reset_at DATETIME NULL;
+-- Phạm vi xếp hạng/đua: char (mặc định) | guild | server | cross_server
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS scope VARCHAR(12) NOT NULL DEFAULT 'char';
+
+-- multiplier giờ là HỆ SỐ TỰ DO (x2/x4/x5...) không chỉ x2. Cập nhật catalog cho rõ.
+UPDATE activity_types SET display_name='Nhan EXP', description='Nhan EXP theo he so cau hinh (x2/x4/x5...) trong thoi gian' WHERE type_key='x2_exp';
+UPDATE activity_types SET display_name='Nhan Ti Le Roi', description='Nhan ti le roi do theo he so cau hinh (x2/x4...)' WHERE type_key='x2_drop';
+INSERT IGNORE INTO activity_types (type_key,display_name,category,unit,default_action,description) VALUES
+ ('gold_boost','Nhan Vang','special','-','passive','Nhan vang nhan duoc theo he so cau hinh (x2/x4...)'),
+ ('exclusive_drop','Roi Vat Pham Su Kien','special','-','passive','Trong thoi gian SK, roi item exclusive theo ti le (drop_json)');
