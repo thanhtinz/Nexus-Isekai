@@ -45,6 +45,13 @@ public class MonsterTemplate {
                 aggroRange, respawnSec, isBoss, lootJson, iconId);
     }
 
+    /** Spawn tai vi tri chi dinh (dung cho spawn tu map layout). */
+    public MonsterInstance spawnAt(float x, float y) {
+        return new MonsterInstance(id, name, level, hp, atk, def, speed,
+                expReward, goldReward, mapId, x, y,
+                aggroRange, respawnSec, isBoss, lootJson, iconId);
+    }
+
     public int getId()        { return id; }
     public String getName()   { return name; }
     public int getMapId()     { return mapId; }

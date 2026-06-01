@@ -3,6 +3,7 @@ package com.nexusisekai.network.handler;
 import com.nexusisekai.game.service.AntiCheatService;
 import com.nexusisekai.game.entity.Player;
 import com.nexusisekai.game.world.WorldManager;
+import com.nexusisekai.game.world.MapData;
 import com.nexusisekai.game.world.ZoneManager;
 import com.nexusisekai.network.GameSession;
 import com.nexusisekai.network.PacketOpcode;
@@ -41,6 +42,13 @@ public class MovementHandler {
 
         if (dist > MAX_MOVE_DISTANCE) {
             log.warn("Player {} speed hack detected: dist={}", player.getName(), dist);
+            sendPositionCorrection(session, player.getX(), player.getY());
+            return;
+        }
+
+        // Collision: chan neu o dich bi danh dau chan trong layout_json
+        MapData curMap = WorldManager.getInstance().getMap(player.getMapId());
+        if (curMap != null && curMap.isBlocked(newX, newY)) {
             sendPositionCorrection(session, player.getX(), player.getY());
             return;
         }

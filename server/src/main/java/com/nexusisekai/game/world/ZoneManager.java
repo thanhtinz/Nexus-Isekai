@@ -38,6 +38,15 @@ public class ZoneManager {
                 zone.addMonster(t.spawn());
             }
         }
+        // Spawn them theo map layout_json (monsters[] do MapEditorPro dat)
+        for (MapData map : maps.values()) {
+            Zone zone = zones.get(map.getId());
+            if (zone == null) continue;
+            for (int[] sp : map.getSpawns()) {
+                MonsterTemplate t = templates.get(sp[0]);
+                if (t != null) zone.addMonster(t.spawnAt(sp[1], sp[2]));
+            }
+        }
         log.info("[ZONE] {} zones initialized.", zones.size());
     }
 
