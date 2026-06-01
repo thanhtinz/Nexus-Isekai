@@ -574,6 +574,9 @@ namespace NexusIsekai.Network
         public const short S2C_ACTIVITY_DETAIL  = 0x4312;
         public const short S2C_ACTIVITY_RESULT  = 0x4313;
         public const short S2C_ACTIVITY_RANKING = 0x4314;
+        // Voice
+        public const short C2S_VOICE_REQUEST    = 0x4401;
+        public const short S2C_VOICE_PLAY       = 0x4411;
 
     }
 }

@@ -257,6 +257,7 @@ const PANELS: PanelConfig[] = [
   { key: 'pvp_rewards',  label: 'Thuong Mua PvP',  group: 'Xa Hoi',     endpoint: '/api/pvp-season-rewards',dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'class_change', label: 'Chuyen Lop',      group: 'Noi Dung',   endpoint: '/api/class-change',      dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'child_shop',   label: 'Shop Tre Em',     group: 'Noi Dung',   endpoint: '/api/child-shop',        dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'voice_lines',  label: 'Loi Thoai (Voice)',group: 'Noi Dung',  endpoint: '/api/voice-lines',       dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'first_topup',  label: 'Thuong Nap Dau',  group: 'Kinh Te',    endpoint: '/api/first-topup',       dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'gift_rewards', label: 'Thuong Giftcode', group: 'Kinh Te',    endpoint: '/api/giftcode-rewards',  dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'webshop_ct',   label: 'Webshop Noi Dung',group: 'Kinh Te',    endpoint: '/api/webshop-contents',  dataKey: 'rows', editable: true, pk: 'id' },

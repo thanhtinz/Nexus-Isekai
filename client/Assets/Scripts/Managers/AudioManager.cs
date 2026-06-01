@@ -9,6 +9,7 @@ public class AudioManager : MonoBehaviour {
     public void PlayBGM(string key) { if (clips.TryGetValue(key, out var c)) { bgmSource.clip=c; bgmSource.volume=master*music; bgmSource.loop=true; bgmSource.Play(); } }
     public void PlaySFX(string key) { if (clips.TryGetValue(key, out var c)) sfxSource.PlayOneShot(c, master*sfx); }
     public void PlayUI(string key) { if (clips.TryGetValue(key, out var c)) uiSource.PlayOneShot(c, master*ui); }
+    public void PlayVoice(string key) { if (clips.TryGetValue(key, out var c)) sfxSource.PlayOneShot(c, master*sfx); } // lời thoại class/npc
     public void SetVolume(string t, float v) { switch(t) { case "master":master=v;break; case "music":music=v;break; case "sfx":sfx=v;break; case "ui":ui=v;break; case "ambient":ambient=v;break; } }
     public void StopBGM() { bgmSource.Stop(); }
 }

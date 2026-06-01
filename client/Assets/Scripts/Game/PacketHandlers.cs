@@ -77,6 +77,7 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_ACTIVITY_DETAIL, OnActivityDetail);
             d.Register(PacketOpcode.S2C_ACTIVITY_RESULT, OnActivityResult);
             d.Register(PacketOpcode.S2C_ACTIVITY_RANKING, OnActivityRanking);
+            d.Register(PacketOpcode.S2C_VOICE_PLAY, OnVoicePlay);
             d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
             d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
             d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
@@ -794,6 +795,12 @@ namespace NexusIsekai.Game
             PacketBuilder.SendActivityList();
         }
 
+        private void OnVoicePlay(PacketReader r) {
+            string audioKey = r.ReadString();
+            string subtitle = r.ReadString();
+            AudioManager.Instance?.PlayVoice(audioKey);
+            if (!string.IsNullOrEmpty(subtitle)) GameState.Instance?.ShowSubtitle(subtitle);
+        }
         private void OnActivityRanking(PacketReader r) {
             int aid = r.ReadInt(); int myRank = r.ReadInt(); long myScore = r.ReadLong();
             ActivityUI.Instance?.ClearRanking();

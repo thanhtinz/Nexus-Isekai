@@ -4004,3 +4004,51 @@ UPDATE activity_types SET display_name='Nhan Ti Le Roi', description='Nhan ti le
 INSERT IGNORE INTO activity_types (type_key,display_name,category,unit,default_action,description) VALUES
  ('gold_boost','Nhan Vang','special','-','passive','Nhan vang nhan duoc theo he so cau hinh (x2/x4...)'),
  ('exclusive_drop','Roi Vat Pham Su Kien','special','-','passive','Trong thoi gian SK, roi item exclusive theo ti le (drop_json)');
+
+-- ═════════════════════════════════════════════════════════════
+-- ÂM THANH LỜI THOẠI (voice_lines) — admin cấu hình
+-- context='class_intro': giới thiệu class lúc tạo nhân vật (ref_id=class_id 1-8)
+-- context='npc_bark'   : câu ngắn NPC nói khi tương tác (ref_id=npc_id), KHÔNG phải full dialog
+-- audio_key trỏ tới audio_assets (asset_type='voice'). Nhiều dòng/ref → chọn ngẫu nhiên theo weight.
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS voice_lines (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    context     VARCHAR(16) NOT NULL,          -- class_intro | npc_bark
+    ref_id      INT NOT NULL,                  -- class_id hoặc npc_id
+    audio_key   VARCHAR(64) NOT NULL,          -- audio_assets.asset_key
+    subtitle    VARCHAR(256) DEFAULT '',       -- phụ đề hiển thị kèm
+    lang        VARCHAR(8) NOT NULL DEFAULT 'vi',
+    weight      INT NOT NULL DEFAULT 1,        -- trọng số chọn ngẫu nhiên
+    is_enabled  TINYINT NOT NULL DEFAULT 1,
+    INDEX idx_ctx (context, ref_id, is_enabled)
+);
+
+-- Audio assets voice (file do team thu âm, đặt vào Audio/Voice/)
+INSERT IGNORE INTO audio_assets (asset_key,asset_type,category,file_path,description) VALUES
+ ('voice_class_1','voice','intro','Audio/Voice/Class/class_1.ogg','Lời thoại Kiếm Sĩ'),
+ ('voice_class_2','voice','intro','Audio/Voice/Class/class_2.ogg','Lời thoại Pháp Sư'),
+ ('voice_class_3','voice','intro','Audio/Voice/Class/class_3.ogg','Lời thoại Xạ Thủ'),
+ ('voice_class_4','voice','intro','Audio/Voice/Class/class_4.ogg','Lời thoại Slinger'),
+ ('voice_class_5','voice','intro','Audio/Voice/Class/class_5.ogg','Lời thoại Axeman'),
+ ('voice_class_6','voice','intro','Audio/Voice/Class/class_6.ogg','Lời thoại Quyền Sư'),
+ ('voice_class_7','voice','intro','Audio/Voice/Class/class_7.ogg','Lời thoại Cung Thủ'),
+ ('voice_class_8','voice','intro','Audio/Voice/Class/class_8.ogg','Lời thoại Sát Thủ'),
+ ('voice_npc_hi','voice','npc','Audio/Voice/Npc/hi.ogg','NPC chào'),
+ ('voice_npc_bye','voice','npc','Audio/Voice/Npc/bye.ogg','NPC tạm biệt');
+
+-- Seed: 8 class intro (gọi lúc chọn class ở màn tạo nhân vật)
+INSERT IGNORE INTO voice_lines (context,ref_id,audio_key,subtitle) VALUES
+ ('class_intro',1,'voice_class_1','Ta là Kiếm Sĩ — lưỡi kiếm không bao giờ gục ngã!'),
+ ('class_intro',2,'voice_class_2','Pháp Sư đây — nguyên tố nằm trong tay ta.'),
+ ('class_intro',3,'voice_class_3','Xạ Thủ sẵn sàng — không mục tiêu nào thoát được.'),
+ ('class_intro',4,'voice_class_4','Slinger ra trận — một viên đạn, một mạng.'),
+ ('class_intro',5,'voice_class_5','Axeman tới đây — rìu của ta khát máu!'),
+ ('class_intro',6,'voice_class_6','Quyền Sư đây — nắm đấm này nói thay lời.'),
+ ('class_intro',7,'voice_class_7','Cung Thủ sẵn sàng — mũi tên đã lên dây.'),
+ ('class_intro',8,'voice_class_8','Sát Thủ... ngươi sẽ không kịp thấy ta.');
+
+-- Seed: vài bark NPC mẫu (ref_id = npc_id, admin thêm theo NPC thật)
+INSERT IGNORE INTO voice_lines (context,ref_id,audio_key,subtitle) VALUES
+ ('npc_bark',1,'voice_npc_hi','Chào lữ khách, cần ta giúp gì?'),
+ ('npc_bark',1,'voice_npc_hi','Ghé qua xem hàng nhé!'),
+ ('npc_bark',2,'voice_npc_hi','Đường phía trước nguy hiểm đấy.');

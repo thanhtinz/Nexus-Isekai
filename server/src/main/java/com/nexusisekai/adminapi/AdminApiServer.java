@@ -144,6 +144,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/activity-milestones", ex -> handleAuth(ex, this::handleActivityMilestonesCfg));
         httpServer.createContext("/api/activity-rank-rewards", ex -> handleAuth(ex, this::handleActivityRankRewardsCfg));
         httpServer.createContext("/api/activity-types", ex -> handleAuth(ex, this::handleActivityTypesCfg));
+        httpServer.createContext("/api/voice-lines", ex -> handleAuth(ex, this::handleVoiceLinesCfg));
         httpServer.createContext("/api/shops",      ex -> handleAuth(ex, this::handleShops));
         httpServer.createContext("/api/events",     ex -> handleAuth(ex, this::handleEvents));
         httpServer.createContext("/api/quests",     ex -> handleAuth(ex, this::handleQuests));
@@ -831,6 +832,9 @@ public class AdminApiServer {
     /** Catalog loai hoat dong (tham chieu de chon type khi tao SK). CRUD duoc. */
     private void handleActivityTypesCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "activity_types", "type_key", new String[]{"display_name","category","unit","default_action","description"});
+    }
+    private void handleVoiceLinesCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "voice_lines", "id", new String[]{"context","ref_id","audio_key","subtitle","lang","weight","is_enabled"});
     }
 
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {

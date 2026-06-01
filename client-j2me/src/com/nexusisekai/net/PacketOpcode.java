@@ -328,4 +328,7 @@ public interface PacketOpcode {
     public static final short S2C_ACTIVITY_DETAIL = (short)0x4312;
     public static final short S2C_ACTIVITY_RESULT = (short)0x4313;
     public static final short S2C_ACTIVITY_RANKING = (short)0x4314;
+    // Voice
+    public static final short C2S_VOICE_REQUEST = (short)0x4401;
+    public static final short S2C_VOICE_PLAY = (short)0x4411;
 }

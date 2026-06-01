@@ -52,7 +52,8 @@
 | sfx | levelup | Audio/SFX/ | lên cấp |
 | ui | ui_click | Audio/UI/ | click, mở/đóng panel |
 | ambient | nature/cave/rain | Audio/Ambient/ | tiếng môi trường |
-| voice | npc/intro | Audio/Voice/ | lồng tiếng |
+| voice | intro | Audio/Voice/Class/ | lời thoại giới thiệu class lúc tạo nhân vật (class_<id>.ogg) |
+| voice | npc | Audio/Voice/Npc/ | câu bark ngắn của NPC khi tương tác (không phải full dialog) |
 
 ## 4. HỆ THỐNG / UI — asset_type='effect'/'particle'/'font'/'video'/'config'
 | Folder | category | Mô tả |

@@ -502,4 +502,7 @@ extension FixedWidthInteger {
     static let S2C_ACTIVITY_DETAIL: Int16 = 0x4312
     static let S2C_ACTIVITY_RESULT: Int16 = 0x4313
     static let S2C_ACTIVITY_RANKING: Int16 = 0x4314
+    // Voice
+    static let C2S_VOICE_REQUEST: Int16 = 0x4401
+    static let S2C_VOICE_PLAY: Int16 = 0x4411
 }

@@ -535,6 +535,10 @@ namespace NexusIsekai.Network
         public static void SendActivityExchange(int id, int milestoneId) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_EXCHANGE).WriteInt(id).WriteInt(milestoneId));
         public static void SendActivityJoin(int id) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_JOIN).WriteInt(id));
         public static void SendActivityRanking(int id) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_RANKING).WriteInt(id));
+        // Voice: context 1=class_intro 2=npc_bark
+        public static void SendVoiceRequest(int context, int refId) => Send(new PacketBuilder(PacketOpcode.C2S_VOICE_REQUEST).WriteByte((byte)context).WriteInt(refId));
+        public static void SendClassIntroVoice(int classId) => SendVoiceRequest(1, classId);
+        public static void SendNpcBark(int npcId) => SendVoiceRequest(2, npcId);
         public static void SendWedding(long targetCharId, int weddingMapId)
             => Send(new PacketBuilder(PacketOpcode.C2S_WEDDING)
                 .WriteLong(targetCharId).WriteInt(weddingMapId));
