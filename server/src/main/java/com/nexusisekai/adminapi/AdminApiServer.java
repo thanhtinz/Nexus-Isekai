@@ -1629,6 +1629,7 @@ public class AdminApiServer {
             } else {
                 @SuppressWarnings("unchecked") Map<String,Object> body = parseBody(ex);
                 String action = str(body,"action");
+                if ("upsert".equals(action)) action = num(body,"id") > 0 ? "update" : "create";
                 switch (action) {
                     case "create" -> {
                         PreparedStatement ps = c.prepareStatement(

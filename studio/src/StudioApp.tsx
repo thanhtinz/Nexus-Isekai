@@ -56,6 +56,7 @@ const SECTIONS: Section[] = [
   { key: 'map',      label: 'MAP',       endpoint: '/api/maps',          dataKey: 'rows', pk: 'id',        nameField: 'name' },
   { key: 'npc',      label: 'NPC',       endpoint: '/api/npcs',          dataKey: 'rows', pk: 'id',        nameField: 'name' },
   { key: 'item',     label: 'ITEM',      endpoint: '/api/items',         dataKey: 'items', pk: 'id',       nameField: 'name' },
+  { key: 'class',    label: 'NHAN VAT',  endpoint: '/api/classes',       dataKey: 'classes', pk: 'id',     nameField: 'name' },
   { key: 'evolve',   label: 'TIEN HOA',  endpoint: '/api/item-evolution',dataKey: 'rows', pk: 'id',        nameField: 'stage_name' },
   { key: 'resource', label: 'RESOURCE',  endpoint: '/api/audio-assets',  dataKey: 'rows', pk: 'id',        nameField: 'asset_key' },
   { key: 'kho',      label: 'KHO ASSET', endpoint: '/api/assets',        dataKey: 'assets', pk: 'id',      nameField: 'asset_key' },
