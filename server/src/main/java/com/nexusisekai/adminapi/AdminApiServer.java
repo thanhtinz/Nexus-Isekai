@@ -126,6 +126,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/vip-levels",      ex -> handleAuth(ex, this::handleVipLevels));
         httpServer.createContext("/api/vip-milestones",  ex -> handleAuth(ex, this::handleVipMilestones));
         httpServer.createContext("/api/outer-floors",    ex -> handleAuth(ex, this::handleOuterFloors));
+        httpServer.createContext("/api/outer-bosses",     ex -> handleAuth(ex, this::handleOuterBosses));
         httpServer.createContext("/api/world-bosses-cfg",ex -> handleAuth(ex, this::handleWorldBossesCfg));
         httpServer.createContext("/api/market-admin",    ex -> handleAuth(ex, this::handleMarketAdmin));
         httpServer.createContext("/api/guild-wars",      ex -> handleAuth(ex, this::handleGuildWarsAdmin));
@@ -716,6 +717,30 @@ public class AdminApiServer {
     }
     private void handleOuterFloors(HttpExchange ex) throws Exception {
         crudConfig(ex, "outer_realm_floors", "floor", new String[]{"name","map_id","min_level","max_players","is_pvp","monster_min_level","monster_max_level","clear_reward_json","is_active"});
+    }
+    /** Boss của từng tầng ngoại vực. GET hỗ trợ ?floor=N để lọc theo tầng. */
+    private void handleOuterBosses(HttpExchange ex) throws Exception {
+        if ("GET".equals(ex.getRequestMethod())) {
+            String q = ex.getRequestURI().getQuery();
+            String floor = null;
+            if (q != null) for (String kv : q.split("&")) if (kv.startsWith("floor=")) floor = kv.substring(6);
+            List<Map<String,Object>> list = new ArrayList<>();
+            try (Connection conn = DatabaseManager.getConnection()) {
+                PreparedStatement ps;
+                if (floor != null && !floor.isEmpty()) {
+                    ps = conn.prepareStatement("SELECT * FROM outer_realm_bosses WHERE floor=? ORDER BY boss_level");
+                    ps.setInt(1, Integer.parseInt(floor.replaceAll("[^0-9]","0")));
+                } else {
+                    ps = conn.prepareStatement("SELECT * FROM outer_realm_bosses ORDER BY floor, boss_level");
+                }
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) list.add(rsToMap(rs, "id","floor","monster_id","boss_level","spawn_x","spawn_y","reward_json"));
+            }
+            sendJson(ex, 200, Map.of("rows", list));
+        } else {
+            // POST upsert + DELETE dùng chung helper
+            crudConfig(ex, "outer_realm_bosses", "id", new String[]{"floor","monster_id","boss_level","spawn_x","spawn_y","reward_json"});
+        }
     }
     private void handleWorldBossesCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "world_bosses", "id", new String[]{"name","map_id","hp","reward_exp","reward_gold","spawn_cron","duration_min","spawn_interval_min","first_kill_reward_json","category"});
