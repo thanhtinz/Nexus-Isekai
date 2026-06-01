@@ -142,6 +142,27 @@ const PANELS: PanelConfig[] = [
   { key: 'schedule',     label: 'Lich Hen',        group: 'He Thong',   endpoint: '/api/scheduled-tasks',   dataKey: 'tasks' },
   { key: 'audit',        label: 'Audit Log',       group: 'He Thong',   endpoint: '/api/audit-log',         dataKey: 'logs' },
   { key: 'servers',      label: 'Servers',         group: 'He Thong',   endpoint: '/api/servers',           dataKey: 'servers' },
+
+  // Tinh nang moi (endgame) — crudConfig tra ve dataKey 'rows'
+  { key: 'afk',          label: 'AFK / The Treo',  group: 'Tinh Nang',  endpoint: '/api/afk-cards',         dataKey: 'rows' },
+  { key: 'vip_levels',   label: 'Moc VIP',         group: 'Tinh Nang',  endpoint: '/api/vip-levels',        dataKey: 'rows' },
+  { key: 'vip_rewards',  label: 'Thuong VIP',      group: 'Tinh Nang',  endpoint: '/api/vip-milestones',    dataKey: 'rows' },
+  { key: 'worldboss',    label: 'World Boss',      group: 'Tinh Nang',  endpoint: '/api/world-bosses-cfg',  dataKey: 'rows' },
+  { key: 'outer_floors', label: 'Ngoai Vuc - Tang',group: 'Tinh Nang',  endpoint: '/api/outer-floors',      dataKey: 'rows' },
+  { key: 'outer_bosses', label: 'Ngoai Vuc - Boss',group: 'Tinh Nang',  endpoint: '/api/outer-bosses',      dataKey: 'rows' },
+  { key: 'guildwar',     label: 'Guild War',       group: 'Tinh Nang',  endpoint: '/api/guild-wars',        dataKey: 'rows' },
+  { key: 'market',       label: 'Cho Nguoi Choi',  group: 'Tinh Nang',  endpoint: '/api/market-admin',      dataKey: 'rows' },
+
+  // Bo sung vao nhom san
+  { key: 'cosmetics',    label: 'Cosmetic',        group: 'Xa Hoi',     endpoint: '/api/cosmetics',         dataKey: 'rows' },
+  { key: 'factions',     label: 'Phe',             group: 'Xa Hoi',     endpoint: '/api/factions',          dataKey: 'rows' },
+  { key: 'faction_tiers',label: 'Moc Danh Vong',   group: 'Xa Hoi',     endpoint: '/api/faction-tiers',     dataKey: 'rows' },
+  { key: 'pvp_rewards',  label: 'Thuong Mua PvP',  group: 'Xa Hoi',     endpoint: '/api/pvp-season-rewards',dataKey: 'rows' },
+  { key: 'class_change', label: 'Chuyen Lop',      group: 'Noi Dung',   endpoint: '/api/class-change',      dataKey: 'rows' },
+  { key: 'child_shop',   label: 'Shop Tre Em',     group: 'Noi Dung',   endpoint: '/api/child-shop',        dataKey: 'rows' },
+  { key: 'first_topup',  label: 'Thuong Nap Dau',  group: 'Kinh Te',    endpoint: '/api/first-topup',       dataKey: 'rows' },
+  { key: 'gift_rewards', label: 'Thuong Giftcode', group: 'Kinh Te',    endpoint: '/api/giftcode-rewards',  dataKey: 'rows' },
+  { key: 'webshop_ct',   label: 'Webshop Noi Dung',group: 'Kinh Te',    endpoint: '/api/webshop-contents',  dataKey: 'rows' },
 ];
 
 //  AI Generate Panel 
@@ -224,6 +245,10 @@ export default function AdminDashboard() {
   const [statusData, setStatusData] = useState<Record<string, unknown>>({});
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // nhom dang mo (dropdown) — mac dinh mo nhom cua panel dang xem
+  const [openGroups, setOpenGroups] = useState<string[]>(['Tong Quan']);
+  const toggleGroup = (g: string) =>
+    setOpenGroups(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g]);
 
   const login = () => {
     if (apiKey.length > 5) {
@@ -237,6 +262,9 @@ export default function AdminDashboard() {
     setActivePanel(key);
     setSidebarOpen(false);
     setLoading(true);
+    // tu mo dropdown chua panel vua chon
+    const g = PANELS.find(p => p.key === key)?.group;
+    if (g) setOpenGroups(prev => prev.includes(g) ? prev : [...prev, g]);
 
     const panel = PANELS.find(p => p.key === key);
     if (!panel) { setLoading(false); return; }
@@ -298,21 +326,31 @@ export default function AdminDashboard() {
         </div>
 
         <nav className="overflow-y-auto h-[calc(100vh-60px)] pb-20">
-          {groups.map(g => (
-            <div key={g}>
-              <div className="px-4 pt-4 pb-1 text-[10px] text-gray-600 uppercase tracking-wider font-medium">{g}</div>
-              {PANELS.filter(p => p.group === g).map(p => (
-                <button key={p.key} onClick={() => loadPanel(p.key)}
-                  className={`w-full text-left px-4 py-2 text-xs transition-colors ${
-                    activePanel === p.key
-                      ? 'bg-[#6c3ef3]/20 text-[#8a5cf5] border-l-2 border-[#6c3ef3]'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
+          {groups.map(g => {
+            const open = openGroups.includes(g);
+            const hasActive = PANELS.some(p => p.group === g && p.key === activePanel);
+            return (
+              <div key={g}>
+                <button onClick={() => toggleGroup(g)}
+                  className={`w-full flex items-center justify-between px-4 pt-3 pb-2 text-[10px] uppercase tracking-wider font-medium transition-colors ${
+                    hasActive ? 'text-[#f0c050]' : 'text-gray-500 hover:text-gray-300'
                   }`}>
-                  {p.label}
+                  <span>{g}</span>
+                  <span className={`transition-transform duration-150 ${open ? 'rotate-90' : ''}`}>{'\u203A'}</span>
                 </button>
-              ))}
-            </div>
-          ))}
+                {open && PANELS.filter(p => p.group === g).map(p => (
+                  <button key={p.key} onClick={() => loadPanel(p.key)}
+                    className={`w-full text-left px-6 py-2 text-xs transition-colors ${
+                      activePanel === p.key
+                        ? 'bg-[#6c3ef3]/20 text-[#8a5cf5] border-l-2 border-[#6c3ef3]'
+                        : 'text-gray-400 hover:bg-white/5 hover:text-white border-l-2 border-transparent'
+                    }`}>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            );
+          })}
         </nav>
       </aside>
 
