@@ -163,7 +163,7 @@ export default function StudioApp() {
               ? <MapBuilder map={draft} setMsg={setMsg} />
               : tab === 'spine' ? <SpineViewer setMsg={setMsg} />
               : tab === 'vfx' ? <VfxEditor draft={draft} setDraft={setDraft} setMsg={setMsg} />
-              : tab === 'scene' ? <CompositePreview />
+              : tab === 'scene' ? <CompositePreview draft={draft} setDraft={setDraft} />
               : tab === 'frames' ? <AnimationEditor draft={draft} setDraft={setDraft} setMsg={setMsg} />
               : <PreviewArea row={draft} section={section} />}
           </div>

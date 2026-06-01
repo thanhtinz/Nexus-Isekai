@@ -4438,3 +4438,15 @@ CREATE TABLE IF NOT EXISTS item_evolution (
     is_active     TINYINT NOT NULL DEFAULT 1,
     INDEX idx_chain (chain_key, stage_order)
 );
+
+-- ═══ SKILL: cau hinh effect (grid sheet) + frame marker (giong NSO TOOL) ═══
+-- vfx_key (da co) tro toi sheet hieu ung trong KHO; grid + fps de play; offset dat tren nhan vat.
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_cols    INT NOT NULL DEFAULT 1;   -- so cot sheet
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_rows    INT NOT NULL DEFAULT 1;   -- so hang sheet
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_frames  INT NOT NULL DEFAULT 1;   -- so frame dung
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_fps     INT NOT NULL DEFAULT 16;  -- toc do
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_ox      INT NOT NULL DEFAULT 0;   -- offset X tren nhan vat (px)
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_oy      INT NOT NULL DEFAULT 0;   -- offset Y
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_scale   INT NOT NULL DEFAULT 100; -- % phong to
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS hit_frame   INT NOT NULL DEFAULT -1;  -- frame trung don (game apply dmg) (-1=none)
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS sound_frame INT NOT NULL DEFAULT -1;  -- frame phat sfx_key (-1=none)

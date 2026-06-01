@@ -1053,7 +1053,7 @@ public class AdminApiServer {
     }
 
     private void handleSkillsCfg(HttpExchange ex) throws Exception {
-        crudConfig(ex, "skill_templates", "id", new String[]{"name","class_id","skill_type","element","base_damage","mp_cost","cooldown_ms","max_level","description","icon_id","unlock_level","vfx_key","vfx_hit_key","sfx_key","status","is_active"});
+        crudConfig(ex, "skill_templates", "id", new String[]{"name","class_id","skill_type","element","base_damage","mp_cost","cooldown_ms","max_level","description","icon_id","unlock_level","vfx_key","vfx_hit_key","sfx_key","vfx_cols","vfx_rows","vfx_frames","vfx_fps","vfx_ox","vfx_oy","vfx_scale","hit_frame","sound_frame","status","is_active"});
     }
     private void handleWelfareCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "welfare", "id", new String[]{"welfare_type","name","description","icon_id","is_enabled","start_at","end_at","server_id","sort_order","claim_mode","reset_period","price_diamond","duration_days","goto_feature","config_json"});
