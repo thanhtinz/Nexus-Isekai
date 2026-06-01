@@ -236,6 +236,19 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_TREASURE_DIG      -> { requireInGame(); TreasureHandler.handleTreasureDig(this, toBuf(p)); }
             case PacketOpcode.C2S_WHEEL_LIST        -> { requireInGame(); TreasureHandler.handleWheelList(this, toBuf(p)); }
             case PacketOpcode.C2S_WHEEL_SPIN        -> { requireInGame(); TreasureHandler.handleWheelSpin(this, toBuf(p)); }
+            // Auto-play
+            case PacketOpcode.C2S_AUTO_SET          -> { requireInGame(); AutoHandler.handleSetAuto(this, toBuf(p)); }
+            case PacketOpcode.C2S_AUTO_CONFIG_REQ   -> { requireInGame(); AutoHandler.sendAutoConfig(this); }
+            // Rút option
+            case PacketOpcode.C2S_OPTION_EXTRACT    -> { requireInGame(); OptionHandler.handleExtract(this, toBuf(p)); }
+            // Thần Thú bang
+            case PacketOpcode.C2S_CLAN_BEAST_INFO   -> { requireInGame(); ClanBeastHandler.handleInfo(this, toBuf(p)); }
+            case PacketOpcode.C2S_CLAN_BEAST_FEED   -> { requireInGame(); ClanBeastHandler.handleFeed(this, toBuf(p)); }
+            // Bảng giờ boss
+            case PacketOpcode.C2S_BOSS_SCHEDULE     -> { requireInGame(); BossScheduleHandler.handleSchedule(this, toBuf(p)); }
+            // Linh hồn quái
+            case PacketOpcode.C2S_SOUL_LIST         -> { requireInGame(); SoulHandler.handleList(this, toBuf(p)); }
+            case PacketOpcode.C2S_SOUL_EXCHANGE     -> { requireInGame(); SoulHandler.handleExchange(this, toBuf(p)); }
             case PacketOpcode.C2S_FARM_VISIT    -> { requireInGame(); FarmingHandler.handleFarmVisit(this, toBuf(p)); }
 
             // ── Housing ───────────────────────────────────────────────

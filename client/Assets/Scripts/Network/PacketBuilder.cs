@@ -332,6 +332,20 @@ namespace NexusIsekai.Network
         public static void SendTreasureDig(int chestId) => Send(new PacketBuilder(PacketOpcode.C2S_TREASURE_DIG).WriteInt(chestId));
         public static void SendWheelList() => Send(new PacketBuilder(PacketOpcode.C2S_WHEEL_LIST));
         public static void SendWheelSpin(int wheelId) => Send(new PacketBuilder(PacketOpcode.C2S_WHEEL_SPIN).WriteInt(wheelId));
+        // Auto-play
+        public static void SendAutoSet(int flags) => Send(new PacketBuilder(PacketOpcode.C2S_AUTO_SET).WriteInt(flags));
+        public static void SendAutoConfigReq() => Send(new PacketBuilder(PacketOpcode.C2S_AUTO_CONFIG_REQ));
+        // Rút option
+        public static void SendOptionExtract(long srcInvId, long dstInvId)
+            => Send(new PacketBuilder(PacketOpcode.C2S_OPTION_EXTRACT).WriteLong(srcInvId).WriteLong(dstInvId));
+        // Thần Thú bang
+        public static void SendClanBeastInfo() => Send(new PacketBuilder(PacketOpcode.C2S_CLAN_BEAST_INFO));
+        public static void SendClanBeastFeed(int units) => Send(new PacketBuilder(PacketOpcode.C2S_CLAN_BEAST_FEED).WriteInt(units));
+        // Bảng giờ boss
+        public static void SendBossSchedule() => Send(new PacketBuilder(PacketOpcode.C2S_BOSS_SCHEDULE));
+        // Linh hồn quái
+        public static void SendSoulList() => Send(new PacketBuilder(PacketOpcode.C2S_SOUL_LIST));
+        public static void SendSoulExchange(int exchangeId) => Send(new PacketBuilder(PacketOpcode.C2S_SOUL_EXCHANGE).WriteInt(exchangeId));
         public static void SendMinigameLeave(long roomId)
             => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_LEAVE).WriteLong(roomId));
         public static void SendMinigameRoomList(string gameType)

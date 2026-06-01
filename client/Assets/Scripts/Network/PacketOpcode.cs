@@ -602,6 +602,22 @@ namespace NexusIsekai.Network
         public const short C2S_WHEEL_SPIN        = 0x4604;
         public const short S2C_WHEEL_LIST        = 0x4613;
         public const short S2C_WHEEL_RESULT      = 0x4614;
+        // Auto/Option/ClanBeast/BossSchedule/Soul
+        public const short C2S_AUTO_SET = 0x4701;
+        public const short C2S_AUTO_CONFIG_REQ = 0x4702;
+        public const short S2C_AUTO_CONFIG = 0x4711;
+        public const short S2C_AUTO_STATE = 0x4712;
+        public const short C2S_OPTION_EXTRACT = 0x4801;
+        public const short S2C_OPTION_RESULT = 0x4811;
+        public const short C2S_CLAN_BEAST_INFO = 0x4901;
+        public const short C2S_CLAN_BEAST_FEED = 0x4902;
+        public const short S2C_CLAN_BEAST_INFO = 0x4911;
+        public const short C2S_BOSS_SCHEDULE = 0x4A01;
+        public const short S2C_BOSS_SCHEDULE = 0x4A11;
+        public const short C2S_SOUL_LIST = 0x4B01;
+        public const short C2S_SOUL_EXCHANGE = 0x4B02;
+        public const short S2C_SOUL_LIST = 0x4B11;
+        public const short S2C_SOUL_RESULT = 0x4B12;
 
     }
 }

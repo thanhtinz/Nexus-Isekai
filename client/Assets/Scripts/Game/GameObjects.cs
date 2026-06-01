@@ -123,6 +123,17 @@ namespace NexusIsekai.Game
 
         public Vector3 GetPos(int instanceId) => _monsters.TryGetValue(instanceId, out var o) && o != null ? o.transform.position : Vector3.zero;
 
+        /// <summary>Quái sống gần vị trí nhất (cho auto-attack). Null nếu không có.</summary>
+        public MonsterObject GetNearest(Vector3 from) {
+            MonsterObject best = null; float bestD = float.MaxValue;
+            foreach (var o in _monsters.Values) {
+                if (o == null) continue;
+                float d = (o.transform.position - from).sqrMagnitude;
+                if (d < bestD) { bestD = d; best = o; }
+            }
+            return best;
+        }
+
         public void UpdateHp(int instanceId, int hp)
         {
             if (_monsters.TryGetValue(instanceId, out var obj))

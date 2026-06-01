@@ -357,5 +357,21 @@ public interface PacketOpcode {
     public static final short C2S_WHEEL_LIST = (short)0x4603;
     public static final short C2S_WHEEL_SPIN = (short)0x4604;
     public static final short S2C_WHEEL_LIST = (short)0x4613;
-    public static final short S2C_WHEEL_RESULT = (short)0x4614;
+    public static final short S2C_WHEEL_RESULT = (short)0x4614;_WHEEL_RESULT   = (short)0x4614;
+    // Auto/Option/ClanBeast/BossSchedule/Soul
+    public static final short C2S_AUTO_SET = (short)0x4701;
+    public static final short C2S_AUTO_CONFIG_REQ = (short)0x4702;
+    public static final short S2C_AUTO_CONFIG = (short)0x4711;
+    public static final short S2C_AUTO_STATE = (short)0x4712;
+    public static final short C2S_OPTION_EXTRACT = (short)0x4801;
+    public static final short S2C_OPTION_RESULT = (short)0x4811;
+    public static final short C2S_CLAN_BEAST_INFO = (short)0x4901;
+    public static final short C2S_CLAN_BEAST_FEED = (short)0x4902;
+    public static final short S2C_CLAN_BEAST_INFO = (short)0x4911;
+    public static final short C2S_BOSS_SCHEDULE = (short)0x4A01;
+    public static final short S2C_BOSS_SCHEDULE = (short)0x4A11;
+    public static final short C2S_SOUL_LIST = (short)0x4B01;
+    public static final short C2S_SOUL_EXCHANGE = (short)0x4B02;
+    public static final short S2C_SOUL_LIST = (short)0x4B11;
+    public static final short S2C_SOUL_RESULT = (short)0x4B12;
 }

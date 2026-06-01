@@ -4263,3 +4263,108 @@ CREATE TABLE IF NOT EXISTS lucky_wheel_progress (
 INSERT IGNORE INTO lucky_wheels (id,name,description,cost_amount,cost_currency,cost_item_id,pity_count,segments_json) VALUES
  (1,'Vòng Quay May Mắn','Quay bằng kim cương',20,1,0,0,'[{"label":"10K Vàng","type":"gold","qty":10000,"weight":40},{"label":"50 KC","type":"diamond","qty":50,"weight":20},{"label":"Trang bị","type":"item","id":8001,"qty":1,"weight":10},{"label":"100K Vàng","type":"gold","qty":100000,"weight":15},{"label":"200 KC","type":"diamond","qty":200,"weight":8},{"label":"Skin hiếm","type":"item","id":8003,"qty":1,"weight":2,"is_jackpot":1}]');
 ALTER TABLE characters ADD COLUMN IF NOT EXISTS muted_until BIGINT NOT NULL DEFAULT 0;
+
+-- ═════════════════════════════════════════════════════════════
+-- AUTO-PLAY (treo tự động trong game) — server cấu hình + chống bot, client chạy vòng auto
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS auto_config (
+    auto_type    VARCHAR(32) NOT NULL PRIMARY KEY, -- attack,pickup,potion,quest,sell,skill
+    display_name VARCHAR(64) NOT NULL,
+    min_vip      INT NOT NULL DEFAULT 0,           -- VIP tối thiểu để bật
+    max_minutes  INT NOT NULL DEFAULT 0,           -- 0=không giới hạn; >0 tự tắt sau N phút
+    is_enabled   TINYINT NOT NULL DEFAULT 1,
+    sort_order   INT NOT NULL DEFAULT 0
+);
+INSERT IGNORE INTO auto_config (auto_type,display_name,min_vip,max_minutes,is_enabled,sort_order) VALUES
+ ('attack','Tự đánh quái',0,0,1,1),('pickup','Tự nhặt đồ',0,0,1,2),('potion','Tự dùng máu/mana',0,0,1,3),
+ ('skill','Tự dùng kỹ năng',1,0,1,4),('quest','Tự làm nhiệm vụ',3,0,1,5),('sell','Tự bán đồ rác',5,0,1,6);
+
+-- ═════════════════════════════════════════════════════════════
+-- OPTION TRANG BỊ + RÚT/CHUYỂN OPTION
+-- ═════════════════════════════════════════════════════════════
+ALTER TABLE character_inventory ADD COLUMN IF NOT EXISTS options_json TEXT;  -- [{"opt":"hp","val":120},...]
+CREATE TABLE IF NOT EXISTS option_extract_config (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(64) NOT NULL DEFAULT 'Rút Option',
+    cost_gold     INT NOT NULL DEFAULT 0,
+    cost_diamond  INT NOT NULL DEFAULT 0,
+    cost_item_id  INT NOT NULL DEFAULT 0,           -- vd Bùa Rút Option
+    success_rate  INT NOT NULL DEFAULT 100,         -- % thành công (thất bại mất phí)
+    consume_source TINYINT NOT NULL DEFAULT 1,      -- 1=đồ nguồn vỡ sau khi rút
+    is_enabled    TINYINT NOT NULL DEFAULT 1
+);
+INSERT IGNORE INTO option_extract_config (id,name,cost_gold,cost_diamond,cost_item_id,success_rate) VALUES
+ (1,'Rút Option',50000,0,0,80);
+
+-- ═════════════════════════════════════════════════════════════
+-- THẦN THÚ BANG HỘI (thú chung guild, thành viên góp nuôi → buff toàn bang)
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS clan_beast (
+    guild_id   BIGINT NOT NULL PRIMARY KEY,
+    level      INT NOT NULL DEFAULT 1,
+    exp        BIGINT NOT NULL DEFAULT 0,
+    skin_id    INT NOT NULL DEFAULT 0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS clan_beast_config (
+    level       INT NOT NULL PRIMARY KEY,
+    exp_need    BIGINT NOT NULL,                    -- exp để lên cấp kế
+    buff_json   TEXT NOT NULL,                      -- {"hp_pct":5,"atk_pct":3} buff toàn bang
+    name        VARCHAR(64) NOT NULL DEFAULT ''
+);
+INSERT IGNORE INTO clan_beast_config (level,exp_need,buff_json,name) VALUES
+ (1,10000,'{"hp_pct":2,"atk_pct":1}','Thú Non'),(2,30000,'{"hp_pct":4,"atk_pct":2}','Thú Trưởng Thành'),
+ (3,80000,'{"hp_pct":7,"atk_pct":4}','Thú Chiến'),(4,200000,'{"hp_pct":10,"atk_pct":6}','Thần Thú');
+CREATE TABLE IF NOT EXISTS clan_beast_feed_log (
+    id        BIGINT AUTO_INCREMENT PRIMARY KEY,
+    guild_id  BIGINT NOT NULL,
+    char_id   BIGINT NOT NULL,
+    exp_added BIGINT NOT NULL,
+    fed_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ═════════════════════════════════════════════════════════════
+-- BẢNG GIỜ + ĐỊNH VỊ BOSS
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS boss_schedule (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    boss_name     VARCHAR(64) NOT NULL,
+    monster_id    INT NOT NULL,
+    map_id        INT NOT NULL,
+    x             INT NOT NULL DEFAULT 0,
+    y             INT NOT NULL DEFAULT 0,
+    interval_min  INT NOT NULL DEFAULT 60,          -- chu kỳ hồi sinh (phút)
+    next_spawn_at BIGINT NOT NULL DEFAULT 0,        -- mốc spawn kế (epoch ms)
+    is_active     TINYINT NOT NULL DEFAULT 1,
+    sort_order    INT NOT NULL DEFAULT 0
+);
+INSERT IGNORE INTO boss_schedule (id,boss_name,monster_id,map_id,x,y,interval_min,is_active) VALUES
+ (1,'Boss Map 1',9001,1,500,300,60,1),(2,'Boss Map 2',9002,2,600,300,120,1);
+
+-- ═════════════════════════════════════════════════════════════
+-- LINH HỒN QUÁI / TRỨNG QUÁI (giết quái rơi linh hồn → đổi pet/thưởng)
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS mob_soul_config (
+    monster_id  INT NOT NULL PRIMARY KEY,
+    soul_id     INT NOT NULL,                       -- loại linh hồn rơi ra
+    drop_rate   INT NOT NULL DEFAULT 10,            -- % rơi mỗi lần giết
+    is_enabled  TINYINT NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS soul_exchange (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(64) NOT NULL,
+    soul_id     INT NOT NULL,
+    soul_cost   INT NOT NULL,                       -- số linh hồn cần
+    reward_json TEXT NOT NULL,                      -- {"type":"item|pet|gold","id":..,"qty":..}
+    is_enabled  TINYINT NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS char_souls (
+    char_id  BIGINT NOT NULL,
+    soul_id  INT NOT NULL,
+    qty      INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (char_id, soul_id)
+);
+INSERT IGNORE INTO mob_soul_config (monster_id,soul_id,drop_rate) VALUES (1,7001,15),(2,7001,15),(9001,7002,100);
+INSERT IGNORE INTO soul_exchange (id,name,soul_id,soul_cost,reward_json) VALUES
+ (1,'Đổi Trứng Pet Thường',7001,50,'{"type":"item","id":8101,"qty":1}'),
+ (2,'Đổi Trứng Pet Hiếm',7002,10,'{"type":"item","id":8102,"qty":1}');

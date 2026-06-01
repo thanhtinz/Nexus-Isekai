@@ -146,6 +146,12 @@ public class AdminApiServer {
         httpServer.createContext("/api/giftcode-rewards",ex -> handleAuth(ex, this::handleGiftcodeRewardsCfg));
         httpServer.createContext("/api/pvp-season-rewards", ex -> handleAuth(ex, this::handlePvpSeasonRewardsCfg));
         httpServer.createContext("/api/minigame-config", ex -> handleAuth(ex, this::handleMinigameCfg));
+        httpServer.createContext("/api/auto-config",     ex -> handleAuth(ex, this::handleAutoCfg));
+        httpServer.createContext("/api/option-extract",  ex -> handleAuth(ex, this::handleOptionExtractCfg));
+        httpServer.createContext("/api/clan-beast",      ex -> handleAuth(ex, this::handleClanBeastCfg));
+        httpServer.createContext("/api/boss-schedule",   ex -> handleAuth(ex, this::handleBossScheduleCfg));
+        httpServer.createContext("/api/mob-soul",        ex -> handleAuth(ex, this::handleMobSoulCfg));
+        httpServer.createContext("/api/soul-exchange",   ex -> handleAuth(ex, this::handleSoulExchangeCfg));
         httpServer.createContext("/api/child-shop",      ex -> handleAuth(ex, this::handleChildShopCfg));
         httpServer.createContext("/api/webshop-contents",ex -> handleAuth(ex, this::handleWebshopContentsCfg));
         httpServer.createContext("/api/activities",       ex -> handleAuth(ex, this::handleActivitiesCfg));
@@ -968,6 +974,24 @@ public class AdminApiServer {
     }
     private void handleMinigameCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "minigame_config", "game_type", new String[]{"min_bet","max_bet","house_edge","config_json","is_active"});
+    }
+    private void handleAutoCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "auto_config", "auto_type", new String[]{"display_name","min_vip","max_minutes","is_enabled","sort_order"});
+    }
+    private void handleOptionExtractCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "option_extract_config", "id", new String[]{"name","cost_gold","cost_diamond","cost_item_id","success_rate","consume_source","is_enabled"});
+    }
+    private void handleClanBeastCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "clan_beast_config", "level", new String[]{"exp_need","buff_json","name"});
+    }
+    private void handleBossScheduleCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "boss_schedule", "id", new String[]{"boss_name","monster_id","map_id","x","y","interval_min","next_spawn_at","is_active","sort_order"});
+    }
+    private void handleMobSoulCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "mob_soul_config", "monster_id", new String[]{"soul_id","drop_rate","is_enabled"});
+    }
+    private void handleSoulExchangeCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "soul_exchange", "id", new String[]{"name","soul_id","soul_cost","reward_json","is_enabled"});
     }
     private void handleChildShopCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "child_shop_items", "id", new String[]{"name","category","nanny","diamond_price","effect_json","is_active"});

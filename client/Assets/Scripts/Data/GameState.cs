@@ -111,6 +111,8 @@ namespace NexusIsekai.Game
     public void ShowToast(string msg){ /* hiện thông báo ngắn trên HUD */ }
     public void ShowSubtitle(string text){ /* hiện phụ đề lời thoại dưới màn hình */ }
     public UnityEngine.Vector3 PlayerPos { get; set; }  // vị trí người chơi (cập nhật khi di chuyển)
+    public int HpPercent { get; set; } = 100;            // % máu hiện tại (HUD cập nhật)
+    public int MpPercent { get; set; } = 100;            // % mana hiện tại
     public void SetCombatMode(string mode){ CombatMode = mode; }
     public void SetPkStatus(string mode, int wanted, int kills, int jailSecs){ CombatMode = mode; WantedLevel = wanted; }
     public void SetWanted(int wanted){ WantedLevel = wanted; }

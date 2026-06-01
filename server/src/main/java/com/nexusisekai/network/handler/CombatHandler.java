@@ -259,6 +259,7 @@ public class CombatHandler {
         // Quest progress update
         world.getQuestManager().onMonsterKill(player, monster.getMonsterId(), monster.getInstanceId(), session);
         ProgressionHandler.recordKill(session, monster.getMonsterId()); // bestiary tracking
+        SoulHandler.dropSoul(player.getCharId(), monster.getMonsterId()); // rơi linh hồn quái
 
         // Schedule respawn
         world.getZoneManager().scheduleRespawn(monster);

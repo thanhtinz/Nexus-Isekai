@@ -682,4 +682,25 @@ public final class PacketOpcode {
     public static final short C2S_WHEEL_SPIN        = (short)0x4604; // [int wheelId]
     public static final short S2C_WHEEL_LIST        = (short)0x4613;
     public static final short S2C_WHEEL_RESULT      = (short)0x4614; // [int segmentIndex][string label][string msg]
+
+    // ───── Auto-play (0x47xx) ─────
+    public static final short C2S_AUTO_SET          = (short)0x4701; // [int flags] bitmask auto bật
+    public static final short C2S_AUTO_CONFIG_REQ   = (short)0x4702;
+    public static final short S2C_AUTO_CONFIG       = (short)0x4711; // danh sách auto cho phép theo VIP
+    public static final short S2C_AUTO_STATE        = (short)0x4712; // [int allowedFlags]
+    // ───── Rút/chuyển option (0x48xx) ─────
+    public static final short C2S_OPTION_EXTRACT    = (short)0x4801; // [long srcInvId][long dstInvId]
+    public static final short S2C_OPTION_RESULT     = (short)0x4811; // [byte ok][string msg]
+    // ───── Thần Thú bang (0x49xx) ─────
+    public static final short C2S_CLAN_BEAST_INFO   = (short)0x4901;
+    public static final short C2S_CLAN_BEAST_FEED   = (short)0x4902; // [int expItems]
+    public static final short S2C_CLAN_BEAST_INFO   = (short)0x4911;
+    // ───── Bảng giờ boss (0x4Axx) ─────
+    public static final short C2S_BOSS_SCHEDULE     = (short)0x4A01;
+    public static final short S2C_BOSS_SCHEDULE     = (short)0x4A11;
+    // ───── Linh hồn quái / trứng (0x4Bxx) ─────
+    public static final short C2S_SOUL_LIST         = (short)0x4B01;
+    public static final short C2S_SOUL_EXCHANGE     = (short)0x4B02; // [int exchangeId]
+    public static final short S2C_SOUL_LIST         = (short)0x4B11;
+    public static final short S2C_SOUL_RESULT       = (short)0x4B12; // [byte ok][string msg]
 }

@@ -89,6 +89,13 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_TREASURE_RESULT,OnTreasureResult);
             d.Register(PacketOpcode.S2C_WHEEL_LIST,     OnWheelList);
             d.Register(PacketOpcode.S2C_WHEEL_RESULT,   OnWheelResult);
+            d.Register(PacketOpcode.S2C_AUTO_CONFIG,     OnAutoConfig);
+            d.Register(PacketOpcode.S2C_AUTO_STATE,      OnAutoState);
+            d.Register(PacketOpcode.S2C_OPTION_RESULT,   OnOptionResult);
+            d.Register(PacketOpcode.S2C_CLAN_BEAST_INFO, OnClanBeastInfo);
+            d.Register(PacketOpcode.S2C_BOSS_SCHEDULE,   OnBossSchedule);
+            d.Register(PacketOpcode.S2C_SOUL_LIST,       OnSoulList);
+            d.Register(PacketOpcode.S2C_SOUL_RESULT,     OnSoulResult);
             d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
             d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
             d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
@@ -850,6 +857,42 @@ namespace NexusIsekai.Game
             LuckyWheelUI.Instance?.Open();
         }
         private void OnWheelResult(PacketReader r) { int idx=r.ReadInt(); string label=r.ReadString(); string msg=r.ReadString(); LuckyWheelUI.Instance?.PlaySpin(idx,label,msg); }
+
+        // Auto-play
+        private void OnAutoConfig(PacketReader r) {
+            int n=r.ReadShort(); AutoManager.Instance?.ClearConfig();
+            for(int i=0;i<n;i++){ string type=r.ReadString(); string name=r.ReadString(); int minVip=r.ReadInt(); int maxMin=r.ReadInt(); int ok=r.ReadByte();
+                AutoManager.Instance?.AddAutoType(type,name,minVip,maxMin,ok==1); }
+            AutoManager.Instance?.OnConfigReady();
+        }
+        private void OnAutoState(PacketReader r) { int allowed=r.ReadInt(); AutoManager.Instance?.SetAllowedFlags(allowed); }
+        // Rút option
+        private void OnOptionResult(PacketReader r) { bool ok=r.ReadByte()==1; string msg=r.ReadString(); GameState.Instance?.ShowToast(msg); }
+        // Thần Thú bang
+        private void OnClanBeastInfo(PacketReader r) {
+            if(r.ReadByte()==0){ ClanBeastUI.Instance?.ShowNoGuild(); return; }
+            int level=r.ReadInt(); long exp=r.ReadLong(); long need=r.ReadLong(); int skin=r.ReadInt();
+            string name=r.ReadString(); string buff=r.ReadString();
+            ClanBeastUI.Instance?.Show(level,exp,need,skin,name,buff);
+        }
+        // Bảng giờ boss
+        private void OnBossSchedule(PacketReader r) {
+            int n=r.ReadShort(); BossScheduleUI.Instance?.Clear();
+            for(int i=0;i<n;i++){ int id=r.ReadInt(); string nm=r.ReadString(); int mob=r.ReadInt(); int map=r.ReadInt();
+                int x=r.ReadInt(); int y=r.ReadInt(); long next=r.ReadLong(); int alive=r.ReadByte();
+                BossScheduleUI.Instance?.AddBoss(id,nm,mob,map,x,y,next,alive==1); }
+            BossScheduleUI.Instance?.Open();
+        }
+        // Linh hồn quái
+        private void OnSoulList(PacketReader r) {
+            int ns=r.ReadShort(); SoulUI.Instance?.ClearSouls();
+            for(int i=0;i<ns;i++){ int sid=r.ReadInt(); int qty=r.ReadInt(); SoulUI.Instance?.AddSoul(sid,qty); }
+            int ne=r.ReadShort(); SoulUI.Instance?.ClearExchanges();
+            for(int i=0;i<ne;i++){ int id=r.ReadInt(); string nm=r.ReadString(); int sid=r.ReadInt(); int cost=r.ReadInt();
+                SoulUI.Instance?.AddExchange(id,nm,sid,cost); }
+            SoulUI.Instance?.Open();
+        }
+        private void OnSoulResult(PacketReader r) { bool ok=r.ReadByte()==1; string msg=r.ReadString(); GameState.Instance?.ShowToast(msg); if(ok) PacketBuilder.SendSoulList(); }
 
         private void OnFxConfig(PacketReader r) {
             int ns = r.ReadShort();

@@ -252,6 +252,12 @@ const PANELS: PanelConfig[] = [
   { key: 'treasure',     label: 'Kho Bau',         group: 'Tinh Nang',  endpoint: '/api/treasure',          dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'lucky_wheels', label: 'Vong Quay',       group: 'Tinh Nang',  endpoint: '/api/lucky-wheels',      dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'minigame_cfg', label: 'Minigame - Cau Hinh',group: 'Tinh Nang',endpoint: '/api/minigame-config',  dataKey: 'rows', editable: true, pk: 'game_type' },
+  { key: 'auto_cfg',     label: 'Auto-play',       group: 'Tinh Nang',  endpoint: '/api/auto-config',       dataKey: 'rows', editable: true, pk: 'auto_type' },
+  { key: 'option_ext',   label: 'Rut Option',      group: 'Tinh Nang',  endpoint: '/api/option-extract',    dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'clan_beast',   label: 'Than Thu Bang',   group: 'Tinh Nang',  endpoint: '/api/clan-beast',        dataKey: 'rows', editable: true, pk: 'level' },
+  { key: 'boss_sched',   label: 'Bang Gio Boss',   group: 'Tinh Nang',  endpoint: '/api/boss-schedule',     dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'mob_soul',     label: 'Linh Hon Quai',   group: 'Tinh Nang',  endpoint: '/api/mob-soul',          dataKey: 'rows', editable: true, pk: 'monster_id' },
+  { key: 'soul_exch',    label: 'Doi Linh Hon',    group: 'Tinh Nang',  endpoint: '/api/soul-exchange',     dataKey: 'rows', editable: true, pk: 'id' },
 
   // He thong (van hanh, OTA, server)
   { key: 'announce',     label: 'Thong Bao',       group: 'He Thong',   endpoint: '/api/announcements',     dataKey: 'announcements' },
