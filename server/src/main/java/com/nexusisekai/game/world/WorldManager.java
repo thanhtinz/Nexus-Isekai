@@ -51,8 +51,9 @@ public class WorldManager {
     }
 
     private void loadMaps() throws Exception {
+        String envF = com.nexusisekai.core.ServerConfig.getInstance().get("server.env","test").equals("main") ? " AND status='live'" : "";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM maps WHERE is_active=1");
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM maps WHERE is_active=1" + envF);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 MapData m = MapData.fromRs(rs);
@@ -73,8 +74,9 @@ public class WorldManager {
     }
 
     private void loadNpcs() throws Exception {
+        String envF = com.nexusisekai.core.ServerConfig.getInstance().get("server.env","test").equals("main") ? " AND status='live'" : "";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM npcs WHERE is_active=1");
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM npcs WHERE is_active=1" + envF);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 NpcData n = NpcData.fromRs(rs);

@@ -28,9 +28,13 @@ public class ItemManager {
     // item_id → ItemTemplate
     private final Map<Integer, ItemTemplate> itemTemplates = new ConcurrentHashMap<>();
 
+    public void reload() throws Exception { loadAll(); }
+
     public void loadAll() throws Exception {
+        itemTemplates.clear();
+        String envFilter = com.nexusisekai.core.ServerConfig.getInstance().get("server.env","test").equals("main") ? " AND status='live'" : "";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM items WHERE is_active=1");
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM items WHERE is_active=1" + envFilter);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 ItemTemplate t = ItemTemplate.fromRs(rs);

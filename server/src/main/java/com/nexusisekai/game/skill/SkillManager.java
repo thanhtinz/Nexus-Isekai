@@ -19,10 +19,13 @@ public class SkillManager {
         return INSTANCE;
     }
 
+    public void reload() throws SQLException { loadAll(); }
+
     public void loadAll() throws SQLException {
         templates.clear();
+        String envFilter = com.nexusisekai.core.ServerConfig.getInstance().get("server.env","test").equals("main") ? " AND status='live'" : "";
         try (Connection c = DatabaseManager.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement("SELECT * FROM skill_templates WHERE is_active=1");
+             PreparedStatement ps = c.prepareStatement("SELECT * FROM skill_templates WHERE is_active=1" + envFilter);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 SkillTemplate t = new SkillTemplate();

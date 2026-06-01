@@ -825,6 +825,8 @@ public class AdminApiServer {
         if (path.endsWith("/maps"))     { world.reloadMaps();     result = "maps reloaded"; }
         else if (path.endsWith("/monsters")) { world.reloadMonsters(); result = "monsters reloaded"; }
         else if (path.endsWith("/npcs"))     { world.reloadNpcs();     result = "npcs reloaded"; }
+        else if (path.endsWith("/skills"))   { com.nexusisekai.game.skill.SkillManager.getInstance().reload(); result = "skills reloaded"; }
+        else if (path.endsWith("/items"))    { com.nexusisekai.game.shop.ItemManager.getInstance().reload();  result = "items reloaded"; }
         sendJson(ex, 200, Map.of("success", true, "result", result));
     }
 
@@ -1028,15 +1030,15 @@ public class AdminApiServer {
         if (!"GET".equals(ex.getRequestMethod())) world.reloadMonsters();
     }
     private void handleNpcsCfg(HttpExchange ex) throws Exception {
-        crudConfig(ex, "npcs", "id", new String[]{"name","map_id","pos_x","pos_y","npc_type","interact_mode","functions_json","dialog_json","action_json","shop_id","icon_id","spine_key","sfx_key","voice_key","is_active"});
+        crudConfig(ex, "npcs", "id", new String[]{"name","map_id","pos_x","pos_y","npc_type","interact_mode","functions_json","dialog_json","action_json","shop_id","icon_id","spine_key","sfx_key","voice_key","status","is_active"});
         if (!"GET".equals(ex.getRequestMethod())) world.reloadNpcs();
     }
     private void handleMapsCfg(HttpExchange ex) throws Exception {
-        crudConfig(ex, "maps", "id", new String[]{"name","file_name","width","height","min_level","max_level","is_pvp","is_safe","bg_music","layout_json","is_active"});
+        crudConfig(ex, "maps", "id", new String[]{"name","file_name","width","height","min_level","max_level","is_pvp","is_safe","bg_music","layout_json","status","is_active"});
         if (!"GET".equals(ex.getRequestMethod())) world.reloadMaps();
     }
     private void handleSkillsCfg(HttpExchange ex) throws Exception {
-        crudConfig(ex, "skill_templates", "id", new String[]{"name","class_id","skill_type","element","base_damage","mp_cost","cooldown_ms","max_level","description","icon_id","unlock_level","vfx_key","vfx_hit_key","sfx_key","is_active"});
+        crudConfig(ex, "skill_templates", "id", new String[]{"name","class_id","skill_type","element","base_damage","mp_cost","cooldown_ms","max_level","description","icon_id","unlock_level","vfx_key","vfx_hit_key","sfx_key","status","is_active"});
     }
     private void handleWelfareCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "welfare", "id", new String[]{"welfare_type","name","description","icon_id","is_enabled","start_at","end_at","server_id","sort_order","claim_mode","reset_period","price_diamond","duration_days","goto_feature","config_json"});

@@ -4361,3 +4361,10 @@ ALTER TABLE npcs ADD COLUMN IF NOT EXISTS action_json    TEXT;  -- mode=dialog: 
 
 -- MAP: scene da dung (layout) cho Map Builder
 ALTER TABLE maps ADD COLUMN IF NOT EXISTS layout_json TEXT; -- {"bg":[{"key":..,"x":..,"y":..,"scale":..,"z":..}],"npcs":[{"id":..,"x":..,"y":..}],"portals":[{"x":..,"y":..,"w":..,"h":..,"dest_map":..,"dest_x":..,"dest_y":..}]}
+
+-- Trang thai noi dung cho quy trinh test → main (mac dinh 'live' de data cu khong doi)
+-- server.env=main chi nap status='live'; server test nap tat ca.
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS status VARCHAR(12) NOT NULL DEFAULT 'live'; -- draft|testing|live
+ALTER TABLE items           ADD COLUMN IF NOT EXISTS status VARCHAR(12) NOT NULL DEFAULT 'live';
+ALTER TABLE maps            ADD COLUMN IF NOT EXISTS status VARCHAR(12) NOT NULL DEFAULT 'live';
+ALTER TABLE npcs            ADD COLUMN IF NOT EXISTS status VARCHAR(12) NOT NULL DEFAULT 'live';

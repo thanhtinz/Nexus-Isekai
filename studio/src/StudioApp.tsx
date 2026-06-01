@@ -35,7 +35,7 @@ async function uploadAsset(assetKey: string, assetType: string, category: string
 }
 
 /* Hot-reload de ap thay doi vao game khong can restart */
-const RELOAD_MAP: Record<string, string> = { mob: 'monsters', map: 'maps', npc: 'npcs' };
+const RELOAD_MAP: Record<string, string> = { mob: 'monsters', map: 'maps', npc: 'npcs', skill: 'skills', item: 'items' };
 async function reloadGame(sectionKey: string) {
   const t = RELOAD_MAP[sectionKey];
   if (t) { try { await api('/api/reload/' + t, 'POST'); return true; } catch { return false; } }
@@ -185,11 +185,30 @@ export default function StudioApp() {
   );
 }
 
+/* Trang thai test → main: draft (nhap) / testing (server test) / live (sv chinh) */
+function StatusToggle({ value, onChange }: { value: string; onChange: (s: string) => void }) {
+  const v = value || 'live';
+  const opts: [string, string][] = [['draft', 'Nhap'], ['testing', 'Test'], ['live', 'Chinh thuc']];
+  return (
+    <div>
+      <label className="block text-[10px] uppercase tracking-wider text-surface-200/50 mb-1">Trang thai (test → main)</label>
+      <div className="flex gap-1">
+        {opts.map(([k, lbl]) => (
+          <button key={k} onClick={() => onChange(k)}
+            className={`flex-1 py-1.5 rounded-lg text-[11px] ${v === k
+              ? (k === 'live' ? 'bg-emerald-500 text-white' : k === 'testing' ? 'bg-gold-500 text-surface-950' : 'bg-white/15 text-surface-100')
+              : 'bg-white/5 text-surface-200/60'}`}>{lbl}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function GeneralTab({ draft, setDraft, section, setMsg, busy, setBusy }: {
   draft: Row; setDraft: (r: Row) => void; section: Section;
   setMsg: (s: string) => void; busy: string; setBusy: (s: string) => void;
 }) {
-  const fields = Object.keys(draft).filter(k => k !== section.pk);
+  const fields = Object.keys(draft).filter(k => k !== section.pk && k !== 'status');
   const set = (k: string, v: any) => setDraft({ ...draft, [k]: v });
 
   const aiDescribe = async () => {
@@ -212,6 +231,7 @@ function GeneralTab({ draft, setDraft, section, setMsg, busy, setBusy }: {
 
   return (
     <div className="p-3 space-y-3">
+      {'status' in draft && <StatusToggle value={draft.status} onChange={v => set('status', v)} />}
       <div className="flex gap-2 flex-wrap">
         <button onClick={aiDescribe} disabled={!!busy} className="btn-secondary !py-1.5 !px-2.5 text-[11px] !text-brand-300">
           {busy === 'ai-desc' ? '...' : 'AI: Mo ta'}</button>
@@ -421,13 +441,16 @@ function NpcEditor({ draft, setDraft, setMsg, reload }: {
 }) {
   const parse = (s: any, fb: any) => { try { return s ? JSON.parse(s) : fb; } catch { return fb; } };
   const mode: string = draft.interact_mode || 'function';
-  const funcs: string[] = parse(draft.functions_json, []);
+  // funcs: [{f:"shop",lv:1}] — ho tro ca dinh dang cu (string[])
+  const funcs: { f: string; lv: number }[] = parse(draft.functions_json, []).map((x: any) => typeof x === 'string' ? { f: x, lv: 1 } : { f: x.f, lv: x.lv ?? 1 });
   const actions: any[] = parse(draft.action_json, []);
   const set = (k: string, v: any) => setDraft({ ...draft, [k]: v });
-  const setFuncs = (f: string[]) => set('functions_json', JSON.stringify(f));
+  const setFuncs = (f: { f: string; lv: number }[]) => set('functions_json', JSON.stringify(f));
   const setActions = (a: any[]) => set('action_json', JSON.stringify(a));
 
-  const toggleFunc = (f: string) => setFuncs(funcs.includes(f) ? funcs.filter(x => x !== f) : [...funcs, f]);
+  const hasFunc = (f: string) => funcs.some(x => x.f === f);
+  const toggleFunc = (f: string) => setFuncs(hasFunc(f) ? funcs.filter(x => x.f !== f) : [...funcs, { f, lv: 1 }]);
+  const setFuncLv = (f: string, lv: number) => setFuncs(funcs.map(x => x.f === f ? { ...x, lv } : x));
   const addAction = (t: string) => {
     const base: any = { type: t };
     if (t === 'dialog') base.text = '';
@@ -469,16 +492,27 @@ function NpcEditor({ draft, setDraft, setMsg, reload }: {
       </div>
 
       {mode === 'function' ? (
-        <div>
-          <label className="block text-[10px] uppercase tracking-wider text-surface-200/50 mb-1">Chuc nang hien thi</label>
+        <div className="space-y-2">
+          <label className="block text-[10px] uppercase tracking-wider text-surface-200/50">Chuc nang + level mo khoa</label>
           <div className="flex flex-wrap gap-1.5">
             {NPC_FUNCTIONS.map(f => (
               <button key={f} onClick={() => toggleFunc(f)}
-                className={`badge ${funcs.includes(f) ? 'bg-brand-500 text-white' : 'bg-white/5 text-surface-200/60'}`}>{f}</button>
+                className={`badge ${hasFunc(f) ? 'bg-brand-500 text-white' : 'bg-white/5 text-surface-200/60'}`}>{f}</button>
             ))}
           </div>
-          {funcs.includes('shop') && (
-            <div className="mt-2">
+          {funcs.length > 0 && (
+            <div className="space-y-1">
+              {funcs.map(x => (
+                <div key={x.f} className="flex items-center gap-2">
+                  <span className="text-[11px] w-20 text-surface-100">{x.f}</span>
+                  <span className="text-[10px] text-surface-200/50">mo o Lv</span>
+                  <input type="number" value={x.lv} onChange={e => setFuncLv(x.f, +e.target.value)} className="input !py-1 !w-20" />
+                </div>
+              ))}
+            </div>
+          )}
+          {hasFunc('shop') && (
+            <div>
               <label className="block text-[10px] uppercase tracking-wider text-surface-200/50 mb-1">shop_id</label>
               <input value={draft.shop_id ?? ''} onChange={e => set('shop_id', e.target.value)} className="input" />
             </div>
@@ -518,6 +552,7 @@ function NpcEditor({ draft, setDraft, setMsg, reload }: {
         </div>
       )}
 
+      {'status' in draft && <StatusToggle value={draft.status} onChange={v => set('status', v)} />}
       <button onClick={save} className="btn-gold w-full !py-2">Luu NPC</button>
     </div>
   );
@@ -673,6 +708,7 @@ function MapBuilder({ map, setMsg }: { map: Row; setMsg: (s: string) => void }) 
   const [palKey, setPalKey] = useState<string>('');
   const [npcId, setNpcId] = useState<number>(0);
   const [sel, setSel] = useState<{ type: string; i: number } | null>(null);
+  const [minLevel, setMinLevel] = useState<number>(Number(map.min_level) || 1);
   const [busy, setBusy] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -750,7 +786,7 @@ function MapBuilder({ map, setMsg }: { map: Row; setMsg: (s: string) => void }) 
   const save = async () => {
     setBusy(true);
     const layout = JSON.stringify({ bg, npcs: markers, portals });
-    const r = await api('/api/maps', 'POST', { action: 'upsert', id: map.id, layout_json: layout });
+    const r = await api('/api/maps', 'POST', { action: 'upsert', ...map, layout_json: layout, min_level: minLevel });
     setMsg(r?.error ? `Loi: ${r.error}` : 'Da luu map layout');
     setBusy(false);
   };
@@ -809,6 +845,8 @@ function MapBuilder({ map, setMsg }: { map: Row; setMsg: (s: string) => void }) 
           </select>
         )}
         {sel && <button onClick={delSel} className="btn-danger !py-1.5">Xoa muc dang chon</button>}
+        <label className="block text-[11px] text-surface-200/60">Level mo khoa map
+          <input type="number" value={minLevel} onChange={e => setMinLevel(+e.target.value)} className="input !py-1.5 mt-1" /></label>
         <div className="mt-auto space-y-1.5">
           <button onClick={save} disabled={busy} className="btn-secondary w-full !py-2">Luu Layout</button>
           <button onClick={applyToTables} disabled={busy} className="btn-gold w-full !py-2">Luu + Ap dung xuong bang</button>
