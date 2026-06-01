@@ -3890,8 +3890,10 @@ public class AdminApiServer {
                     if (type.equals("ban_temp") || type.equals("ban_perm"))
                         c.prepareStatement("UPDATE accounts SET is_banned=1 WHERE id=" + accId).executeUpdate();
                     if (type.equals("mute") && b.get("char_id") != null) {
-                        String mu = days > 0 ? "DATE_ADD(NOW(), INTERVAL " + days + " DAY)" : "DATE_ADD(NOW(), INTERVAL 100 YEAR)";
-                        c.prepareStatement("UPDATE characters SET muted_until=" + mu + " WHERE id=" + num(b,"char_id")).executeUpdate();
+                        // muted_until la epoch millis (ChatHandler so voi System.currentTimeMillis())
+                        long muMs = days > 0 ? System.currentTimeMillis() + days * 86400000L
+                                             : System.currentTimeMillis() + 3650L * 86400000L; // ~vinh vien
+                        c.prepareStatement("UPDATE characters SET muted_until=" + muMs + " WHERE id=" + num(b,"char_id")).executeUpdate();
                     }
                     auditLog(ex, "sanction_" + type, "account", String.valueOf(accId), str(b,"reason"));
                     sendJson(ex, 200, Map.of("success", true));
@@ -3940,7 +3942,7 @@ public class AdminApiServer {
             while (sr.next()) src.add(Map.of("source",sr.getString("source"),"faucet",sr.getLong("faucet"),"sink",sr.getLong("sink")));
             out.put("gold_flow_7d", src);
             // nạp 7 ngày
-            ResultSet pr = c.prepareStatement("SELECT COALESCE(SUM(amount),0) s FROM topup_orders WHERE status='paid' AND created_at>DATE_SUB(NOW(),INTERVAL 7 DAY)").executeQuery();
+            ResultSet pr = c.prepareStatement("SELECT COALESCE(SUM(amount_vnd),0) s FROM topup_orders WHERE status='paid' AND created_at>DATE_SUB(NOW(),INTERVAL 7 DAY)").executeQuery();
             if (pr.next()) out.put("topup_7d", pr.getLong("s"));
             sendJson(ex, 200, out);
         } catch (Exception e) { sendJson(ex, 500, Map.of("error", e.getMessage())); }
