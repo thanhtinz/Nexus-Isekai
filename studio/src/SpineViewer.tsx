@@ -27,6 +27,20 @@ const readText = (f: File) => new Promise<string>((res, rej) => { const r = new 
 const readDataUrl = (f: File) => new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = rej; r.readAsDataURL(f); });
 const toDataUri = (text: string, mime: string) => `data:${mime};base64,` + btoa(unescape(encodeURIComponent(text)));
 
+const API_BASE = (import.meta as any).env?.VITE_API_BASE || '';
+async function uploadSpineFile(assetKey: string, displayName: string, blob: Blob) {
+  const key = localStorage.getItem('studio_key') || '';
+  const res = await fetch(API_BASE + '/api/assets/upload', {
+    method: 'POST',
+    headers: {
+      'X-Admin-Key': key, 'X-Asset-Key': assetKey, 'X-Asset-Type': 'spine',
+      'X-Category': 'spine', 'X-Display-Name': displayName, 'Content-Type': blob.type || 'application/octet-stream',
+    },
+    body: blob,
+  });
+  try { return await res.json(); } catch { return null; }
+}
+
 export default function SpineViewer({ setMsg }: { setMsg: (s: string) => void }) {
   const holder = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
@@ -40,6 +54,20 @@ export default function SpineViewer({ setMsg }: { setMsg: (s: string) => void })
   const [speed, setSpeed] = useState(1);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
+  const [assetName, setAssetName] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const saveKho = async () => {
+    if (!jsonF || !atlasF || pngFs.length === 0) { setErr('Chon du 3 file truoc khi luu KHO'); return; }
+    const name = (assetName || jsonF.name.replace(/\.json$/i, '')).replace(/[^\w-]/g, '_');
+    setSaving(true);
+    try {
+      const files: File[] = [jsonF, atlasF, ...pngFs];
+      for (const f of files) await uploadSpineFile(`spine/${name}/${f.name}`, f.name, f);
+      setMsg(`Da luu bo Spine '${name}' vao KHO (${files.length} file). NPC/Mob co the tro spine_key='spine/${name}'.`);
+    } catch (e: any) { setErr('Loi luu KHO: ' + (e?.message || '')); }
+    setSaving(false);
+  };
 
   useEffect(() => () => { try { playerRef.current?.dispose(); } catch { /* */ } }, []);
 
@@ -118,6 +146,15 @@ export default function SpineViewer({ setMsg }: { setMsg: (s: string) => void })
         <label className="block text-[11px] text-surface-200/70">texture .png (1+)
           <input type="file" accept=".png" multiple onChange={e => setPngFs(Array.from(e.target.files || []))} className="block w-full text-[11px] mt-1" /></label>
         <button onClick={load} disabled={loading} className="btn-gold w-full !py-2 text-xs">{loading ? 'Dang nap...' : 'Nap & Xem'}</button>
+
+        <div className="pt-2 border-t border-white/5 space-y-2">
+          <label className="block text-[11px] text-surface-200/70">Ten bo (luu KHO)
+            <input value={assetName} onChange={e => setAssetName(e.target.value)} placeholder="vd: dragon_pet"
+              className="input !py-1 text-xs mt-1" /></label>
+          <button onClick={saveKho} disabled={saving} className="btn-secondary w-full !py-1.5 text-xs">
+            {saving ? 'Dang luu...' : 'Luu bo Spine vao KHO'}</button>
+          <p className="text-[10px] text-surface-200/40">Luu 3 file vao KHO duoi key spine/&lt;ten&gt;/... de NPC/Mob tro toi qua spine_key.</p>
+        </div>
 
         {anims.length > 0 && (
           <>
