@@ -197,15 +197,9 @@ const PANELS: PanelConfig[] = [
   { key: 'dialogs',      label: 'NPC Dialog',      group: 'Noi Dung',   endpoint: '/api/dialogs',           dataKey: 'dialogs' },
   { key: 'registry',     label: 'Kho Tong',        group: 'Noi Dung',   endpoint: '/api/registry',          dataKey: 'items' },
   { key: 'items',        label: 'Items',           group: 'Noi Dung',   endpoint: '/api/items',             dataKey: 'items' },
-  { key: 'monsters',     label: 'Quai Vat / Boss', group: 'Noi Dung',   endpoint: '/api/monsters',          dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'npcs',         label: 'NPC',             group: 'Noi Dung',   endpoint: '/api/npcs',              dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'skills',       label: 'Ky Nang (VFX)',   group: 'Noi Dung',   endpoint: '/api/skills',            dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'maps',         label: 'Ban Do (Nhac)',   group: 'Noi Dung',   endpoint: '/api/maps',              dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'class_change', label: 'Chuyen Lop',      group: 'Noi Dung',   endpoint: '/api/class-change',      dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'child_shop',   label: 'Shop Tre Em',     group: 'Noi Dung',   endpoint: '/api/child-shop',        dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'voice_lines',  label: 'Loi Thoai (Voice)',group: 'Noi Dung',  endpoint: '/api/voice-lines',       dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'sound_events', label: 'Am Thanh (Sound)',  group: 'Noi Dung',  endpoint: '/api/sound-events',      dataKey: 'rows', editable: true, pk: 'event_key' },
-  { key: 'audio_assets', label: 'Kho Audio',         group: 'Noi Dung',  endpoint: '/api/audio-assets',      dataKey: 'rows', editable: true, pk: 'id' },
 
   // Kinh te (shop, nap, giftcode, su menh)
   { key: 'shop',         label: 'Shop NPC',        group: 'Kinh Te',    endpoint: '/api/shops',             dataKey: 'shops' },
