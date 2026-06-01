@@ -233,6 +233,9 @@ public class CombatHandler {
 
         // Cộng EXP cho người kill (đã nhân hệ số sự kiện)
         int levelsUp = player.gainExp(expGain);
+        // Cộng VÀNG cho người kill SERVER-SIDE (trước đây chỉ gửi xuống client → dễ bị hack)
+        // addGold ghi luôn currency_log nguồn 'drop' để giám sát kinh tế.
+        if (goldGain > 0) player.addGold(goldGain, "drop", "monster " + monster.getName());
         // Hoạt Động: cộng tiến độ sự kiện tích EXP
         ActivityHandler.fire(player.getCharId(), "gain_exp", expGain);
         // Phúc Lợi: cập nhật mốc cấp độ khi lên cấp
