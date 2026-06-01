@@ -3575,3 +3575,16 @@ UPDATE audio_assets SET category='item'    WHERE asset_key IN ('sfx_loot','sfx_e
 UPDATE audio_assets SET category='levelup' WHERE asset_key='sfx_levelup';
 UPDATE audio_assets SET category='ui_click' WHERE asset_type='ui';
 UPDATE audio_assets SET category='nature'  WHERE asset_type='ambient';
+
+-- ═════════════════════════════════════════════════════════════
+-- PHÂN DANH MỤC: thêm cột category cho các bảng còn thiếu hẳn
+-- (các bảng khác đã phân loại bằng cột riêng — xem CONTENT_REGISTRY.md mục D)
+-- ═════════════════════════════════════════════════════════════
+ALTER TABLE monsters     ADD COLUMN IF NOT EXISTS category VARCHAR(24) NOT NULL DEFAULT 'normal'; -- normal,elite,boss,world_boss,minion,summon
+ALTER TABLE shops        ADD COLUMN IF NOT EXISTS category VARCHAR(24) NOT NULL DEFAULT 'general'; -- general,weapon,armor,consumable,farm,gem,vip,event
+ALTER TABLE world_bosses ADD COLUMN IF NOT EXISTS category VARCHAR(24) NOT NULL DEFAULT 'field';   -- field,raid,event,seasonal
+ALTER TABLE gem_templates    ADD COLUMN IF NOT EXISTS category VARCHAR(24) NOT NULL DEFAULT 'stat'; -- stat,element,special (bổ sung cạnh gem_type)
+
+-- Phân loại monster hiện có theo is_boss
+UPDATE monsters SET category='boss' WHERE is_boss=1;
+UPDATE monsters SET category='normal' WHERE is_boss=0;

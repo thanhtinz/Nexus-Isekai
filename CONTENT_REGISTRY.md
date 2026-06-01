@@ -37,3 +37,36 @@
 4. Thêm content mới → vào đúng bảng/danh mục theo bảng trên.
 
 > Liên quan: ITEM_ID_CONVENTION.md (dải id items) · ASSET_HUB.md (folder asset) · FARM_ASSETS.md (icon farm).
+
+## D. CỘT PHÂN LOẠI MỖI BẢNG (audit toàn bộ — mỗi bảng đều có danh mục)
+| Bảng | Cột phân loại | Giá trị |
+|---|---|---|
+| items | category + cat_no | weapon/armor/.../farm_*/gem/cosmetic/quest |
+| quests | quest_type | main/side/daily/event |
+| events | event_type | boss/double_exp/drop_rate/custom + leaderboard/boss_kill/wedding... |
+| achievements | category + reward_type | (theo nhóm thành tựu) |
+| daily_login_rewards | reward_type | (loại thưởng điểm danh) |
+| gacha_banners | banner_type | (loại banner trieu hoi) |
+| monsters | category (MỚI) | normal/elite/boss/world_boss/minion/summon |
+| world_bosses | category (MỚI) | field/raid/event/seasonal |
+| dungeon_templates | difficulty | normal/hard/hell |
+| npcs | npc_type | shop/quest/... |
+| pet_templates | element + rarity | fire/ice/... + common→legendary |
+| mount_templates | rarity | common→legendary |
+| gem_templates | gem_type + category (MỚI) | stat/element/special |
+| cosmetic_templates | cosmetic_type | wing/aura/halo |
+| titles | title_type | (theo nguồn nhận) |
+| skill_templates | class_id | (theo lớp nhân vật) |
+| furniture_catalog | furniture_type | (loại nội thất) |
+| shops | category (MỚI) | general/weapon/armor/consumable/farm/gem/vip/event |
+| farm_seeds / farm_animals | (bảng riêng, id từ 1) | farm_animals: animal_type |
+
+## E. ASSET (xem ASSET_HUB.md)
+| Bảng | Phân loại |
+|---|---|
+| client_assets | asset_type (media) x category (nội dung) |
+| audio_assets | asset_type (bgm/sfx/ambient/voice/ui) x category (scene/combat/item/farm...) |
+| asset_bundles | bundle_category (sprite/audio/ui/map/effect/font/mixed) |
+
+> Nguyên tắc: mọi bảng content/config đều có ÍT NHẤT 1 cột phân loại.
+> Bảng dùng chung (items) thêm category+cat_no; bảng riêng dùng cột type/element/rarity sẵn có.
