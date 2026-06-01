@@ -130,6 +130,16 @@ public class AdminApiServer {
         httpServer.createContext("/api/world-bosses-cfg",ex -> handleAuth(ex, this::handleWorldBossesCfg));
         httpServer.createContext("/api/market-admin",    ex -> handleAuth(ex, this::handleMarketAdmin));
         httpServer.createContext("/api/guild-wars",      ex -> handleAuth(ex, this::handleGuildWarsAdmin));
+        httpServer.createContext("/api/cosmetics",       ex -> handleAuth(ex, this::handleCosmeticsCfg));
+        httpServer.createContext("/api/factions",        ex -> handleAuth(ex, this::handleFactionsCfg));
+        httpServer.createContext("/api/faction-tiers",   ex -> handleAuth(ex, this::handleFactionTiersCfg));
+        httpServer.createContext("/api/class-change",    ex -> handleAuth(ex, this::handleClassChangeCfg));
+        httpServer.createContext("/api/first-topup",     ex -> handleAuth(ex, this::handleFirstTopupCfg));
+        httpServer.createContext("/api/giftcode-rewards",ex -> handleAuth(ex, this::handleGiftcodeRewardsCfg));
+        httpServer.createContext("/api/pvp-season-rewards", ex -> handleAuth(ex, this::handlePvpSeasonRewardsCfg));
+        httpServer.createContext("/api/minigame-config", ex -> handleAuth(ex, this::handleMinigameCfg));
+        httpServer.createContext("/api/child-shop",      ex -> handleAuth(ex, this::handleChildShopCfg));
+        httpServer.createContext("/api/webshop-contents",ex -> handleAuth(ex, this::handleWebshopContentsCfg));
         httpServer.createContext("/api/shops",      ex -> handleAuth(ex, this::handleShops));
         httpServer.createContext("/api/events",     ex -> handleAuth(ex, this::handleEvents));
         httpServer.createContext("/api/quests",     ex -> handleAuth(ex, this::handleQuests));
@@ -771,6 +781,38 @@ public class AdminApiServer {
             while (rs.next()) list.add(rsToMap(rs, "id","guild_a","guild_b","map_id","status","score_a","score_b","start_at","end_at","winner_guild"));
         }
         sendJson(ex, 200, Map.of("rows", list));
+    }
+
+    // ── Thêm CRUD cho các bảng content/config người chơi gặp ingame ──
+    private void handleCosmeticsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "cosmetic_templates", "id", new String[]{"name","cosmetic_type","sprite_id","is_active"});
+    }
+    private void handleFactionsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "factions", "id", new String[]{"name","description","icon_id","max_rep","is_active"});
+    }
+    private void handleFactionTiersCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "faction_rep_tiers", "id", new String[]{"faction_id","tier_order","tier_name","rep_required","reward_json"});
+    }
+    private void handleClassChangeCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "class_change_config", "id", new String[]{"from_class","to_class","level_req","cost_gold","cost_item","is_active"});
+    }
+    private void handleFirstTopupCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "first_topup_rewards", "id", new String[]{"item_id","qty","description"});
+    }
+    private void handleGiftcodeRewardsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "giftcode_rewards", "id", new String[]{"giftcode_id","reward_type","qty"});
+    }
+    private void handlePvpSeasonRewardsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "pvp_season_rewards", "id", new String[]{"season_id","min_rank","max_rank","tier_name","reward_type","reward_id","reward_amount","exclusive_skin"});
+    }
+    private void handleMinigameCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "minigame_config", "game_type", new String[]{"min_bet","max_bet","house_edge","config_json"});
+    }
+    private void handleChildShopCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "child_shop_items", "id", new String[]{"name","category","nanny","diamond_price","effect_json","is_active"});
+    }
+    private void handleWebshopContentsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "webshop_item_contents", "id", new String[]{"webshop_item_id","item_id","qty"});
     }
 
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {
