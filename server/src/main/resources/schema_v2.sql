@@ -1809,7 +1809,7 @@ INSERT IGNORE INTO character_sprite_config VALUES
 ('creation_mode', 'class_gender', 'Tao nhan vat: chon class + gioi tinh'),
 ('animation_format', 'spine', 'Spine animation cho NPCs va effects');
 
--- Tao nhan vat: class_id(1-7) + gender(0/1)
+-- Tao nhan vat: class_id(1-5) + gender(0/1)
 ALTER TABLE characters ADD COLUMN IF NOT EXISTS gender TINYINT NOT NULL DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS animation_states (
