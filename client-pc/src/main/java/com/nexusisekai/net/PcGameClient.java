@@ -345,4 +345,9 @@ public class PcGameClient {
     // Voice
     public static final short C2S_VOICE_REQUEST = (short)0x4401;
     public static final short S2C_VOICE_PLAY = (short)0x4411;
+    // Sound config
+    public static final short C2S_SOUND_CONFIG = (short)0x4402;
+    public static final short S2C_PLAY_BGM = (short)0x4412;
+    public static final short S2C_PLAY_SOUND = (short)0x4413;
+    public static final short S2C_SOUND_CONFIG = (short)0x4414;
 }

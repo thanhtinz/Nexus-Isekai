@@ -653,4 +653,10 @@ public final class PacketOpcode {
     // ───── Âm thanh lời thoại (Voice) (0x44xx) ─────
     public static final short C2S_VOICE_REQUEST    = (short)0x4401; // [byte context][int refId]  context 1=class_intro 2=npc_bark
     public static final short S2C_VOICE_PLAY        = (short)0x4411; // [string audioKey][string subtitle]
+
+    // ───── Sound config + nhạc map (0x44xx) ─────
+    public static final short C2S_SOUND_CONFIG      = (short)0x4402; // client xin bảng sound_events
+    public static final short S2C_PLAY_BGM          = (short)0x4412; // [string bgmKey] — nhạc map
+    public static final short S2C_PLAY_SOUND        = (short)0x4413; // [string audioKey] — one-shot push
+    public static final short S2C_SOUND_CONFIG      = (short)0x4414; // [list event_key+audio_key+volume]
 }

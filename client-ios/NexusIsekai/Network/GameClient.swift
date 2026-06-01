@@ -505,4 +505,9 @@ extension FixedWidthInteger {
     // Voice
     static let C2S_VOICE_REQUEST: Int16 = 0x4401
     static let S2C_VOICE_PLAY: Int16 = 0x4411
+    // Sound config
+    static let C2S_SOUND_CONFIG: Int16 = 0x4402
+    static let S2C_PLAY_BGM: Int16 = 0x4412
+    static let S2C_PLAY_SOUND: Int16 = 0x4413
+    static let S2C_SOUND_CONFIG: Int16 = 0x4414
 }

@@ -10,6 +10,11 @@ public class AudioManager : MonoBehaviour {
     public void PlaySFX(string key) { if (clips.TryGetValue(key, out var c)) sfxSource.PlayOneShot(c, master*sfx); }
     public void PlayUI(string key) { if (clips.TryGetValue(key, out var c)) uiSource.PlayOneShot(c, master*ui); }
     public void PlayVoice(string key) { if (clips.TryGetValue(key, out var c)) sfxSource.PlayOneShot(c, master*sfx); } // lời thoại class/npc
+    // Sound events do admin cấu hình (event_key -> audio_key)
+    private readonly System.Collections.Generic.Dictionary<string,string> soundEvents = new();
+    private readonly System.Collections.Generic.Dictionary<string,float> soundVol = new();
+    public void RegisterSoundEvent(string ev, string audioKey, string path, float vol) { soundEvents[ev]=audioKey; soundVol[ev]=vol; }
+    public void PlayEvent(string ev) { if (soundEvents.TryGetValue(ev, out var k) && clips.TryGetValue(k, out var cl)) sfxSource.PlayOneShot(cl, master*sfx*(soundVol.TryGetValue(ev,out var v)?v:1f)); }
     public void SetVolume(string t, float v) { switch(t) { case "master":master=v;break; case "music":music=v;break; case "sfx":sfx=v;break; case "ui":ui=v;break; case "ambient":ambient=v;break; } }
     public void StopBGM() { bgmSource.Stop(); }
 }

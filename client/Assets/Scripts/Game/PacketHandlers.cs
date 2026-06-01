@@ -78,6 +78,9 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_ACTIVITY_RESULT, OnActivityResult);
             d.Register(PacketOpcode.S2C_ACTIVITY_RANKING, OnActivityRanking);
             d.Register(PacketOpcode.S2C_VOICE_PLAY, OnVoicePlay);
+            d.Register(PacketOpcode.S2C_PLAY_BGM, OnPlayBgm);
+            d.Register(PacketOpcode.S2C_PLAY_SOUND, OnPlaySound);
+            d.Register(PacketOpcode.S2C_SOUND_CONFIG, OnSoundConfig);
             d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
             d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
             d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
@@ -795,6 +798,15 @@ namespace NexusIsekai.Game
             PacketBuilder.SendActivityList();
         }
 
+        private void OnPlayBgm(PacketReader r) { AudioManager.Instance?.PlayBGM(r.ReadString()); }
+        private void OnPlaySound(PacketReader r) { AudioManager.Instance?.PlaySFX(r.ReadString()); }
+        private void OnSoundConfig(PacketReader r) {
+            int n = r.ReadShort();
+            for (int i = 0; i < n; i++) {
+                string ev = r.ReadString(); string key = r.ReadString(); string path = r.ReadString(); float vol = r.ReadFloat();
+                AudioManager.Instance?.RegisterSoundEvent(ev, key, path, vol);
+            }
+        }
         private void OnVoicePlay(PacketReader r) {
             string audioKey = r.ReadString();
             string subtitle = r.ReadString();

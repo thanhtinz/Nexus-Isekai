@@ -4052,3 +4052,53 @@ INSERT IGNORE INTO voice_lines (context,ref_id,audio_key,subtitle) VALUES
  ('npc_bark',1,'voice_npc_hi','Chào lữ khách, cần ta giúp gì?'),
  ('npc_bark',1,'voice_npc_hi','Ghé qua xem hàng nhé!'),
  ('npc_bark',2,'voice_npc_hi','Đường phía trước nguy hiểm đấy.');
+
+-- ═════════════════════════════════════════════════════════════
+-- SOUND EVENTS — gắn âm thanh cho sự kiện, admin cấu hình hết
+-- event_key: action (thao tác/hành động người chơi), ui, monster, boss, system
+--   action: player_attack, skill_cast, jump, pickup, levelup, die, revive, equip
+--   ui:     btn_click, panel_open, panel_close, error, reward, purchase
+--   monster: monster_<id>_attack / _hurt / _death  (vd monster_50_death)
+--   boss:    boss_<id>_roar / _death / _skill
+-- audio_key trỏ audio_assets. Client tải toàn bộ map này 1 lần, phát theo event_key.
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS sound_events (
+    event_key   VARCHAR(48) NOT NULL PRIMARY KEY,
+    audio_key   VARCHAR(64) NOT NULL,
+    category    VARCHAR(16) NOT NULL DEFAULT 'action',  -- action|ui|monster|boss|system
+    volume      FLOAT NOT NULL DEFAULT 1.0,
+    is_enabled  TINYINT NOT NULL DEFAULT 1,
+    description VARCHAR(128) DEFAULT ''
+);
+
+-- Audio assets cho thao tác/hành động/monster/boss (team thu/làm SFX, để vào Audio/SFX/)
+INSERT IGNORE INTO audio_assets (asset_key,asset_type,category,file_path,description) VALUES
+ ('sfx_attack','sfx','combat','Audio/SFX/attack.ogg','Đòn đánh thường'),
+ ('sfx_skill','sfx','skill','Audio/SFX/skill.ogg','Tung kỹ năng'),
+ ('sfx_levelup','sfx','levelup','Audio/SFX/levelup.ogg','Lên cấp'),
+ ('sfx_pickup','sfx','item','Audio/SFX/pickup.ogg','Nhặt đồ'),
+ ('sfx_die','sfx','combat','Audio/SFX/die.ogg','Nhân vật chết'),
+ ('sfx_btn','ui','ui_click','Audio/UI/click.ogg','Bấm nút'),
+ ('sfx_reward','ui','ui_click','Audio/UI/reward.ogg','Nhận thưởng'),
+ ('sfx_mon_hit','sfx','combat','Audio/SFX/mon_hit.ogg','Quái bị đánh'),
+ ('sfx_mon_die','sfx','combat','Audio/SFX/mon_die.ogg','Quái chết'),
+ ('sfx_boss_roar','sfx','combat','Audio/SFX/boss_roar.ogg','Boss gầm');
+
+-- Seed sound_events (admin sửa/thêm)
+INSERT IGNORE INTO sound_events (event_key,audio_key,category,description) VALUES
+ ('player_attack','sfx_attack','action','Đánh thường'),
+ ('skill_cast','sfx_skill','action','Tung skill'),
+ ('levelup','sfx_levelup','action','Lên cấp'),
+ ('pickup','sfx_pickup','action','Nhặt vật phẩm'),
+ ('die','sfx_die','action','Nhân vật chết'),
+ ('btn_click','sfx_btn','ui','Bấm nút'),
+ ('panel_open','sfx_btn','ui','Mở panel'),
+ ('reward','sfx_reward','ui','Nhận thưởng'),
+ ('monster_default_hurt','sfx_mon_hit','monster','Quái bị đánh (mặc định)'),
+ ('monster_default_death','sfx_mon_die','monster','Quái chết (mặc định)'),
+ ('boss_default_roar','sfx_boss_roar','boss','Boss gầm (mặc định)');
+
+-- Nhạc riêng từng map: maps.bg_music (đã có cột). Seed vài map mẫu.
+UPDATE maps SET bg_music='bgm_town'    WHERE is_safe=1 AND (bg_music IS NULL OR bg_music='');
+UPDATE maps SET bg_music='bgm_field'   WHERE is_safe=0 AND is_pvp=0 AND (bg_music IS NULL OR bg_music='');
+UPDATE maps SET bg_music='bgm_pvp'     WHERE is_pvp=1 AND (bg_music IS NULL OR bg_music='');

@@ -577,6 +577,10 @@ namespace NexusIsekai.Network
         // Voice
         public const short C2S_VOICE_REQUEST    = 0x4401;
         public const short S2C_VOICE_PLAY       = 0x4411;
+        public const short C2S_SOUND_CONFIG     = 0x4402;
+        public const short S2C_PLAY_BGM         = 0x4412;
+        public const short S2C_PLAY_SOUND       = 0x4413;
+        public const short S2C_SOUND_CONFIG     = 0x4414;
 
     }
 }

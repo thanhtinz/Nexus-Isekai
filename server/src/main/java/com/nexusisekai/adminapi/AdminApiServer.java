@@ -145,6 +145,8 @@ public class AdminApiServer {
         httpServer.createContext("/api/activity-rank-rewards", ex -> handleAuth(ex, this::handleActivityRankRewardsCfg));
         httpServer.createContext("/api/activity-types", ex -> handleAuth(ex, this::handleActivityTypesCfg));
         httpServer.createContext("/api/voice-lines", ex -> handleAuth(ex, this::handleVoiceLinesCfg));
+        httpServer.createContext("/api/sound-events", ex -> handleAuth(ex, this::handleSoundEventsCfg));
+        httpServer.createContext("/api/audio-assets", ex -> handleAuth(ex, this::handleAudioAssetsCfg));
         httpServer.createContext("/api/shops",      ex -> handleAuth(ex, this::handleShops));
         httpServer.createContext("/api/events",     ex -> handleAuth(ex, this::handleEvents));
         httpServer.createContext("/api/quests",     ex -> handleAuth(ex, this::handleQuests));
@@ -835,6 +837,12 @@ public class AdminApiServer {
     }
     private void handleVoiceLinesCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "voice_lines", "id", new String[]{"context","ref_id","audio_key","subtitle","lang","weight","is_enabled"});
+    }
+    private void handleSoundEventsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "sound_events", "event_key", new String[]{"audio_key","category","volume","is_enabled","description"});
+    }
+    private void handleAudioAssetsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "audio_assets", "id", new String[]{"asset_key","asset_type","category","file_path","volume_default","is_loop","description","is_active"});
     }
 
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {

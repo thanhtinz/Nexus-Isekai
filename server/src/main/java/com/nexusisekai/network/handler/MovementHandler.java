@@ -164,6 +164,8 @@ public class MovementHandler {
         out.writeFloat(player.getX());
         out.writeFloat(player.getY());
         session.send(out);
+        // Nhạc riêng của map (admin cấu hình maps.bg_music)
+        SoundHandler.sendMapBgm(session, player.getMapId());
     }
 
     private static void sendPlayersInZone(GameSession session, ZoneManager zm,
