@@ -124,5 +124,6 @@
 3. Admin hub lọc 2 tầng: chọn asset_type rồi category.
 4. OTA: client so version/hash, tải bổ sung theo category cần dùng.
 5. UI tính năng mới: mỗi tính năng 1 category ui_<feature> (xem 4b) để tải/đổi skin riêng theo sự kiện; icon Hoạt Động đặt tên theo type_key (xem 4c) để map tự động với bảng activity_types.
+6. Spine + VFX + âm thanh gắn qua admin: monster/npc có `spine_key` (skeleton Spine) + `sfx_*`; skill có `vfx_key`/`vfx_hit_key` (Effects/) + `sfx_key`. Đặt Spine vào Sprites/Spine/, hiệu ứng skill vào Effects/Skill/, khai key trong admin.
 
 > Liên quan: CONTENT_REGISTRY.md (phân loại content) · ITEM_ID_CONVENTION.md · FARM_ASSETS.md

@@ -4102,3 +4102,14 @@ INSERT IGNORE INTO sound_events (event_key,audio_key,category,description) VALUE
 UPDATE maps SET bg_music='bgm_town'    WHERE is_safe=1 AND (bg_music IS NULL OR bg_music='');
 UPDATE maps SET bg_music='bgm_field'   WHERE is_safe=0 AND is_pvp=0 AND (bg_music IS NULL OR bg_music='');
 UPDATE maps SET bg_music='bgm_pvp'     WHERE is_pvp=1 AND (bg_music IS NULL OR bg_music='');
+
+-- ───── Cột spine (Spine animation) + âm thanh cho NPC/monster, VFX cho skill ─────
+ALTER TABLE monsters ADD COLUMN IF NOT EXISTS spine_key  VARCHAR(64) DEFAULT NULL; -- tên Spine skeleton
+ALTER TABLE monsters ADD COLUMN IF NOT EXISTS sfx_attack VARCHAR(64) DEFAULT NULL;
+ALTER TABLE monsters ADD COLUMN IF NOT EXISTS sfx_hurt   VARCHAR(64) DEFAULT NULL;
+ALTER TABLE monsters ADD COLUMN IF NOT EXISTS sfx_death  VARCHAR(64) DEFAULT NULL;
+ALTER TABLE npcs     ADD COLUMN IF NOT EXISTS spine_key  VARCHAR(64) DEFAULT NULL;
+ALTER TABLE npcs     ADD COLUMN IF NOT EXISTS sfx_key    VARCHAR(64) DEFAULT NULL; -- âm thanh khi tương tác
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_key     VARCHAR(64) DEFAULT NULL; -- hiệu ứng lúc tung
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_hit_key VARCHAR(64) DEFAULT NULL; -- hiệu ứng lúc trúng
+ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS sfx_key     VARCHAR(64) DEFAULT NULL; -- âm thanh skill

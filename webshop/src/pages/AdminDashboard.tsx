@@ -196,8 +196,10 @@ const PANELS: PanelConfig[] = [
   { key: 'dialogs',      label: 'NPC Dialog',      group: 'Noi Dung',   endpoint: '/api/dialogs',           dataKey: 'dialogs' },
   { key: 'registry',     label: 'Kho Tong',        group: 'Noi Dung',   endpoint: '/api/registry',          dataKey: 'items' },
   { key: 'items',        label: 'Items',           group: 'Noi Dung',   endpoint: '/api/items',             dataKey: 'items' },
-  { key: 'monsters',     label: 'Quai Vat',        group: 'Noi Dung',   endpoint: '/api/monsters',          dataKey: 'monsters' },
-  { key: 'maps',         label: 'Ban Do',          group: 'Noi Dung',   endpoint: '/api/maps',              dataKey: 'maps' },
+  { key: 'monsters',     label: 'Quai Vat / Boss', group: 'Noi Dung',   endpoint: '/api/monsters',          dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'npcs',         label: 'NPC',             group: 'Noi Dung',   endpoint: '/api/npcs',              dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'skills',       label: 'Ky Nang (VFX)',   group: 'Noi Dung',   endpoint: '/api/skills',            dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'maps',         label: 'Ban Do (Nhac)',   group: 'Noi Dung',   endpoint: '/api/maps',              dataKey: 'rows', editable: true, pk: 'id' },
 
   // AI
   { key: 'ai',           label: 'AI Content',      group: 'AI & Review',endpoint: '/api/story',             dataKey: 'chapters' },

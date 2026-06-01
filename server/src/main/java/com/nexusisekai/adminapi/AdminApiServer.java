@@ -117,9 +117,9 @@ public class AdminApiServer {
         httpServer.createContext("/api/ban",        ex -> handleAuth(ex, this::handleBan));
         httpServer.createContext("/api/unban",      ex -> handleAuth(ex, this::handleUnban));
         httpServer.createContext("/api/broadcast",  ex -> handleAuth(ex, this::handleBroadcast));
-        httpServer.createContext("/api/maps",       ex -> handleAuth(ex, this::handleMaps));
-        httpServer.createContext("/api/monsters",   ex -> handleAuth(ex, this::handleMonsters));
-        httpServer.createContext("/api/npcs",       ex -> handleAuth(ex, this::handleNpcs));
+        httpServer.createContext("/api/maps",       ex -> handleAuth(ex, this::handleMapsCfg));
+        httpServer.createContext("/api/monsters",   ex -> handleAuth(ex, this::handleMonstersCfg));
+        httpServer.createContext("/api/npcs",       ex -> handleAuth(ex, this::handleNpcsCfg));
         httpServer.createContext("/api/items",      ex -> handleAuth(ex, this::handleItems));
         // Tính năng mới: cấu hình AFK / VIP / Ngoại Vực / World Boss + giám sát Chợ / Guild War
         httpServer.createContext("/api/afk-cards",       ex -> handleAuth(ex, this::handleAfkCards));
@@ -232,7 +232,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/spawn-zones",         ex -> handleAuth(ex, this::handleSpawnZones));
         httpServer.createContext("/api/event-currency-shop", ex -> handleAuth(ex, this::handleEventCurrencyShop));
         httpServer.createContext("/api/pass/tasks",          ex -> handleAuth(ex, this::handlePassTasks));
-        httpServer.createContext("/api/skills",           ex -> handleAuth(ex, this::handleSkills));
+        httpServer.createContext("/api/skills",           ex -> handleAuth(ex, this::handleSkillsCfg));
         httpServer.createContext("/api/stickers",         ex -> handleAuth(ex, this::handleStickers));
         httpServer.createContext("/api/admin-accounts",   ex -> handleAuth(ex, this::handleAdminAccounts));
         httpServer.createContext("/api/portals",          ex -> handleAuth(ex, this::handlePortals));
@@ -843,6 +843,22 @@ public class AdminApiServer {
     }
     private void handleAudioAssetsCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "audio_assets", "id", new String[]{"asset_key","asset_type","category","file_path","volume_default","is_loop","description","is_active"});
+    }
+    // NPC/monster/map/skill: CRUD đầy đủ cột (tên, spine, âm thanh, vị trí, vfx...) + reload world
+    private void handleMonstersCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "monsters", "id", new String[]{"name","level","hp","atk","def","speed","exp_reward","gold_reward","map_id","spawn_x","spawn_y","aggro_range","respawn_sec","is_boss","loot_json","icon_id","spine_key","sfx_attack","sfx_hurt","sfx_death","is_active"});
+        if (!"GET".equals(ex.getRequestMethod())) world.reloadMonsters();
+    }
+    private void handleNpcsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "npcs", "id", new String[]{"name","map_id","pos_x","pos_y","npc_type","dialog_json","shop_id","icon_id","spine_key","sfx_key","is_active"});
+        if (!"GET".equals(ex.getRequestMethod())) world.reloadNpcs();
+    }
+    private void handleMapsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "maps", "id", new String[]{"name","file_name","width","height","min_level","max_level","is_pvp","is_safe","bg_music","is_active"});
+        if (!"GET".equals(ex.getRequestMethod())) world.reloadMaps();
+    }
+    private void handleSkillsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "skill_templates", "id", new String[]{"name","class_id","skill_type","element","base_damage","mp_cost","cooldown_ms","max_level","description","icon_id","unlock_level","vfx_key","vfx_hit_key","sfx_key","is_active"});
     }
 
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {
