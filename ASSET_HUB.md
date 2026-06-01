@@ -70,6 +70,26 @@
 | Config/ | config | json cấu hình |
 | Localization/ | localization | file ngôn ngữ |
 
+## 4b. UI PANEL TÍNH NĂNG — mỗi tính năng 1 folder, nền panel + icon + nút
+| Folder | category | Mô tả |
+|---|---|---|
+| Sprites/Ui/Afk/ | ui_afk | nền panel AFK, icon thẻ treo theo giờ |
+| Sprites/Ui/Market/ | ui_market | chợ người chơi: nền, tab vàng/kim cương, nút bán/mua |
+| Sprites/Ui/GuildWar/ | ui_guildwar | guild chiến: nền, cờ 2 bang, thanh điểm |
+| Sprites/Ui/WorldBoss/ | ui_worldboss | world boss: nền, thanh HP lớn, khung BXH sát thương |
+| Sprites/Ui/OuterRealm/ | ui_outer | ngoại vực: nền tháp, nút tầng theo level |
+| Sprites/Ui/Vip/ | ui_vip | VIP: nền, huy hiệu 9 mốc, khung đặc quyền |
+| Sprites/Ui/Activity/ | ui_activity | Hoạt Động: nền hub, cột trái danh sách, khung phải chi tiết, thanh tiến độ |
+| Sprites/Ui/Pk/ | ui_pk | chọn chế độ PK (hoà bình/guild/phe/server/cuồng chiến), khung truy nã/nhà tù |
+
+## 4c. ICON LOẠI HOẠT ĐỘNG — Sprites/Icons/Activity/, 1 icon mỗi type
+| Folder | category | Tên file | Nguồn |
+|---|---|---|---|
+| Sprites/Icons/Activity/ | icon_activity | activity_<type_key>.png | bảng activity_types (login,online,kill_monster,fishing,spend_diamond,ranking,x2_exp,gold_boost,exclusive_drop,...) |
+
+> icon_id trong bảng activities trỏ tới icon theo type (hoặc icon riêng nếu admin đặt).
+> 43 type trong catalog → tối thiểu 43 icon, đặt tên theo type_key cho khớp.
+
 ## 5. Bảng quản lý
 - client_assets: sprite/bg/effect/ui/font/video/config — cột asset_type x category + version + hash (OTA).
 - audio_assets: nhạc/âm thanh — asset_type x category + volume + loop.
@@ -81,5 +101,6 @@
 2. Trong 1 danh mục, file đánh số từ 1.
 3. Admin hub lọc 2 tầng: chọn asset_type rồi category.
 4. OTA: client so version/hash, tải bổ sung theo category cần dùng.
+5. UI tính năng mới: mỗi tính năng 1 category ui_<feature> (xem 4b) để tải/đổi skin riêng theo sự kiện; icon Hoạt Động đặt tên theo type_key (xem 4c) để map tự động với bảng activity_types.
 
 > Liên quan: CONTENT_REGISTRY.md (phân loại content) · ITEM_ID_CONVENTION.md · FARM_ASSETS.md
