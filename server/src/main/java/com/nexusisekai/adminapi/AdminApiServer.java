@@ -121,6 +121,14 @@ public class AdminApiServer {
         httpServer.createContext("/api/monsters",   ex -> handleAuth(ex, this::handleMonsters));
         httpServer.createContext("/api/npcs",       ex -> handleAuth(ex, this::handleNpcs));
         httpServer.createContext("/api/items",      ex -> handleAuth(ex, this::handleItems));
+        // Tính năng mới: cấu hình AFK / VIP / Ngoại Vực / World Boss + giám sát Chợ / Guild War
+        httpServer.createContext("/api/afk-cards",       ex -> handleAuth(ex, this::handleAfkCards));
+        httpServer.createContext("/api/vip-levels",      ex -> handleAuth(ex, this::handleVipLevels));
+        httpServer.createContext("/api/vip-milestones",  ex -> handleAuth(ex, this::handleVipMilestones));
+        httpServer.createContext("/api/outer-floors",    ex -> handleAuth(ex, this::handleOuterFloors));
+        httpServer.createContext("/api/world-bosses-cfg",ex -> handleAuth(ex, this::handleWorldBossesCfg));
+        httpServer.createContext("/api/market-admin",    ex -> handleAuth(ex, this::handleMarketAdmin));
+        httpServer.createContext("/api/guild-wars",      ex -> handleAuth(ex, this::handleGuildWarsAdmin));
         httpServer.createContext("/api/shops",      ex -> handleAuth(ex, this::handleShops));
         httpServer.createContext("/api/events",     ex -> handleAuth(ex, this::handleEvents));
         httpServer.createContext("/api/quests",     ex -> handleAuth(ex, this::handleQuests));
@@ -642,6 +650,104 @@ public class AdminApiServer {
     // ===================================================
     // Helpers
     // ===================================================
+    /**
+     * CRUD generic cho bảng config: GET (liệt kê tất cả cột qua metadata),
+     * POST (upsert theo khoá chính), DELETE /{id}. Cột ghi được whitelist qua `cols`.
+     */
+    private void crudConfig(HttpExchange ex, String table, String pk, String[] cols) throws Exception {
+        String method = ex.getRequestMethod();
+        if ("GET".equals(method)) {
+            List<Map<String,Object>> list = new ArrayList<>();
+            try (Connection conn = DatabaseManager.getConnection();
+                 ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM " + table + " ORDER BY " + pk)) {
+                java.sql.ResultSetMetaData md = rs.getMetaData();
+                int n = md.getColumnCount();
+                while (rs.next()) {
+                    Map<String,Object> row = new java.util.LinkedHashMap<>();
+                    for (int i = 1; i <= n; i++) row.put(md.getColumnLabel(i), rs.getObject(i));
+                    list.add(row);
+                }
+            }
+            sendJson(ex, 200, Map.of("rows", list));
+        } else if ("POST".equals(method)) {
+            Map<?,?> body = mapper.readValue(ex.getRequestBody(), Map.class);
+            boolean hasPk = body.get(pk) != null && !str(body, pk).isEmpty();
+            try (Connection conn = DatabaseManager.getConnection()) {
+                if (hasPk) {
+                    StringBuilder sb = new StringBuilder("UPDATE " + table + " SET ");
+                    for (int i = 0; i < cols.length; i++) sb.append(i>0?",":"").append(cols[i]).append("=?");
+                    sb.append(" WHERE ").append(pk).append("=?");
+                    PreparedStatement ps = conn.prepareStatement(sb.toString());
+                    int idx = 1;
+                    for (String col : cols) ps.setObject(idx++, safeStr(str(body, col)));
+                    ps.setObject(idx, safeStr(str(body, pk)));
+                    ps.executeUpdate();
+                } else {
+                    StringBuilder sb = new StringBuilder("INSERT INTO " + table + " (");
+                    for (int i = 0; i < cols.length; i++) sb.append(i>0?",":"").append(cols[i]);
+                    sb.append(") VALUES (");
+                    for (int i = 0; i < cols.length; i++) sb.append(i>0?",?":"?");
+                    sb.append(")");
+                    PreparedStatement ps = conn.prepareStatement(sb.toString());
+                    for (int i = 0; i < cols.length; i++) ps.setObject(i+1, safeStr(str(body, cols[i])));
+                    ps.executeUpdate();
+                }
+            }
+            sendJson(ex, 200, Map.of("success", true));
+        } else if ("DELETE".equals(method)) {
+            String path = ex.getRequestURI().getPath();
+            String id = path.substring(path.lastIndexOf('/')+1);
+            try (Connection conn = DatabaseManager.getConnection();
+                 PreparedStatement ps = conn.prepareStatement("DELETE FROM " + table + " WHERE " + pk + "=?")) {
+                ps.setString(1, safeStr(id)); ps.executeUpdate();
+            }
+            sendJson(ex, 200, Map.of("success", true));
+        }
+    }
+
+    private void handleAfkCards(HttpExchange ex) throws Exception {
+        crudConfig(ex, "afk_cards", "id", new String[]{"name","duration_hours","price_diamond","exp_rate","gold_rate","drop_rate","is_active"});
+    }
+    private void handleVipLevels(HttpExchange ex) throws Exception {
+        crudConfig(ex, "vip_levels", "vip_level", new String[]{"exp_required","name","daily_diamond","daily_gold","afk_bonus_pct","exp_bonus_pct","drop_bonus_pct","gold_bonus_pct","extra_bag_slots","extra_market_slots","market_fee_discount_pct","revive_discount_pct","afk_cap_hours","free_teleport_daily","auto_pickup","name_color","exclusive_title_id","privileges_json"});
+    }
+    private void handleVipMilestones(HttpExchange ex) throws Exception {
+        crudConfig(ex, "vip_milestone_rewards", "vip_level", new String[]{"reward_json"});
+    }
+    private void handleOuterFloors(HttpExchange ex) throws Exception {
+        crudConfig(ex, "outer_realm_floors", "floor", new String[]{"name","map_id","min_level","max_players","is_pvp","monster_min_level","monster_max_level","clear_reward_json","is_active"});
+    }
+    private void handleWorldBossesCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "world_bosses", "id", new String[]{"name","map_id","hp","reward_exp","reward_gold","spawn_cron","duration_min","spawn_interval_min","first_kill_reward_json","category"});
+    }
+    /** Chợ + guild war: chỉ xem (GET) để giám sát, không sửa nội dung người chơi tạo. */
+    private void handleMarketAdmin(HttpExchange ex) throws Exception {
+        if ("GET".equals(ex.getRequestMethod())) {
+            List<Map<String,Object>> list = new ArrayList<>();
+            try (Connection conn = DatabaseManager.getConnection();
+                 ResultSet rs = conn.createStatement().executeQuery("SELECT id,seller_name,item_name,qty,currency,price,category,status,listed_at FROM market_listings ORDER BY listed_at DESC LIMIT 200")) {
+                while (rs.next()) list.add(rsToMap(rs, "id","seller_name","item_name","qty","currency","price","category","status","listed_at"));
+            }
+            sendJson(ex, 200, Map.of("rows", list));
+        } else if ("DELETE".equals(ex.getRequestMethod())) {
+            String path = ex.getRequestURI().getPath();
+            int id = Integer.parseInt(path.substring(path.lastIndexOf('/')+1));
+            try (Connection conn = DatabaseManager.getConnection();
+                 PreparedStatement ps = conn.prepareStatement("UPDATE market_listings SET status='cancelled' WHERE id=?")) {
+                ps.setInt(1, id); ps.executeUpdate();
+            }
+            sendJson(ex, 200, Map.of("success", true));
+        }
+    }
+    private void handleGuildWarsAdmin(HttpExchange ex) throws Exception {
+        List<Map<String,Object>> list = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection();
+             ResultSet rs = conn.createStatement().executeQuery("SELECT id,guild_a,guild_b,map_id,status,score_a,score_b,start_at,end_at,winner_guild FROM guild_wars ORDER BY start_at DESC LIMIT 100")) {
+            while (rs.next()) list.add(rsToMap(rs, "id","guild_a","guild_b","map_id","status","score_a","score_b","start_at","end_at","winner_guild"));
+        }
+        sendJson(ex, 200, Map.of("rows", list));
+    }
+
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {
         byte[] bytes = mapper.writeValueAsBytes(data);
         ex.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
@@ -665,6 +771,11 @@ public class AdminApiServer {
         String v = str(m, k);
         // Strip quotes, semicolons, SQL comments, backslash — defense in depth
         return v.replaceAll("['\\;]", "").replaceAll("--", "").replaceAll("/\\*", "").replaceAll("\\*/", "");
+    }
+    /** Overload: lam sach truc tiep mot String (dung cho tham so query/path). */
+    private String safeStr(String v) {
+        if (v == null) return "";
+        return v.replaceAll("['\\\\;]", "").replaceAll("--", "").replaceAll("/\\*", "").replaceAll("\\*/", "");
     }
     private int num(Map<?,?> m, String k) {
         Object v = m.get(k);
