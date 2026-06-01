@@ -76,6 +76,11 @@ public class AuthHandler {
                     upd.setLong(2, accountId);
                     upd.executeUpdate();
                 }
+                // Ghi DAU (account active trong ngay) — cho analytics/retention
+                try (PreparedStatement da = conn.prepareStatement(
+                        "INSERT IGNORE INTO daily_active (date_key, account_id) VALUES (CURDATE(), ?)")) {
+                    da.setLong(1, accountId); da.executeUpdate();
+                } catch (Exception ignore) {}
 
                 // Gửi kết quả thành công
                 // Response: [1 byte status=1][8 byte accountId][2 byte usernameLen][username]

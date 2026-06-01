@@ -4398,3 +4398,22 @@ CREATE TABLE IF NOT EXISTS currency_log (
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_char (char_id), INDEX idx_src (source), INDEX idx_time (created_at)
 );
+
+-- ═══ ROLLBACK: snapshot nhân vật (khôi phục sau hack/bug) ═══
+CREATE TABLE IF NOT EXISTS character_snapshots (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id      BIGINT NOT NULL,
+    account_id   BIGINT NOT NULL,
+    snapshot_json LONGTEXT NOT NULL,                   -- {char:{...}, inventory:[...]}
+    reason       VARCHAR(128) DEFAULT '',
+    created_by   VARCHAR(64) DEFAULT 'system',
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_char (char_id), INDEX idx_time (created_at)
+);
+
+-- ═══ DAU chính xác: mỗi account active/ngày (cho retention) ═══
+CREATE TABLE IF NOT EXISTS daily_active (
+    date_key   DATE NOT NULL,
+    account_id BIGINT NOT NULL,
+    PRIMARY KEY (date_key, account_id)
+);

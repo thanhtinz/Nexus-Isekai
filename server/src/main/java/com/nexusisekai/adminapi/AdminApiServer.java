@@ -259,6 +259,9 @@ public class AdminApiServer {
         httpServer.createContext("/api/reports",           ex -> handleAuth(ex, this::handleReports));
         httpServer.createContext("/api/sanctions",        ex -> handleAuth(ex, this::handleSanctions));
         httpServer.createContext("/api/economy",          ex -> handleAuth(ex, this::handleEconomy));
+        httpServer.createContext("/api/snapshots",        ex -> handleAuth(ex, this::handleSnapshots));
+        httpServer.createContext("/api/anomalies",        ex -> handleAuth(ex, this::handleAnomalies));
+        httpServer.createContext("/api/analytics-live",   ex -> handleAuth(ex, this::handleAnalyticsLive));
         httpServer.createContext("/api/audit-log",         ex -> handleAuth(ex, this::handleAuditLog));
         httpServer.createContext("/api/scheduled-tasks",   ex -> handleAuth(ex, this::handleScheduledTasks));
         httpServer.createContext("/api/ai/review",         ex -> handleAuth(ex, this::handleAIReview));
@@ -457,6 +460,10 @@ public class AdminApiServer {
             ps.setInt(1, amount); ps.setString(2, charName);
             int rows = ps.executeUpdate();
             if (rows == 0) { sendJson(ex, 404, Map.of("error","Nhân vật không tồn tại")); return; }
+            // ghi nhat ky tien te (nguon gm) cho giam sat kinh te/dupe
+            try (ResultSet br = c.prepareStatement("SELECT id,"+cur+" bal FROM characters WHERE name='"+charName.replace("'","")+"'").executeQuery()) {
+                if (br.next()) logCurrency(c, br.getLong("id"), cur, amount, br.getLong("bal"), "gm", adminName(ex));
+            }
         }
         auditLog(ex, "give_currency", "character", charName, cur+" "+amount);
         sendJson(ex, 200, Map.of("success", true, "charName", charName, "currency", cur, "amount", amount));
@@ -3937,6 +3944,131 @@ public class AdminApiServer {
             if (pr.next()) out.put("topup_7d", pr.getLong("s"));
             sendJson(ex, 200, out);
         } catch (Exception e) { sendJson(ex, 500, Map.of("error", e.getMessage())); }
+    }
+
+    // ─── ROLLBACK: snapshot nhân vật ────────────────────────────
+    /** GET ?char_id= / POST action=create|restore */
+    private void handleSnapshots(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if ("GET".equals(ex.getRequestMethod())) {
+                var p = parseQuery(ex.getRequestURI().getQuery());
+                long charId = Long.parseLong(p.getOrDefault("char_id", "0"));
+                PreparedStatement ps = c.prepareStatement("SELECT id,char_id,account_id,reason,created_by,created_at FROM character_snapshots WHERE char_id=? ORDER BY id DESC LIMIT 100");
+                ps.setLong(1, charId); sendTableResult(ex, ps, "snapshots");
+                return;
+            }
+            var b = parseBody(ex);
+            String action = str(b, "action");
+            if ("create".equals(action)) {
+                long charId = num(b, "char_id");
+                Map<String,Object> snap = new java.util.LinkedHashMap<>();
+                long accId = 0;
+                ResultSet cr = c.prepareStatement("SELECT * FROM characters WHERE id=" + charId).executeQuery();
+                java.sql.ResultSetMetaData md = cr.getMetaData();
+                if (cr.next()) {
+                    Map<String,Object> row = new java.util.LinkedHashMap<>();
+                    for (int i = 1; i <= md.getColumnCount(); i++) { Object v = cr.getObject(i); row.put(md.getColumnLabel(i), v == null ? null : v.toString()); }
+                    snap.put("char", row); accId = cr.getLong("account_id");
+                } else { sendJson(ex, 404, Map.of("success", false, "message", "Char khong ton tai")); return; }
+                var inv = new java.util.ArrayList<Map<String,Object>>();
+                ResultSet ir = c.prepareStatement("SELECT * FROM character_inventory WHERE char_id=" + charId).executeQuery();
+                java.sql.ResultSetMetaData im = ir.getMetaData();
+                while (ir.next()) { Map<String,Object> row = new java.util.LinkedHashMap<>(); for (int i = 1; i <= im.getColumnCount(); i++) { Object v = ir.getObject(i); row.put(im.getColumnLabel(i), v == null ? null : v.toString()); } inv.add(row); }
+                snap.put("inventory", inv);
+                PreparedStatement ps = c.prepareStatement("INSERT INTO character_snapshots (char_id,account_id,snapshot_json,reason,created_by) VALUES (?,?,?,?,?)");
+                ps.setLong(1, charId); ps.setLong(2, accId); ps.setString(3, mapper.writeValueAsString(snap));
+                ps.setString(4, str(b, "reason")); ps.setString(5, adminName(ex)); ps.executeUpdate();
+                auditLog(ex, "snapshot_create", "character", String.valueOf(charId), str(b,"reason"));
+                sendJson(ex, 200, Map.of("success", true));
+            } else if ("restore".equals(action)) {
+                long id = num(b, "id");
+                ResultSet sr = c.prepareStatement("SELECT char_id,snapshot_json FROM character_snapshots WHERE id=" + id).executeQuery();
+                if (!sr.next()) { sendJson(ex, 404, Map.of("success", false, "message", "Snapshot khong ton tai")); return; }
+                long charId = sr.getLong("char_id");
+                var snap = mapper.readTree(sr.getString("snapshot_json"));
+                var ch = snap.path("char");
+                // khoi phuc cac truong kinh te quan trong (an toan)
+                for (String col : new String[]{"gold","diamond","level","exp"}) {
+                    if (ch.has(col) && !ch.path(col).isNull()) {
+                        PreparedStatement up = c.prepareStatement("UPDATE characters SET " + col + "=? WHERE id=?");
+                        up.setString(1, ch.path(col).asText()); up.setLong(2, charId); up.executeUpdate();
+                    }
+                }
+                // khoi phuc inventory: xoa hien tai roi nap lai tu snapshot
+                c.prepareStatement("DELETE FROM character_inventory WHERE char_id=" + charId).executeUpdate();
+                var inv = snap.path("inventory");
+                if (inv.isArray()) for (var it : inv) {
+                    int itemId = it.path("item_id").asInt();
+                    int qty = it.path("qty").asInt(1);
+                    int slot = it.has("slot") ? it.path("slot").asInt(-1) : -1;
+                    String opt = it.has("options_json") && !it.path("options_json").isNull() ? it.path("options_json").asText() : null;
+                    PreparedStatement ins = c.prepareStatement("INSERT INTO character_inventory (char_id,item_id,qty,slot,options_json) VALUES (?,?,?,?,?)");
+                    ins.setLong(1, charId); ins.setInt(2, itemId); ins.setInt(3, qty); ins.setInt(4, slot); ins.setString(5, opt); ins.executeUpdate();
+                }
+                auditLog(ex, "snapshot_restore", "character", String.valueOf(charId), "snapshot #" + id);
+                sendJson(ex, 200, Map.of("success", true, "message", "Da khoi phuc (nguoi choi nen relog)"));
+            } else sendJson(ex, 400, Map.of("success", false));
+        }
+    }
+
+    /** GET /api/anomalies — phát hiện bot/dupe/gian lận từ dữ liệu hiện có. */
+    private void handleAnomalies(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            Map<String,Object> out = new java.util.LinkedHashMap<>();
+            // giau bat thuong: vang / level cao vot
+            var rich = new java.util.ArrayList<Map<String,Object>>();
+            ResultSet rr = c.prepareStatement("SELECT id,name,level,gold FROM characters WHERE level>0 ORDER BY gold/GREATEST(level,1) DESC LIMIT 15").executeQuery();
+            while (rr.next()) rich.add(Map.of("id",rr.getInt("id"),"name",rr.getString("name"),"level",rr.getInt("level"),"gold",rr.getLong("gold"),"gold_per_lv",rr.getLong("gold")/Math.max(1,rr.getInt("level"))));
+            out.put("rich_outliers", rich);
+            // anticheat nghi van chua xu ly
+            var ac = new java.util.ArrayList<Map<String,Object>>();
+            try { ResultSet ar = c.prepareStatement("SELECT char_id,violation_type,severity,created_at FROM anticheat_log WHERE action_taken='none' ORDER BY severity DESC,id DESC LIMIT 20").executeQuery();
+                while (ar.next()) ac.add(Map.of("char_id",ar.getLong("char_id"),"type",ar.getString("violation_type"),"severity",ar.getInt("severity"),"at",String.valueOf(ar.getTimestamp("created_at")))); } catch (Exception ignore) {}
+            out.put("anticheat_pending", ac);
+            // nguon vang phat bat thuong 24h (faucet exploit) + delta lap lai (dupe)
+            var flow = new java.util.ArrayList<Map<String,Object>>();
+            try { ResultSet fr = c.prepareStatement("SELECT source,COUNT(*) n,SUM(delta) net FROM currency_log WHERE currency='gold' AND delta>0 AND created_at>DATE_SUB(NOW(),INTERVAL 1 DAY) GROUP BY source ORDER BY net DESC LIMIT 15").executeQuery();
+                while (fr.next()) flow.add(Map.of("source",fr.getString("source"),"count",fr.getLong("n"),"net_gold",fr.getLong("net"))); } catch (Exception ignore) {}
+            out.put("gold_faucet_24h", flow);
+            var dupe = new java.util.ArrayList<Map<String,Object>>();
+            try { ResultSet dr = c.prepareStatement("SELECT char_id,delta,COUNT(*) n FROM currency_log WHERE delta>0 AND created_at>DATE_SUB(NOW(),INTERVAL 1 DAY) GROUP BY char_id,delta HAVING n>=50 ORDER BY n DESC LIMIT 15").executeQuery();
+                while (dr.next()) dupe.add(Map.of("char_id",dr.getLong("char_id"),"delta",dr.getLong("delta"),"repeat",dr.getLong("n"))); } catch (Exception ignore) {}
+            out.put("repeat_delta_suspects", dupe);
+            sendJson(ex, 200, out);
+        } catch (Exception e) { sendJson(ex, 500, Map.of("error", e.getMessage())); }
+    }
+
+    /** GET /api/analytics-live — DAU/new users/retention tính realtime từ daily_active + accounts. */
+    private void handleAnalyticsLive(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            Map<String,Object> out = new java.util.LinkedHashMap<>();
+            var dau = new java.util.ArrayList<Map<String,Object>>();
+            ResultSet dr = c.prepareStatement("SELECT date_key,COUNT(*) n FROM daily_active WHERE date_key>DATE_SUB(CURDATE(),INTERVAL 14 DAY) GROUP BY date_key ORDER BY date_key DESC").executeQuery();
+            while (dr.next()) dau.add(Map.of("date",String.valueOf(dr.getDate("date_key")),"dau",dr.getInt("n")));
+            out.put("dau_14d", dau);
+            var nu = new java.util.ArrayList<Map<String,Object>>();
+            ResultSet nr = c.prepareStatement("SELECT DATE(created_at) d,COUNT(*) n FROM accounts WHERE created_at>DATE_SUB(CURDATE(),INTERVAL 14 DAY) GROUP BY DATE(created_at) ORDER BY d DESC").executeQuery();
+            while (nr.next()) nu.add(Map.of("date",String.valueOf(nr.getDate("d")),"new_users",nr.getInt("n")));
+            out.put("new_users_14d", nu);
+            // retention D1/D7: cohort tao N ngay truoc, % co active vao D+1 / D+7
+            for (int d : new int[]{1, 7}) {
+                ResultSet cr = c.prepareStatement(
+                    "SELECT COUNT(DISTINCT a.id) cohort, COUNT(DISTINCT da.account_id) ret FROM accounts a " +
+                    "LEFT JOIN daily_active da ON da.account_id=a.id AND da.date_key=DATE_ADD(DATE(a.created_at),INTERVAL " + d + " DAY) " +
+                    "WHERE DATE(a.created_at)=DATE_SUB(CURDATE(),INTERVAL " + (d + 1) + " DAY)").executeQuery();
+                if (cr.next()) { long co = cr.getLong("cohort"), rt = cr.getLong("ret");
+                    out.put("retention_d" + d, Map.of("cohort", co, "retained", rt, "pct", co > 0 ? Math.round(rt * 1000.0 / co) / 10.0 : 0)); }
+            }
+            sendJson(ex, 200, out);
+        } catch (Exception e) { sendJson(ex, 500, Map.of("error", e.getMessage())); }
+    }
+
+    /** Ghi nhat ky tien te (dupe/economy). Goi tai cac diem cong/tru vang-kc quan trong. */
+    private void logCurrency(Connection c, long charId, String currency, long delta, long balance, String source, String detail) {
+        try (PreparedStatement ps = c.prepareStatement("INSERT INTO currency_log (char_id,currency,delta,balance,source,detail) VALUES (?,?,?,?,?,?)")) {
+            ps.setLong(1, charId); ps.setString(2, currency); ps.setLong(3, delta); ps.setLong(4, balance);
+            ps.setString(5, source); ps.setString(6, detail); ps.executeUpdate();
+        } catch (Exception ignore) {}
     }
 
     /** GET/POST /api/hot-config — Quản lý hot config */

@@ -192,6 +192,9 @@ const PANELS: PanelConfig[] = [
   { key: 'reports',      label: 'Bao Cao',         group: 'Nguoi Choi', endpoint: '/api/reports',           dataKey: 'reports' },
   { key: 'sanctions',    label: 'Cam / Phat',      group: 'Nguoi Choi', endpoint: '/api/sanctions',         dataKey: 'sanctions' },
   { key: 'economy',      label: 'Giam Sat Kinh Te',group: 'Nguoi Choi', endpoint: '/api/economy',           dataKey: 'top_gold' },
+  { key: 'snapshots',    label: 'Rollback / Snapshot',group: 'Nguoi Choi', endpoint: '/api/snapshots',        dataKey: 'snapshots' },
+  { key: 'anomalies',    label: 'Bot / Dupe',      group: 'Nguoi Choi', endpoint: '/api/anomalies',         dataKey: 'rich_outliers' },
+  { key: 'analytics-live',label: 'DAU / Retention', group: 'Nguoi Choi', endpoint: '/api/analytics-live',     dataKey: 'dau_14d' },
 
   // Noi dung (cot truyen, item, NPC, ky nang, audio)
   { key: 'story',        label: 'Cot Truyen',      group: 'Noi Dung',   endpoint: '/api/story',             dataKey: 'chapters' },
