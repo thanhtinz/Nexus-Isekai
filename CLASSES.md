@@ -28,4 +28,4 @@
 - Sprite nam/nữ: `class_templates.male_sprite`/`female_sprite`; animation `class_animation_map`; asset Sprites/Characters/class_<id>/ (xem ASSET_HUB.md).
 - Chuyển/đổi lớp cấu hình qua admin (`class_change`).
 
-> Liên quan: ASSET_HUB.md · ITEM_ID_CONVENTION.md · CONTENT_REGISTRY.md · HIRING.md
+> Liên quan: ASSET_HUB.md · ITEM_ID_CONVENTION.md · CONTENT_REGISTRY.md
