@@ -820,7 +820,7 @@ public class AdminApiServer {
     }
     // Hoat Dong — bat/tat (is_enabled) + cau hinh
     private void handleActivitiesCfg(HttpExchange ex) throws Exception {
-        crudConfig(ex, "activities", "id", new String[]{"activity_type","name","description","icon_id","is_enabled","start_at","end_at","server_id","sort_order","multiplier","action_type","config_json"});
+        crudConfig(ex, "activities", "id", new String[]{"activity_type","name","description","icon_id","is_enabled","start_at","end_at","server_id","sort_order","multiplier","action_type","goal_mode","condition_json","target","win_reward_json","drop_json","config_json"});
     }
     private void handleActivityMilestonesCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "activity_milestones", "id", new String[]{"activity_id","milestone_order","requirement","reward_json","item_cost_id","item_cost_qty","exchange_limit","label"});

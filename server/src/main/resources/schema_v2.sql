@@ -3844,3 +3844,30 @@ INSERT IGNORE INTO activity_types (type_key,display_name,category,unit,default_a
  ('guild_event','Su Kien Bang','special','diem','progress','Hoat dong cung bang hoi'),
  ('cross_server','Lien Server','special','diem','ranking','Thi dau lien may chu'),
  ('special','Su Kien Dac Biet','special','diem','progress','Su kien le/dac biet');
+
+-- ───── BIẾN THỂ HOẠT ĐỘNG: điều kiện + cơ chế giải quyết + hiệu ứng bị động ─────
+-- goal_mode: milestone (mốc - cũ) | race (ai đạt trước thắng) | ranking (top điểm) | passive (hiệu ứng trong thời gian, không tiến độ)
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS goal_mode VARCHAR(12) NOT NULL DEFAULT 'milestone';
+-- điều kiện ĐẾM tiến độ (lọc cái gì mới tính): {"item_id":1234} | {"rarity_min":4} | {"subtype":"fish_rare"} | {"monster_id":50}
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS condition_json VARCHAR(512) DEFAULT NULL;
+-- race: mục tiêu cần đạt + người thắng + thưởng người thắng
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS target INT NOT NULL DEFAULT 1;
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS winner_char_id BIGINT NULL;
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS win_reward_json VARCHAR(512) DEFAULT NULL;
+-- passive: hiệu ứng trong thời gian SK — rớt thêm item/exclusive/x2
+-- {"multiplier":2} | {"chance":0.1,"items":[[9100,1]]} | {"exclusive_item":9100,"chance":0.05}
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS drop_json VARCHAR(512) DEFAULT NULL;
+
+-- Seed ví dụ biến thể:
+-- 1) Câu cá QUÝ - ai câu được cá hiếm (rarity>=4) ĐẦU TIÊN thắng
+INSERT IGNORE INTO activities (id,activity_type,name,description,is_enabled,action_type,goal_mode,condition_json,target,win_reward_json) VALUES
+ (20,'fishing','Săn Cá Quý','Ai câu được Cá Quý (hiếm) đầu tiên giành chiến thắng sự kiện',1,'passive','race','{"rarity_min":4}',1,'{"diamond":1000,"items":[[8001,1]]}');
+-- 2) Sự kiện RỚT EXCLUSIVE - trong thời gian SK, đánh quái có 10% rớt item sự kiện 9100 để đổi thưởng
+INSERT IGNORE INTO activities (id,activity_type,name,description,is_enabled,action_type,goal_mode,drop_json) VALUES
+ (21,'x2_drop','Mùa Rơi Bảo Vật','Trong thời gian sự kiện, diệt quái có cơ hội rớt Bảo Vật Sự Kiện để đổi thưởng',1,'passive','passive','{"chance":0.1,"items":[[9100,1]]}');
+-- 3) Đổi thưởng dùng item sự kiện 9100 (gắn với SK rớt ở trên)
+INSERT IGNORE INTO activities (id,activity_type,name,description,is_enabled,action_type,goal_mode) VALUES
+ (22,'exchange','Đổi Bảo Vật','Dùng Bảo Vật Sự Kiện đổi phần thưởng giá trị',1,'exchange','milestone');
+INSERT IGNORE INTO activity_milestones (activity_id,milestone_order,requirement,reward_json,item_cost_id,item_cost_qty,exchange_limit,label) VALUES
+ (22,1,0,'{"diamond":100}',9100,10,5,'Đổi 10 Bảo Vật -> 100 KC'),
+ (22,2,0,'{"items":[[8001,1]]}',9100,50,1,'Đổi 50 Bảo Vật -> Cánh hiếm');

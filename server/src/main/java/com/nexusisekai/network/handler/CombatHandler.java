@@ -208,6 +208,8 @@ public class CombatHandler {
         if (ActivityHandler.activeMultiplier("x2_drop") > 1.0f) {
             loot.addAll(CombatEngine.rollLoot(monster.getLootJson()));
         }
+        // Hoạt Động rớt bị động: item sự kiện (vd Bảo Vật để đổi thưởng)
+        loot.addAll(ActivityHandler.rollEventDrops(player.getCharId()));
 
         // Build death packet: [4 monsterInstanceId][8 killerId][4 exp][4 gold][N loot items]
         ByteBuffer resp = ByteBuffer.allocate(4 + 8 + 4 + 4 + loot.size() * 8);

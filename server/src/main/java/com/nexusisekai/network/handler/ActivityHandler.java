@@ -282,9 +282,93 @@ public class ActivityHandler {
      * Mọi sự kiện đang bật khớp type sẽ tự cộng tiến độ — admin tạo SK chỉ cần chọn type.
      */
     public static void fire(long charId, String activityType, long amount) {
+        fireEx(charId, activityType, amount, 0, 0, null);
+    }
+
+    /**
+     * HOOK CÓ NGỮ CẢNH — hỗ trợ BIẾN THỂ: điều kiện đếm + cơ chế race (ai đạt trước thắng).
+     * itemId/rarity/subtype = ngữ cảnh hành động (vd câu được cá item 1234 rarity 5 subtype "fish").
+     * condition_json của SK lọc: {"item_id":N} | {"rarity_min":N} | {"monster_id":N} | {"subtype":"x"}.
+     * goal_mode 'race': ai đạt target ĐẦU TIÊN → thắng, nhận win_reward, SK kết thúc.
+     */
+    public static void fireEx(long charId, String activityType, long amount, int itemId, int rarity, String subtype) {
         try(Connection c=DatabaseManager.getInstance().getConnection()){
-            addProgress(c, charId, activityType, amount);
+            List<Map<String,Object>> acts=SqlSafe.query(c,
+                "SELECT id,goal_mode,condition_json,target,win_reward_json FROM activities WHERE activity_type=? AND is_enabled=1 "+
+                "AND (start_at IS NULL OR start_at<=NOW()) AND (end_at IS NULL OR end_at>=NOW())", activityType);
+            for(var a:acts){
+                if(!matchCondition((String)a.get("condition_json"), itemId, rarity, subtype)) continue; // biến thể: lọc điều kiện
+                int aid=((Number)a.get("id")).intValue();
+                String mode=(String)a.get("goal_mode");
+                SqlSafe.update(c,
+                    "INSERT INTO activity_progress (char_id,activity_id,progress) VALUES (?,?,?) "+
+                    "ON DUPLICATE KEY UPDATE progress=progress+?", charId, aid, amount, amount);
+                if("race".equals(mode)){
+                    int target=((Number)a.get("target")).intValue();
+                    Map<String,Object> pr=SqlSafe.queryOne(c,"SELECT progress FROM activity_progress WHERE char_id=? AND activity_id=?", charId, aid);
+                    long prog=pr==null?0:((Number)pr.get("progress")).longValue();
+                    if(prog>=target){
+                        // chốt người thắng (atomic) — ai đạt trước thắng
+                        int won=SqlSafe.update(c,"UPDATE activities SET winner_char_id=?, is_enabled=0 WHERE id=? AND winner_char_id IS NULL", charId, aid);
+                        if(won>0){
+                            grantRewardConn(c, charId, (String)a.get("win_reward_json"));
+                            notifyWinner(charId, "Ban da THANG su kien!");
+                        }
+                    }
+                }
+            }
         }catch(Exception e){ /* best-effort */ }
+    }
+
+    /** Kiểm điều kiện đếm. condition rỗng = luôn tính. */
+    private static boolean matchCondition(String cond, int itemId, int rarity, String subtype){
+        if(cond==null || cond.isEmpty() || cond.equals("{}")) return true;
+        long needItem=jsonLong(cond,"item_id");
+        if(needItem>0 && itemId!=needItem) return false;
+        long rarMin=jsonLong(cond,"rarity_min");
+        if(rarMin>0 && rarity<rarMin) return false;
+        long needMon=jsonLong(cond,"monster_id");
+        if(needMon>0 && itemId!=needMon) return false; // monster_id truyền qua itemId khi type combat
+        java.util.regex.Matcher sm=java.util.regex.Pattern.compile("\"subtype\"\\s*:\\s*\"([^\"]+)\"").matcher(cond);
+        if(sm.find() && !sm.group(1).equals(subtype)) return false;
+        return true;
+    }
+
+    /**
+     * Hiệu ứng RỚT BỊ ĐỘNG trong thời gian SK (passive drop). Trả thêm item rớt.
+     * drop_json: {"chance":0.1,"items":[[9100,1]]} hoặc {"multiplier":2}.
+     * Combat gọi khi quái chết để cộng drop sự kiện (vd Bảo Vật để đổi thưởng).
+     */
+    public static List<int[]> rollEventDrops(long charId){
+        List<int[]> out=new java.util.ArrayList<>();
+        try(Connection c=DatabaseManager.getInstance().getConnection()){
+            List<Map<String,Object>> acts=SqlSafe.query(c,
+                "SELECT drop_json FROM activities WHERE is_enabled=1 AND goal_mode='passive' AND drop_json IS NOT NULL "+
+                "AND (start_at IS NULL OR start_at<=NOW()) AND (end_at IS NULL OR end_at>=NOW())");
+            for(var a:acts){
+                String dj=(String)a.get("drop_json"); if(dj==null) continue;
+                java.util.regex.Matcher cm=java.util.regex.Pattern.compile("\"chance\"\\s*:\\s*([0-9.]+)").matcher(dj);
+                double chance=cm.find()?Double.parseDouble(cm.group(1)):0;
+                if(chance>0 && Math.random()<chance){
+                    for(int[] it: jsonItems(dj)) out.add(it);
+                }
+            }
+        }catch(Exception e){ /* best-effort */ }
+        return out;
+    }
+
+    private static void grantRewardConn(Connection c, long charId, String json) throws Exception {
+        if(json==null) return;
+        long dia=jsonLong(json,"diamond"), gold=jsonLong(json,"gold");
+        if(dia>0||gold>0) SqlSafe.update(c,"UPDATE characters SET diamond=diamond+?, gold=gold+? WHERE id=?", dia, gold, charId);
+        for(int[] it: jsonItems(json))
+            SqlSafe.update(c,"INSERT INTO character_inventory (char_id,item_id,qty,slot) VALUES (?,?,?,-1)", charId, it[0], it[1]);
+    }
+    private static void notifyWinner(long charId, String msg){
+        try{
+            GameSession s=com.nexusisekai.network.SessionRegistry.getByCharId(charId);
+            if(s!=null){ ByteBuf b=Unpooled.buffer(); b.writeShort(PacketOpcode.S2C_ACTIVITY_RESULT); writeStr(b,msg); s.send(b); }
+        }catch(Exception e){ }
     }
 
     /** Multiplier đang hiệu lực cho x2_exp / x2_drop (combat/exp đọc). 1.0 nếu không có sự kiện. */
