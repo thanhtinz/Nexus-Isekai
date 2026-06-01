@@ -296,10 +296,25 @@ public class CombatHandler {
     }
 
     private void sendSkillEffect(int skillId, float x, float y) {
-        ByteBuffer buf = ByteBuffer.allocate(4 + 4 + 4);
-        buf.putInt(skillId);
-        buf.putFloat(x);
-        buf.putFloat(y);
+        com.nexusisekai.game.skill.SkillManager.SkillTemplate t =
+                com.nexusisekai.game.skill.SkillManager.getInstance().getTemplate(skillId);
+        String vfx = (t != null && t.vfxKey != null) ? t.vfxKey : "";
+        String sfx = (t != null && t.sfxKey != null) ? t.sfxKey : "";
+        byte[] vfxB = vfx.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] sfxB = sfx.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        int hitFrame = t != null ? t.hitFrame : -1, soundFrame = t != null ? t.soundFrame : -1;
+        int cols = t != null ? t.vfxCols : 1, rows = t != null ? t.vfxRows : 1;
+        int frames = t != null ? t.vfxFrames : 1, fps = t != null ? t.vfxFps : 16;
+        int ox = t != null ? t.vfxOx : 0, oy = t != null ? t.vfxOy : 0, scale = t != null ? t.vfxScale : 100;
+        // Payload: int skillId | float x | float y | short+utf8 vfxKey | short+utf8 sfxKey |
+        //          int hitFrame | int soundFrame | int cols,rows,frames,fps | int ox,oy,scale
+        ByteBuffer buf = ByteBuffer.allocate(12 + 2 + vfxB.length + 2 + sfxB.length + 8 + 16 + 12);
+        buf.putInt(skillId); buf.putFloat(x); buf.putFloat(y);
+        buf.putShort((short) vfxB.length); buf.put(vfxB);
+        buf.putShort((short) sfxB.length); buf.put(sfxB);
+        buf.putInt(hitFrame); buf.putInt(soundFrame);
+        buf.putInt(cols); buf.putInt(rows); buf.putInt(frames); buf.putInt(fps);
+        buf.putInt(ox); buf.putInt(oy); buf.putInt(scale);
         world.getNetworkServer().broadcastToMap(session.getPlayer().getMapId(),
                 PacketOpcode.S2C_SKILL_EFFECT, buf.array());
     }

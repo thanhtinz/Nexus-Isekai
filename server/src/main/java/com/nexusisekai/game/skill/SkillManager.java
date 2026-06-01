@@ -35,6 +35,10 @@ public class SkillManager {
                 t.mpCost = rs.getInt("mp_cost"); t.cooldownMs = rs.getInt("cooldown_ms");
                 t.maxLevel = rs.getInt("max_level"); t.description = rs.getString("description");
                 t.iconId = rs.getInt("icon_id"); t.unlockLevel = rs.getInt("unlock_level");
+                t.vfxKey = rs.getString("vfx_key"); t.vfxHitKey = rs.getString("vfx_hit_key"); t.sfxKey = rs.getString("sfx_key");
+                t.hitFrame = rs.getInt("hit_frame"); t.soundFrame = rs.getInt("sound_frame");
+                t.vfxCols = rs.getInt("vfx_cols"); t.vfxRows = rs.getInt("vfx_rows"); t.vfxFrames = rs.getInt("vfx_frames"); t.vfxFps = rs.getInt("vfx_fps");
+                t.vfxOx = rs.getInt("vfx_ox"); t.vfxOy = rs.getInt("vfx_oy"); t.vfxScale = rs.getInt("vfx_scale");
                 templates.put(t.id, t);
             }
         }
@@ -161,6 +165,9 @@ public class SkillManager {
     public static class SkillTemplate {
         public int id, classId, baseDamage, mpCost, cooldownMs, maxLevel, iconId, unlockLevel;
         public String name, skillType, element, description;
+        // VFX + frame marker (cast)
+        public String vfxKey, vfxHitKey, sfxKey;
+        public int hitFrame = -1, soundFrame = -1, vfxCols = 1, vfxRows = 1, vfxFrames = 1, vfxFps = 16, vfxOx, vfxOy, vfxScale = 100;
     }
 
     public static class PlayerSkillData {

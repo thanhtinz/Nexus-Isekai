@@ -2309,7 +2309,17 @@ namespace NexusIsekai.Game
     private void OnQuestUpdate(PacketReader r) { r.ReadInt(); r.ReadInt(); r.ReadInt(); }
     private void OnQuestComplete(PacketReader r) { int qid = r.ReadInt(); UIManager.Instance?.ShowNotification("Hoan thanh nhiem vu!", UINotificationType.Success); }
     private void OnShopResult(PacketReader r) { bool ok = r.ReadBool(); string msg = r.ReadString(); UIManager.Instance?.ShowNotification(msg, ok ? UINotificationType.Success : UINotificationType.Warning); }
-    private void OnSkillEffect(PacketReader r) { r.ReadLong(); r.ReadInt(); r.ReadFloat(); r.ReadFloat(); }
+    private void OnSkillEffect(PacketReader r) {
+        int skillId = r.ReadInt();
+        float x = r.ReadFloat(), y = r.ReadFloat();
+        string vfxKey = r.ReadString();
+        string sfxKey = r.ReadString();
+        int hitFrame = r.ReadInt(), soundFrame = r.ReadInt();
+        int cols = r.ReadInt(), rows = r.ReadInt(), frames = r.ReadInt(), fps = r.ReadInt();
+        int ox = r.ReadInt(), oy = r.ReadInt(), scale = r.ReadInt();
+        // hitFrame: client co the dung de hien so damage dung frame (damage chinh thuc den qua S2C_COMBAT_RESULT)
+        NexusIsekai.Vfx.SkillEffectPlayer.Spawn(vfxKey, sfxKey, x, y, cols, rows, frames, fps, ox, oy, scale, soundFrame);
+    }
     private void OnSkillCooldown(PacketReader r) { r.ReadInt(); r.ReadInt(); }
     private void OnGuildMsg(PacketReader r) { string msg = r.ReadString(); }
     private void OnEventStart(PacketReader r) { string name = r.ReadString(); UIManager.Instance?.ShowNotification("Su kien: " + name, UINotificationType.Info); }
