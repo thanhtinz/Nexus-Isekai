@@ -90,6 +90,27 @@
 > icon_id trong bảng activities trỏ tới icon theo type (hoặc icon riêng nếu admin đặt).
 > 43 type trong catalog → tối thiểu 43 icon, đặt tên theo type_key cho khớp.
 
+## 4d. HUD MÀN CHƠI — Sprites/Hud/, category 'hud' (phần tử luôn hiển thị khi chơi)
+| File | Mô tả |
+|---|---|
+| hud_hp_bar.png / hud_mp_bar.png | thanh máu / mana người chơi |
+| hud_exp_bar.png | thanh kinh nghiệm |
+| hud_avatar_frame.png | khung avatar + level góc trên trái |
+| hud_joystick_base.png / hud_joystick_knob.png | cần điều khiển di chuyển |
+| hud_btn_attack.png | nút tấn công chính |
+| hud_skill_slot.png (x7) | ô kỹ năng (7 active) + lớp phủ hồi chiêu |
+| hud_quickslot.png (x4) | ô vật phẩm nhanh (bình máu/mp) |
+| hud_buff_icon_frame.png | khung icon buff/debuff đang hiệu lực |
+| hud_minimap_frame.png | khung bản đồ nhỏ + chấm quái/NPC/cổng |
+| hud_target_bar.png | thanh HP mục tiêu (quái/boss/người chơi) |
+| hud_currency_gold.png / hud_currency_diamond.png | hiển thị vàng / kim cương góc trên phải |
+| hud_menu_btn.png | nút mở menu chính (túi, kỹ năng, nhiệm vụ...) |
+| hud_chat_box.png | khung chat + tab kênh |
+| hud_quest_tracker.png | bảng theo dõi nhiệm vụ góc phải |
+| hud_event_entry.png | nút nổi vào Hoạt Động/sự kiện đang mở |
+| hud_pk_mode_badge.png | huy hiệu chế độ PK hiện tại + cờ truy nã |
+| hud_vip_badge.png | huy hiệu VIP cạnh avatar |
+
 ## 5. Bảng quản lý
 - client_assets: sprite/bg/effect/ui/font/video/config — cột asset_type x category + version + hash (OTA).
 - audio_assets: nhạc/âm thanh — asset_type x category + volume + loop.
