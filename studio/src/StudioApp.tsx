@@ -147,6 +147,8 @@ export default function StudioApp() {
           {msg && <div className="m-3 text-xs px-3 py-2 rounded-lg bg-brand-500/10 text-brand-200 border border-brand-500/20">{msg}</div>}
           {!selected
             ? <div className="p-4 text-xs text-surface-200/50">Chon mot muc ben trai de sua.</div>
+            : section.key === 'npc'
+              ? <NpcEditor draft={draft} setDraft={setDraft} setMsg={setMsg} reload={() => loadList(section)} />
             : tab === 'vfx'
               ? <VfxTab draft={draft} setDraft={setDraft} setMsg={setMsg} busy={busy} setBusy={setBusy} />
               : <GeneralTab draft={draft} setDraft={setDraft} section={section} setMsg={setMsg} busy={busy} setBusy={setBusy} />}
@@ -381,11 +383,171 @@ function AnimationEditor({ draft, setDraft, setMsg }: {
   );
 }
 
-function PreviewArea({ row, section }: { row: Row; section: Section }) {
+/* ── NPC EDITOR: che do chuc nang (chips) hoac thoai+voice+action ── */
+const NPC_FUNCTIONS = ['shop','quest','bank','craft','upgrade','teleport','heal','storage'];
+const ACTION_TYPES = ['dialog','give_item','warp','emote'];
+
+function NpcEditor({ draft, setDraft, setMsg, reload }: {
+  draft: Row; setDraft: (r: Row) => void; setMsg: (s: string) => void; reload: () => void;
+}) {
+  const parse = (s: any, fb: any) => { try { return s ? JSON.parse(s) : fb; } catch { return fb; } };
+  const mode: string = draft.interact_mode || 'function';
+  const funcs: string[] = parse(draft.functions_json, []);
+  const actions: any[] = parse(draft.action_json, []);
+  const set = (k: string, v: any) => setDraft({ ...draft, [k]: v });
+  const setFuncs = (f: string[]) => set('functions_json', JSON.stringify(f));
+  const setActions = (a: any[]) => set('action_json', JSON.stringify(a));
+
+  const toggleFunc = (f: string) => setFuncs(funcs.includes(f) ? funcs.filter(x => x !== f) : [...funcs, f]);
+  const addAction = (t: string) => {
+    const base: any = { type: t };
+    if (t === 'dialog') base.text = '';
+    if (t === 'give_item') { base.id = 0; base.qty = 1; }
+    if (t === 'warp') { base.map = 0; base.x = 0; base.y = 0; }
+    if (t === 'emote') base.name = '';
+    setActions([...actions, base]);
+  };
+  const updAction = (i: number, k: string, v: any) => setActions(actions.map((a, j) => j === i ? { ...a, [k]: v } : a));
+  const delAction = (i: number) => setActions(actions.filter((_, j) => j !== i));
+
+  const save = async () => {
+    const r = await api('/api/npcs', 'POST', draft);
+    setMsg(r?.success ? 'Da luu NPC' : `Loi: ${r?.error || r?.message || 'luu NPC'}`);
+    reload();
+  };
+
   return (
-    <div className="text-center">
-      <div className="w-40 h-40 mx-auto card flex items-center justify-center text-surface-200/40 text-xs">Preview</div>
-      <div className="mt-3 text-sm text-surface-100">{row[section.nameField] ?? '—'}</div>
+    <div className="p-3 space-y-3 text-xs">
+      {/* basic */}
+      {['name','map_id','pos_x','pos_y','icon_id','spine_key'].map(k => (
+        <div key={k}>
+          <label className="block text-[10px] uppercase tracking-wider text-surface-200/50 mb-1">{k}</label>
+          <input value={draft[k] ?? ''} onChange={e => set(k, e.target.value)} className="input" />
+        </div>
+      ))}
+
+      {/* mode toggle */}
+      <div>
+        <label className="block text-[10px] uppercase tracking-wider text-surface-200/50 mb-1">Che do tuong tac</label>
+        <div className="flex gap-1">
+          {['function','dialog'].map(m => (
+            <button key={m} onClick={() => set('interact_mode', m)}
+              className={`flex-1 py-1.5 rounded-lg ${mode === m ? 'bg-brand-500 text-white' : 'bg-white/5 text-surface-200/70'}`}>
+              {m === 'function' ? 'Chuc nang (menu)' : 'Thoai + Voice + Action'}</button>
+          ))}
+        </div>
+      </div>
+
+      {mode === 'function' ? (
+        <div>
+          <label className="block text-[10px] uppercase tracking-wider text-surface-200/50 mb-1">Chuc nang hien thi</label>
+          <div className="flex flex-wrap gap-1.5">
+            {NPC_FUNCTIONS.map(f => (
+              <button key={f} onClick={() => toggleFunc(f)}
+                className={`badge ${funcs.includes(f) ? 'bg-brand-500 text-white' : 'bg-white/5 text-surface-200/60'}`}>{f}</button>
+            ))}
+          </div>
+          {funcs.includes('shop') && (
+            <div className="mt-2">
+              <label className="block text-[10px] uppercase tracking-wider text-surface-200/50 mb-1">shop_id</label>
+              <input value={draft.shop_id ?? ''} onChange={e => set('shop_id', e.target.value)} className="input" />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <div>
+            <label className="block text-[10px] uppercase tracking-wider text-surface-200/50 mb-1">voice_key (khi tuong tac)</label>
+            <input value={draft.voice_key ?? ''} onChange={e => set('voice_key', e.target.value)} className="input" />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-wider text-surface-200/50">Chuoi hanh dong</span>
+            <select onChange={e => { if (e.target.value) { addAction(e.target.value); e.target.value = ''; } }} className="input !w-28 !py-1">
+              <option value="">+ Them...</option>
+              {ACTION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          {actions.map((a, i) => (
+            <div key={i} className="card p-2 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="badge bg-brand-500/15 text-brand-300">{a.type}</span>
+                <button onClick={() => delAction(i)} className="text-red-400 hover:text-red-300">×</button>
+              </div>
+              {a.type === 'dialog' && <textarea value={a.text} onChange={e => updAction(i, 'text', e.target.value)} rows={2} placeholder="Loi thoai..." className="input" />}
+              {a.type === 'give_item' && <div className="flex gap-1">
+                <input value={a.id} onChange={e => updAction(i, 'id', +e.target.value)} placeholder="item id" className="input !py-1" />
+                <input value={a.qty} onChange={e => updAction(i, 'qty', +e.target.value)} placeholder="qty" className="input !py-1 !w-16" /></div>}
+              {a.type === 'warp' && <div className="flex gap-1">
+                <input value={a.map} onChange={e => updAction(i, 'map', +e.target.value)} placeholder="map" className="input !py-1" />
+                <input value={a.x} onChange={e => updAction(i, 'x', +e.target.value)} placeholder="x" className="input !py-1 !w-16" />
+                <input value={a.y} onChange={e => updAction(i, 'y', +e.target.value)} placeholder="y" className="input !py-1 !w-16" /></div>}
+              {a.type === 'emote' && <input value={a.name} onChange={e => updAction(i, 'name', e.target.value)} placeholder="ten emote" className="input !py-1" />}
+            </div>
+          ))}
+          {actions.length === 0 && <p className="text-surface-200/40">Chua co hanh dong. Them dialog/give_item/warp/emote.</p>}
+        </div>
+      )}
+
+      <button onClick={save} className="btn-gold w-full !py-2">Luu NPC</button>
+    </div>
+  );
+}
+
+function PreviewArea({ row, section }: { row: Row; section: Section }) {
+  const [imgEl, setImgEl] = useState<HTMLImageElement | null>(null);
+  const [playing, setPlaying] = useState(true);
+  const [cur, setCur] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // doc animation da luu trong data
+  const anim = (() => {
+    for (const k of ['animation_json', 'frames_json', 'config_json']) {
+      try { const v = row[k]; if (typeof v === 'string' && v.includes('frames')) { const o = JSON.parse(v); if (Array.isArray(o.frames)) return o; } } catch {}
+    }
+    return null;
+  })();
+  const frames: any[] = anim?.frames || [];
+  const delay = anim?.delay_ms || 120;
+  const loop = anim?.loop ?? true;
+
+  const onFile = (f: File) => { const r = new FileReader(); r.onload = () => { const el = new Image(); el.onload = () => setImgEl(el); el.src = r.result as string; }; r.readAsDataURL(f); };
+
+  useEffect(() => {
+    if (!playing || frames.length === 0) return;
+    const id = setInterval(() => setCur(c => { const n = c + 1; if (n >= frames.length) return loop ? 0 : c; return n; }), delay);
+    return () => clearInterval(id);
+  }, [playing, frames.length, delay, loop]);
+
+  useEffect(() => {
+    const cv = canvasRef.current; if (!cv || !imgEl || frames.length === 0) return;
+    const f = frames[cur % frames.length]; if (!f) return;
+    const Z = 3; cv.width = f.w * Z; cv.height = f.h * Z;
+    const ctx = cv.getContext('2d'); if (!ctx) return;
+    ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.drawImage(imgEl, f.x, f.y, f.w, f.h, 0, 0, f.w * Z, f.h * Z);
+  }, [cur, imgEl, frames]);
+
+  return (
+    <div className="text-center space-y-3">
+      {frames.length > 0 ? (
+        <>
+          <div className="w-48 h-48 mx-auto card flex items-center justify-center overflow-hidden"
+            style={{ backgroundImage: 'repeating-conic-gradient(#1a1a35 0 25%, #131328 0 50%)', backgroundSize: '16px 16px' }}>
+            {imgEl ? <canvas ref={canvasRef} style={{ imageRendering: 'pixelated' }} />
+              : <span className="text-surface-200/40 text-xs px-3">Nap sprite sheet de phat {frames.length} frame da luu</span>}
+          </div>
+          <div className="flex gap-2 justify-center">
+            <input ref={fileRef} type="file" accept="image/png,image/webp" className="hidden" onChange={e => e.target.files?.[0] && onFile(e.target.files[0])} />
+            <button onClick={() => fileRef.current?.click()} className="btn-secondary text-xs">Nap sheet</button>
+            {imgEl && <button onClick={() => setPlaying(p => !p)} className="btn-primary text-xs !py-1.5 !px-4">{playing ? 'Pause' : 'Play'}</button>}
+          </div>
+          <div className="text-[11px] text-surface-200/50">{frames.length} frame · {delay}ms · {loop ? 'loop' : 'once'}</div>
+        </>
+      ) : (
+        <div className="w-40 h-40 mx-auto card flex items-center justify-center text-surface-200/40 text-xs">Chua co animation da luu</div>
+      )}
+      <div className="text-sm text-surface-100">{row[section.nameField] ?? '—'}</div>
       <div className="text-[11px] text-surface-200/50">ID: {row[section.pk] ?? '—'} · {section.label}</div>
     </div>
   );
@@ -494,6 +656,26 @@ function MapBuilder({ map, setMsg }: { map: Row; setMsg: (s: string) => void }) 
     setBusy(false);
   };
 
+  // Dong bo vi tri NPC + portal tu canvas xuong thang bang npcs / map_portals
+  const applyToTables = async () => {
+    setBusy(true);
+    // NPC: gui full row (tranh crudConfig ghi rong cot khac) + vi tri moi
+    for (const mk of markers) {
+      const full = npcs.find(n => n.id === mk.id);
+      if (full) await api('/api/npcs', 'POST', { ...full, pos_x: mk.x, pos_y: mk.y, map_id: map.id });
+    }
+    // Portal: xoa portal cu cua map roi tao lai theo canvas
+    const ex = await api(`/api/portals?map_id=${map.id}`);
+    for (const p of (ex?.portals || [])) await api('/api/portals', 'POST', { action: 'delete', id: p.id });
+    for (const p of portals) await api('/api/portals', 'POST', {
+      action: 'create', from_map_id: map.id, to_map_id: p.dest_map || 0,
+      from_x: p.x, from_y: p.y, to_x: p.dest_x || 0, to_y: p.dest_y || 0, min_level: 0,
+    });
+    await save();
+    setMsg(`Da ap dung: ${markers.length} NPC + ${portals.length} portal xuong bang`);
+    setBusy(false);
+  };
+
   return (
     <div className="w-full h-full flex gap-3">
       {/* palette + tools */}
@@ -527,7 +709,10 @@ function MapBuilder({ map, setMsg }: { map: Row; setMsg: (s: string) => void }) 
           </select>
         )}
         {sel && <button onClick={delSel} className="btn-danger !py-1.5">Xoa muc dang chon</button>}
-        <button onClick={save} disabled={busy} className="btn-gold !py-2 mt-auto">Luu Map Layout</button>
+        <div className="mt-auto space-y-1.5">
+          <button onClick={save} disabled={busy} className="btn-secondary w-full !py-2">Luu Layout</button>
+          <button onClick={applyToTables} disabled={busy} className="btn-gold w-full !py-2">Luu + Ap dung xuong bang</button>
+        </div>
       </div>
 
       {/* stage */}
