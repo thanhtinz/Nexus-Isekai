@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /* ──────────────────────────────────────────────────────────────
-   NEXUS STUDIO — tool bien tap data DOC LAP (project rieng, build/deploy rieng).
-   Khong thuoc admin. Ket noi toi server game qua VITE_API_BASE + key rieng.
+   NEXUS STUDIO — tool bien tap data DOC LAP (project rieng, build/deploy rieng)
+   nhung DUNG CHUNG he giao dien web (palette brand/surface/gold, font, class
+   .card/.btn/.input). Khong thuoc admin. Ket noi server qua VITE_API_BASE + key rieng.
    Module: Skill / Mob / Effect / Map / Npc / Resource. AI-assist + tach anh.
    ────────────────────────────────────────────────────────────── */
 
@@ -68,72 +69,71 @@ export default function StudioApp() {
     String(r[section.pk] ?? '').includes(search));
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#0b0b1a] text-gray-200 overflow-hidden">
+    <div className="h-screen w-screen flex flex-col bg-surface-950 text-surface-100 overflow-hidden">
       {/* Top bar */}
-      <header className="flex items-center gap-4 px-4 h-12 bg-gradient-to-r from-[#2a1207] to-[#3a1a08] border-b border-[#5a2e10]">
+      <header className="flex items-center gap-4 px-4 h-14 bg-surface-850 border-b border-white/5">
         <div className="flex items-center gap-2">
-          <span className="text-[#f0a020] font-bold tracking-widest text-sm">NEXUS STUDIO</span>
-          <span className="text-[10px] text-gray-500">v1.0 · DATA TOOL</span>
+          <span className="font-display text-lg font-bold text-brand-400 tracking-wider">NEXUS STUDIO</span>
+          <span className="badge bg-brand-500/15 text-brand-300">v1.0 · DATA TOOL</span>
         </div>
         <div className="flex-1" />
-        <button onClick={() => setShowConn(v => !v)} className="text-xs text-gray-400 hover:text-white">Ket noi</button>
-        <button onClick={save} disabled={!selected}
-          className="px-3 py-1 text-xs rounded bg-[#f0a020] text-black font-semibold disabled:opacity-30">Save Data</button>
+        <button onClick={() => setShowConn(v => !v)} className="btn-secondary !py-1.5 !px-3 text-xs">Ket noi</button>
+        <button onClick={save} disabled={!selected} className="btn-gold !py-1.5 !px-3 text-xs">Save Data</button>
       </header>
 
       {/* Connection bar */}
       {showConn && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-[#15152e] border-b border-white/10 text-xs">
-          <span className="text-gray-400">API:</span>
-          <span className="text-gray-300">{API_BASE || '(proxy /api)'}</span>
-          <span className="text-gray-400 ml-3">Key:</span>
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-surface-900 border-b border-white/10 text-xs">
+          <span className="text-surface-200/60">API:</span>
+          <span className="text-surface-100">{API_BASE || '(proxy /api)'}</span>
+          <span className="text-surface-200/60 ml-3">Key:</span>
           <input value={keyVal} onChange={e => setKeyVal(e.target.value)} type="password" placeholder="Admin/Studio key"
-            className="bg-[#0b0b1a] border border-white/10 rounded px-2 py-1 w-64" />
-          <button onClick={saveKey} className="px-2 py-1 rounded bg-[#4ecca3] text-black">Luu & Ket noi</button>
-          <span className="text-gray-600">Doi VITE_API_BASE trong .env de tro server khac.</span>
+            className="input !w-64 !py-1.5" />
+          <button onClick={saveKey} className="btn-primary !py-1.5 !px-3">Luu & Ket noi</button>
+          <span className="text-surface-200/40">Doi VITE_API_BASE trong .env de tro server khac.</span>
         </div>
       )}
 
       <div className="flex-1 flex min-h-0">
         {/* Left: module nav + library */}
-        <aside className="w-64 flex flex-col bg-[#0e0e22] border-r border-white/5">
-          <nav className="grid grid-cols-2 gap-1 p-2">
+        <aside className="w-64 flex flex-col bg-surface-850 border-r border-white/5">
+          <nav className="grid grid-cols-2 gap-1.5 p-2.5">
             {SECTIONS.map(s => (
               <button key={s.key} onClick={() => setSection(s)}
-                className={`text-[11px] py-2 rounded font-medium tracking-wide ${
-                  section.key === s.key ? 'bg-[#5a2e10] text-[#f0a020]' : 'bg-[#15152e] text-gray-400 hover:text-white'}`}>
+                className={`text-[11px] py-2 rounded-lg font-medium tracking-wide transition-colors ${
+                  section.key === s.key ? 'bg-brand-500 text-white' : 'bg-white/5 text-surface-200/70 hover:bg-white/10'}`}>
                 {s.label}
               </button>
             ))}
           </nav>
-          <div className="px-2 pb-2">
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tim..."
-              className="w-full bg-[#15152e] border border-white/10 rounded px-2 py-1.5 text-xs" />
+          <div className="px-2.5 pb-2">
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tim..." className="input !py-2" />
           </div>
-          <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-0.5">
-            {busy === 'list' && <div className="text-xs text-gray-500 p-2">Dang tai...</div>}
+          <div className="flex-1 overflow-y-auto px-2.5 pb-4 space-y-0.5">
+            {busy === 'list' && <div className="text-xs text-surface-200/50 p-2">Dang tai...</div>}
             {filtered.map((row, i) => (
               <button key={i} onClick={() => pick(row)}
-                className={`w-full text-left text-xs px-2 py-1.5 rounded truncate ${
+                className={`w-full text-left text-xs px-2.5 py-2 rounded-lg truncate transition-colors ${
                   selected && selected[section.pk] === row[section.pk]
-                    ? 'bg-[#f0a020] text-black' : 'text-gray-300 hover:bg-[#15152e]'}`}>
-                <span className="opacity-50 mr-1">{row[section.pk]}</span>{row[section.nameField] ?? ''}
+                    ? 'bg-brand-500/20 text-brand-200 border border-brand-500/30'
+                    : 'text-surface-100/80 hover:bg-white/5'}`}>
+                <span className="opacity-40 mr-1.5">{row[section.pk]}</span>{row[section.nameField] ?? ''}
               </button>
             ))}
-            {!busy && filtered.length === 0 && <div className="text-xs text-gray-600 p-2">Khong co du lieu (kiem tra Ket noi)</div>}
+            {!busy && filtered.length === 0 && <div className="text-xs text-surface-200/40 p-2">Khong co du lieu (kiem tra Ket noi)</div>}
           </div>
         </aside>
 
         {/* Center: preview / frames */}
-        <main className="flex-1 flex flex-col min-w-0 bg-[#08081a]">
+        <main className="flex-1 flex flex-col min-w-0 bg-surface-950">
           <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
             {tab === 'frames' ? <SpriteSlicer /> : <PreviewArea row={draft} section={section} />}
           </div>
-          <div className="flex gap-1 px-3 h-9 items-center border-t border-white/5 bg-[#0e0e22]">
+          <div className="flex gap-1.5 px-3 h-10 items-center border-t border-white/5 bg-surface-850">
             {(['general','frames','vfx','preview'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
-                className={`px-3 py-1 text-[11px] rounded uppercase tracking-wide ${
-                  tab === t ? 'bg-[#5a2e10] text-[#f0a020]' : 'text-gray-500 hover:text-gray-300'}`}>
+                className={`px-3 py-1.5 text-[11px] rounded-lg uppercase tracking-wide transition-colors ${
+                  tab === t ? 'bg-brand-500/20 text-brand-200' : 'text-surface-200/50 hover:text-surface-100'}`}>
                 {t === 'general' ? 'General' : t === 'frames' ? 'Frame/Tach anh' : t === 'vfx' ? 'VFX/Effect' : 'Preview'}
               </button>
             ))}
@@ -141,10 +141,10 @@ export default function StudioApp() {
         </main>
 
         {/* Right: property editor */}
-        <aside className="w-96 flex flex-col bg-[#0e0e22] border-l border-white/5 overflow-y-auto">
-          {msg && <div className="m-3 text-xs px-2 py-1.5 rounded bg-[#1a1a3a] text-[#f0a020]">{msg}</div>}
+        <aside className="w-96 flex flex-col bg-surface-850 border-l border-white/5 overflow-y-auto">
+          {msg && <div className="m-3 text-xs px-3 py-2 rounded-lg bg-brand-500/10 text-brand-200 border border-brand-500/20">{msg}</div>}
           {!selected
-            ? <div className="p-4 text-xs text-gray-600">Chon mot muc ben trai de sua.</div>
+            ? <div className="p-4 text-xs text-surface-200/50">Chon mot muc ben trai de sua.</div>
             : tab === 'vfx'
               ? <VfxTab draft={draft} setDraft={setDraft} setMsg={setMsg} busy={busy} setBusy={setBusy} />
               : <GeneralTab draft={draft} setDraft={setDraft} section={section} setMsg={setMsg} busy={busy} setBusy={setBusy} />}
@@ -182,21 +182,17 @@ function GeneralTab({ draft, setDraft, section, setMsg, busy, setBusy }: {
   return (
     <div className="p-3 space-y-3">
       <div className="flex gap-2 flex-wrap">
-        <button onClick={aiDescribe} disabled={!!busy}
-          className="px-2 py-1 text-[11px] rounded bg-[#2a1f4a] text-[#b090f0] disabled:opacity-40">
+        <button onClick={aiDescribe} disabled={!!busy} className="btn-secondary !py-1.5 !px-2.5 text-[11px] !text-brand-300">
           {busy === 'ai-desc' ? '...' : 'AI: Mo ta'}</button>
-        <button onClick={aiStats} disabled={!!busy}
-          className="px-2 py-1 text-[11px] rounded bg-[#2a1f4a] text-[#b090f0] disabled:opacity-40">
+        <button onClick={aiStats} disabled={!!busy} className="btn-secondary !py-1.5 !px-2.5 text-[11px] !text-brand-300">
           {busy === 'ai-stats' ? '...' : 'AI: Goi y chi so'}</button>
       </div>
       {fields.map(k => (
         <div key={k}>
-          <label className="block text-[10px] uppercase tracking-wider text-gray-500 mb-0.5">{k}</label>
+          <label className="block text-[10px] uppercase tracking-wider text-surface-200/50 mb-1">{k}</label>
           {String(draft[k] ?? '').length > 60 || k === 'description'
-            ? <textarea value={draft[k] ?? ''} onChange={e => set(k, e.target.value)} rows={3}
-                className="w-full bg-[#15152e] border border-white/10 rounded px-2 py-1.5 text-xs" />
-            : <input value={draft[k] ?? ''} onChange={e => set(k, e.target.value)}
-                className="w-full bg-[#15152e] border border-white/10 rounded px-2 py-1.5 text-xs" />}
+            ? <textarea value={draft[k] ?? ''} onChange={e => set(k, e.target.value)} rows={3} className="input" />
+            : <input value={draft[k] ?? ''} onChange={e => set(k, e.target.value)} className="input" />}
         </div>
       ))}
     </div>
@@ -222,15 +218,14 @@ function VfxTab({ draft, setDraft, setMsg, busy, setBusy }: {
   };
   return (
     <div className="p-3 space-y-3">
-      <p className="text-[11px] text-gray-400">Mo ta hieu ung → AI tao JSON cau hinh VFX (particle/shake/flash).</p>
-      <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={3} placeholder="vd: vu no lua do, rung man hinh, tia lua bay len"
-        className="w-full bg-[#15152e] border border-white/10 rounded px-2 py-1.5 text-xs" />
-      <button onClick={gen} disabled={!!busy}
-        className="px-3 py-1 text-xs rounded bg-[#2a1f4a] text-[#b090f0] disabled:opacity-40">
+      <p className="text-[11px] text-surface-200/60">Mo ta hieu ung → AI tao JSON cau hinh VFX (particle/shake/flash).</p>
+      <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={3}
+        placeholder="vd: vu no lua do, rung man hinh, tia lua bay len" className="input" />
+      <button onClick={gen} disabled={!!busy} className="btn-secondary !text-brand-300 text-xs">
         {busy === 'ai-vfx' ? 'Dang tao...' : 'AI: Tao VFX'}</button>
       {out && <>
-        <pre className="text-[10px] text-gray-300 bg-[#08081a] border border-white/10 rounded p-2 max-h-60 overflow-auto whitespace-pre-wrap">{out}</pre>
-        <button onClick={apply} className="px-3 py-1 text-xs rounded bg-[#f0a020] text-black">Gan vao muc dang sua</button>
+        <pre className="text-[10px] text-surface-100/80 card p-2.5 max-h-60 overflow-auto whitespace-pre-wrap">{out}</pre>
+        <button onClick={apply} className="btn-gold text-xs">Gan vao muc dang sua</button>
       </>}
     </div>
   );
@@ -262,21 +257,21 @@ function SpriteSlicer() {
       <div className="flex items-center gap-2">
         <input ref={fileRef} type="file" accept="image/png,image/webp" className="hidden"
           onChange={e => e.target.files?.[0] && onFile(e.target.files[0])} />
-        <button onClick={() => fileRef.current?.click()} className="px-3 py-1 text-xs rounded bg-[#15152e] border border-white/10">Chon sprite sheet</button>
-        <button onClick={slice} disabled={!img || busy} className="px-3 py-1 text-xs rounded bg-[#f0a020] text-black disabled:opacity-30">
+        <button onClick={() => fileRef.current?.click()} className="btn-secondary text-xs">Chon sprite sheet</button>
+        <button onClick={slice} disabled={!img || busy} className="btn-gold text-xs">
           {busy ? 'Dang tach...' : 'Tach anh (auto)'}</button>
-        {frames.length > 0 && <span className="text-xs text-[#4ecca3]">{frames.length} frame</span>}
+        {frames.length > 0 && <span className="text-xs text-emerald-400">{frames.length} frame</span>}
       </div>
       {img && (
-        <div className="relative inline-block border border-white/10 rounded overflow-hidden bg-[#111]">
+        <div className="relative inline-block card overflow-hidden">
           <img src={img} alt="sheet" className="block max-w-full" style={{ imageRendering: 'pixelated' }} />
           {dim.w > 0 && frames.map((f, i) => (
-            <div key={i} className="absolute border border-[#f0a020]/80"
+            <div key={i} className="absolute border border-gold-500/80"
               style={{ left: `${f.x / dim.w * 100}%`, top: `${f.y / dim.h * 100}%`, width: `${f.w / dim.w * 100}%`, height: `${f.h / dim.h * 100}%` }} />
           ))}
         </div>
       )}
-      {!img && <p className="text-xs text-gray-600">Tai len sprite sheet (nen trong suot) — tool tu nhan dien tung khung hinh.</p>}
+      {!img && <p className="text-xs text-surface-200/50">Tai len sprite sheet (nen trong suot) — tool tu nhan dien tung khung hinh.</p>}
     </div>
   );
 }
@@ -284,9 +279,9 @@ function SpriteSlicer() {
 function PreviewArea({ row, section }: { row: Row; section: Section }) {
   return (
     <div className="text-center">
-      <div className="w-40 h-40 mx-auto rounded-lg bg-[#15152e] border border-white/10 flex items-center justify-center text-gray-600 text-xs">Preview</div>
-      <div className="mt-3 text-sm text-gray-300">{row[section.nameField] ?? '—'}</div>
-      <div className="text-[11px] text-gray-600">ID: {row[section.pk] ?? '—'} · {section.label}</div>
+      <div className="w-40 h-40 mx-auto card flex items-center justify-center text-surface-200/40 text-xs">Preview</div>
+      <div className="mt-3 text-sm text-surface-100">{row[section.nameField] ?? '—'}</div>
+      <div className="text-[11px] text-surface-200/50">ID: {row[section.pk] ?? '—'} · {section.label}</div>
     </div>
   );
 }
