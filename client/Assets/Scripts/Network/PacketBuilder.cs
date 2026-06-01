@@ -541,6 +541,13 @@ namespace NexusIsekai.Network
         public static void SendNpcBark(int npcId) => SendVoiceRequest(2, npcId);
         public static void SendSoundConfig() => Send(new PacketBuilder(PacketOpcode.C2S_SOUND_CONFIG));
         public static void SendFxConfig() => Send(new PacketBuilder(PacketOpcode.C2S_FX_CONFIG));
+        // Phuc Loi
+        public static void SendWelfareList() => Send(new PacketBuilder(PacketOpcode.C2S_WELFARE_LIST));
+        public static void SendWelfareDetail(int id) => Send(new PacketBuilder(PacketOpcode.C2S_WELFARE_DETAIL).WriteInt(id));
+        public static void SendWelfareClaim(int id, int order) => Send(new PacketBuilder(PacketOpcode.C2S_WELFARE_CLAIM).WriteInt(id).WriteInt(order));
+        public static void SendWelfareClaimAll(int id) => Send(new PacketBuilder(PacketOpcode.C2S_WELFARE_CLAIM_ALL).WriteInt(id));
+        public static void SendWelfareActivate(int id) => Send(new PacketBuilder(PacketOpcode.C2S_WELFARE_ACTIVATE).WriteInt(id));
+        public static void SendWelfarePurchase(int id) => Send(new PacketBuilder(PacketOpcode.C2S_WELFARE_PURCHASE).WriteInt(id));
         public static void SendWedding(long targetCharId, int weddingMapId)
             => Send(new PacketBuilder(PacketOpcode.C2S_WEDDING)
                 .WriteLong(targetCharId).WriteInt(weddingMapId));

@@ -235,6 +235,8 @@ public class CombatHandler {
         int levelsUp = player.gainExp(expGain);
         // Hoạt Động: cộng tiến độ sự kiện tích EXP
         ActivityHandler.fire(player.getCharId(), "gain_exp", expGain);
+        // Phúc Lợi: cập nhật mốc cấp độ khi lên cấp
+        if (levelsUp > 0) WelfareHandler.fire(player.getCharId(), "level_gift", player.getLevel());
 
         // Gửi exp update
         ByteBuffer expBuf = ByteBuffer.allocate(8 + 8 + 4);

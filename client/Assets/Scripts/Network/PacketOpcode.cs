@@ -583,6 +583,16 @@ namespace NexusIsekai.Network
         public const short S2C_SOUND_CONFIG     = 0x4414;
         public const short C2S_FX_CONFIG        = 0x4403;
         public const short S2C_FX_CONFIG        = 0x4415;
+        // Phuc Loi
+        public const short C2S_WELFARE_LIST      = 0x4501;
+        public const short C2S_WELFARE_DETAIL    = 0x4502;
+        public const short C2S_WELFARE_CLAIM     = 0x4503;
+        public const short C2S_WELFARE_CLAIM_ALL = 0x4504;
+        public const short C2S_WELFARE_ACTIVATE  = 0x4505;
+        public const short C2S_WELFARE_PURCHASE  = 0x4506;
+        public const short S2C_WELFARE_LIST      = 0x4511;
+        public const short S2C_WELFARE_DETAIL    = 0x4512;
+        public const short S2C_WELFARE_RESULT    = 0x4513;
 
     }
 }

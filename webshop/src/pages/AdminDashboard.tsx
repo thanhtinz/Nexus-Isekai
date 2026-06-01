@@ -251,6 +251,9 @@ const PANELS: PanelConfig[] = [
   { key: 'act_miles',    label: 'Hoat Dong - Moc', group: 'Tinh Nang',  endpoint: '/api/activity-milestones',dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'act_ranks',    label: 'Hoat Dong - Hang',group: 'Tinh Nang',  endpoint: '/api/activity-rank-rewards',dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'act_types',    label: 'Hoat Dong - Loai', group: 'Tinh Nang', endpoint: '/api/activity-types', dataKey: 'rows', editable: true, pk: 'type_key' },
+  { key: 'welfare',      label: 'Phuc Loi',        group: 'Tinh Nang',  endpoint: '/api/welfare',           dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'welfare_mile', label: 'Phuc Loi - Moc',  group: 'Tinh Nang',  endpoint: '/api/welfare-milestones',dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'welfare_types',label: 'Phuc Loi - Loai', group: 'Tinh Nang',  endpoint: '/api/welfare-types',     dataKey: 'rows', editable: true, pk: 'type_key' },
 
   // Bo sung vao nhom san
   { key: 'cosmetics',    label: 'Cosmetic',        group: 'Xa Hoi',     endpoint: '/api/cosmetics',         dataKey: 'rows', editable: true, pk: 'id' },

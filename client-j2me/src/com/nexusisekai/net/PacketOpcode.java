@@ -339,4 +339,14 @@ public interface PacketOpcode {
     // FX config
     public static final short C2S_FX_CONFIG = (short)0x4403;
     public static final short S2C_FX_CONFIG = (short)0x4415;
+    // Phuc Loi
+    public static final short C2S_WELFARE_LIST = (short)0x4501;
+    public static final short C2S_WELFARE_DETAIL = (short)0x4502;
+    public static final short C2S_WELFARE_CLAIM = (short)0x4503;
+    public static final short C2S_WELFARE_CLAIM_ALL = (short)0x4504;
+    public static final short C2S_WELFARE_ACTIVATE = (short)0x4505;
+    public static final short C2S_WELFARE_PURCHASE = (short)0x4506;
+    public static final short S2C_WELFARE_LIST = (short)0x4511;
+    public static final short S2C_WELFARE_DETAIL = (short)0x4512;
+    public static final short S2C_WELFARE_RESULT = (short)0x4513;
 }

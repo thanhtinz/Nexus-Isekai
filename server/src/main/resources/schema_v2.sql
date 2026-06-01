@@ -4113,3 +4113,98 @@ ALTER TABLE npcs     ADD COLUMN IF NOT EXISTS sfx_key    VARCHAR(64) DEFAULT NUL
 ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_key     VARCHAR(64) DEFAULT NULL; -- hiệu ứng lúc tung
 ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_hit_key VARCHAR(64) DEFAULT NULL; -- hiệu ứng lúc trúng
 ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS sfx_key     VARCHAR(64) DEFAULT NULL; -- âm thanh skill
+
+-- ═════════════════════════════════════════════════════════════
+-- HỆ THỐNG PHÚC LỢI (Welfare Hub) — phần thưởng miễn phí/nạp/ưu đãi
+-- Data-driven, admin bật/tắt + cấu hình. Trạng thái theo enabled + thời gian + tiến độ.
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS welfare (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    welfare_type  VARCHAR(24) NOT NULL,          -- checkin,online,first_topup,daily_topup,cumulative_topup,monthly_card,growth_fund,battle_pass,giftcode,level_gift,power_gift,achievement_gift,newbie_gift,refund
+    name          VARCHAR(64) NOT NULL,
+    description   VARCHAR(512) DEFAULT '',
+    icon_id       INT NOT NULL DEFAULT 0,
+    is_enabled    TINYINT NOT NULL DEFAULT 1,    -- admin bật/tắt
+    start_at      DATETIME NULL,
+    end_at        DATETIME NULL,
+    server_id     INT NOT NULL DEFAULT 0,
+    sort_order    INT NOT NULL DEFAULT 0,
+    claim_mode    VARCHAR(12) NOT NULL DEFAULT 'milestone', -- milestone|once|daily|activate|purchase|passive
+    reset_period  VARCHAR(8) NOT NULL DEFAULT 'none',       -- none|daily|monthly
+    price_diamond INT NOT NULL DEFAULT 0,         -- mua quyền lợi (thẻ tháng/quỹ): giá KC
+    duration_days INT NOT NULL DEFAULT 0,         -- thẻ tháng: 30
+    goto_feature  VARCHAR(32) DEFAULT NULL,       -- "đi đến tính năng": key màn cần mở
+    config_json   VARCHAR(1024) DEFAULT NULL,
+    INDEX idx_type_enabled (welfare_type, is_enabled)
+);
+
+-- Mốc thưởng (ngày điểm danh, phút online, mốc tích nạp, cấp pass, mốc level/lực chiến...)
+CREATE TABLE IF NOT EXISTS welfare_milestones (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    welfare_id    INT NOT NULL,
+    milestone_order INT NOT NULL DEFAULT 0,
+    requirement   INT NOT NULL DEFAULT 0,         -- ngưỡng: ngày/phút/KC nạp/cấp/lực chiến
+    reward_json   VARCHAR(512) NOT NULL DEFAULT '{}',     -- thưởng miễn phí
+    reward_premium_json VARCHAR(512) DEFAULT NULL,        -- thưởng cao cấp (battle pass premium)
+    label         VARCHAR(64) DEFAULT '',
+    INDEX idx_welfare (welfare_id, milestone_order)
+);
+
+-- Tiến độ phúc lợi của từng nhân vật
+CREATE TABLE IF NOT EXISTS welfare_progress (
+    char_id       BIGINT NOT NULL,
+    welfare_id    INT NOT NULL,
+    progress      BIGINT NOT NULL DEFAULT 0,      -- ngày/phút/KC nạp/level/lực chiến/điểm pass
+    claimed_json  VARCHAR(1024) NOT NULL DEFAULT '[]',
+    is_premium    TINYINT NOT NULL DEFAULT 0,     -- battle pass: đã mua premium chưa
+    activated_at  DATETIME NULL,                  -- thẻ tháng/quỹ: thời điểm kích hoạt
+    expire_at     DATETIME NULL,                  -- thẻ tháng hết hạn
+    last_tick_at  DATETIME NULL,
+    updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (char_id, welfare_id)
+);
+
+-- Catalog loại phúc lợi (admin chọn type)
+CREATE TABLE IF NOT EXISTS welfare_types (
+    type_key      VARCHAR(24) NOT NULL PRIMARY KEY,
+    display_name  VARCHAR(48) NOT NULL,
+    category      VARCHAR(16) NOT NULL DEFAULT 'free',  -- free|topup|growth|pass|special
+    claim_mode    VARCHAR(12) NOT NULL DEFAULT 'milestone',
+    description   VARCHAR(256) DEFAULT ''
+);
+INSERT IGNORE INTO welfare_types (type_key,display_name,category,claim_mode,description) VALUES
+ ('checkin','Diem Danh','free','daily','Nhan thuong dang nhap moi ngay + tich luy'),
+ ('online','Qua Online','free','milestone','Thuong theo thoi gian online'),
+ ('first_topup','Nap Dau','topup','once','Thuong dac biet lan nap dau (1 lan/tai khoan)'),
+ ('daily_topup','Nap Moi Ngay','topup','daily','Nap dat dieu kien trong ngay, reset 00:00'),
+ ('cumulative_topup','Tich Nap','topup','milestone','Tong nap trong su kien, thuong theo moc'),
+ ('monthly_card','The Thang','topup','purchase','Mua, nhan thuong moi ngay 30 ngay'),
+ ('growth_fund','Quy Tang Truong','growth','purchase','Mua 1 lan, dat cap nhan thuong'),
+ ('battle_pass','Battle Pass','pass','milestone','Hoan thanh nhiem vu tang cap pass, thuong free/premium'),
+ ('giftcode','Giftcode','special','activate','Nhap ma qua tang nhan vat pham qua thu'),
+ ('level_gift','Qua Cap Do','growth','milestone','Thuong khi dat moc cap do'),
+ ('power_gift','Qua Luc Chien','growth','milestone','Thuong khi dat moc luc chien'),
+ ('achievement_gift','Qua Thanh Tuu','growth','milestone','Thuong khi hoan thanh thanh tuu'),
+ ('newbie_gift','Qua Tan Thu','free','milestone','Chuoi nhiem vu ho tro nguoi moi'),
+ ('refund','Hoan Tra','special','milestone','Hoan tra tai nguyen theo su kien, gioi han thoi gian');
+
+-- Seed phúc lợi mẫu
+INSERT IGNORE INTO welfare (id,welfare_type,name,description,is_enabled,claim_mode,reset_period,price_diamond,duration_days) VALUES
+ (1,'checkin','Điểm Danh','Đăng nhập mỗi ngày nhận quà, tích luỹ ngày thưởng lớn',1,'daily','none',0,0),
+ (2,'online','Quà Online','Online tích thời gian nhận thưởng theo mốc',1,'milestone','daily',0,0),
+ (3,'first_topup','Nạp Đầu','Thưởng đặc biệt cho lần nạp đầu tiên',1,'once','none',0,0),
+ (4,'monthly_card','Thẻ Tháng','Kích hoạt 30 ngày, nhận thưởng mỗi ngày',1,'purchase','none',300,30),
+ (5,'growth_fund','Quỹ Tăng Trưởng','Mua một lần, đạt cấp nhận thưởng',1,'purchase','none',500,0),
+ (6,'battle_pass','Battle Pass','Hoàn thành nhiệm vụ tăng cấp Pass',1,'milestone','none',0,0),
+ (7,'level_gift','Quà Cấp Độ','Đạt mốc cấp độ nhận thưởng',1,'milestone','none',0,0),
+ (8,'power_gift','Quà Lực Chiến','Đạt mốc lực chiến nhận thưởng',1,'milestone','none',0,0),
+ (9,'newbie_gift','Quà Tân Thủ','Chuỗi nhiệm vụ hỗ trợ người mới',1,'milestone','none',0,0);
+
+INSERT IGNORE INTO welfare_milestones (welfare_id,milestone_order,requirement,reward_json,reward_premium_json,label) VALUES
+ (1,1,1,'{"gold":10000}',NULL,'Ngày 1'),(1,2,7,'{"diamond":50}',NULL,'Ngày 7'),(1,3,30,'{"diamond":200,"items":[[8001,1]]}',NULL,'Ngày 30'),
+ (2,1,30,'{"gold":5000}',NULL,'30 phút'),(2,2,120,'{"diamond":30}',NULL,'120 phút'),
+ (5,1,30,'{"diamond":300}',NULL,'Cấp 30'),(5,2,60,'{"diamond":600}',NULL,'Cấp 60'),
+ (6,1,100,'{"gold":20000}','{"diamond":50}','Pass 1'),(6,2,300,'{"gold":50000}','{"diamond":150}','Pass 3'),
+ (7,1,10,'{"gold":5000}',NULL,'Cấp 10'),(7,2,50,'{"diamond":100}',NULL,'Cấp 50'),
+ (8,1,1000,'{"gold":10000}',NULL,'1000 LC'),(8,2,5000,'{"diamond":80}',NULL,'5000 LC'),
+ (9,1,1,'{"items":[[1,1]]}',NULL,'Bước 1'),(9,2,5,'{"diamond":50}',NULL,'Bước 5');

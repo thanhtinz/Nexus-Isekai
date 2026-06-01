@@ -661,4 +661,15 @@ public final class PacketOpcode {
     public static final short S2C_SOUND_CONFIG      = (short)0x4414; // [list event_key+audio_key+volume]
     public static final short C2S_FX_CONFIG         = (short)0x4403; // client xin bảng spine/vfx/sfx của monster/npc/skill
     public static final short S2C_FX_CONFIG         = (short)0x4415;
+
+    // ───── Phúc Lợi (Welfare Hub) (0x45xx) ─────
+    public static final short C2S_WELFARE_LIST      = (short)0x4501;
+    public static final short C2S_WELFARE_DETAIL    = (short)0x4502;
+    public static final short C2S_WELFARE_CLAIM     = (short)0x4503;
+    public static final short C2S_WELFARE_CLAIM_ALL = (short)0x4504;
+    public static final short C2S_WELFARE_ACTIVATE  = (short)0x4505; // kích hoạt (giftcode/thẻ)
+    public static final short C2S_WELFARE_PURCHASE  = (short)0x4506; // mua quyền lợi (thẻ tháng/quỹ)
+    public static final short S2C_WELFARE_LIST      = (short)0x4511;
+    public static final short S2C_WELFARE_DETAIL    = (short)0x4512;
+    public static final short S2C_WELFARE_RESULT    = (short)0x4513;
 }

@@ -513,4 +513,14 @@ extension FixedWidthInteger {
     // FX config
     static let C2S_FX_CONFIG: Int16 = 0x4403
     static let S2C_FX_CONFIG: Int16 = 0x4415
+    // Phuc Loi
+    static let C2S_WELFARE_LIST: Int16 = 0x4501
+    static let C2S_WELFARE_DETAIL: Int16 = 0x4502
+    static let C2S_WELFARE_CLAIM: Int16 = 0x4503
+    static let C2S_WELFARE_CLAIM_ALL: Int16 = 0x4504
+    static let C2S_WELFARE_ACTIVATE: Int16 = 0x4505
+    static let C2S_WELFARE_PURCHASE: Int16 = 0x4506
+    static let S2C_WELFARE_LIST: Int16 = 0x4511
+    static let S2C_WELFARE_DETAIL: Int16 = 0x4512
+    static let S2C_WELFARE_RESULT: Int16 = 0x4513
 }

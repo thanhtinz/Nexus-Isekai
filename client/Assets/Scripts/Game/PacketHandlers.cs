@@ -82,6 +82,9 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_PLAY_SOUND, OnPlaySound);
             d.Register(PacketOpcode.S2C_SOUND_CONFIG, OnSoundConfig);
             d.Register(PacketOpcode.S2C_FX_CONFIG, OnFxConfig);
+            d.Register(PacketOpcode.S2C_WELFARE_LIST,   OnWelfareList);
+            d.Register(PacketOpcode.S2C_WELFARE_DETAIL, OnWelfareDetail);
+            d.Register(PacketOpcode.S2C_WELFARE_RESULT, OnWelfareResult);
             d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
             d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
             d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
@@ -803,6 +806,29 @@ namespace NexusIsekai.Game
         }
 
         private void OnPlayBgm(PacketReader r) { AudioManager.Instance?.PlayBGM(r.ReadString()); }
+        private void OnWelfareList(PacketReader r) {
+            int n = r.ReadShort(); WelfareUI.Instance?.ClearList();
+            for (int i=0;i<n;i++){
+                int id=r.ReadInt(); string type=r.ReadString(); string name=r.ReadString(); string desc=r.ReadString();
+                int icon=r.ReadInt(); int status=r.ReadByte(); string mode=r.ReadString(); string goto_=r.ReadString();
+                int price=r.ReadInt(); int claimable=r.ReadInt(); int secsLeft=r.ReadInt();
+                WelfareUI.Instance?.AddWelfare(id,type,name,desc,icon,status,mode,goto_,price,claimable,secsLeft);
+            }
+            WelfareUI.Instance?.Open();
+        }
+        private void OnWelfareDetail(PacketReader r) {
+            int id=r.ReadInt(); string name=r.ReadString(); string desc=r.ReadString();
+            string type=r.ReadString(); string mode=r.ReadString(); long prog=r.ReadLong(); bool premium=r.ReadBool(); int price=r.ReadInt();
+            WelfareUI.Instance?.SetDetailHeader(id,name,desc,type,mode,prog,premium,price);
+            int m=r.ReadShort(); WelfareUI.Instance?.ClearMilestones();
+            for (int i=0;i<m;i++){
+                int order=r.ReadInt(); int req=r.ReadInt(); string reward=r.ReadString(); string rewardP=r.ReadString();
+                string label=r.ReadString(); bool claimed=r.ReadBool(); bool eligible=r.ReadBool();
+                WelfareUI.Instance?.AddMilestone(order,req,reward,rewardP,label,claimed,eligible);
+            }
+            WelfareUI.Instance?.ShowDetail();
+        }
+        private void OnWelfareResult(PacketReader r) { GameState.Instance?.ShowToast(r.ReadString()); PacketBuilder.SendWelfareList(); }
         private void OnFxConfig(PacketReader r) {
             int ns = r.ReadShort();
             for (int i=0;i<ns;i++){ int id=r.ReadInt(); FxManager.Instance?.RegisterSkill(id, r.ReadString(), r.ReadString(), r.ReadString()); }

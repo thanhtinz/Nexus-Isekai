@@ -233,6 +233,9 @@ public class AdminApiServer {
         httpServer.createContext("/api/event-currency-shop", ex -> handleAuth(ex, this::handleEventCurrencyShop));
         httpServer.createContext("/api/pass/tasks",          ex -> handleAuth(ex, this::handlePassTasks));
         httpServer.createContext("/api/skills",           ex -> handleAuth(ex, this::handleSkillsCfg));
+        httpServer.createContext("/api/welfare",            ex -> handleAuth(ex, this::handleWelfareCfg));
+        httpServer.createContext("/api/welfare-milestones", ex -> handleAuth(ex, this::handleWelfareMilestonesCfg));
+        httpServer.createContext("/api/welfare-types",      ex -> handleAuth(ex, this::handleWelfareTypesCfg));
         httpServer.createContext("/api/stickers",         ex -> handleAuth(ex, this::handleStickers));
         httpServer.createContext("/api/admin-accounts",   ex -> handleAuth(ex, this::handleAdminAccounts));
         httpServer.createContext("/api/portals",          ex -> handleAuth(ex, this::handlePortals));
@@ -859,6 +862,15 @@ public class AdminApiServer {
     }
     private void handleSkillsCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "skill_templates", "id", new String[]{"name","class_id","skill_type","element","base_damage","mp_cost","cooldown_ms","max_level","description","icon_id","unlock_level","vfx_key","vfx_hit_key","sfx_key","is_active"});
+    }
+    private void handleWelfareCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "welfare", "id", new String[]{"welfare_type","name","description","icon_id","is_enabled","start_at","end_at","server_id","sort_order","claim_mode","reset_period","price_diamond","duration_days","goto_feature","config_json"});
+    }
+    private void handleWelfareMilestonesCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "welfare_milestones", "id", new String[]{"welfare_id","milestone_order","requirement","reward_json","reward_premium_json","label"});
+    }
+    private void handleWelfareTypesCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "welfare_types", "type_key", new String[]{"display_name","category","claim_mode","description"});
     }
 
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {
