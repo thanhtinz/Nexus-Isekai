@@ -245,6 +245,8 @@ const PANELS: PanelConfig[] = [
   { key: 'outer_bosses', label: 'Ngoai Vuc - Boss',group: 'Tinh Nang',  endpoint: '/api/outer-bosses',      dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'guildwar',     label: 'Guild War',       group: 'Tinh Nang',  endpoint: '/api/guild-wars',        dataKey: 'rows' },
   { key: 'market',       label: 'Cho Nguoi Choi',  group: 'Tinh Nang',  endpoint: '/api/market-admin',      dataKey: 'rows' },
+  { key: 'activities',   label: 'Hoat Dong',       group: 'Tinh Nang',  endpoint: '/api/activities',        dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'act_miles',    label: 'Hoat Dong - Moc', group: 'Tinh Nang',  endpoint: '/api/activity-milestones',dataKey: 'rows', editable: true, pk: 'id' },
 
   // Bo sung vao nhom san
   { key: 'cosmetics',    label: 'Cosmetic',        group: 'Xa Hoi',     endpoint: '/api/cosmetics',         dataKey: 'rows', editable: true, pk: 'id' },

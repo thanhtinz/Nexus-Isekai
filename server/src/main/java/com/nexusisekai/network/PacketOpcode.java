@@ -637,4 +637,14 @@ public final class PacketOpcode {
     public static final short C2S_VIP_DAILY      = (short)0x4203;  // nhận đặc quyền ngày
     public static final short S2C_VIP_INFO       = (short)0x4211;
     public static final short S2C_VIP_REWARD     = (short)0x4212;
+
+    // ───── Hoạt Động (Activity Hub) (0x43xx) ─────
+    public static final short C2S_ACTIVITY_LIST    = (short)0x4301;
+    public static final short C2S_ACTIVITY_DETAIL  = (short)0x4302;
+    public static final short C2S_ACTIVITY_CLAIM   = (short)0x4303;  // nhận thưởng mốc
+    public static final short C2S_ACTIVITY_EXCHANGE= (short)0x4304;  // đổi thưởng
+    public static final short C2S_ACTIVITY_JOIN    = (short)0x4305;  // tham gia nhanh
+    public static final short S2C_ACTIVITY_LIST    = (short)0x4311;
+    public static final short S2C_ACTIVITY_DETAIL  = (short)0x4312;
+    public static final short S2C_ACTIVITY_RESULT  = (short)0x4313;
 }

@@ -213,6 +213,12 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_VIP_INFO      -> { requireInGame(); EndgameHandler.handleVipInfo(this, toBuf(p)); }
             case PacketOpcode.C2S_VIP_CLAIM     -> { requireInGame(); EndgameHandler.handleVipClaim(this, toBuf(p)); }
             case PacketOpcode.C2S_VIP_DAILY     -> { requireInGame(); EndgameHandler.handleVipDaily(this, toBuf(p)); }
+            // Hoạt Động
+            case PacketOpcode.C2S_ACTIVITY_LIST     -> { requireInGame(); ActivityHandler.handleList(this, toBuf(p)); }
+            case PacketOpcode.C2S_ACTIVITY_DETAIL   -> { requireInGame(); ActivityHandler.handleDetail(this, toBuf(p)); }
+            case PacketOpcode.C2S_ACTIVITY_CLAIM    -> { requireInGame(); ActivityHandler.handleClaim(this, toBuf(p)); }
+            case PacketOpcode.C2S_ACTIVITY_EXCHANGE -> { requireInGame(); ActivityHandler.handleExchange(this, toBuf(p)); }
+            case PacketOpcode.C2S_ACTIVITY_JOIN     -> { requireInGame(); ActivityHandler.handleJoin(this, toBuf(p)); }
             case PacketOpcode.C2S_FARM_VISIT    -> { requireInGame(); FarmingHandler.handleFarmVisit(this, toBuf(p)); }
 
             // ── Housing ───────────────────────────────────────────────

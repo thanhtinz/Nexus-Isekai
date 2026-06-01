@@ -528,6 +528,12 @@ namespace NexusIsekai.Network
         public static void SendVipInfo() => Send(new PacketBuilder(PacketOpcode.C2S_VIP_INFO));
         public static void SendVipClaim(int vipLevel) => Send(new PacketBuilder(PacketOpcode.C2S_VIP_CLAIM).WriteInt(vipLevel));
         public static void SendVipDaily() => Send(new PacketBuilder(PacketOpcode.C2S_VIP_DAILY));
+        // Hoat Dong
+        public static void SendActivityList() => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_LIST));
+        public static void SendActivityDetail(int id) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_DETAIL).WriteInt(id));
+        public static void SendActivityClaim(int id, int order) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_CLAIM).WriteInt(id).WriteInt(order));
+        public static void SendActivityExchange(int id, int milestoneId) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_EXCHANGE).WriteInt(id).WriteInt(milestoneId));
+        public static void SendActivityJoin(int id) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_JOIN).WriteInt(id));
         public static void SendWedding(long targetCharId, int weddingMapId)
             => Send(new PacketBuilder(PacketOpcode.C2S_WEDDING)
                 .WriteLong(targetCharId).WriteInt(weddingMapId));

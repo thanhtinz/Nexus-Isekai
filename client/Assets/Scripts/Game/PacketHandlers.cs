@@ -72,6 +72,10 @@ namespace NexusIsekai.Game
             // VIP
             d.Register(PacketOpcode.S2C_VIP_INFO,      OnVipInfo);
             d.Register(PacketOpcode.S2C_VIP_REWARD,    OnVipReward);
+            // Hoat Dong
+            d.Register(PacketOpcode.S2C_ACTIVITY_LIST,   OnActivityList);
+            d.Register(PacketOpcode.S2C_ACTIVITY_DETAIL, OnActivityDetail);
+            d.Register(PacketOpcode.S2C_ACTIVITY_RESULT, OnActivityResult);
             d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
             d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
             d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
@@ -754,6 +758,40 @@ namespace NexusIsekai.Game
             VipUI.Instance?.Open();
         }
         private void OnVipReward(PacketReader r) { GameState.Instance?.ShowToast(r.ReadString()); }
+
+        // ───── Hoat Dong ─────
+        private void OnActivityList(PacketReader r) {
+            int n = r.ReadShort();
+            ActivityUI.Instance?.ClearList();
+            for (int i = 0; i < n; i++) {
+                int id = r.ReadInt(); string type = r.ReadString(); string name = r.ReadString();
+                string desc = r.ReadString(); int icon = r.ReadInt(); int status = r.ReadByte();
+                string action = r.ReadString(); float mult = r.ReadFloat();
+                long prog = r.ReadLong(); int total = r.ReadInt(); int done = r.ReadInt(); int secsLeft = r.ReadInt();
+                ActivityUI.Instance?.AddActivity(id, type, name, desc, icon, status, action, mult, prog, total, done, secsLeft);
+            }
+            ActivityUI.Instance?.Open();
+        }
+        private void OnActivityDetail(PacketReader r) {
+            int id = r.ReadInt(); string name = r.ReadString(); string desc = r.ReadString();
+            string type = r.ReadString(); string action = r.ReadString(); long prog = r.ReadLong();
+            int toStart = r.ReadInt(); int toEnd = r.ReadInt();
+            ActivityUI.Instance?.SetDetailHeader(id, name, desc, type, action, prog, toStart, toEnd);
+            int m = r.ReadShort();
+            ActivityUI.Instance?.ClearMilestones();
+            for (int i = 0; i < m; i++) {
+                int msId = r.ReadInt(); int order = r.ReadInt(); int req = r.ReadInt();
+                string reward = r.ReadString(); string label = r.ReadString();
+                int costId = r.ReadInt(); int costQty = r.ReadInt(); int exLimit = r.ReadInt();
+                bool claimed = r.ReadBool(); bool eligible = r.ReadBool();
+                ActivityUI.Instance?.AddMilestone(msId, order, req, reward, label, costId, costQty, exLimit, claimed, eligible);
+            }
+            ActivityUI.Instance?.ShowDetail();
+        }
+        private void OnActivityResult(PacketReader r) {
+            GameState.Instance?.ShowToast(r.ReadString());
+            PacketBuilder.SendActivityList();
+        }
 
         private void OnClassStory(PacketReader r)
         {

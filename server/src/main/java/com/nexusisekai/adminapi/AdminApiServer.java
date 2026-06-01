@@ -140,6 +140,8 @@ public class AdminApiServer {
         httpServer.createContext("/api/minigame-config", ex -> handleAuth(ex, this::handleMinigameCfg));
         httpServer.createContext("/api/child-shop",      ex -> handleAuth(ex, this::handleChildShopCfg));
         httpServer.createContext("/api/webshop-contents",ex -> handleAuth(ex, this::handleWebshopContentsCfg));
+        httpServer.createContext("/api/activities",       ex -> handleAuth(ex, this::handleActivitiesCfg));
+        httpServer.createContext("/api/activity-milestones", ex -> handleAuth(ex, this::handleActivityMilestonesCfg));
         httpServer.createContext("/api/shops",      ex -> handleAuth(ex, this::handleShops));
         httpServer.createContext("/api/events",     ex -> handleAuth(ex, this::handleEvents));
         httpServer.createContext("/api/quests",     ex -> handleAuth(ex, this::handleQuests));
@@ -813,6 +815,13 @@ public class AdminApiServer {
     }
     private void handleWebshopContentsCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "webshop_item_contents", "id", new String[]{"webshop_item_id","item_id","qty"});
+    }
+    // Hoat Dong — bat/tat (is_enabled) + cau hinh
+    private void handleActivitiesCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "activities", "id", new String[]{"activity_type","name","description","icon_id","is_enabled","start_at","end_at","server_id","sort_order","multiplier","action_type","config_json"});
+    }
+    private void handleActivityMilestonesCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "activity_milestones", "id", new String[]{"activity_id","milestone_order","requirement","reward_json","item_cost_id","item_cost_qty","exchange_limit","label"});
     }
 
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {

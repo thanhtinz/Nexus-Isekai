@@ -3675,3 +3675,79 @@ INSERT IGNORE INTO vip_milestone_rewards (vip_level,reward_json) VALUES
 -- World boss: chu kỳ hồi sinh (phút) cho scheduler tự spawn
 ALTER TABLE world_bosses ADD COLUMN IF NOT EXISTS spawn_interval_min INT NOT NULL DEFAULT 180;
 ALTER TABLE world_bosses ADD COLUMN IF NOT EXISTS last_killer_name VARCHAR(32) DEFAULT NULL;
+
+-- ═════════════════════════════════════════════════════════════
+-- HỆ THỐNG HOẠT ĐỘNG (Activity Hub) — gom sự kiện/nhiệm vụ giới hạn thời gian
+-- Admin bật/tắt + cấu hình thời gian, mốc thưởng, điều kiện.
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS activities (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    activity_type VARCHAR(24) NOT NULL,          -- login,online,daily_mission,weekly_mission,spending,exchange,ranking,boss_hunt,x2_exp,x2_drop,lucky_wheel,guild_event,cross_server,special
+    name          VARCHAR(64) NOT NULL,
+    description   VARCHAR(512) DEFAULT '',
+    icon_id       INT NOT NULL DEFAULT 0,
+    is_enabled    TINYINT NOT NULL DEFAULT 1,    -- admin bật/tắt
+    start_at      DATETIME NULL,                 -- NULL = luôn mở
+    end_at        DATETIME NULL,
+    server_id     INT NOT NULL DEFAULT 0,        -- 0 = mọi server; >0 = riêng server; -1 = liên server
+    sort_order    INT NOT NULL DEFAULT 0,
+    -- với x2_exp/x2_drop: multiplier; với khác: cấu hình riêng
+    multiplier    FLOAT NOT NULL DEFAULT 1.0,
+    action_type   VARCHAR(16) NOT NULL DEFAULT 'progress', -- progress,claim,exchange,join,wheel,passive
+    config_json   VARCHAR(1024) DEFAULT NULL,
+    INDEX idx_type_enabled (activity_type, is_enabled)
+);
+
+-- Mốc thưởng / mục tiêu của một hoạt động (login ngày, online phút, điểm nhiệm vụ, mốc tiêu KC...)
+CREATE TABLE IF NOT EXISTS activity_milestones (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    activity_id   INT NOT NULL,
+    milestone_order INT NOT NULL DEFAULT 0,
+    requirement   INT NOT NULL DEFAULT 0,        -- ngưỡng: ngày/phút/điểm/KC tiêu
+    reward_json   VARCHAR(512) NOT NULL DEFAULT '{}',
+    item_cost_id  INT NOT NULL DEFAULT 0,        -- đổi thưởng: vật phẩm cần tiêu
+    item_cost_qty INT NOT NULL DEFAULT 0,
+    exchange_limit INT NOT NULL DEFAULT 0,       -- đổi thưởng: giới hạn số lần (0 = không giới hạn)
+    label         VARCHAR(64) DEFAULT '',
+    INDEX idx_activity (activity_id, milestone_order)
+);
+
+-- Tiến độ của từng nhân vật trong từng hoạt động
+CREATE TABLE IF NOT EXISTS activity_progress (
+    char_id       BIGINT NOT NULL,
+    activity_id   INT NOT NULL,
+    progress      BIGINT NOT NULL DEFAULT 0,     -- giá trị tích luỹ (ngày/phút/điểm/KC)
+    streak        INT NOT NULL DEFAULT 0,        -- chuỗi liên tiếp (login)
+    last_tick_at  DATETIME NULL,                 -- mốc cập nhật cuối (login ngày/online)
+    claimed_json  VARCHAR(512) NOT NULL DEFAULT '[]', -- danh sách milestone_order đã nhận
+    updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (char_id, activity_id)
+);
+
+-- Log đổi thưởng (đếm giới hạn theo từng milestone)
+CREATE TABLE IF NOT EXISTS activity_exchange_log (
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id       BIGINT NOT NULL,
+    activity_id   INT NOT NULL,
+    milestone_id  INT NOT NULL,
+    count         INT NOT NULL DEFAULT 1,
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq (char_id, milestone_id)
+);
+
+-- Seed ví dụ (admin sẽ chỉnh/thêm)
+INSERT IGNORE INTO activities (id,activity_type,name,description,is_enabled,action_type,multiplier) VALUES
+ (1,'login','Quà Đăng Nhập','Đăng nhập mỗi ngày nhận quà, chuỗi liên tiếp thưởng lớn',1,'claim',1.0),
+ (2,'online','Quà Online','Online tích thời gian mở mốc thưởng',1,'claim',1.0),
+ (3,'daily_mission','Nhiệm Vụ Ngày','Hoàn thành nhiệm vụ nhận điểm hoạt động',1,'progress',1.0),
+ (4,'weekly_mission','Nhiệm Vụ Tuần','Mục tiêu tuần, thưởng theo mốc điểm',1,'progress',1.0),
+ (5,'spending','Tích Tiêu','Tiêu Kim Cương nhận thưởng theo mốc',1,'claim',1.0),
+ (6,'exchange','Đổi Thưởng','Đổi vật phẩm sự kiện lấy phần thưởng',1,'exchange',1.0),
+ (7,'x2_exp','X2 EXP','Nhân đôi kinh nghiệm trong thời gian sự kiện',0,'passive',2.0),
+ (8,'x2_drop','X2 Tỉ Lệ Rơi','Nhân đôi tỉ lệ rơi đồ trong thời gian sự kiện',0,'passive',2.0);
+
+INSERT IGNORE INTO activity_milestones (activity_id,milestone_order,requirement,reward_json,label) VALUES
+ (1,1,1,'{"gold":10000}','Ngày 1'),(1,2,3,'{"diamond":20}','Ngày 3'),(1,3,7,'{"diamond":50,"items":[[7001,1]]}','Ngày 7'),
+ (2,1,30,'{"gold":5000}','30 phút'),(2,2,60,'{"gold":15000}','60 phút'),(2,3,120,'{"diamond":30}','120 phút'),
+ (3,1,100,'{"gold":20000}','100 điểm'),(3,2,300,'{"diamond":30}','300 điểm'),
+ (5,1,100,'{"items":[[8001,1]]}','Tiêu 100 KC'),(5,2,500,'{"items":[[8001,3]]}','Tiêu 500 KC');

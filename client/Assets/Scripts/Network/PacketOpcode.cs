@@ -563,6 +563,15 @@ namespace NexusIsekai.Network
         public const short C2S_VIP_DAILY      = 0x4203;
         public const short S2C_VIP_INFO       = 0x4211;
         public const short S2C_VIP_REWARD     = 0x4212;
+        // Hoat Dong
+        public const short C2S_ACTIVITY_LIST    = 0x4301;
+        public const short C2S_ACTIVITY_DETAIL  = 0x4302;
+        public const short C2S_ACTIVITY_CLAIM   = 0x4303;
+        public const short C2S_ACTIVITY_EXCHANGE= 0x4304;
+        public const short C2S_ACTIVITY_JOIN    = 0x4305;
+        public const short S2C_ACTIVITY_LIST    = 0x4311;
+        public const short S2C_ACTIVITY_DETAIL  = 0x4312;
+        public const short S2C_ACTIVITY_RESULT  = 0x4313;
 
     }
 }
