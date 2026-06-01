@@ -4417,3 +4417,24 @@ CREATE TABLE IF NOT EXISTS daily_active (
     account_id BIGINT NOT NULL,
     PRIMARY KEY (date_key, account_id)
 );
+
+-- ═══ TIẾN HOÁ ITEM (chuỗi giai đoạn) — vd lúa: hạt → cây non → cây lớn → bông thu hoạch ═══
+-- Tổng quát: dùng cho cây trồng, pet (trứng→con→trưởng thành), trang bị (nâng cấp bậc)...
+-- 1 chuỗi = các dòng cùng chain_key, sắp theo stage_order.
+CREATE TABLE IF NOT EXISTS item_evolution (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    chain_key     VARCHAR(48) NOT NULL,                 -- vd 'rice','dragon_pet','sword_tier'
+    chain_name    VARCHAR(64) NOT NULL DEFAULT '',
+    stage_order   INT NOT NULL DEFAULT 0,               -- 0,1,2,3...
+    stage_name    VARCHAR(64) NOT NULL DEFAULT '',       -- 'Hat lua','Cay lua non','Bong lua'
+    item_id       INT NOT NULL DEFAULT 0,                -- item ung voi giai doan (0=chi visual)
+    sprite_key    VARCHAR(64) DEFAULT NULL,              -- anh giai doan (tu KHO asset)
+    trigger_type  VARCHAR(16) NOT NULL DEFAULT 'time',   -- time|water|feed|use|level|harvest
+    trigger_value INT NOT NULL DEFAULT 60,               -- phut / so lan / level...
+    result_item_id INT NOT NULL DEFAULT 0,               -- item nhan duoc khi qua giai doan (vd thu hoach)
+    result_qty_min INT NOT NULL DEFAULT 1,
+    result_qty_max INT NOT NULL DEFAULT 1,
+    status        VARCHAR(12) NOT NULL DEFAULT 'live',
+    is_active     TINYINT NOT NULL DEFAULT 1,
+    INDEX idx_chain (chain_key, stage_order)
+);

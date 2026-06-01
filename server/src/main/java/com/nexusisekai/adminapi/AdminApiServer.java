@@ -245,6 +245,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/event-currency-shop", ex -> handleAuth(ex, this::handleEventCurrencyShop));
         httpServer.createContext("/api/pass/tasks",          ex -> handleAuth(ex, this::handlePassTasks));
         httpServer.createContext("/api/skills",           ex -> handleAuth(ex, this::handleSkillsCfg));
+        httpServer.createContext("/api/item-evolution",   ex -> handleAuth(ex, this::handleItemEvolution));
         httpServer.createContext("/api/welfare",            ex -> handleAuth(ex, this::handleWelfareCfg));
         httpServer.createContext("/api/welfare-milestones", ex -> handleAuth(ex, this::handleWelfareMilestonesCfg));
         httpServer.createContext("/api/welfare-types",      ex -> handleAuth(ex, this::handleWelfareTypesCfg));
@@ -714,7 +715,7 @@ public class AdminApiServer {
                     ps = conn.prepareStatement("SELECT * FROM items ORDER BY category, cat_no");
                 }
                 ResultSet rs = ps.executeQuery();
-                while (rs.next()) list.add(rsToMap(rs, "id","category","cat_no","name","description","type","level_req","sell_price","buy_price","icon_id","is_active"));
+                while (rs.next()) list.add(rsToMap(rs, "id","category","cat_no","name","description","type","level_req","sell_price","buy_price","icon_id","stats_json","status","is_active"));
             }
             sendJson(ex, 200, Map.of("items", list));
         } else if ("POST".equals(ex.getRequestMethod())) {
@@ -722,24 +723,24 @@ public class AdminApiServer {
             try (Connection conn = DatabaseManager.getConnection()) {
                 if (body.get("id") != null) {
                     PreparedStatement ps = conn.prepareStatement(
-                            "UPDATE items SET name=?,description=?,type=?,class_req=?,level_req=?,sell_price=?,buy_price=?,icon_id=?,stats_json=?,is_active=?,category=?,cat_no=? WHERE id=?");
+                            "UPDATE items SET name=?,description=?,type=?,class_req=?,level_req=?,sell_price=?,buy_price=?,icon_id=?,stats_json=?,is_active=?,category=?,cat_no=?,status=? WHERE id=?");
                     ps.setString(1,str(body,"name")); ps.setString(2,str(body,"description"));
                     ps.setInt(3,num(body,"type")); ps.setInt(4,num(body,"class_req"));
                     ps.setInt(5,num(body,"level_req")); ps.setInt(6,num(body,"sell_price"));
                     ps.setInt(7,num(body,"buy_price")); ps.setInt(8,num(body,"icon_id"));
                     ps.setString(9,str(body,"stats_json")); ps.setInt(10,num(body,"is_active"));
                     ps.setString(11,safeStr(str(body,"category"))); ps.setInt(12,num(body,"cat_no"));
-                    ps.setInt(13,num(body,"id")); ps.executeUpdate();
+                    ps.setString(13, str(body,"status").isEmpty()?"live":str(body,"status")); ps.setInt(14,num(body,"id")); ps.executeUpdate();
                 } else {
                     PreparedStatement ps = conn.prepareStatement(
-                            "INSERT INTO items (name,description,type,class_req,level_req,sell_price,buy_price,icon_id,stats_json,category,cat_no) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+                            "INSERT INTO items (name,description,type,class_req,level_req,sell_price,buy_price,icon_id,stats_json,category,cat_no,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
                     ps.setString(1,str(body,"name")); ps.setString(2,str(body,"description"));
                     ps.setInt(3,num(body,"type")); ps.setInt(4,num(body,"class_req"));
                     ps.setInt(5,num(body,"level_req")); ps.setInt(6,num(body,"sell_price"));
                     ps.setInt(7,num(body,"buy_price")); ps.setInt(8,num(body,"icon_id"));
                     ps.setString(9,str(body,"stats_json"));
                     ps.setString(10,safeStr(str(body,"category"))); ps.setInt(11,num(body,"cat_no"));
-                    ps.executeUpdate();
+                    ps.setString(12, str(body,"status").isEmpty()?"live":str(body,"status")); ps.executeUpdate();
                 }
             }
             world.getItemManager().loadAll();
@@ -1046,6 +1047,11 @@ public class AdminApiServer {
         crudConfig(ex, "maps", "id", new String[]{"name","file_name","width","height","min_level","max_level","is_pvp","is_safe","bg_music","layout_json","status","is_active"});
         if (!"GET".equals(ex.getRequestMethod())) world.reloadMaps();
     }
+    /** GET/POST/DELETE /api/item-evolution — chuoi tien hoa item (lua: hat-cay-bong, pet, trang bi...) */
+    private void handleItemEvolution(HttpExchange ex) throws Exception {
+        crudConfig(ex, "item_evolution", "id", new String[]{"chain_key","chain_name","stage_order","stage_name","item_id","sprite_key","trigger_type","trigger_value","result_item_id","result_qty_min","result_qty_max","status","is_active"});
+    }
+
     private void handleSkillsCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "skill_templates", "id", new String[]{"name","class_id","skill_type","element","base_damage","mp_cost","cooldown_ms","max_level","description","icon_id","unlock_level","vfx_key","vfx_hit_key","sfx_key","status","is_active"});
     }
