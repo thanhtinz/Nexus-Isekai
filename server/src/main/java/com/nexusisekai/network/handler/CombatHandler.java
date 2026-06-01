@@ -44,8 +44,85 @@ public class CombatHandler {
 
         if (targetType == 0) {
             attackMonster(player, targetId);
+        } else if (targetType == 1) {
+            attackPlayer(player, targetId);
         }
-        // PvP sẽ mở rộng sau
+    }
+
+    /** PvP: player đánh player — kiểm chế độ chiến đấu, áp sát thương, xử lý kill→truy nã/tù/điểm guild war. */
+    private void attackPlayer(Player attacker, long victimId) {
+        if (victimId == attacker.getCharId()) return;
+        GameSession vSession = com.nexusisekai.network.SessionRegistry.getByCharId(victimId);
+        if (vSession == null) return;
+        Player victim = vSession.getPlayer();
+        if (victim == null || !victim.isAlive()) return;
+        if (victim.getMapId() != attacker.getMapId() || victim.getInstanceId() != attacker.getInstanceId()) return;
+
+        try (java.sql.Connection c = com.nexusisekai.database.DatabaseManager.getInstance().getConnection()) {
+            // 1. Kiểm chế độ chiến đấu (peace/guild/faction/server/berserk + nhà tù)
+            String deny = CombatModeHandler.canAttack(c, attacker, victimId);
+            if (deny != null) { session.sendError(PacketOpcode.S2C_COMBAT_RESULT, deny); return; }
+
+            // 2. Áp sát thương
+            CombatEngine.AttackResult result = CombatEngine.playerAttackPlayer(attacker, victim);
+            sendCombatResult(attacker.getCharId(), victimId, result.damage, result.isCrit, result.isDodged);
+            // cập nhật HP cho cả 2 phía
+            vSession.send(PacketOpcode.S2C_PLAYER_HP_UPDATE, buildHpUpdate(
+                    victim.getCharId(), victim.getHp(), victim.getMaxHp(), victim.getMp(), victim.getMaxMp()));
+            session.send(PacketOpcode.S2C_PLAYER_HP_UPDATE, buildHpUpdate(
+                    victim.getCharId(), victim.getHp(), victim.getMaxHp(), victim.getMp(), victim.getMaxMp()));
+
+            // 3. Nếu mục tiêu chết → xử lý kill
+            if (!victim.isAlive()) {
+                handlePlayerKill(c, attacker, victim);
+            }
+        } catch (Exception e) {
+            log.warn("Lỗi PvP {} -> {}: {}", attacker.getCharId(), victimId, e.getMessage());
+        }
+    }
+
+    /** Xử lý khi 1 người chết do PvP: truy nã/tù + điểm guild war + thông báo. */
+    private void handlePlayerKill(java.sql.Connection c, Player killer, Player victim) throws Exception {
+        // truy nã / nhà tù (giết người vô tội → tăng wanted; wanted cao → nhốt)
+        CombatModeHandler.onPlayerKill(c, killer.getCharId(), victim.getCharId(), killer.getMapId());
+        // nếu nạn nhân đang bị truy nã mà chết → vào tù
+        CombatModeHandler.onWantedDeath(c, victim.getCharId());
+
+        // điểm guild war (nếu 2 người thuộc 2 guild đang trong trận trên map này)
+        awardGuildWarKill(c, killer, victim);
+
+        // broadcast chết
+        ByteBuf dieMsg = io.netty.buffer.Unpooled.buffer();
+        dieMsg.writeShort(PacketOpcode.S2C_PLAYER_DIE);
+        dieMsg.writeLong(victim.getCharId());
+        dieMsg.writeLong(killer.getCharId());
+        com.nexusisekai.network.WorldBroadcast.toMap(victim.getMapId(), dieMsg);
+
+        // hồi sinh nạn nhân về thành (giữ đơn giản: full HP, về map an toàn)
+        victim.setHp(victim.getMaxHp());
+        GameSession vSession = com.nexusisekai.network.SessionRegistry.getByCharId(victim.getCharId());
+        if (vSession != null) {
+            vSession.send(PacketOpcode.S2C_PLAYER_HP_UPDATE, buildHpUpdate(
+                    victim.getCharId(), victim.getHp(), victim.getMaxHp(), victim.getMp(), victim.getMaxMp()));
+        }
+    }
+
+    /** Cộng điểm guild war nếu killer & victim thuộc 2 guild đang có trận 'ongoing'. */
+    private void awardGuildWarKill(java.sql.Connection c, Player killer, Player victim) throws Exception {
+        long kg = killer.getGuildId(), vg = victim.getGuildId();
+        if (kg <= 0 || vg <= 0 || kg == vg) return;
+        java.util.Map<String,Object> war = com.nexusisekai.database.SqlSafe.queryOne(c,
+                "SELECT id, guild_a, guild_b FROM guild_wars WHERE status='ongoing' " +
+                "AND ((guild_a=? AND guild_b=?) OR (guild_a=? AND guild_b=?)) LIMIT 1",
+                kg, vg, vg, kg);
+        if (war == null) return;
+        int warId = ((Number)war.get("id")).intValue();
+        long guildA = ((Number)war.get("guild_a")).longValue();
+        String col = (kg == guildA) ? "score_a" : "score_b";
+        com.nexusisekai.database.SqlSafe.update(c, "UPDATE guild_wars SET " + col + "=" + col + "+1 WHERE id=?", warId);
+        com.nexusisekai.database.SqlSafe.update(c,
+                "INSERT INTO guild_war_kills (war_id,killer_char_id,victim_char_id,killer_guild,points) VALUES (?,?,?,?,1)",
+                warId, killer.getCharId(), victim.getCharId(), (int)kg);
     }
 
     private void attackMonster(Player player, int monsterId) {

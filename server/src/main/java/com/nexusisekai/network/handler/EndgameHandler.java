@@ -175,34 +175,87 @@ public class EndgameHandler {
         try(Connection c=DatabaseManager.getInstance().getConnection()){
             Map<String,Object> ch=SqlSafe.queryOne(c,"SELECT vip_level,total_topup FROM characters WHERE id=?", p.getCharId());
             int vip=ch==null?0:((Number)ch.get("vip_level")).intValue();
-            Map<String,Object> vl=SqlSafe.queryOne(c,"SELECT name,daily_diamond,afk_bonus_pct,extra_bag_slots,extra_market_slots FROM vip_levels WHERE vip_level=?", vip);
-            Map<String,Object> nxt=SqlSafe.queryOne(c,"SELECT vip_level,exp_required FROM vip_levels WHERE vip_level=?", vip+1);
+            Map<String,Object> vl=SqlSafe.queryOne(c,
+                "SELECT name,daily_diamond,daily_gold,afk_bonus_pct,exp_bonus_pct,drop_bonus_pct,gold_bonus_pct,"+
+                "extra_bag_slots,extra_market_slots,market_fee_discount_pct,revive_discount_pct,afk_cap_hours,"+
+                "free_teleport_daily,auto_pickup,name_color FROM vip_levels WHERE vip_level=?", vip);
+            Map<String,Object> nxt=SqlSafe.queryOne(c,"SELECT exp_required FROM vip_levels WHERE vip_level=?", vip+1);
+            int topup=ch==null?0:(ch.get("total_topup")==null?0:((Number)ch.get("total_topup")).intValue());
+            // mốc đã nhận
+            List<Map<String,Object>> claimed=SqlSafe.query(c,"SELECT vip_level FROM character_vip_claims WHERE char_id=?", p.getCharId());
+            java.util.Set<Integer> claimedSet=new java.util.HashSet<>();
+            for(var r:claimed) claimedSet.add(((Number)r.get("vip_level")).intValue());
+
             ByteBuf b=Unpooled.buffer(); b.writeShort(PacketOpcode.S2C_VIP_INFO);
             b.writeInt(vip);
             writeStr(b, vl==null?("VIP "+vip):(String)vl.get("name"));
-            b.writeInt(vl==null?0:((Number)vl.get("daily_diamond")).intValue());
-            b.writeFloat(vl==null?0f:((Number)vl.get("afk_bonus_pct")).floatValue());
-            b.writeInt(vl==null?0:((Number)vl.get("extra_bag_slots")).intValue());
-            b.writeInt(vl==null?0:((Number)vl.get("extra_market_slots")).intValue());
+            b.writeInt(topup);
             b.writeInt(nxt==null?-1:((Number)nxt.get("exp_required")).intValue());
+            // khối quyền lợi (đầy đủ)
+            b.writeInt(f(vl,"daily_diamond"));
+            b.writeInt(f(vl,"daily_gold"));
+            b.writeFloat(ff(vl,"afk_bonus_pct"));
+            b.writeFloat(ff(vl,"exp_bonus_pct"));
+            b.writeFloat(ff(vl,"drop_bonus_pct"));
+            b.writeFloat(ff(vl,"gold_bonus_pct"));
+            b.writeInt(f(vl,"extra_bag_slots"));
+            b.writeInt(f(vl,"extra_market_slots"));
+            b.writeFloat(ff(vl,"market_fee_discount_pct"));
+            b.writeFloat(ff(vl,"revive_discount_pct"));
+            b.writeInt(vl==null?24:((Number)vl.get("afk_cap_hours")).intValue());
+            b.writeInt(f(vl,"free_teleport_daily"));
+            b.writeBoolean(vl!=null && ((Number)vl.get("auto_pickup")).intValue()==1);
+            writeStr(b, vl==null||vl.get("name_color")==null?"":(String)vl.get("name_color"));
+            // danh sách mốc 1..8 + đã nhận chưa + đủ điều kiện chưa
+            b.writeShort(8);
+            for(int lv=1; lv<=8; lv++){
+                b.writeInt(lv);
+                b.writeBoolean(vip>=lv);             // đủ điều kiện
+                b.writeBoolean(claimedSet.contains(lv)); // đã nhận
+            }
             s.send(b);
         }catch(Exception e){ }
     }
+    private static int f(Map<String,Object> m, String k){ return m==null||m.get(k)==null?0:((Number)m.get(k)).intValue(); }
+    private static float ff(Map<String,Object> m, String k){ return m==null||m.get(k)==null?0f:((Number)m.get(k)).floatValue(); }
 
-    /** Nhận thưởng mốc VIP (1 lần/mốc). Payload: [int vipLevel]. */
+    /** Nhận thưởng mốc VIP (1 lần/mốc). Phát thật theo reward_json (diamond+gold+items). Payload: [int vipLevel]. */
     public static void handleVipClaim(GameSession s, ByteBuf in){
         int lvl=in.readInt(); Player p=s.getPlayer(); if(p==null) return;
         try(Connection c=DatabaseManager.getInstance().getConnection()){
             Map<String,Object> ch=SqlSafe.queryOne(c,"SELECT vip_level FROM characters WHERE id=?", p.getCharId());
             if(ch==null || ((Number)ch.get("vip_level")).intValue()<lvl){ vipMsg(s,"Chua dat moc VIP nay"); return; }
-            Map<String,Object> done=SqlSafe.queryOne(c,"SELECT 1 AS x FROM character_vip_claims WHERE char_id=? AND vip_level=?", p.getCharId(), lvl);
-            if(done!=null){ vipMsg(s,"Da nhan moc nay roi"); return; }
+            // chốt nhận 1 lần (atomic qua INSERT IGNORE + kiểm affected rows)
+            int ins=SqlSafe.update(c,"INSERT IGNORE INTO character_vip_claims (char_id,vip_level) VALUES (?,?)", p.getCharId(), lvl);
+            if(ins==0){ vipMsg(s,"Da nhan moc nay roi"); return; }
             Map<String,Object> rw=SqlSafe.queryOne(c,"SELECT reward_json FROM vip_milestone_rewards WHERE vip_level=?", lvl);
-            SqlSafe.update(c,"INSERT IGNORE INTO character_vip_claims (char_id,vip_level) VALUES (?,?)", p.getCharId(), lvl);
-            // thưởng cơ bản theo mốc (chi tiết qua reward_json do admin cấu hình)
-            SqlSafe.update(c,"UPDATE characters SET diamond=diamond+? WHERE id=?", lvl*50, p.getCharId());
-            vipMsg(s,"Da nhan thuong moc VIP "+lvl+(rw!=null?"":""));
+            String json = rw==null?null:(String)rw.get("reward_json");
+            long dia=jsonLong(json,"diamond"), gold=jsonLong(json,"gold");
+            if(dia>0||gold>0) SqlSafe.update(c,"UPDATE characters SET diamond=diamond+?, gold=gold+? WHERE id=?", dia, gold, p.getCharId());
+            // items: [[id,qty],...]
+            for(int[] it: jsonItems(json)){
+                SqlSafe.update(c,"INSERT INTO character_inventory (char_id,item_id,qty,slot) VALUES (?,?,?,-1)", p.getCharId(), it[0], it[1]);
+            }
+            if(gold>0) p.setGold((int)Math.min(Integer.MAX_VALUE, p.getGold()+gold));
+            ByteBuf b=Unpooled.buffer(); b.writeShort(PacketOpcode.S2C_VIP_REWARD);
+            writeStr(b,"Nhan moc VIP "+lvl+": +"+dia+" KC, +"+gold+" vang"); s.send(b);
         }catch(Exception e){ vipMsg(s,"Loi nhan thuong VIP"); }
+    }
+
+    // parser JSON tối giản cho reward_json
+    private static long jsonLong(String json, String key){
+        if(json==null) return 0;
+        java.util.regex.Matcher m=java.util.regex.Pattern.compile("\""+key+"\"\\s*:\\s*(\\d+)").matcher(json);
+        return m.find()?Long.parseLong(m.group(1)):0;
+    }
+    private static List<int[]> jsonItems(String json){
+        List<int[]> out=new java.util.ArrayList<>();
+        if(json==null) return out;
+        java.util.regex.Matcher arr=java.util.regex.Pattern.compile("\"items\"\\s*:\\s*\\[(.*?)\\]\\s*}").matcher(json);
+        String inner = arr.find()?arr.group(1):"";
+        java.util.regex.Matcher pair=java.util.regex.Pattern.compile("\\[(\\d+)\\s*,\\s*(\\d+)\\]").matcher(inner);
+        while(pair.find()) out.add(new int[]{Integer.parseInt(pair.group(1)), Integer.parseInt(pair.group(2))});
+        return out;
     }
 
     /** Nhận đặc quyền kim cương mỗi ngày. */

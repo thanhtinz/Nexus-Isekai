@@ -48,8 +48,30 @@ public class CombatEngine {
     }
 
     /**
-     * Monster đánh player
+     * Player đánh Player (PvP). DEF giảm sát thương mạnh hơn PvE để tránh one-shot.
      */
+    public static AttackResult playerAttackPlayer(Player attacker, Player target) {
+        // Dodge theo AGI của mục tiêu
+        float dodge = BASE_DODGE_RATE + target.getAgi() * AGI_DODGE_BONUS;
+        if (rng.nextFloat() < dodge) {
+            return AttackResult.missed();
+        }
+        int atk = attacker.getAttack();
+        int def = target.getDefense();
+        int baseDmg = Math.max(1, atk - (int)(def * 0.7f));   // DEF hiệu quả hơn trong PvP
+
+        float critRate = BASE_CRIT_RATE + attacker.getAgi() * AGI_CRIT_BONUS;
+        boolean isCrit = rng.nextFloat() < critRate;
+        if (isCrit) baseDmg = (int)(baseDmg * 1.6f);          // crit PvP nhẹ hơn PvE
+
+        float variance = 0.85f + rng.nextFloat() * 0.3f;
+        int finalDmg = Math.max(1, (int)(baseDmg * variance * 0.6f)); // PvP scale 60% để trận lâu hơn
+
+        target.takeDamage(finalDmg);
+        return new AttackResult(finalDmg, isCrit, false);
+    }
+
+
     public static AttackResult monsterAttackPlayer(MonsterInstance attacker, Player target) {
         // Player dodge
         float dodge = BASE_DODGE_RATE + target.getAgi() * AGI_DODGE_BONUS;

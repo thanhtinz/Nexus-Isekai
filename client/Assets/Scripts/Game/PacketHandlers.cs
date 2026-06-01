@@ -735,9 +735,22 @@ namespace NexusIsekai.Game
         // ───── VIP ─────
         private void OnVipInfo(PacketReader r) {
             int vip = r.ReadInt(); string name = r.ReadString();
-            int daily = r.ReadInt(); float afkBonus = r.ReadFloat();
-            int bag = r.ReadInt(); int market = r.ReadInt(); int nextReq = r.ReadInt();
-            VipUI.Instance?.SetInfo(vip, name, daily, afkBonus, bag, market, nextReq);
+            int topup = r.ReadInt(); int nextReq = r.ReadInt();
+            int dailyDia = r.ReadInt(); int dailyGold = r.ReadInt();
+            float afkBonus = r.ReadFloat(); float expBonus = r.ReadFloat();
+            float dropBonus = r.ReadFloat(); float goldBonus = r.ReadFloat();
+            int bag = r.ReadInt(); int market = r.ReadInt();
+            float feeDisc = r.ReadFloat(); float reviveDisc = r.ReadFloat();
+            int afkCap = r.ReadInt(); int freeTp = r.ReadInt();
+            bool autoPickup = r.ReadBool(); string nameColor = r.ReadString();
+            VipUI.Instance?.SetInfo(vip, name, topup, nextReq, dailyDia, dailyGold, afkBonus, expBonus,
+                dropBonus, goldBonus, bag, market, feeDisc, reviveDisc, afkCap, freeTp, autoPickup, nameColor);
+            int milestones = r.ReadShort();
+            VipUI.Instance?.ClearMilestones();
+            for (int i = 0; i < milestones; i++) {
+                int lv = r.ReadInt(); bool eligible = r.ReadBool(); bool claimed = r.ReadBool();
+                VipUI.Instance?.AddMilestone(lv, eligible, claimed);
+            }
             VipUI.Instance?.Open();
         }
         private void OnVipReward(PacketReader r) { GameState.Instance?.ShowToast(r.ReadString()); }

@@ -3636,3 +3636,38 @@ CREATE TABLE IF NOT EXISTS character_vip_claims (
     char_id      BIGINT NOT NULL, vip_level INT NOT NULL,
     claimed_at   DATETIME DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (char_id, vip_level)
 );
+
+-- ───── VIP: mở rộng nhiều quyền lợi theo từng mốc ─────
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS exp_bonus_pct FLOAT NOT NULL DEFAULT 0;       -- +% EXP mọi nguồn
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS drop_bonus_pct FLOAT NOT NULL DEFAULT 0;      -- +% tỉ lệ rơi đồ
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS gold_bonus_pct FLOAT NOT NULL DEFAULT 0;      -- +% vàng kiếm được
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS daily_gold INT NOT NULL DEFAULT 0;            -- vàng tặng mỗi ngày
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS market_fee_discount_pct FLOAT NOT NULL DEFAULT 0; -- giảm phí chợ
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS revive_discount_pct FLOAT NOT NULL DEFAULT 0; -- giảm phí hồi sinh
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS afk_cap_hours INT NOT NULL DEFAULT 24;        -- trần giờ AFK offline
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS free_teleport_daily INT NOT NULL DEFAULT 0;   -- dịch chuyển miễn phí/ngày
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS auto_pickup TINYINT NOT NULL DEFAULT 0;       -- tự nhặt đồ
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS name_color VARCHAR(8) DEFAULT NULL;           -- màu tên riêng
+ALTER TABLE vip_levels ADD COLUMN IF NOT EXISTS exclusive_title_id INT NOT NULL DEFAULT 0;    -- danh hiệu độc quyền
+
+-- Cập nhật quyền lợi chi tiết từng mốc (tăng dần)
+UPDATE vip_levels SET exp_bonus_pct=0,  drop_bonus_pct=0,  gold_bonus_pct=0,  daily_gold=0,      market_fee_discount_pct=0,  revive_discount_pct=0,  afk_cap_hours=24,  free_teleport_daily=0,  auto_pickup=0, name_color=NULL,      exclusive_title_id=0  WHERE vip_level=0;
+UPDATE vip_levels SET exp_bonus_pct=5,  drop_bonus_pct=3,  gold_bonus_pct=5,  daily_gold=5000,   market_fee_discount_pct=5,  revive_discount_pct=10, afk_cap_hours=36,  free_teleport_daily=0,  auto_pickup=0, name_color='#88cc88', exclusive_title_id=0  WHERE vip_level=1;
+UPDATE vip_levels SET exp_bonus_pct=10, drop_bonus_pct=6,  gold_bonus_pct=10, daily_gold=12000,  market_fee_discount_pct=10, revive_discount_pct=20, afk_cap_hours=48,  free_teleport_daily=1,  auto_pickup=0, name_color='#66cc66', exclusive_title_id=0  WHERE vip_level=2;
+UPDATE vip_levels SET exp_bonus_pct=15, drop_bonus_pct=10, gold_bonus_pct=15, daily_gold=25000,  market_fee_discount_pct=15, revive_discount_pct=30, afk_cap_hours=72,  free_teleport_daily=2,  auto_pickup=1, name_color='#44ccaa', exclusive_title_id=0  WHERE vip_level=3;
+UPDATE vip_levels SET exp_bonus_pct=20, drop_bonus_pct=15, gold_bonus_pct=20, daily_gold=50000,  market_fee_discount_pct=20, revive_discount_pct=40, afk_cap_hours=96,  free_teleport_daily=3,  auto_pickup=1, name_color='#33ccff', exclusive_title_id=0  WHERE vip_level=4;
+UPDATE vip_levels SET exp_bonus_pct=30, drop_bonus_pct=20, gold_bonus_pct=30, daily_gold=100000, market_fee_discount_pct=25, revive_discount_pct=50, afk_cap_hours=120, free_teleport_daily=5,  auto_pickup=1, name_color='#3399ff', exclusive_title_id=0  WHERE vip_level=5;
+UPDATE vip_levels SET exp_bonus_pct=40, drop_bonus_pct=25, gold_bonus_pct=40, daily_gold=200000, market_fee_discount_pct=30, revive_discount_pct=60, afk_cap_hours=168, free_teleport_daily=8,  auto_pickup=1, name_color='#9966ff', exclusive_title_id=0  WHERE vip_level=6;
+UPDATE vip_levels SET exp_bonus_pct=55, drop_bonus_pct=35, gold_bonus_pct=55, daily_gold=400000, market_fee_discount_pct=40, revive_discount_pct=75, afk_cap_hours=240, free_teleport_daily=12, auto_pickup=1, name_color='#ff66cc', exclusive_title_id=0  WHERE vip_level=7;
+UPDATE vip_levels SET exp_bonus_pct=80, drop_bonus_pct=50, gold_bonus_pct=80, daily_gold=800000, market_fee_discount_pct=50, revive_discount_pct=100,afk_cap_hours=336, free_teleport_daily=20, auto_pickup=1, name_color='#ffcc00', exclusive_title_id=0  WHERE vip_level=8;
+
+-- Thưởng MỐC VIP (nhận 1 lần khi đạt) — diamond + vàng + item, JSON do admin chỉnh thêm
+INSERT IGNORE INTO vip_milestone_rewards (vip_level,reward_json) VALUES
+ (1,'{"diamond":50,"gold":50000,"items":[[4001,5]]}'),
+ (2,'{"diamond":120,"gold":120000,"items":[[4001,10],[4002,5]]}'),
+ (3,'{"diamond":250,"gold":300000,"items":[[4002,10],[7001,1]]}'),
+ (4,'{"diamond":500,"gold":600000,"items":[[7001,2],[2001,1]]}'),
+ (5,'{"diamond":1000,"gold":1200000,"items":[[7001,3],[8001,1]]}'),
+ (6,'{"diamond":2000,"gold":2500000,"items":[[8001,1],[1001,1]]}'),
+ (7,'{"diamond":4000,"gold":5000000,"items":[[8001,2],[1002,1]]}'),
+ (8,'{"diamond":8000,"gold":10000000,"items":[[8001,3],[1003,1]]}');
