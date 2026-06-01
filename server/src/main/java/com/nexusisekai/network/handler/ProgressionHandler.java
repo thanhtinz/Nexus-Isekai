@@ -157,6 +157,8 @@ public class ProgressionHandler {
     // ═══════════ BESTIARY / SỔ TAY QUÁI ═══════════
     /** Gọi khi giết quái — tăng kill_count, mở khoá nếu đủ. */
     public static void recordKill(GameSession s, int monsterId) {
+        // Hoạt Động: cộng tiến độ sự kiện diệt quái (mọi SK type kill_monster đang bật)
+        ActivityHandler.fire(s.getPlayer().getCharId(), "kill_monster", 1);
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             SqlSafe.update(c, "INSERT INTO character_bestiary (char_id,monster_id,kill_count) VALUES (?,?,1) " +
                 "ON DUPLICATE KEY UPDATE kill_count=kill_count+1", s.getPlayer().getCharId(), monsterId);

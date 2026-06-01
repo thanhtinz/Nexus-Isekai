@@ -3775,3 +3775,72 @@ INSERT IGNORE INTO activity_rank_rewards (activity_id,rank_from,rank_to,reward_j
  (9,3,3,'{"diamond":200}','Hạng 3'),
  (9,4,5,'{"diamond":100}','Xếp 4-5'),
  (9,6,10,'{"diamond":50}','Xếp 6-10');
+
+-- ═════════════════════════════════════════════════════════════
+-- CATALOG LOẠI HOẠT ĐỘNG — phủ mọi tính năng ingame.
+-- activities.activity_type tham chiếu type_key. Hệ thống ingame gọi
+-- ActivityHandler.fire(charId, type_key, amount) → tự cộng tiến độ mọi
+-- sự kiện đang bật khớp type. Admin tạo SK chỉ cần chọn type + đặt mốc.
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS activity_types (
+    type_key      VARCHAR(24) NOT NULL PRIMARY KEY,
+    display_name  VARCHAR(48) NOT NULL,
+    category      VARCHAR(24) NOT NULL,          -- combat,progression,pvp,economy,collection,life,quest,faction,special
+    unit          VARCHAR(24) NOT NULL DEFAULT 'diem', -- đơn vị tiến độ hiển thị
+    default_action VARCHAR(16) NOT NULL DEFAULT 'progress', -- progress,claim,exchange,ranking,passive,wheel
+    description   VARCHAR(256) DEFAULT ''
+);
+INSERT IGNORE INTO activity_types (type_key,display_name,category,unit,default_action,description) VALUES
+ -- Combat / PvE
+ ('kill_monster','Diet Quai','combat','con','progress','So quai tieu diet'),
+ ('kill_boss','San Boss','combat','con','progress','So boss tieu diet'),
+ ('world_boss','Boss The Gioi','combat','sat thuong','ranking','Sat thuong len world boss'),
+ ('dungeon_clear','Vuot Ham Nguc','combat','luot','progress','So lan clear dungeon'),
+ ('outer_clear','Vuot Ngoai Vuc','combat','tang','progress','So tang ngoai vuc vuot'),
+ -- Progression
+ ('gain_exp','Tich EXP','progression','exp','progress','Tong EXP kiem duoc'),
+ ('level_up','Len Cap','progression','cap','progress','So cap tang'),
+ ('enhance','Cuong Hoa','progression','lan','progress','So lan cuong hoa thanh cong'),
+ ('refine','Tinh Luyen','progression','lan','progress','So lan tinh luyen'),
+ ('gem_socket','Kham Ngoc','progression','lan','progress','So lan kham ngoc'),
+ -- PvP
+ ('pvp_win','Thang PvP','pvp','tran','progress','So tran PvP thang'),
+ ('pvp_kill','Ha Guc PvP','pvp','mang','progress','So nguoi ha guc'),
+ ('arena_rank','Dau Truong','pvp','diem','ranking','Diem dau truong'),
+ ('guild_war_kill','Bang Chien','pvp','diem','ranking','Diem guild war'),
+ ('power_rank','Dua Top Chien Luc','pvp','luc chien','ranking','Xep theo chien luc'),
+ -- Economy
+ ('spend_diamond','Tich Tieu KC','economy','KC','claim','Tong Kim Cuong tieu hao'),
+ ('spend_gold','Tich Tieu Vang','economy','vang','claim','Tong vang tieu hao'),
+ ('topup','Su Kien Nap','economy','KC nap','claim','Tong nap trong su kien'),
+ ('market_sell','Ban Cho','economy','luot','progress','So luot ban tren cho'),
+ ('market_buy','Mua Cho','economy','luot','progress','So luot mua tren cho'),
+ -- Collection / Gacha
+ ('gacha_pull','Trieu Hoi','collection','luot','progress','So lan quay gacha'),
+ ('lucky_wheel','Vong Quay','collection','luot','wheel','Quay thuong bang ve/vat pham'),
+ ('collect_pet','Suu Tap Pet','collection','con','progress','So pet so huu'),
+ ('collect_mount','Suu Tap Thu Cuoi','collection','con','progress','So thu cuoi so huu'),
+ ('collect_cosmetic','Suu Tap Trang Suc','collection','mon','progress','So cosmetic so huu'),
+ -- Life / Social
+ ('login','Qua Dang Nhap','life','ngay','claim','Diem danh moi ngay'),
+ ('online','Qua Online','life','phut','claim','Thoi gian online'),
+ ('fishing','Cau Ca','life','con','progress','So ca cau duoc'),
+ ('farm_harvest','Thu Hoach Nong Trai','life','lan','progress','So lan thu hoach'),
+ ('cooking','Nau An','life','mon','progress','So mon nau'),
+ ('marriage','Ket Hon','life','su kien','progress','Hoat dong ket hon'),
+ ('child_raise','Nuoi Con','life','lan','progress','Cham soc con'),
+ -- Quest
+ ('daily_mission','Nhiem Vu Ngay','quest','diem','progress','Diem nhiem vu ngay'),
+ ('weekly_mission','Nhiem Vu Tuan','quest','diem','progress','Diem nhiem vu tuan'),
+ ('quest_complete','Hoan Thanh NV','quest','nv','progress','So nhiem vu hoan thanh'),
+ ('story_chapter','Cot Truyen','quest','chuong','progress','So chuong cot truyen'),
+ -- Faction
+ ('faction_rep','Danh Vong Phe','faction','diem','progress','Danh vong tich luy'),
+ -- Special
+ ('exchange','Doi Thuong','special','luot','exchange','Doi vat pham lay thuong'),
+ ('ranking','Dua Top','special','diem','ranking','Xep hang theo diem su kien'),
+ ('x2_exp','X2 EXP','special','-','passive','Nhan doi EXP trong thoi gian'),
+ ('x2_drop','X2 Ti Le Roi','special','-','passive','Nhan doi ti le roi do'),
+ ('guild_event','Su Kien Bang','special','diem','progress','Hoat dong cung bang hoi'),
+ ('cross_server','Lien Server','special','diem','ranking','Thi dau lien may chu'),
+ ('special','Su Kien Dac Biet','special','diem','progress','Su kien le/dac biet');

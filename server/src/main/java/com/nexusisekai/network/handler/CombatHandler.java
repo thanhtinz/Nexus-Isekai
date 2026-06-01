@@ -204,6 +204,10 @@ public class CombatHandler {
 
         // Roll loot
         List<int[]> loot = CombatEngine.rollLoot(monster.getLootJson());
+        // Hoạt Động X2 Tỉ Lệ Rơi: quay loot thêm lần nữa khi sự kiện đang bật
+        if (ActivityHandler.activeMultiplier("x2_drop") > 1.0f) {
+            loot.addAll(CombatEngine.rollLoot(monster.getLootJson()));
+        }
 
         // Build death packet: [4 monsterInstanceId][8 killerId][4 exp][4 gold][N loot items]
         ByteBuffer resp = ByteBuffer.allocate(4 + 8 + 4 + 4 + loot.size() * 8);
@@ -220,12 +224,16 @@ public class CombatHandler {
         world.getNetworkServer().broadcastToMap(player.getMapId(),
                 PacketOpcode.S2C_MONSTER_DIE, resp.array());
 
-        // Cộng EXP cho người kill
-        int levelsUp = player.gainExp(monster.getExpReward());
+        // Cộng EXP cho người kill — áp hệ số sự kiện X2 EXP (Hoạt Động) nếu đang bật
+        float expMult = ActivityHandler.activeMultiplier("x2_exp");
+        int expGain = (int)(monster.getExpReward() * expMult);
+        int levelsUp = player.gainExp(expGain);
+        // Hoạt Động: cộng tiến độ sự kiện tích EXP
+        ActivityHandler.fire(player.getCharId(), "gain_exp", expGain);
 
         // Gửi exp update
         ByteBuffer expBuf = ByteBuffer.allocate(8 + 8 + 4);
-        expBuf.putLong(monster.getExpReward());
+        expBuf.putLong(expGain);
         expBuf.putLong(player.getExp());
         expBuf.putInt(player.getLevel());
         session.send(PacketOpcode.S2C_EXP_GAIN, expBuf.array());

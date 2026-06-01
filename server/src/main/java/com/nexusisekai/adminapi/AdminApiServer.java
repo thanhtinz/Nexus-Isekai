@@ -143,6 +143,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/activities",       ex -> handleAuth(ex, this::handleActivitiesCfg));
         httpServer.createContext("/api/activity-milestones", ex -> handleAuth(ex, this::handleActivityMilestonesCfg));
         httpServer.createContext("/api/activity-rank-rewards", ex -> handleAuth(ex, this::handleActivityRankRewardsCfg));
+        httpServer.createContext("/api/activity-types", ex -> handleAuth(ex, this::handleActivityTypesCfg));
         httpServer.createContext("/api/shops",      ex -> handleAuth(ex, this::handleShops));
         httpServer.createContext("/api/events",     ex -> handleAuth(ex, this::handleEvents));
         httpServer.createContext("/api/quests",     ex -> handleAuth(ex, this::handleQuests));
@@ -826,6 +827,10 @@ public class AdminApiServer {
     }
     private void handleActivityRankRewardsCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "activity_rank_rewards", "id", new String[]{"activity_id","rank_from","rank_to","reward_json","label"});
+    }
+    /** Catalog loai hoat dong (tham chieu de chon type khi tao SK). CRUD duoc. */
+    private void handleActivityTypesCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "activity_types", "type_key", new String[]{"display_name","category","unit","default_action","description"});
     }
 
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {

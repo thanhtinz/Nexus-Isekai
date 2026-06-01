@@ -261,16 +261,29 @@ public class ActivityHandler {
         // online & spending được cập nhật từ nơi khác (scheduler online tick, payment) qua addProgress()
     }
 
-    /** API cho hệ thống khác cộng tiến độ (nhiệm vụ, tiêu KC, online...). */
+    /** API cho hệ thống khác cộng tiến độ (nhiệm vụ, tiêu KC, online...). Chỉ SK đang bật + trong thời gian. */
     public static void addProgress(Connection c, long charId, String activityType, long amount) {
         try{
-            List<Map<String,Object>> acts=SqlSafe.query(c,"SELECT id FROM activities WHERE activity_type=? AND is_enabled=1", activityType);
+            List<Map<String,Object>> acts=SqlSafe.query(c,
+                "SELECT id FROM activities WHERE activity_type=? AND is_enabled=1 "+
+                "AND (start_at IS NULL OR start_at<=NOW()) AND (end_at IS NULL OR end_at>=NOW())", activityType);
             for(var a:acts){
                 SqlSafe.update(c,
                     "INSERT INTO activity_progress (char_id,activity_id,progress) VALUES (?,?,?) "+
                     "ON DUPLICATE KEY UPDATE progress=progress+?",
                     charId, ((Number)a.get("id")).intValue(), amount, amount);
             }
+        }catch(Exception e){ /* best-effort */ }
+    }
+
+    /**
+     * HOOK CHUNG cho mọi tính năng ingame gọi (tự mở connection).
+     * VD: ActivityHandler.fire(charId,"kill_monster",1); fire(charId,"spend_diamond",100);
+     * Mọi sự kiện đang bật khớp type sẽ tự cộng tiến độ — admin tạo SK chỉ cần chọn type.
+     */
+    public static void fire(long charId, String activityType, long amount) {
+        try(Connection c=DatabaseManager.getInstance().getConnection()){
+            addProgress(c, charId, activityType, amount);
         }catch(Exception e){ /* best-effort */ }
     }
 
