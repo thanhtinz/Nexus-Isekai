@@ -533,10 +533,6 @@ extension FixedWidthInteger {
     static let S2C_WHEEL_LIST: Int16 = 0x4613
     static let S2C_WHEEL_RESULT: Int16 = 0x4614
     // Auto/Option/ClanBeast/BossSchedule/Soul
-    static let C2S_AUTO_SET: Int16 = 0x4701
-    static let C2S_AUTO_CONFIG_REQ: Int16 = 0x4702
-    static let S2C_AUTO_CONFIG: Int16 = 0x4711
-    static let S2C_AUTO_STATE: Int16 = 0x4712
     static let C2S_OPTION_EXTRACT: Int16 = 0x4801
     static let S2C_OPTION_RESULT: Int16 = 0x4811
     static let C2S_CLAN_BEAST_INFO: Int16 = 0x4901

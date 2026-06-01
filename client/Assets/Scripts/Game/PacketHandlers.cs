@@ -89,8 +89,6 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_TREASURE_RESULT,OnTreasureResult);
             d.Register(PacketOpcode.S2C_WHEEL_LIST,     OnWheelList);
             d.Register(PacketOpcode.S2C_WHEEL_RESULT,   OnWheelResult);
-            d.Register(PacketOpcode.S2C_AUTO_CONFIG,     OnAutoConfig);
-            d.Register(PacketOpcode.S2C_AUTO_STATE,      OnAutoState);
             d.Register(PacketOpcode.S2C_OPTION_RESULT,   OnOptionResult);
             d.Register(PacketOpcode.S2C_CLAN_BEAST_INFO, OnClanBeastInfo);
             d.Register(PacketOpcode.S2C_BOSS_SCHEDULE,   OnBossSchedule);
@@ -858,14 +856,6 @@ namespace NexusIsekai.Game
         }
         private void OnWheelResult(PacketReader r) { int idx=r.ReadInt(); string label=r.ReadString(); string msg=r.ReadString(); LuckyWheelUI.Instance?.PlaySpin(idx,label,msg); }
 
-        // Auto-play
-        private void OnAutoConfig(PacketReader r) {
-            int n=r.ReadShort(); AutoManager.Instance?.ClearConfig();
-            for(int i=0;i<n;i++){ string type=r.ReadString(); string name=r.ReadString(); int minVip=r.ReadInt(); int maxMin=r.ReadInt(); int ok=r.ReadByte();
-                AutoManager.Instance?.AddAutoType(type,name,minVip,maxMin,ok==1); }
-            AutoManager.Instance?.OnConfigReady();
-        }
-        private void OnAutoState(PacketReader r) { int allowed=r.ReadInt(); AutoManager.Instance?.SetAllowedFlags(allowed); }
         // Rút option
         private void OnOptionResult(PacketReader r) { bool ok=r.ReadByte()==1; string msg=r.ReadString(); GameState.Instance?.ShowToast(msg); }
         // Thần Thú bang

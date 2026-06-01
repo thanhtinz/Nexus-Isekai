@@ -683,11 +683,6 @@ public final class PacketOpcode {
     public static final short S2C_WHEEL_LIST        = (short)0x4613;
     public static final short S2C_WHEEL_RESULT      = (short)0x4614; // [int segmentIndex][string label][string msg]
 
-    // ───── Auto-play (0x47xx) ─────
-    public static final short C2S_AUTO_SET          = (short)0x4701; // [int flags] bitmask auto bật
-    public static final short C2S_AUTO_CONFIG_REQ   = (short)0x4702;
-    public static final short S2C_AUTO_CONFIG       = (short)0x4711; // danh sách auto cho phép theo VIP
-    public static final short S2C_AUTO_STATE        = (short)0x4712; // [int allowedFlags]
     // ───── Rút/chuyển option (0x48xx) ─────
     public static final short C2S_OPTION_EXTRACT    = (short)0x4801; // [long srcInvId][long dstInvId]
     public static final short S2C_OPTION_RESULT     = (short)0x4811; // [byte ok][string msg]

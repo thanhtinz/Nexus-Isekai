@@ -146,7 +146,6 @@ public class AdminApiServer {
         httpServer.createContext("/api/giftcode-rewards",ex -> handleAuth(ex, this::handleGiftcodeRewardsCfg));
         httpServer.createContext("/api/pvp-season-rewards", ex -> handleAuth(ex, this::handlePvpSeasonRewardsCfg));
         httpServer.createContext("/api/minigame-config", ex -> handleAuth(ex, this::handleMinigameCfg));
-        httpServer.createContext("/api/auto-config",     ex -> handleAuth(ex, this::handleAutoCfg));
         httpServer.createContext("/api/option-extract",  ex -> handleAuth(ex, this::handleOptionExtractCfg));
         httpServer.createContext("/api/clan-beast",      ex -> handleAuth(ex, this::handleClanBeastCfg));
         httpServer.createContext("/api/boss-schedule",   ex -> handleAuth(ex, this::handleBossScheduleCfg));
@@ -974,9 +973,6 @@ public class AdminApiServer {
     }
     private void handleMinigameCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "minigame_config", "game_type", new String[]{"min_bet","max_bet","house_edge","config_json","is_active"});
-    }
-    private void handleAutoCfg(HttpExchange ex) throws Exception {
-        crudConfig(ex, "auto_config", "auto_type", new String[]{"display_name","min_vip","max_minutes","is_enabled","sort_order"});
     }
     private void handleOptionExtractCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "option_extract_config", "id", new String[]{"name","cost_gold","cost_diamond","cost_item_id","success_rate","consume_source","is_enabled"});

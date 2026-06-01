@@ -4264,20 +4264,6 @@ INSERT IGNORE INTO lucky_wheels (id,name,description,cost_amount,cost_currency,c
  (1,'Vòng Quay May Mắn','Quay bằng kim cương',20,1,0,0,'[{"label":"10K Vàng","type":"gold","qty":10000,"weight":40},{"label":"50 KC","type":"diamond","qty":50,"weight":20},{"label":"Trang bị","type":"item","id":8001,"qty":1,"weight":10},{"label":"100K Vàng","type":"gold","qty":100000,"weight":15},{"label":"200 KC","type":"diamond","qty":200,"weight":8},{"label":"Skin hiếm","type":"item","id":8003,"qty":1,"weight":2,"is_jackpot":1}]');
 ALTER TABLE characters ADD COLUMN IF NOT EXISTS muted_until BIGINT NOT NULL DEFAULT 0;
 
--- ═════════════════════════════════════════════════════════════
--- AUTO-PLAY (treo tự động trong game) — server cấu hình + chống bot, client chạy vòng auto
--- ═════════════════════════════════════════════════════════════
-CREATE TABLE IF NOT EXISTS auto_config (
-    auto_type    VARCHAR(32) NOT NULL PRIMARY KEY, -- attack,pickup,potion,quest,sell,skill
-    display_name VARCHAR(64) NOT NULL,
-    min_vip      INT NOT NULL DEFAULT 0,           -- VIP tối thiểu để bật
-    max_minutes  INT NOT NULL DEFAULT 0,           -- 0=không giới hạn; >0 tự tắt sau N phút
-    is_enabled   TINYINT NOT NULL DEFAULT 1,
-    sort_order   INT NOT NULL DEFAULT 0
-);
-INSERT IGNORE INTO auto_config (auto_type,display_name,min_vip,max_minutes,is_enabled,sort_order) VALUES
- ('attack','Tự đánh quái',0,0,1,1),('pickup','Tự nhặt đồ',0,0,1,2),('potion','Tự dùng máu/mana',0,0,1,3),
- ('skill','Tự dùng kỹ năng',1,0,1,4),('quest','Tự làm nhiệm vụ',3,0,1,5),('sell','Tự bán đồ rác',5,0,1,6);
 
 -- ═════════════════════════════════════════════════════════════
 -- OPTION TRANG BỊ + RÚT/CHUYỂN OPTION

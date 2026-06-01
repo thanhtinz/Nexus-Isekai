@@ -236,9 +236,6 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_TREASURE_DIG      -> { requireInGame(); TreasureHandler.handleTreasureDig(this, toBuf(p)); }
             case PacketOpcode.C2S_WHEEL_LIST        -> { requireInGame(); TreasureHandler.handleWheelList(this, toBuf(p)); }
             case PacketOpcode.C2S_WHEEL_SPIN        -> { requireInGame(); TreasureHandler.handleWheelSpin(this, toBuf(p)); }
-            // Auto-play
-            case PacketOpcode.C2S_AUTO_SET          -> { requireInGame(); AutoHandler.handleSetAuto(this, toBuf(p)); }
-            case PacketOpcode.C2S_AUTO_CONFIG_REQ   -> { requireInGame(); AutoHandler.sendAutoConfig(this); }
             // Rút option
             case PacketOpcode.C2S_OPTION_EXTRACT    -> { requireInGame(); OptionHandler.handleExtract(this, toBuf(p)); }
             // Thần Thú bang
