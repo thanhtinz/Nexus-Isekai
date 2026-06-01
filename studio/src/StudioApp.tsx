@@ -19,6 +19,29 @@ async function api(path: string, method = 'GET', body?: any) {
   try { return await res.json(); } catch { return null; }
 }
 
+/* Upload file (raw bytes) vao kho client_assets qua /api/assets/upload */
+async function uploadAsset(assetKey: string, assetType: string, category: string, displayName: string, dataUrl: string) {
+  const key = localStorage.getItem('studio_key') || '';
+  const blob = await (await fetch(dataUrl)).blob();
+  const res = await fetch(API_BASE + '/api/assets/upload', {
+    method: 'POST',
+    headers: {
+      'X-Admin-Key': key, 'X-Asset-Key': assetKey, 'X-Asset-Type': assetType,
+      'X-Category': category, 'X-Display-Name': displayName, 'Content-Type': blob.type || 'image/png',
+    },
+    body: blob,
+  });
+  try { return await res.json(); } catch { return null; }
+}
+
+/* Hot-reload de ap thay doi vao game khong can restart */
+const RELOAD_MAP: Record<string, string> = { mob: 'monsters', map: 'maps', npc: 'npcs' };
+async function reloadGame(sectionKey: string) {
+  const t = RELOAD_MAP[sectionKey];
+  if (t) { try { await api('/api/reload/' + t, 'POST'); return true; } catch { return false; } }
+  return false;
+}
+
 type Section = { key: string; label: string; endpoint: string; dataKey: string; pk: string; nameField: string };
 const SECTIONS: Section[] = [
   { key: 'skill',    label: 'SKILL',     endpoint: '/api/skills',        dataKey: 'rows', pk: 'id',        nameField: 'name' },
@@ -27,6 +50,7 @@ const SECTIONS: Section[] = [
   { key: 'map',      label: 'MAP',       endpoint: '/api/maps',          dataKey: 'rows', pk: 'id',        nameField: 'name' },
   { key: 'npc',      label: 'NPC',       endpoint: '/api/npcs',          dataKey: 'rows', pk: 'id',        nameField: 'name' },
   { key: 'resource', label: 'RESOURCE',  endpoint: '/api/audio-assets',  dataKey: 'rows', pk: 'id',        nameField: 'asset_key' },
+  { key: 'kho',      label: 'KHO ASSET', endpoint: '/api/assets',        dataKey: 'assets', pk: 'id',      nameField: 'asset_key' },
 ];
 
 type Row = Record<string, any>;
@@ -57,7 +81,8 @@ export default function StudioApp() {
   const save = async () => {
     setBusy('save');
     const r = await api(section.endpoint, 'POST', { action: 'upsert', ...draft });
-    setMsg(r?.error ? `Loi: ${r.error}` : 'Da luu');
+    const applied = await reloadGame(section.key);
+    setMsg(r?.error ? `Loi: ${r.error}` : (applied ? 'Da luu + ap vao game (reload)' : 'Da luu'));
     await loadList(section);
     setBusy('');
   };
@@ -127,7 +152,9 @@ export default function StudioApp() {
         {/* Center: preview / frames */}
         <main className="flex-1 flex flex-col min-w-0 bg-surface-950">
           <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
-            {section.key === 'map' && selected
+            {section.key === 'kho'
+              ? <AssetLibrary setMsg={setMsg} />
+              : section.key === 'map' && selected
               ? <MapBuilder map={draft} setMsg={setMsg} />
               : tab === 'frames' ? <AnimationEditor draft={draft} setDraft={setDraft} setMsg={setMsg} /> : <PreviewArea row={draft} section={section} />}
           </div>
@@ -324,6 +351,8 @@ function AnimationEditor({ draft, setDraft, setMsg }: {
           onChange={e => e.target.files?.[0] && onFile(e.target.files[0])} />
         <button onClick={() => fileRef.current?.click()} className="btn-secondary text-xs">Chon sprite sheet</button>
         <button onClick={slice} disabled={!img || busy} className="btn-gold text-xs">{busy ? 'Dang tach...' : 'Tach anh (auto)'}</button>
+        <button onClick={async () => { if (!img) return; const r = await uploadAsset(`Sprites/${Date.now()}.png`, 'sprite', 'general', 'sheet', img); setMsg(r?.success ? 'Da luu sheet vao kho' : 'Loi luu kho'); }}
+          disabled={!img} className="btn-secondary text-xs">Luu sheet vao kho</button>
         {frames.length > 0 && <span className="text-xs text-emerald-400">{frames.length} frame</span>}
       </div>
 
@@ -412,7 +441,8 @@ function NpcEditor({ draft, setDraft, setMsg, reload }: {
 
   const save = async () => {
     const r = await api('/api/npcs', 'POST', draft);
-    setMsg(r?.success ? 'Da luu NPC' : `Loi: ${r?.error || r?.message || 'luu NPC'}`);
+    await reloadGame('npc');
+    setMsg(r?.success ? 'Da luu NPC + ap vao game' : `Loi: ${r?.error || r?.message || 'luu NPC'}`);
     reload();
   };
 
@@ -489,6 +519,75 @@ function NpcEditor({ draft, setDraft, setMsg, reload }: {
       )}
 
       <button onClick={save} className="btn-gold w-full !py-2">Luu NPC</button>
+    </div>
+  );
+}
+
+/* ── KHO ASSET: duyet + upload + xoa client_assets (file luu tren server) ── */
+const ASSET_CATEGORIES = ['', 'map_bg', 'map_tile', 'sky', 'parallax', 'monster', 'npc', 'skill', 'effect', 'particle', 'weapon', 'armor', 'cosmetic', 'pet', 'mount', 'ui', 'hud', 'icon', 'general'];
+
+function AssetLibrary({ setMsg }: { setMsg: (s: string) => void }) {
+  const [assets, setAssets] = useState<Row[]>([]);
+  const [cat, setCat] = useState('');
+  const [q, setQ] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [upCat, setUpCat] = useState('map_bg');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const load = useCallback(async () => {
+    setBusy(true);
+    const r = await api(`/api/assets?category=${cat}&q=${encodeURIComponent(q)}`);
+    setAssets(r?.assets || []); setBusy(false);
+  }, [cat, q]);
+  useEffect(() => { load(); }, [load]);
+
+  const onFiles = async (files: FileList) => {
+    setBusy(true);
+    for (const f of Array.from(files)) {
+      const dataUrl: string = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result as string); r.readAsDataURL(f); });
+      const key = `${upCat}/${f.name}`;
+      const type = f.type.startsWith('image') ? 'sprite' : 'data';
+      await uploadAsset(key, type, upCat, f.name, dataUrl);
+    }
+    setMsg(`Da upload ${files.length} file vao kho (${upCat})`);
+    await load(); setBusy(false);
+  };
+  const del = async (id: number) => { await api('/api/assets', 'POST', { action: 'delete', id }); load(); };
+
+  return (
+    <div className="w-full h-full flex flex-col gap-3">
+      {/* toolbar */}
+      <div className="flex items-center gap-2 flex-wrap text-xs">
+        <select value={cat} onChange={e => setCat(e.target.value)} className="input !w-40 !py-1.5">
+          {ASSET_CATEGORIES.map(c => <option key={c} value={c}>{c || '— Tat ca —'}</option>)}
+        </select>
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Tim asset..." className="input !w-48 !py-1.5" />
+        <div className="flex-1" />
+        <span className="text-surface-200/50">Upload vao:</span>
+        <select value={upCat} onChange={e => setUpCat(e.target.value)} className="input !w-36 !py-1.5">
+          {ASSET_CATEGORIES.filter(Boolean).map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => e.target.files && onFiles(e.target.files)} />
+        <button onClick={() => fileRef.current?.click()} disabled={busy} className="btn-gold !py-1.5 !px-3">{busy ? '...' : 'Upload'}</button>
+      </div>
+
+      {/* grid */}
+      <div className="flex-1 overflow-y-auto card p-3">
+        <div className="grid grid-cols-6 gap-2">
+          {assets.map(a => (
+            <div key={a.id} className="card p-1.5 group relative">
+              <div className="aspect-square bg-surface-950 rounded overflow-hidden flex items-center justify-center">
+                <img src={assetUrl(a.file_path)} alt="" className="max-w-full max-h-full object-contain" style={{ imageRendering: 'pixelated' }} />
+              </div>
+              <div className="text-[9px] text-surface-100 truncate mt-1" title={a.asset_key}>{a.asset_key}</div>
+              <div className="text-[8px] text-surface-200/40">{a.category} · v{a.version}</div>
+              <button onClick={() => del(a.id)} className="absolute top-1 right-1 hidden group-hover:block bg-red-500/80 text-white rounded w-4 h-4 text-[10px] leading-none">×</button>
+            </div>
+          ))}
+        </div>
+        {!busy && assets.length === 0 && <div className="text-xs text-surface-200/40 p-4 text-center">Kho trong. Upload sprite/bg/asset de dung trong Studio + game tu dong tai (theo version/hash).</div>}
+      </div>
+      <p className="text-[11px] text-surface-200/50">File luu tren server (thu muc client-assets). Game client tai ve theo version/hash — upload de tang version la client tu cap nhat.</p>
     </div>
   );
 }
@@ -672,7 +771,8 @@ function MapBuilder({ map, setMsg }: { map: Row; setMsg: (s: string) => void }) 
       from_x: p.x, from_y: p.y, to_x: p.dest_x || 0, to_y: p.dest_y || 0, min_level: 0,
     });
     await save();
-    setMsg(`Da ap dung: ${markers.length} NPC + ${portals.length} portal xuong bang`);
+    await reloadGame('map'); await reloadGame('npc');
+    setMsg(`Da ap dung + reload: ${markers.length} NPC + ${portals.length} portal vao game`);
     setBusy(false);
   };
 

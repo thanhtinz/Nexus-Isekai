@@ -4,13 +4,16 @@ Tool bien tap data **tach rieng**, KHONG thuoc web admin. Build & deploy doc lap
 Ket noi toi server game qua API (cau hinh `VITE_API_BASE`), dung dung data he thong.
 
 ## Tinh nang
-- Module: Skill / Mob-Boss / Effect / Map / Npc / Resource.
+- Module: Skill / Mob-Boss / Effect / Map / Npc / Resource / KHO ASSET.
 - Thu vien + editor thuoc tinh (schema-driven: tu render field theo data tra ve).
 - AI-assist: tao mo ta, goi y chi so can bang, tao cau hinh VFX (JSON).
 - Tach anh + LAM HOAT ANH: upload sprite sheet → tu nhan dien frame → ghep thanh
   hoat anh (dai frame doi thu tu/xoa) → preview Play/Pause/Delay/Zoom/Loop →
   xuat JSON (animation_json/frames_json/config_json) vao data.
-- Save → ghi thang vao DB qua API CRUD san co.
+- KHO ASSET: duyet + upload sprite/bg/asset (luu file tren server client_assets, co
+  version/hash → game client tu tai ve khi thay doi).
+- Save = AP VAO GAME: luu xong tu goi hot-reload (/api/reload/maps|monsters|npcs) →
+  thay doi mob/map/npc co hieu luc ngay, khong can restart.
 
 ## Chay
 ```
