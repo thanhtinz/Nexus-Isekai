@@ -85,10 +85,6 @@ public class GameNetworkServer {
         return sessions.values();
     }
 
-    public int getOnlineCount() {
-        return sessions.size();
-    }
-
     /**
      * Broadcast toàn server — dùng cho server notice, event start,...
      */
