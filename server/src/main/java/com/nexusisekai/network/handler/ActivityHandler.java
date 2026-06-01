@@ -167,6 +167,79 @@ public class ActivityHandler {
         }catch(Exception e){ result(s,"Loi"); }
     }
 
+    /**
+     * Bảng xếp hạng sự kiện ĐUA TOP. Payload: [int activityId].
+     * Xếp theo activity_progress.progress (điểm sự kiện) — KHÔNG phải BXH thật.
+     * Trả: top N người chơi + hạng của mình + các mốc thưởng theo hạng.
+     */
+    public static void handleRanking(GameSession s, ByteBuf in){
+        int aid=in.readInt(); Player p=s.getPlayer(); if(p==null) return;
+        try(Connection c=DatabaseManager.getInstance().getConnection()){
+            // top 20 theo điểm sự kiện
+            List<Map<String,Object>> top=SqlSafe.query(c,
+                "SELECT ap.char_id, ap.progress, ch.name FROM activity_progress ap "+
+                "JOIN characters ch ON ch.id=ap.char_id WHERE ap.activity_id=? AND ap.progress>0 "+
+                "ORDER BY ap.progress DESC LIMIT 20", aid);
+            // hạng của mình
+            Map<String,Object> me=SqlSafe.queryOne(c,
+                "SELECT (SELECT COUNT(*)+1 FROM activity_progress WHERE activity_id=? AND progress > "+
+                "(SELECT COALESCE(progress,0) FROM activity_progress WHERE activity_id=? AND char_id=?)) AS my_rank, "+
+                "COALESCE((SELECT progress FROM activity_progress WHERE activity_id=? AND char_id=?),0) AS my_score",
+                aid, aid, p.getCharId(), aid, p.getCharId());
+            // mốc thưởng theo hạng
+            List<Map<String,Object>> tiers=SqlSafe.query(c,
+                "SELECT rank_from,rank_to,reward_json,label FROM activity_rank_rewards WHERE activity_id=? ORDER BY rank_from", aid);
+            ByteBuf b=Unpooled.buffer(); b.writeShort(PacketOpcode.S2C_ACTIVITY_RANKING);
+            b.writeInt(aid);
+            long myScore=me==null?0:((Number)me.get("my_score")).longValue();
+            int myRank=(me==null||myScore<=0)?0:((Number)me.get("my_rank")).intValue(); // 0 = chưa lên hạng
+            b.writeInt(myRank); b.writeLong(myScore);
+            b.writeShort(top.size());
+            int rank=1;
+            for(var t:top){
+                b.writeInt(rank++);
+                writeStr(b,(String)t.get("name"));
+                b.writeLong(((Number)t.get("progress")).longValue());
+            }
+            b.writeShort(tiers.size());
+            for(var t:tiers){
+                b.writeInt(((Number)t.get("rank_from")).intValue());
+                b.writeInt(((Number)t.get("rank_to")).intValue());
+                writeStr(b,(String)t.get("label"));
+                writeStr(b,(String)t.get("reward_json"));
+            }
+            s.send(b);
+        }catch(Exception e){ result(s,"Loi tai bang xep hang"); }
+    }
+
+    /**
+     * Phát thưởng đua top khi sự kiện kết thúc (scheduler gọi).
+     * Xếp theo điểm, ai vào khoảng hạng nào nhận reward khoảng đó. Đánh dấu tránh phát trùng.
+     */
+    public static void distributeRankingRewards(Connection c, int activityId) throws Exception {
+        List<Map<String,Object>> tiers=SqlSafe.query(c,
+            "SELECT rank_from,rank_to,reward_json FROM activity_rank_rewards WHERE activity_id=? ORDER BY rank_from", activityId);
+        if(tiers.isEmpty()) return;
+        List<Map<String,Object>> ranked=SqlSafe.query(c,
+            "SELECT char_id, progress FROM activity_progress WHERE activity_id=? AND progress>0 ORDER BY progress DESC LIMIT 1000", activityId);
+        int rank=0;
+        for(var row:ranked){
+            rank++;
+            long charId=((Number)row.get("char_id")).longValue();
+            for(var t:tiers){
+                int from=((Number)t.get("rank_from")).intValue(), to=((Number)t.get("rank_to")).intValue();
+                if(rank>=from && rank<=to){
+                    String json=(String)t.get("reward_json");
+                    long dia=jsonLong(json,"diamond"), gold=jsonLong(json,"gold");
+                    if(dia>0||gold>0) SqlSafe.update(c,"UPDATE characters SET diamond=diamond+?, gold=gold+? WHERE id=?", dia, gold, charId);
+                    for(int[] it: jsonItems(json))
+                        SqlSafe.update(c,"INSERT INTO character_inventory (char_id,item_id,qty,slot) VALUES (?,?,?,-1)", charId, it[0], it[1]);
+                    break;
+                }
+            }
+        }
+    }
+
     // ───── Engine dùng chung ─────
     /** Cập nhật progress tự động cho login (theo ngày) / online (theo phút) / spending (đọc total_spent). */
     private static void syncProgress(Connection c, Player p, int aid) throws Exception {

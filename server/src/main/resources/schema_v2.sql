@@ -3751,3 +3751,27 @@ INSERT IGNORE INTO activity_milestones (activity_id,milestone_order,requirement,
  (2,1,30,'{"gold":5000}','30 phút'),(2,2,60,'{"gold":15000}','60 phút'),(2,3,120,'{"diamond":30}','120 phút'),
  (3,1,100,'{"gold":20000}','100 điểm'),(3,2,300,'{"diamond":30}','300 điểm'),
  (5,1,100,'{"items":[[8001,1]]}','Tiêu 100 KC'),(5,2,500,'{"items":[[8001,3]]}','Tiêu 500 KC');
+
+-- Sự kiện ĐUA TOP: thưởng theo khoảng hạng (Hạng 1, 2, 3, Xếp 4-5, 6-10...)
+-- Xếp hạng theo activity_progress.progress (điểm sự kiện), KHÁC BXH thật.
+CREATE TABLE IF NOT EXISTS activity_rank_rewards (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    activity_id   INT NOT NULL,
+    rank_from     INT NOT NULL,                  -- hạng bắt đầu (1)
+    rank_to       INT NOT NULL,                  -- hạng kết thúc (1 = chỉ hạng 1; 5 = tới hạng 5)
+    reward_json   VARCHAR(512) NOT NULL DEFAULT '{}',
+    label         VARCHAR(48) DEFAULT '',        -- "Hạng 1","Xếp 4-5"...
+    INDEX idx_activity (activity_id, rank_from)
+);
+-- Đánh dấu đã phát thưởng đua top khi kết thúc (tránh phát trùng)
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS rewards_distributed TINYINT NOT NULL DEFAULT 0;
+
+-- Seed: thêm 1 sự kiện đua top mẫu + mốc hạng (giống ảnh: top 10 chiến lực)
+INSERT IGNORE INTO activities (id,activity_type,name,description,is_enabled,action_type,multiplier) VALUES
+ (9,'ranking','BXH Chiến Lực','Đua top chiến lực, phát thưởng cho top 10 khi kết thúc',1,'progress',1.0);
+INSERT IGNORE INTO activity_rank_rewards (activity_id,rank_from,rank_to,reward_json,label) VALUES
+ (9,1,1,'{"diamond":500,"items":[[8001,1]]}','Hạng 1'),
+ (9,2,2,'{"diamond":300,"items":[[8001,1]]}','Hạng 2'),
+ (9,3,3,'{"diamond":200}','Hạng 3'),
+ (9,4,5,'{"diamond":100}','Xếp 4-5'),
+ (9,6,10,'{"diamond":50}','Xếp 6-10');

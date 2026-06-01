@@ -644,7 +644,9 @@ public final class PacketOpcode {
     public static final short C2S_ACTIVITY_CLAIM   = (short)0x4303;  // nhận thưởng mốc
     public static final short C2S_ACTIVITY_EXCHANGE= (short)0x4304;  // đổi thưởng
     public static final short C2S_ACTIVITY_JOIN    = (short)0x4305;  // tham gia nhanh
+    public static final short C2S_ACTIVITY_RANKING = (short)0x4306;  // bảng xếp hạng đua top
     public static final short S2C_ACTIVITY_LIST    = (short)0x4311;
     public static final short S2C_ACTIVITY_DETAIL  = (short)0x4312;
     public static final short S2C_ACTIVITY_RESULT  = (short)0x4313;
+    public static final short S2C_ACTIVITY_RANKING = (short)0x4314;
 }

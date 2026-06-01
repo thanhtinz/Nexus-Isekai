@@ -534,6 +534,7 @@ namespace NexusIsekai.Network
         public static void SendActivityClaim(int id, int order) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_CLAIM).WriteInt(id).WriteInt(order));
         public static void SendActivityExchange(int id, int milestoneId) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_EXCHANGE).WriteInt(id).WriteInt(milestoneId));
         public static void SendActivityJoin(int id) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_JOIN).WriteInt(id));
+        public static void SendActivityRanking(int id) => Send(new PacketBuilder(PacketOpcode.C2S_ACTIVITY_RANKING).WriteInt(id));
         public static void SendWedding(long targetCharId, int weddingMapId)
             => Send(new PacketBuilder(PacketOpcode.C2S_WEDDING)
                 .WriteLong(targetCharId).WriteInt(weddingMapId));

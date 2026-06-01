@@ -142,6 +142,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/webshop-contents",ex -> handleAuth(ex, this::handleWebshopContentsCfg));
         httpServer.createContext("/api/activities",       ex -> handleAuth(ex, this::handleActivitiesCfg));
         httpServer.createContext("/api/activity-milestones", ex -> handleAuth(ex, this::handleActivityMilestonesCfg));
+        httpServer.createContext("/api/activity-rank-rewards", ex -> handleAuth(ex, this::handleActivityRankRewardsCfg));
         httpServer.createContext("/api/shops",      ex -> handleAuth(ex, this::handleShops));
         httpServer.createContext("/api/events",     ex -> handleAuth(ex, this::handleEvents));
         httpServer.createContext("/api/quests",     ex -> handleAuth(ex, this::handleQuests));
@@ -822,6 +823,9 @@ public class AdminApiServer {
     }
     private void handleActivityMilestonesCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "activity_milestones", "id", new String[]{"activity_id","milestone_order","requirement","reward_json","item_cost_id","item_cost_qty","exchange_limit","label"});
+    }
+    private void handleActivityRankRewardsCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "activity_rank_rewards", "id", new String[]{"activity_id","rank_from","rank_to","reward_json","label"});
     }
 
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {

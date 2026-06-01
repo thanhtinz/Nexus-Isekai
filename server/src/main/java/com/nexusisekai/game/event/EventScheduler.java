@@ -50,6 +50,9 @@ public class EventScheduler {
         // Guild War: chuyển trạng thái scheduled→ongoing→ended + trao thưởng (mỗi 30s)
         scheduler.scheduleAtFixedRate(this::guildWarTask, 25, 30, TimeUnit.SECONDS);
 
+        // Hoạt Động đua top: phát thưởng theo hạng khi sự kiện kết thúc (mỗi 60s)
+        scheduler.scheduleAtFixedRate(this::activityRankingTask, 40, 60, TimeUnit.SECONDS);
+
         log.info("[EVENT] Scheduler started.");
     }
 
@@ -153,6 +156,26 @@ public class EventScheduler {
 
     public void stop() {
         if (scheduler != null) scheduler.shutdownNow();
+    }
+
+    /** Phát thưởng đua top cho các hoạt động ranking đã kết thúc mà chưa phát. */
+    private void activityRankingTask() {
+        try (Connection c = DatabaseManager.getConnection()) {
+            java.util.List<java.util.Map<String,Object>> ended = com.nexusisekai.database.SqlSafe.query(c,
+                "SELECT id FROM activities WHERE activity_type='ranking' AND rewards_distributed=0 " +
+                "AND end_at IS NOT NULL AND end_at < NOW()");
+            for (java.util.Map<String,Object> a : ended) {
+                int id = ((Number) a.get("id")).intValue();
+                // chốt cờ trước (atomic) để tránh phát trùng nếu 2 tick
+                int marked = com.nexusisekai.database.SqlSafe.update(c,
+                    "UPDATE activities SET rewards_distributed=1 WHERE id=? AND rewards_distributed=0", id);
+                if (marked == 0) continue;
+                com.nexusisekai.network.handler.ActivityHandler.distributeRankingRewards(c, id);
+                log.info("[ACTIVITY] Phat thuong dua top hoat dong {}", id);
+            }
+        } catch (Exception e) {
+            log.warn("activityRankingTask error: {}", e.getMessage());
+        }
     }
 
     private void checkScheduledEvents() {

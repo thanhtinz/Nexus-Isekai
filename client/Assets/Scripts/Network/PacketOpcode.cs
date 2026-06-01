@@ -569,9 +569,11 @@ namespace NexusIsekai.Network
         public const short C2S_ACTIVITY_CLAIM   = 0x4303;
         public const short C2S_ACTIVITY_EXCHANGE= 0x4304;
         public const short C2S_ACTIVITY_JOIN    = 0x4305;
+        public const short C2S_ACTIVITY_RANKING = 0x4306;
         public const short S2C_ACTIVITY_LIST    = 0x4311;
         public const short S2C_ACTIVITY_DETAIL  = 0x4312;
         public const short S2C_ACTIVITY_RESULT  = 0x4313;
+        public const short S2C_ACTIVITY_RANKING = 0x4314;
 
     }
 }

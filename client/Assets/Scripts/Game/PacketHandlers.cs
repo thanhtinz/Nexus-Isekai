@@ -76,6 +76,7 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_ACTIVITY_LIST,   OnActivityList);
             d.Register(PacketOpcode.S2C_ACTIVITY_DETAIL, OnActivityDetail);
             d.Register(PacketOpcode.S2C_ACTIVITY_RESULT, OnActivityResult);
+            d.Register(PacketOpcode.S2C_ACTIVITY_RANKING, OnActivityRanking);
             d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
             d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
             d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
@@ -791,6 +792,17 @@ namespace NexusIsekai.Game
         private void OnActivityResult(PacketReader r) {
             GameState.Instance?.ShowToast(r.ReadString());
             PacketBuilder.SendActivityList();
+        }
+
+        private void OnActivityRanking(PacketReader r) {
+            int aid = r.ReadInt(); int myRank = r.ReadInt(); long myScore = r.ReadLong();
+            ActivityUI.Instance?.ClearRanking();
+            ActivityUI.Instance?.SetMyRank(myRank, myScore);
+            int n = r.ReadShort();
+            for (int i = 0; i < n; i++) { int rank = r.ReadInt(); string name = r.ReadString(); long score = r.ReadLong(); ActivityUI.Instance?.AddRankRow(rank, name, score); }
+            int t = r.ReadShort();
+            for (int i = 0; i < t; i++) { int from = r.ReadInt(); int to = r.ReadInt(); string label = r.ReadString(); string reward = r.ReadString(); ActivityUI.Instance?.AddRankTier(from, to, label, reward); }
+            ActivityUI.Instance?.ShowRanking();
         }
 
         private void OnClassStory(PacketReader r)
