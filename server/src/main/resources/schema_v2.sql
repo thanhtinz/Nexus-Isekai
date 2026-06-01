@@ -77,25 +77,7 @@ CREATE TABLE IF NOT EXISTS sepay_config (
 
 INSERT IGNORE INTO sepay_config (id) VALUES (1);
 
-CREATE TABLE IF NOT EXISTS topup_packages (
-    id           INT AUTO_INCREMENT PRIMARY KEY,
-    name         VARCHAR(128) NOT NULL,
-    diamond      INT NOT NULL,
-    bonus_diamond INT NOT NULL DEFAULT 0,
-    price_vnd    INT NOT NULL,
-    is_featured  TINYINT NOT NULL DEFAULT 0,
-    is_active    TINYINT NOT NULL DEFAULT 1,
-    icon_url     VARCHAR(256),
-    sort_order   INT NOT NULL DEFAULT 0,
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
-INSERT IGNORE INTO topup_packages (id,name,diamond,bonus_diamond,price_vnd,is_featured,sort_order) VALUES
-(1,'Gói Nhỏ',        100,  0,    10000, 0, 1),
-(2,'Gói Vừa',        500,  50,   50000, 0, 2),
-(3,'Gói Lớn',       1200, 200,  100000, 1, 3),
-(4,'Gói VIP',       2500, 500,  200000, 0, 4),
-(5,'Gói Siêu VIP',  6500,1500,  500000, 1, 5);
 
 CREATE TABLE IF NOT EXISTS topup_orders (
     id              VARCHAR(64) PRIMARY KEY,          -- format: NI_{timestamp}_{random}
@@ -1346,60 +1328,18 @@ INSERT IGNORE INTO rate_limit_config VALUES
 ('shop',5,60,'Gioi han mua ban');
 
 -- Guild invites table (da tham chieu trong GuildHandler)
-CREATE TABLE IF NOT EXISTS guild_invites (
-    guild_id        BIGINT NOT NULL,
-    char_id         BIGINT NOT NULL,
-    invited_by      BIGINT NOT NULL,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (guild_id, char_id)
-);
+
 
 -- PvP duels table
-CREATE TABLE IF NOT EXISTS pvp_duels (
-    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-    char_id_a       BIGINT NOT NULL,
-    char_id_b       BIGINT NOT NULL,
-    winner_char_id  BIGINT DEFAULT NULL,
-    status          VARCHAR(16) NOT NULL DEFAULT 'pending',
-    map_id          INT DEFAULT NULL,
-    elo_change      INT DEFAULT 0,
-    started_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ended_at        DATETIME DEFAULT NULL
-);
+
 
 -- Farm seeds/animals config
-CREATE TABLE IF NOT EXISTS farm_seeds (
-    id              INT AUTO_INCREMENT PRIMARY KEY,
-    seed_name       VARCHAR(64) NOT NULL,
-    grow_time_min   INT NOT NULL DEFAULT 60,
-    harvest_item_id INT NOT NULL,
-    harvest_qty     INT NOT NULL DEFAULT 1,
-    buy_price       INT NOT NULL DEFAULT 100,
-    exp_reward      INT NOT NULL DEFAULT 10,
-    is_active       TINYINT NOT NULL DEFAULT 1
-);
 
-CREATE TABLE IF NOT EXISTS farm_animals (
-    id              INT AUTO_INCREMENT PRIMARY KEY,
-    animal_name     VARCHAR(64) NOT NULL,
-    feed_item_id    INT NOT NULL DEFAULT 0,
-    product_item_id INT NOT NULL,
-    produce_time_min INT NOT NULL DEFAULT 120,
-    buy_price       INT NOT NULL DEFAULT 500,
-    is_active       TINYINT NOT NULL DEFAULT 1
-);
+
+
 
 -- Furniture catalog
-CREATE TABLE IF NOT EXISTS furniture_catalog (
-    id              INT AUTO_INCREMENT PRIMARY KEY,
-    name            VARCHAR(64) NOT NULL,
-    furniture_type  VARCHAR(32) NOT NULL DEFAULT 'decoration',
-    price_gold      INT NOT NULL DEFAULT 1000,
-    size            INT NOT NULL DEFAULT 1,
-    icon_id         INT NOT NULL DEFAULT 0,
-    is_active       TINYINT NOT NULL DEFAULT 1,
-    sort_order      INT NOT NULL DEFAULT 0
-);
+
 
 -- ═════════════════════════════════════════════════════════════
 -- 33. OTA ASSET UPDATE — Hệ thống cập nhật client qua mạng
@@ -2874,35 +2814,13 @@ CREATE TABLE IF NOT EXISTS player_auto_config (
 -- STICKER / EMOJI IN CHAT (rieng voi bieu cam nhan vat)
 -- ═════════════════════════════════════════════════════════════
 
-CREATE TABLE IF NOT EXISTS sticker_packs (
-    id              INT AUTO_INCREMENT PRIMARY KEY,
-    pack_name       VARCHAR(32) NOT NULL,
-    pack_icon       VARCHAR(128) DEFAULT '',
-    is_free         TINYINT NOT NULL DEFAULT 1,
-    price_diamond   INT NOT NULL DEFAULT 0,
-    sort_order      INT NOT NULL DEFAULT 0,
-    is_active       TINYINT NOT NULL DEFAULT 1
-);
 
-CREATE TABLE IF NOT EXISTS stickers (
-    id              INT AUTO_INCREMENT PRIMARY KEY,
-    pack_id         INT NOT NULL,
-    sticker_key     VARCHAR(32) NOT NULL,
-    image_path      VARCHAR(128) NOT NULL,
-    is_animated     TINYINT NOT NULL DEFAULT 0,
-    sort_order      INT NOT NULL DEFAULT 0,
-    INDEX idx_pack (pack_id)
-);
 
-CREATE TABLE IF NOT EXISTS player_sticker_packs (
-    char_id         BIGINT NOT NULL,
-    pack_id         INT NOT NULL,
-    purchased_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (char_id, pack_id)
-);
 
-INSERT IGNORE INTO sticker_packs (id,pack_name,is_free) VALUES
-(1,'Default',1),(2,'Chibi',1),(3,'Meme',0);
+
+
+
+
 
 -- ═════════════════════════════════════════════════════════════
 -- CHARACTER EXPRESSIONS + ACTIONS + PAIR ACTIONS
@@ -3012,12 +2930,7 @@ CREATE TABLE IF NOT EXISTS character_blocks (
     PRIMARY KEY (char_id, blocked_char_id)
 );
 
-CREATE TABLE IF NOT EXISTS player_reports (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    reporter_id BIGINT NOT NULL, reported_id BIGINT NOT NULL,
-    reason VARCHAR(256), status VARCHAR(16) DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX idx_reported (reported_id)
-);
+
 
 CREATE TABLE IF NOT EXISTS character_tutorial (
     char_id BIGINT NOT NULL PRIMARY KEY,
@@ -3034,26 +2947,11 @@ CREATE TABLE IF NOT EXISTS character_warehouse (
     PRIMARY KEY (char_id, item_id)
 );
 
-CREATE TABLE IF NOT EXISTS gacha_history (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    char_id BIGINT NOT NULL, banner_id INT NOT NULL,
-    reward_type VARCHAR(16), reward_id INT, rarity TINYINT, pull_number INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX idx_char_banner (char_id, banner_id)
-);
 
-CREATE TABLE IF NOT EXISTS gacha_pity (
-    char_id BIGINT NOT NULL, banner_id INT NOT NULL,
-    pull_count INT NOT NULL DEFAULT 0, last_ssr_pull INT NOT NULL DEFAULT 0,
-    PRIMARY KEY (char_id, banner_id)
-);
 
-CREATE TABLE IF NOT EXISTS pvp_player_season (
-    char_id BIGINT NOT NULL, season_id INT NOT NULL,
-    elo INT NOT NULL DEFAULT 1000, wins INT NOT NULL DEFAULT 0, losses INT NOT NULL DEFAULT 0,
-    win_streak INT NOT NULL DEFAULT 0, max_streak INT NOT NULL DEFAULT 0,
-    tier VARCHAR(16) DEFAULT 'Bronze', reward_claimed TINYINT NOT NULL DEFAULT 0,
-    PRIMARY KEY (char_id, season_id)
-);
+
+
+
 
 CREATE TABLE IF NOT EXISTS character_mail (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -3063,11 +2961,7 @@ CREATE TABLE IF NOT EXISTS character_mail (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX idx_char (char_id)
 );
 
-CREATE TABLE IF NOT EXISTS character_quests (
-    char_id BIGINT NOT NULL, quest_id INT NOT NULL,
-    status VARCHAR(16) DEFAULT 'in_progress', progress INT NOT NULL DEFAULT 0,
-    PRIMARY KEY (char_id, quest_id)
-);
+
 
 CREATE TABLE IF NOT EXISTS character_achievements (
     char_id BIGINT NOT NULL, achievement_id INT NOT NULL,
