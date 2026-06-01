@@ -53,6 +53,97 @@ function DataTable({ data, compact }: { data: TableRow[]; compact?: boolean }) {
   );
 }
 
+//  Config editor — them/sua/xoa cho bang config 
+function ConfigEditor({ endpoint, pk, data, onReload }:
+  { endpoint: string; pk: string; data: TableRow[]; onReload: () => void }) {
+  const [editing, setEditing] = useState<TableRow | null>(null);
+  const [isNew, setIsNew] = useState(false);
+
+  // suy ra danh sach cot tu dong dau (loai cot thoi gian tu sinh)
+  const cols = data.length > 0
+    ? Object.keys(data[0]).filter(k => !['created_at', 'listed_at', 'last_spawn_at'].includes(k))
+    : [pk];
+
+  const startNew = () => {
+    const blank: TableRow = {};
+    cols.forEach(c => { if (c !== pk) blank[c] = ''; });
+    setEditing(blank); setIsNew(true);
+  };
+  const startEdit = (row: TableRow) => { setEditing({ ...row }); setIsNew(false); };
+
+  const save = async () => {
+    if (!editing) return;
+    const body: Record<string, string> = {};
+    Object.keys(editing).forEach(k => { body[k] = String(editing[k] ?? ''); });
+    if (isNew) delete body[pk]; // de DB tu sinh khoa (tru khi pk do nguoi nhap)
+    if (isNew && editing[pk] !== undefined && String(editing[pk]).length > 0) body[pk] = String(editing[pk]);
+    await api(endpoint, 'POST', body);
+    setEditing(null); onReload();
+  };
+  const remove = async (row: TableRow) => {
+    if (!window.confirm(`Xoa ban ghi ${pk}=${row[pk]}?`)) return;
+    await api(`${endpoint}/${row[pk]}`, 'DELETE');
+    onReload();
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between p-3 border-b border-white/10">
+        <span className="text-xs text-gray-400">{data.length} ban ghi</span>
+        <ActionButton onClick={startNew}>+ Them moi</ActionButton>
+      </div>
+
+      {editing && (
+        <div className="p-4 bg-[#0d0d22] border-b border-white/10">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {cols.map(c => (
+              <div key={c}>
+                <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-1">
+                  {c}{c === pk && isNew ? ' (de trong = tu sinh)' : ''}
+                </label>
+                <input
+                  value={String(editing[c] ?? '')}
+                  disabled={c === pk && !isNew}
+                  onChange={e => setEditing({ ...editing, [c]: e.target.value })}
+                  className="w-full bg-[#12122a] border border-white/10 rounded px-2 py-1 text-xs text-gray-200 disabled:opacity-50"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2 mt-3">
+            <ActionButton onClick={save} variant="primary">Luu</ActionButton>
+            <ActionButton onClick={() => setEditing(null)}>Huy</ActionButton>
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-white/10">
+              {cols.slice(0, 8).map(k => <th key={k} className="text-left p-2 text-gray-400 font-medium uppercase tracking-wider">{k}</th>)}
+              <th className="text-right p-2 text-gray-400 font-medium uppercase tracking-wider">Thao tac</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.slice(0, 100).map((row, i) => (
+              <tr key={i} className="border-b border-white/5 hover:bg-white/5">
+                {cols.slice(0, 8).map(k => (
+                  <td key={k} className="p-2 text-gray-300 max-w-[180px] truncate">{String(row[k] ?? '')}</td>
+                ))}
+                <td className="p-2 text-right whitespace-nowrap">
+                  <button onClick={() => startEdit(row)} className="text-[#8a5cf5] hover:underline mr-3">Sua</button>
+                  <button onClick={() => remove(row)} className="text-red-400 hover:underline">Xoa</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function StatCard({ label, value, color = '#6c3ef3' }: { label: string; value: string | number; color?: string }) {
   return (
     <div className="bg-[#12122a] border border-white/5 rounded-xl p-4">
@@ -84,6 +175,8 @@ interface PanelConfig {
   endpoint: string;
   dataKey: string;
   actions?: { label: string; endpoint: string; body: Record<string, string> }[];
+  editable?: boolean;   // bat form them/sua/xoa
+  pk?: string;          // cot khoa chinh (mac dinh 'id')
 }
 
 const PANELS: PanelConfig[] = [
@@ -144,25 +237,25 @@ const PANELS: PanelConfig[] = [
   { key: 'servers',      label: 'Servers',         group: 'He Thong',   endpoint: '/api/servers',           dataKey: 'servers' },
 
   // Tinh nang moi (endgame) — crudConfig tra ve dataKey 'rows'
-  { key: 'afk',          label: 'AFK / The Treo',  group: 'Tinh Nang',  endpoint: '/api/afk-cards',         dataKey: 'rows' },
-  { key: 'vip_levels',   label: 'Moc VIP',         group: 'Tinh Nang',  endpoint: '/api/vip-levels',        dataKey: 'rows' },
-  { key: 'vip_rewards',  label: 'Thuong VIP',      group: 'Tinh Nang',  endpoint: '/api/vip-milestones',    dataKey: 'rows' },
-  { key: 'worldboss',    label: 'World Boss',      group: 'Tinh Nang',  endpoint: '/api/world-bosses-cfg',  dataKey: 'rows' },
-  { key: 'outer_floors', label: 'Ngoai Vuc - Tang',group: 'Tinh Nang',  endpoint: '/api/outer-floors',      dataKey: 'rows' },
-  { key: 'outer_bosses', label: 'Ngoai Vuc - Boss',group: 'Tinh Nang',  endpoint: '/api/outer-bosses',      dataKey: 'rows' },
+  { key: 'afk',          label: 'AFK / The Treo',  group: 'Tinh Nang',  endpoint: '/api/afk-cards',         dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'vip_levels',   label: 'Moc VIP',         group: 'Tinh Nang',  endpoint: '/api/vip-levels',        dataKey: 'rows', editable: true, pk: 'vip_level' },
+  { key: 'vip_rewards',  label: 'Thuong VIP',      group: 'Tinh Nang',  endpoint: '/api/vip-milestones',    dataKey: 'rows', editable: true, pk: 'vip_level' },
+  { key: 'worldboss',    label: 'World Boss',      group: 'Tinh Nang',  endpoint: '/api/world-bosses-cfg',  dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'outer_floors', label: 'Ngoai Vuc - Tang',group: 'Tinh Nang',  endpoint: '/api/outer-floors',      dataKey: 'rows', editable: true, pk: 'floor' },
+  { key: 'outer_bosses', label: 'Ngoai Vuc - Boss',group: 'Tinh Nang',  endpoint: '/api/outer-bosses',      dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'guildwar',     label: 'Guild War',       group: 'Tinh Nang',  endpoint: '/api/guild-wars',        dataKey: 'rows' },
   { key: 'market',       label: 'Cho Nguoi Choi',  group: 'Tinh Nang',  endpoint: '/api/market-admin',      dataKey: 'rows' },
 
   // Bo sung vao nhom san
-  { key: 'cosmetics',    label: 'Cosmetic',        group: 'Xa Hoi',     endpoint: '/api/cosmetics',         dataKey: 'rows' },
-  { key: 'factions',     label: 'Phe',             group: 'Xa Hoi',     endpoint: '/api/factions',          dataKey: 'rows' },
-  { key: 'faction_tiers',label: 'Moc Danh Vong',   group: 'Xa Hoi',     endpoint: '/api/faction-tiers',     dataKey: 'rows' },
-  { key: 'pvp_rewards',  label: 'Thuong Mua PvP',  group: 'Xa Hoi',     endpoint: '/api/pvp-season-rewards',dataKey: 'rows' },
-  { key: 'class_change', label: 'Chuyen Lop',      group: 'Noi Dung',   endpoint: '/api/class-change',      dataKey: 'rows' },
-  { key: 'child_shop',   label: 'Shop Tre Em',     group: 'Noi Dung',   endpoint: '/api/child-shop',        dataKey: 'rows' },
-  { key: 'first_topup',  label: 'Thuong Nap Dau',  group: 'Kinh Te',    endpoint: '/api/first-topup',       dataKey: 'rows' },
-  { key: 'gift_rewards', label: 'Thuong Giftcode', group: 'Kinh Te',    endpoint: '/api/giftcode-rewards',  dataKey: 'rows' },
-  { key: 'webshop_ct',   label: 'Webshop Noi Dung',group: 'Kinh Te',    endpoint: '/api/webshop-contents',  dataKey: 'rows' },
+  { key: 'cosmetics',    label: 'Cosmetic',        group: 'Xa Hoi',     endpoint: '/api/cosmetics',         dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'factions',     label: 'Phe',             group: 'Xa Hoi',     endpoint: '/api/factions',          dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'faction_tiers',label: 'Moc Danh Vong',   group: 'Xa Hoi',     endpoint: '/api/faction-tiers',     dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'pvp_rewards',  label: 'Thuong Mua PvP',  group: 'Xa Hoi',     endpoint: '/api/pvp-season-rewards',dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'class_change', label: 'Chuyen Lop',      group: 'Noi Dung',   endpoint: '/api/class-change',      dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'child_shop',   label: 'Shop Tre Em',     group: 'Noi Dung',   endpoint: '/api/child-shop',        dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'first_topup',  label: 'Thuong Nap Dau',  group: 'Kinh Te',    endpoint: '/api/first-topup',       dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'gift_rewards', label: 'Thuong Giftcode', group: 'Kinh Te',    endpoint: '/api/giftcode-rewards',  dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'webshop_ct',   label: 'Webshop Noi Dung',group: 'Kinh Te',    endpoint: '/api/webshop-contents',  dataKey: 'rows', editable: true, pk: 'id' },
 ];
 
 //  AI Generate Panel 
@@ -408,7 +501,9 @@ export default function AdminDashboard() {
 
           {!loading && activePanel !== 'status' && activePanel !== 'ai' && (
             <div className="bg-[#12122a] border border-white/5 rounded-xl overflow-hidden">
-              <DataTable data={panelData} />
+              {currentPanel?.editable
+                ? <ConfigEditor endpoint={currentPanel.endpoint} pk={currentPanel.pk || 'id'} data={panelData} onReload={() => loadPanel(activePanel)} />
+                : <DataTable data={panelData} />}
             </div>
           )}
         </div>
