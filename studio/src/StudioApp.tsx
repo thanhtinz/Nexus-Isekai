@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import VfxEditor from './VfxEditor';
 import SpineViewer from './SpineViewer';
 import CompositePreview from './CompositePreview';
+import EffectComposer from './EffectComposer';
 
 /* ──────────────────────────────────────────────────────────────
    NEXUS STUDIO — tool bien tap data DOC LAP (project rieng, build/deploy rieng)
@@ -66,7 +67,7 @@ export default function StudioApp() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Row | null>(null);
   const [draft, setDraft] = useState<Row>({});
-  const [tab, setTab] = useState<'general' | 'frames' | 'vfx' | 'spine' | 'scene' | 'preview'>('general');
+  const [tab, setTab] = useState<'general' | 'frames' | 'vfx' | 'fxc' | 'spine' | 'scene' | 'preview'>('general');
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState('');
   const [keyVal, setKeyVal] = useState(localStorage.getItem('studio_key') || '');
@@ -163,16 +164,17 @@ export default function StudioApp() {
               ? <MapBuilder map={draft} setMsg={setMsg} />
               : tab === 'spine' ? <SpineViewer setMsg={setMsg} />
               : tab === 'vfx' ? <VfxEditor draft={draft} setDraft={setDraft} setMsg={setMsg} />
+              : tab === 'fxc' ? <EffectComposer draft={draft} setDraft={setDraft} setMsg={setMsg} />
               : tab === 'scene' ? <CompositePreview draft={draft} setDraft={setDraft} />
               : tab === 'frames' ? <AnimationEditor draft={draft} setDraft={setDraft} setMsg={setMsg} />
               : <PreviewArea row={draft} section={section} />}
           </div>
           <div className="flex gap-1.5 px-3 h-10 items-center border-t border-white/5 bg-surface-850">
-            {(['general','frames','vfx','spine','scene','preview'] as const).map(t => (
+            {(['general','frames','vfx','fxc','spine','scene','preview'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
                 className={`px-3 py-1.5 text-[11px] rounded-lg uppercase tracking-wide transition-colors ${
                   tab === t ? 'bg-brand-500/20 text-brand-200' : 'text-surface-200/50 hover:text-surface-100'}`}>
-                {t === 'general' ? 'General' : t === 'frames' ? 'Frame/Tach anh' : t === 'vfx' ? 'VFX/Effect' : t === 'spine' ? 'Spine' : t === 'scene' ? 'Canh/In-game' : 'Preview'}
+                {t === 'general' ? 'General' : t === 'frames' ? 'Frame/Tach anh' : t === 'vfx' ? 'VFX/Particle' : t === 'fxc' ? 'Effect atlas' : t === 'spine' ? 'Spine' : t === 'scene' ? 'Canh/In-game' : 'Preview'}
               </button>
             ))}
           </div>
