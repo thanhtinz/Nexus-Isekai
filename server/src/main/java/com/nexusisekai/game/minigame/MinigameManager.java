@@ -41,14 +41,14 @@ public class MinigameManager {
         try (Connection c = DatabaseManager.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(
                  "INSERT INTO minigame_rooms (game_type,room_name,host_char_id,min_bet,max_bet,currency,status) " +
-                 "VALUES (?,?,?,?,?,'waiting')", Statement.RETURN_GENERATED_KEYS)) {
+                 "VALUES (?,?,?,?,?,0,'waiting')", Statement.RETURN_GENERATED_KEYS)) {  // currency=0: CHỈ VÀNG
             ps.setString(1, gameType);
             ps.setString(2, host.getPlayer().getName() + "'s Room");
             ps.setLong(3, host.getPlayer().getCharId());
             ps.setInt(4, minBet); ps.setInt(5, maxBet);
             ps.executeUpdate();
             long roomId = ps.getGeneratedKeys().getLong(1);
-            GameRoom room = createGameRoom(roomId, gameType, minBet, maxBet, currency, host);
+            GameRoom room = createGameRoom(roomId, gameType, minBet, maxBet, 0, host); // ép VÀNG, không dùng kim cương
             rooms.put(roomId, room);
             log.info("[GAME] Room {} created: {} by {}", roomId, gameType, host.getPlayer().getName());
             return roomId;
@@ -321,7 +321,13 @@ public class MinigameManager {
         else if (room instanceof TienLenRoom) { if (action == 0) tienLenStart(roomId); else tienLenPlay(s, roomId, cards); }
     }
 
+    public static final String GAMBLING_WARNING =
+        "CANH BAO: Tro choi co tinh may rui, chi mang tinh giai tri, CHI dung VANG trong game " +
+        "(khong lien quan tien that/kim cuong). Choi co trach nhiem, khong qua da.";
+
     public void sendRoomList(GameSession session, String gameType) throws SQLException {
+        // Cảnh báo cờ bạc mỗi khi mở sảnh minigame
+        session.sendError(PacketOpcode.S2C_SYSTEM_MSG, GAMBLING_WARNING);
 
         List<Map<String,Object>> roomList = new ArrayList<>();
         try (Connection c = DatabaseManager.getInstance().getConnection();
@@ -378,27 +384,23 @@ public class MinigameManager {
         if (amount > maxBet) throw new IllegalStateException("Đặt cược tối đa: " + maxBet);
     }
 
+    // Minigame cá cược CHỈ dùng VÀNG (không dùng kim cương) — tránh quy đổi tiền nạp ra cờ bạc
     private void deductBet(GameSession session, int amount, int currency) {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
-            String sql = currency == 0
-                ? "UPDATE characters SET gold=gold-? WHERE id=? AND gold>=?"
-                : "UPDATE accounts SET diamond=diamond-? WHERE id=? AND diamond>=?";
-            PreparedStatement ps = c.prepareStatement(sql);
+            PreparedStatement ps = c.prepareStatement("UPDATE characters SET gold=gold-? WHERE id=? AND gold>=?");
             ps.setInt(1, amount);
-            ps.setLong(2, currency == 0 ? session.getPlayer().getCharId() : session.getAccountId());
+            ps.setLong(2, session.getPlayer().getCharId());
             ps.setInt(3, amount);
             int rows = ps.executeUpdate();
-            if (rows == 0) throw new RuntimeException("Không đủ tiền cược.");
+            if (rows == 0) throw new RuntimeException("Không đủ vàng để cược.");
         } catch (Exception e) { throw new RuntimeException(e); }
     }
 
     private void creditPlayer(long charId, int amount, int currency) {
+        // Minigame chỉ trả thưởng bằng VÀNG
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
-            if (currency == 0)
-                c.prepareStatement("UPDATE characters SET gold=gold+" + amount + " WHERE id=" + charId).executeUpdate();
-            else
-                c.prepareStatement("UPDATE accounts SET diamond=diamond+" + amount +
-                    " WHERE id=(SELECT account_id FROM characters WHERE id=" + charId + ")").executeUpdate();
+            PreparedStatement ps = c.prepareStatement("UPDATE characters SET gold=gold+? WHERE id=?");
+            ps.setInt(1, amount); ps.setLong(2, charId); ps.executeUpdate();
         } catch (Exception e) { log.error("creditPlayer: {}", e.getMessage()); }
     }
 

@@ -217,7 +217,6 @@ public class AdminApiServer {
         httpServer.createContext("/api/analytics-retention",ex-> handleAuth(ex, this::handleAnalyticsRetention));
         httpServer.createContext("/api/tutorial-steps",   ex -> handleAuth(ex, this::handleTutorialSteps));
         httpServer.createContext("/api/localization",     ex -> handleAuth(ex, this::handleLocalization));
-        httpServer.createContext("/api/audio-assets",     ex -> handleAuth(ex, this::handleAudioAssets));
         httpServer.createContext("/api/social-accounts",  ex -> handleAuth(ex, this::handleSocialAccounts));
         httpServer.createContext("/api/anticheat-log",    ex -> handleAuth(ex, this::handleAnticheatLog));
         httpServer.createContext("/api/device-bans",      ex -> handleAuth(ex, this::handleDeviceBans));
@@ -238,7 +237,6 @@ public class AdminApiServer {
         httpServer.createContext("/api/welfare-types",      ex -> handleAuth(ex, this::handleWelfareTypesCfg));
         httpServer.createContext("/api/treasure",       ex -> handleAuth(ex, this::handleTreasureCfg));
         httpServer.createContext("/api/lucky-wheels",   ex -> handleAuth(ex, this::handleLuckyWheelCfg));
-        httpServer.createContext("/api/minigame-config",ex -> handleAuth(ex, this::handleMinigameCfg));
         httpServer.createContext("/api/stickers",         ex -> handleAuth(ex, this::handleStickers));
         httpServer.createContext("/api/admin-accounts",   ex -> handleAuth(ex, this::handleAdminAccounts));
         httpServer.createContext("/api/portals",          ex -> handleAuth(ex, this::handlePortals));
@@ -819,7 +817,7 @@ public class AdminApiServer {
         crudConfig(ex, "pvp_season_rewards", "id", new String[]{"season_id","min_rank","max_rank","tier_name","reward_type","reward_id","reward_amount","exclusive_skin"});
     }
     private void handleMinigameCfg(HttpExchange ex) throws Exception {
-        crudConfig(ex, "minigame_config", "game_type", new String[]{"min_bet","max_bet","house_edge","config_json"});
+        crudConfig(ex, "minigame_config", "game_type", new String[]{"min_bet","max_bet","house_edge","config_json","is_active"});
     }
     private void handleChildShopCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "child_shop_items", "id", new String[]{"name","category","nanny","diamond_price","effect_json","is_active"});
@@ -880,9 +878,6 @@ public class AdminApiServer {
     }
     private void handleLuckyWheelCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "lucky_wheels", "id", new String[]{"name","description","icon_id","cost_amount","cost_currency","cost_item_id","segments_json","pity_count","is_enabled","sort_order"});
-    }
-    private void handleMinigameCfg(HttpExchange ex) throws Exception {
-        crudConfig(ex, "minigame_config", "game_type", new String[]{"min_bet","max_bet","house_edge","config_json","is_active"});
     }
 
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {

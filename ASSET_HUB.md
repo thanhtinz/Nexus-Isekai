@@ -127,3 +127,33 @@
 6. Spine + VFX + âm thanh gắn qua admin: monster/npc có `spine_key` (skeleton Spine) + `sfx_*`; skill có `vfx_key`/`vfx_hit_key` (Effects/) + `sfx_key`. Đặt Spine vào Sprites/Spine/, hiệu ứng skill vào Effects/Skill/, khai key trong admin.
 
 > Liên quan: CONTENT_REGISTRY.md (phân loại content) · ITEM_ID_CONVENTION.md · FARM_ASSETS.md
+
+## 6. ASSET CẦN LÀM CHO TÍNH NĂNG MỚI (cập nhật)
+
+### 6a. Phúc Lợi (Welfare)
+- Icon panel: `ui_welfare` (Sprites/UI/welfare/). Icon từng loại theo welfare_type: `welfare_<type>` (checkin, online, first_topup, daily_topup, cumulative_topup, monthly_card, growth_fund, battle_pass, giftcode, level_gift, power_gift, achievement_gift, newbie_gift, refund).
+- Badge trạng thái: chưa đạt / có thể nhận (chấm đỏ) / đã nhận / hết hạn.
+
+### 6b. Kho Báu (Treasure)
+- Icon rương theo treasure_chests.icon_id (Sprites/Icons/Treasure/). Hiệu ứng mở rương: Effects/Treasure/open_<rarity>.
+- Âm thanh: sound_events `treasure_open` (Audio/SFX/).
+
+### 6c. Vòng Quay May Mắn (Lucky Wheel)
+- Sprite vòng quay nền + kim: Sprites/UI/wheel/wheel_base, wheel_pointer. Icon từng ô theo segments_json.label.
+- Âm thanh quay/trúng: sound_events `wheel_spin`, `wheel_win`.
+
+### 6d. Minigame (CHỈ CƯỢC BẰNG VÀNG — có cảnh báo cờ bạc)
+- Bầu Cua: Sprites/Minigame/baucua/ (6 linh vật: bau,cua,ca,tom,ga,nai) + xúc xắc.
+- Tiến Lên: bộ bài 52 lá Sprites/Minigame/cards/ (rank*4+chat, 0=3 bích ... 51=2 cơ).
+- Đua Thú: 6 lane thú Sprites/Minigame/duathu/.
+- Ô Ăn Quan: bàn 12 ô + quân Sprites/Minigame/oanquan/.
+- Đá Gà: 2 gà + animation Sprites/Minigame/daga/.
+- Đố Vui: chỉ UI text.
+- Banner cảnh báo cờ bạc (responsible gaming) hiển thị khi mở sảnh minigame.
+
+### 6e. Spine/VFX/SFX (gắn admin)
+- monster/npc `spine_key` → Sprites/Spine/<key> (.skel/.atlas/.png) + SpineMarker render.
+- skill `vfx_key`/`vfx_hit_key` → Effects/Skill/<key> (prefab). `sfx_key` → audio_assets.
+- Nhạc map: maps.bg_music → audio_assets (bgm). Lời thoại: Audio/Voice/Class|Npc/.
+
+> Nguyên tắc: KEY trong admin = tên file/asset (không khoảng trắng). Team bỏ asset đúng folder + đặt tên khớp key là client OTA tự nạp.
