@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import VfxEditor from './VfxEditor';
+import SpineViewer from './SpineViewer';
 
 /* ──────────────────────────────────────────────────────────────
    NEXUS STUDIO — tool bien tap data DOC LAP (project rieng, build/deploy rieng)
@@ -63,7 +65,7 @@ export default function StudioApp() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Row | null>(null);
   const [draft, setDraft] = useState<Row>({});
-  const [tab, setTab] = useState<'general' | 'frames' | 'vfx' | 'preview'>('general');
+  const [tab, setTab] = useState<'general' | 'frames' | 'vfx' | 'spine' | 'preview'>('general');
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState('');
   const [keyVal, setKeyVal] = useState(localStorage.getItem('studio_key') || '');
@@ -158,14 +160,17 @@ export default function StudioApp() {
               ? <AssetLibrary setMsg={setMsg} />
               : section.key === 'map' && selected
               ? <MapBuilder map={draft} setMsg={setMsg} />
-              : tab === 'frames' ? <AnimationEditor draft={draft} setDraft={setDraft} setMsg={setMsg} /> : <PreviewArea row={draft} section={section} />}
+              : tab === 'spine' ? <SpineViewer setMsg={setMsg} />
+              : tab === 'vfx' ? <VfxEditor draft={draft} setDraft={setDraft} setMsg={setMsg} />
+              : tab === 'frames' ? <AnimationEditor draft={draft} setDraft={setDraft} setMsg={setMsg} />
+              : <PreviewArea row={draft} section={section} />}
           </div>
           <div className="flex gap-1.5 px-3 h-10 items-center border-t border-white/5 bg-surface-850">
-            {(['general','frames','vfx','preview'] as const).map(t => (
+            {(['general','frames','vfx','spine','preview'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
                 className={`px-3 py-1.5 text-[11px] rounded-lg uppercase tracking-wide transition-colors ${
                   tab === t ? 'bg-brand-500/20 text-brand-200' : 'text-surface-200/50 hover:text-surface-100'}`}>
-                {t === 'general' ? 'General' : t === 'frames' ? 'Frame/Tach anh' : t === 'vfx' ? 'VFX/Effect' : 'Preview'}
+                {t === 'general' ? 'General' : t === 'frames' ? 'Frame/Tach anh' : t === 'vfx' ? 'VFX/Effect' : t === 'spine' ? 'Spine' : 'Preview'}
               </button>
             ))}
           </div>
@@ -178,9 +183,7 @@ export default function StudioApp() {
             ? <div className="p-4 text-xs text-surface-200/50">Chon mot muc ben trai de sua.</div>
             : section.key === 'npc'
               ? <NpcEditor draft={draft} setDraft={setDraft} setMsg={setMsg} reload={() => loadList(section)} />
-            : tab === 'vfx'
-              ? <VfxTab draft={draft} setDraft={setDraft} setMsg={setMsg} busy={busy} setBusy={setBusy} />
-              : <GeneralTab draft={draft} setDraft={setDraft} section={section} setMsg={setMsg} busy={busy} setBusy={setBusy} />}
+            : <GeneralTab draft={draft} setDraft={setDraft} section={section} setMsg={setMsg} busy={busy} setBusy={setBusy} />}
         </aside>
       </div>
     </div>
