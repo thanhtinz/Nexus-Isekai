@@ -107,6 +107,7 @@ namespace NexusIsekai.Game
             {
                 obj.InstanceId = data.InstanceId;
                 obj.SetData(data);
+                FxManager.Instance?.ApplySpine(go, FxManager.Instance.GetMonsterSpine(data.MonsterId));
             }
             _monsters[data.InstanceId] = obj;
         }
@@ -114,10 +115,13 @@ namespace NexusIsekai.Game
         public void KillMonster(int instanceId)
         {
             if (!_monsters.TryGetValue(instanceId, out var obj)) return;
+            FxManager.Instance?.PlayMonsterSfx(obj.MonsterId, "death", obj.transform.position);
             obj.PlayDeathAnim();
             _monsters.Remove(instanceId);
             Destroy(obj.gameObject, 1.5f);
         }
+
+        public Vector3 GetPos(int instanceId) => _monsters.TryGetValue(instanceId, out var o) && o != null ? o.transform.position : Vector3.zero;
 
         public void UpdateHp(int instanceId, int hp)
         {
@@ -216,6 +220,7 @@ namespace NexusIsekai.Game
     public class MonsterObject : MonoBehaviour
     {
         public int InstanceId { get; set; }
+        public int MonsterId  { get; set; }
 
         [Header("UI")]
         public Slider    hpBar;
@@ -228,6 +233,7 @@ namespace NexusIsekai.Game
 
         public void SetData(MonsterData data)
         {
+            MonsterId = data.MonsterId;
             _hp    = data.Hp;
             _maxHp = data.MaxHp;
             if (nameText != null) nameText.text = data.IsBoss ? $"[BOSS] {data.Name}" : data.Name;

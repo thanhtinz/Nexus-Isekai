@@ -81,6 +81,7 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_PLAY_BGM, OnPlayBgm);
             d.Register(PacketOpcode.S2C_PLAY_SOUND, OnPlaySound);
             d.Register(PacketOpcode.S2C_SOUND_CONFIG, OnSoundConfig);
+            d.Register(PacketOpcode.S2C_FX_CONFIG, OnFxConfig);
             d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
             d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
             d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
@@ -407,6 +408,9 @@ namespace NexusIsekai.Game
             GameState.Instance.MyPlayer = p;
             Debug.Log($"[EnterGame] {p.Name} Lv{p.Level} {p.ClassDisplayName}");
             SceneManager.LoadScene("Game");
+            // Tải cấu hình âm thanh + FX (spine/vfx/sfx) do admin cấu hình
+            PacketBuilder.SendSoundConfig();
+            PacketBuilder.SendFxConfig();
             // Lần đầu vào game → thử phát video intro (server quyết định đã xem chưa)
             IntroVideoPlayer.Instance?.RequestAndPlay(() => Debug.Log("[Intro] done, vào game"));
         }
@@ -799,6 +803,14 @@ namespace NexusIsekai.Game
         }
 
         private void OnPlayBgm(PacketReader r) { AudioManager.Instance?.PlayBGM(r.ReadString()); }
+        private void OnFxConfig(PacketReader r) {
+            int ns = r.ReadShort();
+            for (int i=0;i<ns;i++){ int id=r.ReadInt(); FxManager.Instance?.RegisterSkill(id, r.ReadString(), r.ReadString(), r.ReadString()); }
+            int nm = r.ReadShort();
+            for (int i=0;i<nm;i++){ int id=r.ReadInt(); FxManager.Instance?.RegisterMonster(id, r.ReadString(), r.ReadString(), r.ReadString(), r.ReadString()); }
+            int np = r.ReadShort();
+            for (int i=0;i<np;i++){ int id=r.ReadInt(); FxManager.Instance?.RegisterNpc(id, r.ReadString(), r.ReadString()); }
+        }
         private void OnPlaySound(PacketReader r) { AudioManager.Instance?.PlaySFX(r.ReadString()); }
         private void OnSoundConfig(PacketReader r) {
             int n = r.ReadShort();
@@ -951,6 +963,8 @@ namespace NexusIsekai.Game
                 mon.Hp = monsterHp;
 
             CombatUI.Instance?.ShowSkillEffect(skillId, targetId, damage);
+            FxManager.Instance?.PlaySkillCast(skillId, GameState.Instance != null ? GameState.Instance.PlayerPos : Vector3.zero);
+            FxManager.Instance?.PlaySkillHit(skillId, MonsterManager.Instance != null ? MonsterManager.Instance.GetPos(targetId) : Vector3.zero);
             HUDUI.Instance?.UpdateMp(newMp, GameState.Instance.MyPlayer?.MaxMp ?? 0);
         }
 

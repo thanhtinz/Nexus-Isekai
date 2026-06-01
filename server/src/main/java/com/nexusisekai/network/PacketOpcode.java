@@ -659,4 +659,6 @@ public final class PacketOpcode {
     public static final short S2C_PLAY_BGM          = (short)0x4412; // [string bgmKey] — nhạc map
     public static final short S2C_PLAY_SOUND        = (short)0x4413; // [string audioKey] — one-shot push
     public static final short S2C_SOUND_CONFIG      = (short)0x4414; // [list event_key+audio_key+volume]
+    public static final short C2S_FX_CONFIG         = (short)0x4403; // client xin bảng spine/vfx/sfx của monster/npc/skill
+    public static final short S2C_FX_CONFIG         = (short)0x4415;
 }

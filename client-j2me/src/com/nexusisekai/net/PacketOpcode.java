@@ -336,4 +336,7 @@ public interface PacketOpcode {
     public static final short S2C_PLAY_BGM = (short)0x4412;
     public static final short S2C_PLAY_SOUND = (short)0x4413;
     public static final short S2C_SOUND_CONFIG = (short)0x4414;
+    // FX config
+    public static final short C2S_FX_CONFIG = (short)0x4403;
+    public static final short S2C_FX_CONFIG = (short)0x4415;
 }

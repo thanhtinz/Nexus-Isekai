@@ -581,6 +581,8 @@ namespace NexusIsekai.Network
         public const short S2C_PLAY_BGM         = 0x4412;
         public const short S2C_PLAY_SOUND       = 0x4413;
         public const short S2C_SOUND_CONFIG     = 0x4414;
+        public const short C2S_FX_CONFIG        = 0x4403;
+        public const short S2C_FX_CONFIG        = 0x4415;
 
     }
 }

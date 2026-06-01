@@ -540,6 +540,7 @@ namespace NexusIsekai.Network
         public static void SendClassIntroVoice(int classId) => SendVoiceRequest(1, classId);
         public static void SendNpcBark(int npcId) => SendVoiceRequest(2, npcId);
         public static void SendSoundConfig() => Send(new PacketBuilder(PacketOpcode.C2S_SOUND_CONFIG));
+        public static void SendFxConfig() => Send(new PacketBuilder(PacketOpcode.C2S_FX_CONFIG));
         public static void SendWedding(long targetCharId, int weddingMapId)
             => Send(new PacketBuilder(PacketOpcode.C2S_WEDDING)
                 .WriteLong(targetCharId).WriteInt(weddingMapId));

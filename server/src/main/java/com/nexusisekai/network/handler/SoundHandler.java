@@ -55,4 +55,31 @@ public class SoundHandler {
             s.send(b);
         }catch(Exception e){ /* không critical */ }
     }
+
+    /** Gửi bảng spine/vfx/sfx của monster/npc/skill — client tra theo id để render. */
+    public static void handleFxConfig(GameSession s, ByteBuf in){
+        try(Connection c=DatabaseManager.getInstance().getConnection()){
+            ByteBuf b=Unpooled.buffer(); b.writeShort(PacketOpcode.S2C_FX_CONFIG);
+            // skills: vfx_key, vfx_hit_key, sfx_key
+            List<Map<String,Object>> sk=SqlSafe.query(c,
+                "SELECT id,vfx_key,vfx_hit_key,sfx_key FROM skill_templates WHERE vfx_key IS NOT NULL OR vfx_hit_key IS NOT NULL OR sfx_key IS NOT NULL");
+            b.writeShort(sk.size());
+            for(var r:sk){ b.writeInt(((Number)r.get("id")).intValue());
+                writeStr(b,sOr(r,"vfx_key")); writeStr(b,sOr(r,"vfx_hit_key")); writeStr(b,sOr(r,"sfx_key")); }
+            // monsters: spine + sfx
+            List<Map<String,Object>> mon=SqlSafe.query(c,
+                "SELECT id,spine_key,sfx_attack,sfx_hurt,sfx_death FROM monsters WHERE spine_key IS NOT NULL OR sfx_attack IS NOT NULL OR sfx_hurt IS NOT NULL OR sfx_death IS NOT NULL");
+            b.writeShort(mon.size());
+            for(var r:mon){ b.writeInt(((Number)r.get("id")).intValue());
+                writeStr(b,sOr(r,"spine_key")); writeStr(b,sOr(r,"sfx_attack")); writeStr(b,sOr(r,"sfx_hurt")); writeStr(b,sOr(r,"sfx_death")); }
+            // npcs: spine + sfx
+            List<Map<String,Object>> npc=SqlSafe.query(c,
+                "SELECT id,spine_key,sfx_key FROM npcs WHERE spine_key IS NOT NULL OR sfx_key IS NOT NULL");
+            b.writeShort(npc.size());
+            for(var r:npc){ b.writeInt(((Number)r.get("id")).intValue());
+                writeStr(b,sOr(r,"spine_key")); writeStr(b,sOr(r,"sfx_key")); }
+            s.send(b);
+        }catch(Exception e){ /* không critical */ }
+    }
+    private static String sOr(Map<String,Object> r, String k){ Object v=r.get(k); return v==null?"":v.toString(); }
 }

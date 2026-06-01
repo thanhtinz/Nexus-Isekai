@@ -223,6 +223,7 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             // Âm thanh lời thoại (class intro không cần inGame, npc bark thì có — cho phép cả 2)
             case PacketOpcode.C2S_VOICE_REQUEST     -> VoiceHandler.handleRequest(this, toBuf(p));
             case PacketOpcode.C2S_SOUND_CONFIG      -> SoundHandler.handleConfig(this, toBuf(p));
+            case PacketOpcode.C2S_FX_CONFIG         -> SoundHandler.handleFxConfig(this, toBuf(p));
             case PacketOpcode.C2S_FARM_VISIT    -> { requireInGame(); FarmingHandler.handleFarmVisit(this, toBuf(p)); }
 
             // ── Housing ───────────────────────────────────────────────

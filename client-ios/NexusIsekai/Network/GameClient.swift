@@ -510,4 +510,7 @@ extension FixedWidthInteger {
     static let S2C_PLAY_BGM: Int16 = 0x4412
     static let S2C_PLAY_SOUND: Int16 = 0x4413
     static let S2C_SOUND_CONFIG: Int16 = 0x4414
+    // FX config
+    static let C2S_FX_CONFIG: Int16 = 0x4403
+    static let S2C_FX_CONFIG: Int16 = 0x4415
 }
