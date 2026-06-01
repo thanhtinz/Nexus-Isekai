@@ -14,6 +14,7 @@ import DownloadPage from '@/pages/DownloadPage'
 import NewsPage from '@/pages/NewsPage'
 import SupportPage from '@/pages/SupportPage'
 import AdminDashboard from '@/pages/AdminDashboard'
+import StudioApp from '@/pages/StudioApp'
 
 const withLayout = (el: React.ReactNode) => <Layout>{el}</Layout>
 
@@ -27,6 +28,7 @@ export function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/sys/internal/v2/dashboard" element={<AdminDashboard />} />
+            <Route path="/studio" element={<StudioApp />} />
 
             {/* Public pages (with layout) */}
             <Route path="/download" element={withLayout(<DownloadPage />)} />

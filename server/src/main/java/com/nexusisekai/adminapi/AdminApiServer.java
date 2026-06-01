@@ -260,6 +260,8 @@ public class AdminApiServer {
         httpServer.createContext("/api/audit-log",         ex -> handleAuth(ex, this::handleAuditLog));
         httpServer.createContext("/api/scheduled-tasks",   ex -> handleAuth(ex, this::handleScheduledTasks));
         httpServer.createContext("/api/ai/review",         ex -> handleAuth(ex, this::handleAIReview));
+        httpServer.createContext("/api/studio/ai",        ex -> handleAuth(ex, this::handleStudioAI));
+        httpServer.createContext("/api/studio/slice",     ex -> handleAuth(ex, this::handleStudioSlice));
         httpServer.createContext("/api/assets/upload",    ex -> handleAuth(ex, this::handleAssetUpload));
         httpServer.createContext("/api/assets",           ex -> handleAuth(ex, this::handleAssets));
         httpServer.createContext("/api/assets/bundles",   ex -> handleAuth(ex, this::handleAssetBundles));
@@ -3685,6 +3687,100 @@ public class AdminApiServer {
         } catch (Exception e) {
             log.error("[AI] Generation error: {}", e.getMessage());
             sendJson(ex, 500, Map.of("success", false, "message", "AI error: " + e.getMessage()));
+        }
+    }
+
+    // ─── GAME STUDIO (tool tách riêng, dùng data hệ thống) ───────
+    /** Gọi Claude API, trả text kết quả (tái dùng cho AI-assist Studio). */
+    private String callClaude(String systemPrompt, String userPrompt) throws Exception {
+        String apiKey = System.getenv("ANTHROPIC_API_KEY");
+        if (apiKey == null || apiKey.isEmpty()) apiKey = ServerConfig.getInstance().get("anthropic.api.key", "");
+        if (apiKey.isEmpty()) throw new IllegalStateException("ANTHROPIC_API_KEY chưa cấu hình");
+        com.fasterxml.jackson.databind.ObjectMapper m = new com.fasterxml.jackson.databind.ObjectMapper();
+        String body = m.writeValueAsString(Map.of(
+            "model", "claude-sonnet-4-20250514", "max_tokens", 1500,
+            "system", systemPrompt,
+            "messages", java.util.List.of(Map.of("role","user","content",userPrompt))));
+        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL("https://api.anthropic.com/v1/messages").openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("x-api-key", apiKey);
+        conn.setRequestProperty("anthropic-version", "2023-06-01");
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(body.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        int code = conn.getResponseCode();
+        String resp = new String((code==200?conn.getInputStream():conn.getErrorStream()).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        if (code != 200) throw new RuntimeException("AI API " + code + ": " + resp);
+        return m.readTree(resp).path("content").get(0).path("text").asText();
+    }
+
+    /** POST /api/studio/ai — AI-assist: {task, payload}. task: gen_description|suggest_stats|gen_vfx|describe_frames */
+    private void handleStudioAI(HttpExchange ex) throws Exception {
+        if (!"POST".equals(ex.getRequestMethod())) { sendJson(ex, 405, Map.of("error","Method Not Allowed")); return; }
+        Map<String,Object> b = parseBody(ex);
+        String task = str(b,"task"); String payload = str(b,"payload");
+        String sys, user;
+        switch (task) {
+            case "gen_description" -> {
+                sys = "Ban la biet doi viet mo ta ky nang game MMORPG tieng Viet, ngan gon hap dan (1-2 cau), khong dung emoji.";
+                user = "Viet mo ta cho ky nang dua tren thong tin sau:\n" + payload;
+            }
+            case "suggest_stats" -> {
+                sys = "Ban la chuyen gia can bang game. Tra ve JSON {\"base_damage\":..,\"cooldown_ms\":..,\"range\":..,\"mana_cost\":..} hop ly theo loai/level. Chi tra JSON, khong giai thich.";
+                user = "Goi y chi so can bang cho ky nang:\n" + payload;
+            }
+            case "gen_vfx" -> {
+                sys = "Ban tao cau hinh VFX dang JSON cho game 2D. Tra ve JSON {\"particles\":[{\"type\":..,\"color\":..,\"count\":..,\"lifetime\":..}],\"screen_shake\":..,\"flash\":..}. Chi tra JSON.";
+                user = "Tao cau hinh VFX cho hieu ung:\n" + payload;
+            }
+            case "describe_frames" -> {
+                sys = "Ban mo ta chuoi khung hinh hoat anh (frame sequence) cho mot dong tac game 2D, liet ke tung frame ngan gon.";
+                user = "Mo ta chuoi frame cho dong tac:\n" + payload;
+            }
+            default -> { sendJson(ex, 400, Map.of("error","task khong hop le")); return; }
+        }
+        try {
+            String result = callClaude(sys, user);
+            auditLog(ex, "studio_ai", "studio", task, "");
+            sendJson(ex, 200, Map.of("success", true, "task", task, "result", result));
+        } catch (Exception e) {
+            sendJson(ex, 500, Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    /** POST /api/studio/slice — tách sprite sheet: {image_base64} → cac frame [{x,y,w,h}] (gom vung khong trong suot). */
+    private void handleStudioSlice(HttpExchange ex) throws Exception {
+        if (!"POST".equals(ex.getRequestMethod())) { sendJson(ex, 405, Map.of("error","Method Not Allowed")); return; }
+        Map<String,Object> b = parseBody(ex);
+        String data = str(b,"image_base64");
+        int idx = data.indexOf(","); if (idx >= 0) data = data.substring(idx+1); // bỏ "data:image/png;base64,"
+        int minSize = b.containsKey("min_size") ? num(b,"min_size") : 4;
+        try {
+            byte[] bytes = java.util.Base64.getDecoder().decode(data);
+            java.awt.image.BufferedImage img = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(bytes));
+            if (img == null) { sendJson(ex, 400, Map.of("error","Khong doc duoc anh")); return; }
+            int W = img.getWidth(), H = img.getHeight();
+            boolean[][] solid = new boolean[H][W];
+            for (int y=0;y<H;y++) for (int x=0;x<W;x++) solid[y][x] = ((img.getRGB(x,y)>>>24) & 0xFF) > 16; // alpha>16
+            boolean[][] seen = new boolean[H][W];
+            java.util.List<Map<String,Object>> frames = new java.util.ArrayList<>();
+            int[] dx={1,-1,0,0,1,1,-1,-1}, dy={0,0,1,-1,1,-1,1,-1};
+            for (int y=0;y<H;y++) for (int x=0;x<W;x++) {
+                if (!solid[y][x] || seen[y][x]) continue;
+                int minX=x,maxX=x,minY=y,maxY=y;
+                java.util.ArrayDeque<int[]> q = new java.util.ArrayDeque<>(); q.add(new int[]{x,y}); seen[y][x]=true;
+                while(!q.isEmpty()){
+                    int[] p=q.poll(); minX=Math.min(minX,p[0]);maxX=Math.max(maxX,p[0]);minY=Math.min(minY,p[1]);maxY=Math.max(maxY,p[1]);
+                    for(int k=0;k<8;k++){ int nx=p[0]+dx[k],ny=p[1]+dy[k];
+                        if(nx>=0&&nx<W&&ny>=0&&ny<H&&solid[ny][nx]&&!seen[ny][nx]){ seen[ny][nx]=true; q.add(new int[]{nx,ny}); } }
+                }
+                int w=maxX-minX+1,h=maxY-minY+1;
+                if (w>=minSize && h>=minSize) frames.add(Map.of("x",minX,"y",minY,"w",w,"h",h));
+            }
+            frames.sort((a,c)->{ int ay=(int)a.get("y"),cy=(int)c.get("y"); if(Math.abs(ay-cy)>16) return ay-cy; return (int)a.get("x")-(int)c.get("x"); });
+            sendJson(ex, 200, Map.of("success", true, "width", W, "height", H, "count", frames.size(), "frames", frames));
+        } catch (Exception e) {
+            sendJson(ex, 500, Map.of("success", false, "message", "Loi tach anh: " + e.getMessage()));
         }
     }
 
