@@ -44,6 +44,12 @@ public class EventScheduler {
         // Chăm con: giảm nhu cầu dần, bảo mẫu tự chăm (mỗi 10 phút)
         scheduler.scheduleAtFixedRate(this::childCareTask, 10, 10, TimeUnit.MINUTES);
 
+        // World Boss: spawn theo chu kỳ + despawn khi hết giờ (mỗi 30s)
+        scheduler.scheduleAtFixedRate(this::worldBossTask, 20, 30, TimeUnit.SECONDS);
+
+        // Guild War: chuyển trạng thái scheduled→ongoing→ended + trao thưởng (mỗi 30s)
+        scheduler.scheduleAtFixedRate(this::guildWarTask, 25, 30, TimeUnit.SECONDS);
+
         log.info("[EVENT] Scheduler started.");
     }
 
@@ -63,6 +69,85 @@ public class EventScheduler {
                 "WHERE nanny_until IS NULL OR nanny_until <= NOW()");
         } catch (Exception e) {
             log.warn("childCareTask error: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * World Boss: tự spawn theo chu kỳ (spawn_interval_min) và despawn khi hết giờ (active_until).
+     * Khi spawn: reset HP, xoá bảng damage của lượt trước, thông báo toàn server.
+     */
+    private void worldBossTask() {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            // 1. Despawn boss đã hết giờ mà chưa bị giết (boss thoát, không ai nhận thưởng kết liễu)
+            com.nexusisekai.database.SqlSafe.update(c,
+                "UPDATE world_bosses SET is_alive=0 WHERE is_alive=1 AND active_until IS NOT NULL AND active_until < NOW()");
+
+            // 2. Spawn boss đủ điều kiện: chưa sống + (chưa spawn lần nào HOẶC đã qua chu kỳ)
+            java.util.List<java.util.Map<String,Object>> ready = com.nexusisekai.database.SqlSafe.query(c,
+                "SELECT id,name,map_id,hp,duration_min FROM world_bosses " +
+                "WHERE is_alive=0 AND (last_spawn_at IS NULL OR last_spawn_at <= DATE_SUB(NOW(), INTERVAL spawn_interval_min MINUTE))");
+            for (java.util.Map<String,Object> bo : ready) {
+                int id = ((Number) bo.get("id")).intValue();
+                int mapId = ((Number) bo.get("map_id")).intValue();
+                long hp = ((Number) bo.get("hp")).longValue();
+                int dur = ((Number) bo.get("duration_min")).intValue();
+                // đánh dấu sống + đặt HP + hạn giờ (atomic, tránh spawn trùng nếu 2 tick chạy gần nhau)
+                int spawned = com.nexusisekai.database.SqlSafe.update(c,
+                    "UPDATE world_bosses SET is_alive=1, current_hp=?, active_until=DATE_ADD(NOW(), INTERVAL ? MINUTE), last_spawn_at=NOW(), last_killer_name=NULL " +
+                    "WHERE id=? AND is_alive=0", hp, dur, id);
+                if (spawned == 0) continue;
+                // xoá damage lượt trước (spawn_seq=0 dùng làm lượt hiện tại)
+                com.nexusisekai.database.SqlSafe.update(c, "DELETE FROM world_boss_damage WHERE boss_id=?", id);
+                // thông báo toàn server
+                String name = (String) bo.get("name");
+                io.netty.buffer.ByteBuf buf = io.netty.buffer.Unpooled.buffer();
+                byte[] nb = name.getBytes(StandardCharsets.UTF_8);
+                buf.writeInt(id); buf.writeShort(nb.length); buf.writeBytes(nb);
+                byte[] arr = new byte[buf.readableBytes()]; buf.readBytes(arr);
+                world.getNetworkServer().broadcast(PacketOpcode.S2C_WORLDBOSS_SPAWN, arr);
+                log.info("[WORLDBOSS] Spawn '{}' (id={}) map={} duration={}min", name, id, mapId, dur);
+            }
+        } catch (Exception e) {
+            log.warn("worldBossTask error: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Guild War: scheduled→ongoing khi tới start_at; ongoing→ended khi tới end_at.
+     * Khi kết thúc: xác định guild thắng theo điểm, trao thưởng cho thành viên guild thắng.
+     */
+    private void guildWarTask() {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            // 1. scheduled → ongoing
+            com.nexusisekai.database.SqlSafe.update(c,
+                "UPDATE guild_wars SET status='ongoing' WHERE status='scheduled' AND start_at <= NOW()");
+
+            // 2. ongoing → ended: lấy các trận vừa hết giờ để xử lý thưởng
+            java.util.List<java.util.Map<String,Object>> finished = com.nexusisekai.database.SqlSafe.query(c,
+                "SELECT id,guild_a,guild_b,score_a,score_b FROM guild_wars WHERE status='ongoing' AND end_at <= NOW()");
+            for (java.util.Map<String,Object> w : finished) {
+                int id = ((Number) w.get("id")).intValue();
+                int ga = ((Number) w.get("guild_a")).intValue();
+                int gb = ((Number) w.get("guild_b")).intValue();
+                int sa = ((Number) w.get("score_a")).intValue();
+                int sb = ((Number) w.get("score_b")).intValue();
+                Integer winner = sa == sb ? null : (sa > sb ? ga : gb);
+                // chốt trạng thái (atomic), chỉ xử lý nếu còn 'ongoing'
+                int ended = com.nexusisekai.database.SqlSafe.update(c,
+                    "UPDATE guild_wars SET status='ended', winner_guild=? WHERE id=? AND status='ongoing'",
+                    winner, id);
+                if (ended == 0) continue;
+                if (winner != null) {
+                    // thưởng thành viên guild thắng (vàng + kim cương)
+                    com.nexusisekai.database.SqlSafe.update(c,
+                        "UPDATE characters SET gold=gold+200000, diamond=diamond+50 WHERE guild_id=?", winner);
+                    log.info("[GUILDWAR] War {} ket thuc — guild {} thang ({}-{})", id, winner, sa, sb);
+                } else {
+                    log.info("[GUILDWAR] War {} hoa ({}-{})", id, sa, sb);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("guildWarTask error: {}", e.getMessage());
         }
     }
 

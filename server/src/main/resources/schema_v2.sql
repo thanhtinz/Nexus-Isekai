@@ -3671,3 +3671,7 @@ INSERT IGNORE INTO vip_milestone_rewards (vip_level,reward_json) VALUES
  (6,'{"diamond":2000,"gold":2500000,"items":[[8001,1],[1001,1]]}'),
  (7,'{"diamond":4000,"gold":5000000,"items":[[8001,2],[1002,1]]}'),
  (8,'{"diamond":8000,"gold":10000000,"items":[[8001,3],[1003,1]]}');
+
+-- World boss: chu kỳ hồi sinh (phút) cho scheduler tự spawn
+ALTER TABLE world_bosses ADD COLUMN IF NOT EXISTS spawn_interval_min INT NOT NULL DEFAULT 180;
+ALTER TABLE world_bosses ADD COLUMN IF NOT EXISTS last_killer_name VARCHAR(32) DEFAULT NULL;
