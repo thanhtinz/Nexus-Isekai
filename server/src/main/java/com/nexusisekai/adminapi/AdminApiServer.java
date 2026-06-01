@@ -121,6 +121,10 @@ public class AdminApiServer {
         httpServer.createContext("/api/give-item",     ex -> handleAuth(ex, this::handleGiveItem));
         httpServer.createContext("/api/set-level",      ex -> handleAuth(ex, this::handleSetLevel));
         httpServer.createContext("/api/mute",           ex -> handleAuth(ex, this::handleMute));
+        httpServer.createContext("/api/save-data",      ex -> handleAuth(ex, this::handleSaveData));
+        httpServer.createContext("/api/kick-all",       ex -> handleAuth(ex, this::handleKickAll));
+        httpServer.createContext("/api/exp-rate",       ex -> handleAuth(ex, this::handleExpRate));
+        httpServer.createContext("/api/gc",             ex -> handleAuth(ex, this::handleGc));
         httpServer.createContext("/api/maps",       ex -> handleAuth(ex, this::handleMapsCfg));
         httpServer.createContext("/api/monsters",   ex -> handleAuth(ex, this::handleMonstersCfg));
         httpServer.createContext("/api/npcs",       ex -> handleAuth(ex, this::handleNpcsCfg));
@@ -315,7 +319,17 @@ public class AdminApiServer {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("status", "running");
         data.put("online", networkServer.getOnlineCount());
-        data.put("uptime_ms", System.currentTimeMillis());
+        // RAM / CPU / uptime thật (giám sát realtime)
+        Runtime rt = Runtime.getRuntime();
+        long used = rt.totalMemory() - rt.freeMemory();
+        data.put("ram_used_mb", used / 1048576);
+        data.put("ram_max_mb", rt.maxMemory() / 1048576);
+        data.put("ram_pct", (int)(used * 100 / Math.max(1, rt.maxMemory())));
+        var os = java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+        double load = os.getSystemLoadAverage();
+        data.put("cpu_load", load < 0 ? 0 : Math.round(load * 100.0) / 100.0);
+        data.put("cpu_cores", os.getAvailableProcessors());
+        data.put("uptime_ms", java.lang.management.ManagementFactory.getRuntimeMXBean().getUptime());
         data.put("maps", world.getMapCount());
         data.put("monsters", world.getMonsterTemplates().size());
         data.put("npcs", world.getNpcCount());
@@ -484,6 +498,70 @@ public class AdminApiServer {
         }
         auditLog(ex, "mute", "character", charName, minutes+"m");
         sendJson(ex, 200, Map.of("success", true, "charName", charName, "minutes", minutes));
+    }
+
+    // ─── ĐIỀU KHIỂN SERVER (giám sát + tối ưu) ───────────────────
+    /** Lưu toàn bộ player online xuống DB. */
+    private void handleSaveData(HttpExchange ex) throws Exception {
+        if (!"POST".equals(ex.getRequestMethod())) { sendJson(ex, 405, Map.of("error","Method Not Allowed")); return; }
+        int n = 0;
+        for (var s : networkServer.getAllSessions()) {
+            if (s.getPlayer() != null) { try { s.getPlayer().saveToDb(); n++; } catch (Exception ignored) {} }
+        }
+        auditLog(ex, "save_data", "server", "all", n+" players");
+        sendJson(ex, 200, Map.of("success", true, "saved", n));
+    }
+
+    /** Kick toàn bộ người chơi (lưu trước khi ngắt). */
+    private void handleKickAll(HttpExchange ex) throws Exception {
+        if (!"POST".equals(ex.getRequestMethod())) { sendJson(ex, 405, Map.of("error","Method Not Allowed")); return; }
+        int n = 0;
+        for (var s : networkServer.getAllSessions()) {
+            try { if (s.getPlayer() != null) s.getPlayer().saveToDb(); s.getChannel().close(); n++; } catch (Exception ignored) {}
+        }
+        auditLog(ex, "kick_all", "server", "all", n+" sessions");
+        sendJson(ex, 200, Map.of("success", true, "kicked", n));
+    }
+
+    /** Hệ số EXP/Gold/Drop toàn server. GET xem, POST đặt {exp,gold,drop}. */
+    private void handleExpRate(HttpExchange ex) throws Exception {
+        if ("GET".equals(ex.getRequestMethod())) {
+            sendJson(ex, 200, Map.of("exp", com.nexusisekai.game.server.GameRates.expRate,
+                "gold", com.nexusisekai.game.server.GameRates.goldRate,
+                "drop", com.nexusisekai.game.server.GameRates.dropRate));
+            return;
+        }
+        Map<String,Object> b = parseBody(ex);
+        if (b.containsKey("exp"))  com.nexusisekai.game.server.GameRates.expRate  = Double.parseDouble(str(b,"exp"));
+        if (b.containsKey("gold")) com.nexusisekai.game.server.GameRates.goldRate = Double.parseDouble(str(b,"gold"));
+        if (b.containsKey("drop")) com.nexusisekai.game.server.GameRates.dropRate = Double.parseDouble(str(b,"drop"));
+        // lưu hot_config để giữ qua restart
+        try (Connection c = DatabaseManager.getConnection()) {
+            for (String k : new String[]{"exp","gold","drop"}) {
+                if (!b.containsKey(k)) continue;
+                try (PreparedStatement ps = c.prepareStatement(
+                    "INSERT INTO hot_config (config_key,config_value,config_type,category) VALUES (?,?,'float','rate') "+
+                    "ON DUPLICATE KEY UPDATE config_value=VALUES(config_value)")) {
+                    ps.setString(1, "rate_"+k); ps.setString(2, str(b,k)); ps.executeUpdate();
+                }
+            }
+        }
+        auditLog(ex, "set_rate", "server", "rates", "exp="+com.nexusisekai.game.server.GameRates.expRate);
+        sendJson(ex, 200, Map.of("success", true, "exp", com.nexusisekai.game.server.GameRates.expRate,
+            "gold", com.nexusisekai.game.server.GameRates.goldRate, "drop", com.nexusisekai.game.server.GameRates.dropRate));
+    }
+
+    /** Giải phóng RAM (gọi GC). Trả lượng RAM giải phóng. */
+    private void handleGc(HttpExchange ex) throws Exception {
+        Runtime rt = Runtime.getRuntime();
+        long before = rt.totalMemory() - rt.freeMemory();
+        System.gc();
+        try { Thread.sleep(120); } catch (InterruptedException ignored) {}
+        long after = rt.totalMemory() - rt.freeMemory();
+        long freedKb = Math.max(0, (before - after)) / 1024;
+        auditLog(ex, "gc", "server", "jvm", freedKb+"KB freed");
+        sendJson(ex, 200, Map.of("success", true, "freed_kb", freedKb,
+            "used_mb", (after)/1048576, "max_mb", rt.maxMemory()/1048576));
     }
 
     private void handleMaps(HttpExchange ex) throws Exception {

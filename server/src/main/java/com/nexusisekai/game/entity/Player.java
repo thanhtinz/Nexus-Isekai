@@ -106,6 +106,7 @@ public class Player {
      * @return số level tăng được (0 nếu không lên)
      */
     public int gainExp(long amount) {
+        amount = com.nexusisekai.game.server.GameRates.applyExp(amount); // hệ số exp toàn server
         this.exp += amount;
         int levelsGained = 0;
         while (this.exp >= expToNextLevel && level < 999) {

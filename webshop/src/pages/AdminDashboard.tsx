@@ -597,19 +597,42 @@ export default function AdminDashboard() {
 
           {!loading && activePanel === 'status' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatCard label="Trang thai" value={statusData.online_count != null ? 'Online' : 'Checking...'} color="#4ecca3" />
-                <StatCard label="Online" value={String(statusData.online_count ?? '—')} />
-                <StatCard label="Tong acc" value={String(statusData.total_accounts ?? '—')} />
-                <StatCard label="Server" value={String(statusData.uptime ?? '—')} color="#f0c050" />
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <StatCard label="Online" value={String(statusData.online ?? statusData.online_count ?? '—')} color="#4ecca3" />
+                <StatCard label="RAM" value={statusData.ram_pct != null ? `${statusData.ram_pct}%` : '—'}
+                  color={(Number(statusData.ram_pct) || 0) > 80 ? '#e84545' : '#6c3ef3'} />
+                <StatCard label="CPU (load)" value={statusData.cpu_load != null ? String(statusData.cpu_load) : '—'} color="#4ecca3" />
+                <StatCard label="Uptime" value={statusData.uptime_ms != null
+                  ? `${Math.floor(Number(statusData.uptime_ms)/3600000)}h${Math.floor((Number(statusData.uptime_ms)%3600000)/60000)}m` : 'Offline'} color="#f0c050" />
+                <StatCard label="RAM dung" value={statusData.ram_used_mb != null ? `${statusData.ram_used_mb}/${statusData.ram_max_mb}MB` : '—'} />
               </div>
-              <div className="bg-[#12122a] border border-white/5 rounded-xl p-4">
-                <h3 className="text-sm font-medium text-white mb-2">Hanh dong nhanh</h3>
-                <div className="flex flex-wrap gap-2">
-                  <ActionButton onClick={() => { const msg = window.prompt('Nội dung broadcast:'); if (msg) api('/api/broadcast', 'POST', { message: msg }); }}>Broadcast</ActionButton>
-                  <ActionButton onClick={() => api('/api/maintenance', 'POST', { enabled: 'true' })} variant="danger">Bao Tri</ActionButton>
-                  <ActionButton onClick={() => loadPanel('ai')} variant="outline">AI Generate</ActionButton>
-                  <ActionButton onClick={() => loadPanel('announce')} variant="outline">Thong Bao</ActionButton>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-[#12122a] border border-white/5 rounded-xl p-4 space-y-2">
+                  <h3 className="text-sm font-medium text-white mb-1">Dieu khien Server</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <ActionButton variant="danger" onClick={() => api('/api/maintenance', 'POST', { enabled: 'true' })}>Bao Tri</ActionButton>
+                    <ActionButton variant="outline" onClick={async () => { const r = await api('/api/save-data', 'POST', {}); alert(`Da luu ${r?.saved ?? 0} nguoi choi`); }}>Luu Data</ActionButton>
+                    <ActionButton variant="danger" onClick={async () => { if (confirm('Kick TAT CA nguoi choi?')) { const r = await api('/api/kick-all', 'POST', {}); alert(`Da kick ${r?.kicked ?? 0}`); } }}>Kick All</ActionButton>
+                    <ActionButton variant="outline" onClick={async () => { const v = window.prompt('He so EXP toan server (vd 2 = x2):', '1'); if (v) { await api('/api/exp-rate', 'POST', { exp: v }); alert(`EXP rate = x${v}`); } }}>Doi EXP</ActionButton>
+                  </div>
+                </div>
+
+                <div className="bg-[#12122a] border border-white/5 rounded-xl p-4 space-y-2">
+                  <h3 className="text-sm font-medium text-white mb-1">Cong cu Quan tri</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <ActionButton onClick={() => loadPanel('quick')}>Thao Tac Nhanh</ActionButton>
+                    <ActionButton variant="outline" onClick={() => { const msg = window.prompt('Noi dung thong bao:'); if (msg) api('/api/broadcast', 'POST', { message: msg }); }}>Thong Bao</ActionButton>
+                    <ActionButton variant="outline" onClick={() => loadPanel('players')}>Nguoi Choi</ActionButton>
+                  </div>
+                </div>
+
+                <div className="bg-[#12122a] border border-white/5 rounded-xl p-4 space-y-2">
+                  <h3 className="text-sm font-medium text-white mb-1">Toi uu He thong</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <ActionButton variant="outline" onClick={async () => { const r = await api('/api/gc', 'POST', {}); alert(`Giai phong ${r?.freed_kb ?? 0}KB. Dang dung ${r?.used_mb ?? '?'}MB`); loadPanel('status'); }}>Giai phong RAM (GC)</ActionButton>
+                    <ActionButton variant="outline" onClick={() => loadPanel('status')}>Lam moi</ActionButton>
+                  </div>
                 </div>
               </div>
             </div>
