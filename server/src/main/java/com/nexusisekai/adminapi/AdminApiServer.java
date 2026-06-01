@@ -2371,7 +2371,15 @@ public class AdminApiServer {
     }
     private void handleAudioAssets(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
-            if (ex.getRequestMethod().equals("GET")) sendTableResult(ex, c.prepareStatement("SELECT * FROM audio_assets ORDER BY asset_type,asset_key"), "audio");
+            if (ex.getRequestMethod().equals("GET")) {
+                var params = parseQuery(ex.getRequestURI().getQuery());
+                String type = params.getOrDefault("type", "");
+                String cat  = params.getOrDefault("category", "");
+                String where = "WHERE 1=1";
+                if (!type.isEmpty()) where += " AND asset_type='" + type.replace("'","") + "'";
+                if (!cat.isEmpty())  where += " AND category='" + cat.replace("'","") + "'";
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM audio_assets " + where + " ORDER BY asset_type,category,asset_key"), "audio");
+            }
             else { var b = parseBody(ex);
                 c.prepareStatement("INSERT INTO audio_assets (asset_key,asset_type,file_path,description) VALUES ('"+safeStr(b,"asset_key")+"','"+safeStr(b,"asset_type")+"','"+safeStr(b,"file_path")+"','"+safeStr(b,"description")+"') ON DUPLICATE KEY UPDATE file_path=VALUES(file_path)").executeUpdate();
                 sendJson(ex,200,Map.of("success",true)); }

@@ -1409,8 +1409,8 @@ CREATE TABLE IF NOT EXISTS furniture_catalog (
 CREATE TABLE IF NOT EXISTS client_assets (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     asset_key       VARCHAR(256) NOT NULL UNIQUE,  -- VD: "Sprites/Items/item_001.png", "Config/skills.json"
-    asset_type      VARCHAR(32) NOT NULL,           -- image,config,audio,data,sprite_atlas,hud,icon,map_tile
-    category        VARCHAR(64) NOT NULL DEFAULT 'general', -- weapon,armor,accessory,consumable,material,farm_seed,farm_crop,farm_feed,farm_produce,farm_animal,farm_tool,gem,cosmetic,monster,npc,hud,ui,map,effect,audio,config
+    asset_type      VARCHAR(32) NOT NULL,           -- sprite,atlas,icon,bg,tileset,effect,particle,font,video,shader,config,data
+    category        VARCHAR(64) NOT NULL DEFAULT 'general', -- CONTENT: weapon,armor,accessory,consumable,material,farm_seed,farm_crop,farm_feed,farm_produce,farm_animal,farm_tool,gem,cosmetic,pet,mount,monster,npc,skill,title,furniture | SCENE: map_bg,map_tile,sky,parallax | SYSTEM: ui,hud,icon,button,frame,font,effect,particle,loading,logo | DATA: config,localization
     file_path       VARCHAR(512) NOT NULL,          -- đường dẫn thực trên server
     file_size       INT NOT NULL DEFAULT 0,         -- bytes
     hash_md5        VARCHAR(32) NOT NULL DEFAULT '', -- MD5 hash để client so sánh
@@ -1437,6 +1437,7 @@ CREATE TABLE IF NOT EXISTS asset_bundles (
     version         INT NOT NULL DEFAULT 1,
     total_size      BIGINT NOT NULL DEFAULT 0,      -- tổng kích thước
     asset_count     INT NOT NULL DEFAULT 0,
+    bundle_category VARCHAR(32) NOT NULL DEFAULT 'mixed', -- sprite,audio,ui,map,effect,font,mixed
     status          VARCHAR(16) NOT NULL DEFAULT 'draft', -- draft,published,archived
     published_at    DATETIME DEFAULT NULL,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -1506,6 +1507,7 @@ CREATE TABLE IF NOT EXISTS story_chapters (
     max_level       INT NOT NULL DEFAULT 99,
     prev_chapter_id INT DEFAULT NULL,
     next_chapter_id INT DEFAULT NULL,
+    bundle_category VARCHAR(32) NOT NULL DEFAULT 'mixed', -- sprite,audio,ui,map,effect,font,mixed
     status          VARCHAR(16) NOT NULL DEFAULT 'draft', -- draft,published,archived
     cutscene_data   TEXT,                           -- JSON: cấu hình cutscene
     ai_generated    TINYINT NOT NULL DEFAULT 0,     -- 1=được AI tạo
@@ -2297,6 +2299,7 @@ CREATE TABLE IF NOT EXISTS audio_assets (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     asset_key       VARCHAR(64) NOT NULL UNIQUE,     -- bgm_village, sfx_sword_hit, ui_button_click
     asset_type      VARCHAR(8) NOT NULL,             -- bgm, sfx, ambient, voice, ui
+    category        VARCHAR(32) NOT NULL DEFAULT 'general', -- BGM: scene_town,scene_field,scene_dungeon,scene_boss,scene_login,event | SFX: combat,skill,farm,ui_click,item,levelup | AMBIENT: nature,cave,rain | VOICE: npc,intro
     file_path       VARCHAR(256) NOT NULL,
     volume_default  FLOAT NOT NULL DEFAULT 1.0,
     is_loop         TINYINT NOT NULL DEFAULT 0,
@@ -3560,3 +3563,15 @@ UPDATE items SET category='farm_tool',    cat_no=id-6400 WHERE id BETWEEN 6400 A
 UPDATE items SET category='gem',          cat_no=id-7000 WHERE id BETWEEN 7000 AND 7999;
 UPDATE items SET category='cosmetic',     cat_no=id-8000 WHERE id BETWEEN 8000 AND 8999;
 UPDATE items SET category='quest',        cat_no=id-9000 WHERE id BETWEEN 9000 AND 9999;
+
+-- Phân loại audio hiện có theo ngữ cảnh
+UPDATE audio_assets SET category='scene_login'   WHERE asset_key='bgm_login';
+UPDATE audio_assets SET category='scene_town'    WHERE asset_key='bgm_village';
+UPDATE audio_assets SET category='scene_field'   WHERE asset_key='bgm_field';
+UPDATE audio_assets SET category='scene_dungeon' WHERE asset_key='bgm_dungeon';
+UPDATE audio_assets SET category='scene_boss'    WHERE asset_key IN ('bgm_boss','bgm_pvp');
+UPDATE audio_assets SET category='combat'  WHERE asset_key IN ('sfx_hit','sfx_crit','sfx_die');
+UPDATE audio_assets SET category='item'    WHERE asset_key IN ('sfx_loot','sfx_equip','sfx_enhance_ok','sfx_enhance_fail','sfx_gacha');
+UPDATE audio_assets SET category='levelup' WHERE asset_key='sfx_levelup';
+UPDATE audio_assets SET category='ui_click' WHERE asset_type='ui';
+UPDATE audio_assets SET category='nature'  WHERE asset_type='ambient';
