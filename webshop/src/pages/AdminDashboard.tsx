@@ -197,9 +197,6 @@ const PANELS: PanelConfig[] = [
   { key: 'analytics-live',label: 'DAU / Retention', group: 'Nguoi Choi', endpoint: '/api/analytics-live',     dataKey: 'dau_14d' },
 
   // Noi dung (cot truyen, item, NPC, ky nang, audio)
-  { key: 'story',        label: 'Cot Truyen',      group: 'Noi Dung',   endpoint: '/api/story',             dataKey: 'chapters' },
-  { key: 'quests',       label: 'Nhiem Vu',        group: 'Noi Dung',   endpoint: '/api/quests',            dataKey: 'quests' },
-  { key: 'dialogs',      label: 'NPC Dialog',      group: 'Noi Dung',   endpoint: '/api/dialogs',           dataKey: 'dialogs' },
   { key: 'registry',     label: 'Kho Tong',        group: 'Noi Dung',   endpoint: '/api/registry',          dataKey: 'items' },
   { key: 'items',        label: 'Items',           group: 'Noi Dung',   endpoint: '/api/items',             dataKey: 'items' },
   { key: 'class_change', label: 'Chuyen Lop',      group: 'Noi Dung',   endpoint: '/api/class-change',      dataKey: 'rows', editable: true, pk: 'id' },
@@ -207,7 +204,6 @@ const PANELS: PanelConfig[] = [
   { key: 'voice_lines',  label: 'Loi Thoai (Voice)',group: 'Noi Dung',  endpoint: '/api/voice-lines',       dataKey: 'rows', editable: true, pk: 'id' },
 
   // Kinh te (shop, nap, giftcode, su menh)
-  { key: 'shop',         label: 'Shop NPC',        group: 'Kinh Te',    endpoint: '/api/shops',             dataKey: 'shops' },
   { key: 'webshop',      label: 'Webshop',         group: 'Kinh Te',    endpoint: '/api/webshop',           dataKey: 'products' },
   { key: 'auction',      label: 'Dau Gia',         group: 'Kinh Te',    endpoint: '/api/auction',           dataKey: 'listings' },
   { key: 'trades',       label: 'Giao Dich',       group: 'Kinh Te',    endpoint: '/api/trade/history',     dataKey: 'trades' },

@@ -749,15 +749,7 @@ public class AdminApiServer {
     }
 
     private void handleShops(HttpExchange ex) throws Exception {
-        if ("GET".equals(ex.getRequestMethod())) {
-            List<Map<String,Object>> list = new ArrayList<>();
-            try (Connection conn = DatabaseManager.getConnection();
-                 ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM shops")) {
-                while (rs.next()) list.add(rsToMap(rs, "id","name","currency","is_active"));
-            }
-            sendJson(ex, 200, Map.of("shops", list));
-        }
-        // POST/DELETE tương tự pattern trên...
+        crudConfig(ex, "shops", "id", new String[]{"name","currency","is_active"});
     }
 
     private void handleEvents(HttpExchange ex) throws Exception {
@@ -792,14 +784,7 @@ public class AdminApiServer {
     }
 
     private void handleQuests(HttpExchange ex) throws Exception {
-        if ("GET".equals(ex.getRequestMethod())) {
-            List<Map<String,Object>> list = new ArrayList<>();
-            try (Connection conn = DatabaseManager.getConnection();
-                 ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM quests")) {
-                while (rs.next()) list.add(rsToMap(rs, "id","name","description","class_req","min_level","chapter","quest_type","is_active"));
-            }
-            sendJson(ex, 200, Map.of("quests", list));
-        }
+        crudConfig(ex, "quests", "id", new String[]{"name","description","class_req","min_level","chapter","quest_type","objectives","rewards_json","next_quest_id","is_active"});
     }
 
     private void handleAccounts(HttpExchange ex) throws Exception {
@@ -2103,22 +2088,33 @@ public class AdminApiServer {
             var params = parseQuery(ex.getRequestURI().getQuery());
             int npcId = Integer.parseInt(params.getOrDefault("npc_id", "0"));
             if (ex.getRequestMethod().equals("GET")) {
+                String sel = "SELECT id,npc_id,dialog_key,text,speaker,next_dialog_id,options,action AS dialog_action,sort_order FROM npc_dialogs";
                 PreparedStatement ps = npcId > 0
-                    ? c.prepareStatement("SELECT * FROM npc_dialogs WHERE npc_id=" + npcId + " ORDER BY sort_order")
-                    : c.prepareStatement("SELECT * FROM npc_dialogs ORDER BY npc_id, sort_order LIMIT 200");
+                    ? c.prepareStatement(sel + " WHERE npc_id=" + npcId + " ORDER BY sort_order")
+                    : c.prepareStatement(sel + " ORDER BY npc_id, sort_order LIMIT 500");
                 sendTableResult(ex, ps, "dialogs");
             } else {
                 var body = parseBody(ex);
-                if ("create".equals(str(body,"action"))) {
+                String act = str(body,"action");
+                if ("upsert".equals(act)) act = num(body,"id") > 0 ? "update" : "create";
+                if ("create".equals(act)) {
                     PreparedStatement ps = c.prepareStatement(
                         "INSERT INTO npc_dialogs (npc_id,dialog_key,text,speaker,next_dialog_id,options,action,sort_order) " +
                         "VALUES (?,?,?,?,?,?,?,?)");
                     ps.setInt(1, num(body,"npc_id")); ps.setString(2, str(body,"dialog_key"));
                     ps.setString(3, str(body,"text")); ps.setString(4, str(body,"speaker"));
                     ps.setInt(5, num(body,"next_dialog_id")); ps.setString(6, str(body,"options"));
-                    ps.setString(7, str(body,"action_json")); ps.setInt(8, num(body,"sort_order"));
+                    ps.setString(7, str(body,"dialog_action")); ps.setInt(8, num(body,"sort_order"));
                     ps.executeUpdate();
-                } else if ("delete".equals(str(body,"action"))) {
+                } else if ("update".equals(act)) {
+                    PreparedStatement ps = c.prepareStatement(
+                        "UPDATE npc_dialogs SET npc_id=?,dialog_key=?,text=?,speaker=?,next_dialog_id=?,options=?,action=?,sort_order=? WHERE id=?");
+                    ps.setInt(1, num(body,"npc_id")); ps.setString(2, str(body,"dialog_key"));
+                    ps.setString(3, str(body,"text")); ps.setString(4, str(body,"speaker"));
+                    ps.setInt(5, num(body,"next_dialog_id")); ps.setString(6, str(body,"options"));
+                    ps.setString(7, str(body,"dialog_action")); ps.setInt(8, num(body,"sort_order"));
+                    ps.setInt(9, num(body,"id")); ps.executeUpdate();
+                } else if ("delete".equals(act)) {
                     c.prepareStatement("DELETE FROM npc_dialogs WHERE id=" + num(body,"id")).executeUpdate();
                 }
                 sendJson(ex,200,Map.of("success",true));
@@ -3588,6 +3584,7 @@ public class AdminApiServer {
             } else {
                 var body = parseBody(ex);
                 String action = str(body, "action");
+                if ("upsert".equals(action)) action = num(body,"id") > 0 ? "update" : "create";
                 switch (action) {
                     case "create" -> {
                         PreparedStatement ps = c.prepareStatement(
