@@ -7,7 +7,9 @@ Ket noi toi server game qua API (cau hinh `VITE_API_BASE`), dung dung data he th
 - Module: Skill / Mob-Boss / Effect / Map / Npc / Resource.
 - Thu vien + editor thuoc tinh (schema-driven: tu render field theo data tra ve).
 - AI-assist: tao mo ta, goi y chi so can bang, tao cau hinh VFX (JSON).
-- Tach anh: upload sprite sheet → tu nhan dien tung khung hinh (frame).
+- Tach anh + LAM HOAT ANH: upload sprite sheet → tu nhan dien frame → ghep thanh
+  hoat anh (dai frame doi thu tu/xoa) → preview Play/Pause/Delay/Zoom/Loop →
+  xuat JSON (animation_json/frames_json/config_json) vao data.
 - Save → ghi thang vao DB qua API CRUD san co.
 
 ## Chay
