@@ -190,7 +190,7 @@ const PANELS: PanelConfig[] = [
   { key: 'mail',         label: 'Thu',             group: 'Nguoi Choi', endpoint: '/api/mail',              dataKey: 'mails' },
   { key: 'reports',      label: 'Bao Cao',         group: 'Nguoi Choi', endpoint: '/api/reports',           dataKey: 'reports' },
 
-  // Noi dung
+  // Noi dung (cot truyen, item, NPC, ky nang, audio)
   { key: 'story',        label: 'Cot Truyen',      group: 'Noi Dung',   endpoint: '/api/story',             dataKey: 'chapters' },
   { key: 'quests',       label: 'Nhiem Vu',        group: 'Noi Dung',   endpoint: '/api/quests',            dataKey: 'quests' },
   { key: 'dialogs',      label: 'NPC Dialog',      group: 'Noi Dung',   endpoint: '/api/dialogs',           dataKey: 'dialogs' },
@@ -200,12 +200,13 @@ const PANELS: PanelConfig[] = [
   { key: 'npcs',         label: 'NPC',             group: 'Noi Dung',   endpoint: '/api/npcs',              dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'skills',       label: 'Ky Nang (VFX)',   group: 'Noi Dung',   endpoint: '/api/skills',            dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'maps',         label: 'Ban Do (Nhac)',   group: 'Noi Dung',   endpoint: '/api/maps',              dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'class_change', label: 'Chuyen Lop',      group: 'Noi Dung',   endpoint: '/api/class-change',      dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'child_shop',   label: 'Shop Tre Em',     group: 'Noi Dung',   endpoint: '/api/child-shop',        dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'voice_lines',  label: 'Loi Thoai (Voice)',group: 'Noi Dung',  endpoint: '/api/voice-lines',       dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'sound_events', label: 'Am Thanh (Sound)',  group: 'Noi Dung',  endpoint: '/api/sound-events',      dataKey: 'rows', editable: true, pk: 'event_key' },
+  { key: 'audio_assets', label: 'Kho Audio',         group: 'Noi Dung',  endpoint: '/api/audio-assets',      dataKey: 'rows', editable: true, pk: 'id' },
 
-  // AI
-  { key: 'ai',           label: 'AI Content',      group: 'AI & Review',endpoint: '/api/story',             dataKey: 'chapters' },
-  { key: 'ai_log',       label: 'AI Log',          group: 'AI & Review',endpoint: '/api/logs?type=ai',      dataKey: 'logs' },
-
-  // Kinh te
+  // Kinh te (shop, nap, giftcode, su menh)
   { key: 'shop',         label: 'Shop NPC',        group: 'Kinh Te',    endpoint: '/api/shops',             dataKey: 'shops' },
   { key: 'webshop',      label: 'Webshop',         group: 'Kinh Te',    endpoint: '/api/webshop',           dataKey: 'products' },
   { key: 'auction',      label: 'Dau Gia',         group: 'Kinh Te',    endpoint: '/api/auction',           dataKey: 'listings' },
@@ -214,8 +215,11 @@ const PANELS: PanelConfig[] = [
   { key: 'pass',         label: 'So Su Menh',      group: 'Kinh Te',    endpoint: '/api/pass/seasons',      dataKey: 'seasons' },
   { key: 'enhance',      label: 'Cuong Hoa',       group: 'Kinh Te',    endpoint: '/api/enhancement-config',dataKey: 'config' },
   { key: 'eventcur',     label: 'Tien Te SK',      group: 'Kinh Te',    endpoint: '/api/event-currency',    dataKey: 'currencies' },
+  { key: 'first_topup',  label: 'Thuong Nap Dau',  group: 'Kinh Te',    endpoint: '/api/first-topup',       dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'gift_rewards', label: 'Thuong Giftcode', group: 'Kinh Te',    endpoint: '/api/giftcode-rewards',  dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'webshop_ct',   label: 'Webshop Noi Dung',group: 'Kinh Te',    endpoint: '/api/webshop-contents',  dataKey: 'rows', editable: true, pk: 'id' },
 
-  // Xa hoi
+  // Xa hoi (guild, PvP, danh hieu, phe, pet)
   { key: 'guilds',       label: 'Guild',           group: 'Xa Hoi',     endpoint: '/api/guilds',            dataKey: 'guilds' },
   { key: 'party',        label: 'Nhom',            group: 'Xa Hoi',     endpoint: '/api/party/active',      dataKey: 'parties' },
   { key: 'pvp',          label: 'PvP',             group: 'Xa Hoi',     endpoint: '/api/pvp/history',       dataKey: 'matches' },
@@ -223,22 +227,12 @@ const PANELS: PanelConfig[] = [
   { key: 'chat',         label: 'Chat',            group: 'Xa Hoi',     endpoint: '/api/chat/history',      dataKey: 'messages' },
   { key: 'titles',       label: 'Danh Hieu',       group: 'Xa Hoi',     endpoint: '/api/titles',            dataKey: 'titles' },
   { key: 'pets',         label: 'Pet & Mount',     group: 'Xa Hoi',     endpoint: '/api/pets',              dataKey: 'pets' },
+  { key: 'cosmetics',    label: 'Cosmetic',        group: 'Xa Hoi',     endpoint: '/api/cosmetics',         dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'factions',     label: 'Phe',             group: 'Xa Hoi',     endpoint: '/api/factions',          dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'faction_tiers',label: 'Moc Danh Vong',   group: 'Xa Hoi',     endpoint: '/api/faction-tiers',     dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'pvp_rewards',  label: 'Thuong Mua PvP',  group: 'Xa Hoi',     endpoint: '/api/pvp-season-rewards',dataKey: 'rows', editable: true, pk: 'id' },
 
-  // He thong
-  { key: 'announce',     label: 'Thong Bao',       group: 'He Thong',   endpoint: '/api/announcements',     dataKey: 'announcements' },
-  { key: 'assets',       label: 'Assets OTA',      group: 'He Thong',   endpoint: '/api/assets',            dataKey: 'assets' },
-  { key: 'versions',     label: 'Phien Ban',       group: 'He Thong',   endpoint: '/api/client-versions',   dataKey: 'versions' },
-  { key: 'hotconfig',    label: 'Hot Config',      group: 'He Thong',   endpoint: '/api/hot-config',        dataKey: 'configs' },
-  { key: 'ratelimit',    label: 'Rate Limit',      group: 'He Thong',   endpoint: '/api/rate-limit',        dataKey: 'limits' },
-  { key: 'dungeon',      label: 'Dungeon',         group: 'He Thong',   endpoint: '/api/dungeon',           dataKey: 'dungeons' },
-  { key: 'farming',      label: 'Nong Trai',       group: 'He Thong',   endpoint: '/api/farming/seeds',     dataKey: 'seeds' },
-  { key: 'housing',      label: 'Nha O',           group: 'He Thong',   endpoint: '/api/housing/catalog',   dataKey: 'furniture' },
-  { key: 'minigame',     label: 'Minigame',        group: 'He Thong',   endpoint: '/api/minigame/config',   dataKey: 'config' },
-  { key: 'schedule',     label: 'Lich Hen',        group: 'He Thong',   endpoint: '/api/scheduled-tasks',   dataKey: 'tasks' },
-  { key: 'audit',        label: 'Audit Log',       group: 'He Thong',   endpoint: '/api/audit-log',         dataKey: 'logs' },
-  { key: 'servers',      label: 'Servers',         group: 'He Thong',   endpoint: '/api/servers',           dataKey: 'servers' },
-
-  // Tinh nang moi (endgame) — crudConfig tra ve dataKey 'rows'
+  // Tinh nang (endgame, hoat dong, phuc loi, minigame)
   { key: 'afk',          label: 'AFK / The Treo',  group: 'Tinh Nang',  endpoint: '/api/afk-cards',         dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'vip_levels',   label: 'Moc VIP',         group: 'Tinh Nang',  endpoint: '/api/vip-levels',        dataKey: 'rows', editable: true, pk: 'vip_level' },
   { key: 'vip_rewards',  label: 'Thuong VIP',      group: 'Tinh Nang',  endpoint: '/api/vip-milestones',    dataKey: 'rows', editable: true, pk: 'vip_level' },
@@ -258,19 +252,23 @@ const PANELS: PanelConfig[] = [
   { key: 'lucky_wheels', label: 'Vong Quay',       group: 'Tinh Nang',  endpoint: '/api/lucky-wheels',      dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'minigame_cfg', label: 'Minigame - Cau Hinh',group: 'Tinh Nang',endpoint: '/api/minigame-config',  dataKey: 'rows', editable: true, pk: 'game_type' },
 
-  // Bo sung vao nhom san
-  { key: 'cosmetics',    label: 'Cosmetic',        group: 'Xa Hoi',     endpoint: '/api/cosmetics',         dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'factions',     label: 'Phe',             group: 'Xa Hoi',     endpoint: '/api/factions',          dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'faction_tiers',label: 'Moc Danh Vong',   group: 'Xa Hoi',     endpoint: '/api/faction-tiers',     dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'pvp_rewards',  label: 'Thuong Mua PvP',  group: 'Xa Hoi',     endpoint: '/api/pvp-season-rewards',dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'class_change', label: 'Chuyen Lop',      group: 'Noi Dung',   endpoint: '/api/class-change',      dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'child_shop',   label: 'Shop Tre Em',     group: 'Noi Dung',   endpoint: '/api/child-shop',        dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'voice_lines',  label: 'Loi Thoai (Voice)',group: 'Noi Dung',  endpoint: '/api/voice-lines',       dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'sound_events', label: 'Am Thanh (Sound)',  group: 'Noi Dung',  endpoint: '/api/sound-events',      dataKey: 'rows', editable: true, pk: 'event_key' },
-  { key: 'audio_assets', label: 'Kho Audio',         group: 'Noi Dung',  endpoint: '/api/audio-assets',      dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'first_topup',  label: 'Thuong Nap Dau',  group: 'Kinh Te',    endpoint: '/api/first-topup',       dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'gift_rewards', label: 'Thuong Giftcode', group: 'Kinh Te',    endpoint: '/api/giftcode-rewards',  dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'webshop_ct',   label: 'Webshop Noi Dung',group: 'Kinh Te',    endpoint: '/api/webshop-contents',  dataKey: 'rows', editable: true, pk: 'id' },
+  // He thong (van hanh, OTA, server)
+  { key: 'announce',     label: 'Thong Bao',       group: 'He Thong',   endpoint: '/api/announcements',     dataKey: 'announcements' },
+  { key: 'assets',       label: 'Assets OTA',      group: 'He Thong',   endpoint: '/api/assets',            dataKey: 'assets' },
+  { key: 'versions',     label: 'Phien Ban',       group: 'He Thong',   endpoint: '/api/client-versions',   dataKey: 'versions' },
+  { key: 'hotconfig',    label: 'Hot Config',      group: 'He Thong',   endpoint: '/api/hot-config',        dataKey: 'configs' },
+  { key: 'ratelimit',    label: 'Rate Limit',      group: 'He Thong',   endpoint: '/api/rate-limit',        dataKey: 'limits' },
+  { key: 'dungeon',      label: 'Dungeon',         group: 'He Thong',   endpoint: '/api/dungeon',           dataKey: 'dungeons' },
+  { key: 'farming',      label: 'Nong Trai',       group: 'He Thong',   endpoint: '/api/farming/seeds',     dataKey: 'seeds' },
+  { key: 'housing',      label: 'Nha O',           group: 'He Thong',   endpoint: '/api/housing/catalog',   dataKey: 'furniture' },
+  { key: 'minigame',     label: 'Minigame',        group: 'He Thong',   endpoint: '/api/minigame/config',   dataKey: 'config' },
+  { key: 'schedule',     label: 'Lich Hen',        group: 'He Thong',   endpoint: '/api/scheduled-tasks',   dataKey: 'tasks' },
+  { key: 'audit',        label: 'Audit Log',       group: 'He Thong',   endpoint: '/api/audit-log',         dataKey: 'logs' },
+  { key: 'servers',      label: 'Servers',         group: 'He Thong',   endpoint: '/api/servers',           dataKey: 'servers' },
+
+  // AI
+  { key: 'ai',           label: 'AI Content',      group: 'AI & Review',endpoint: '/api/story',             dataKey: 'chapters' },
+  { key: 'ai_log',       label: 'AI Log',          group: 'AI & Review',endpoint: '/api/logs?type=ai',      dataKey: 'logs' },
 ];
 
 //  AI Generate Panel 
@@ -417,7 +415,9 @@ export default function AdminDashboard() {
 
   //  Groups 
 
-  const groups = [...new Set(PANELS.map(p => p.group))];
+  const GROUP_ORDER = ['Tong Quan','Nguoi Choi','Noi Dung','Kinh Te','Xa Hoi','Tinh Nang','He Thong','AI & Review'];
+  const groups = [...new Set(PANELS.map(p => p.group))]
+    .sort((a, b) => GROUP_ORDER.indexOf(a) - GROUP_ORDER.indexOf(b));
   const currentPanel = PANELS.find(p => p.key === activePanel);
 
   return (
