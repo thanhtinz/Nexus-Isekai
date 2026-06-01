@@ -1,17 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /* ──────────────────────────────────────────────────────────────
-   GAME STUDIO — tool tách riêng (không thuộc admin), dùng data hệ thống.
-   Trình biên tập trực quan: chọn module (Skill/Mob/Effect/Map/Resource) →
-   thư viện → sửa thuộc tính (schema-driven) → AI-assist + tách ảnh + xem trước.
-   Route: /studio
+   NEXUS STUDIO — tool bien tap data DOC LAP (project rieng, build/deploy rieng).
+   Khong thuoc admin. Ket noi toi server game qua VITE_API_BASE + key rieng.
+   Module: Skill / Mob / Effect / Map / Npc / Resource. AI-assist + tach anh.
    ────────────────────────────────────────────────────────────── */
 
-const API = (import.meta as any).env?.VITE_ADMIN_API || '';
+const API_BASE = (import.meta as any).env?.VITE_API_BASE || '';
 
 async function api(path: string, method = 'GET', body?: any) {
-  const key = localStorage.getItem('admin_key') || '';
-  const res = await fetch(API + path, {
+  const key = localStorage.getItem('studio_key') || '';
+  const res = await fetch(API_BASE + path, {
     method,
     headers: { 'Content-Type': 'application/json', 'X-Admin-Key': key },
     body: body ? JSON.stringify(body) : undefined,
@@ -21,12 +20,12 @@ async function api(path: string, method = 'GET', body?: any) {
 
 type Section = { key: string; label: string; endpoint: string; dataKey: string; pk: string; nameField: string };
 const SECTIONS: Section[] = [
-  { key: 'skill',    label: 'SKILL',     endpoint: '/api/skills',        dataKey: 'rows', pk: 'id',         nameField: 'name' },
-  { key: 'mob',      label: 'MOB / BOSS',endpoint: '/api/monsters',      dataKey: 'rows', pk: 'id',         nameField: 'name' },
-  { key: 'effect',   label: 'EFFECT',    endpoint: '/api/sound-events',  dataKey: 'rows', pk: 'event_key',  nameField: 'event_key' },
-  { key: 'map',      label: 'MAP',       endpoint: '/api/maps',          dataKey: 'rows', pk: 'id',         nameField: 'name' },
-  { key: 'npc',      label: 'NPC',       endpoint: '/api/npcs',          dataKey: 'rows', pk: 'id',         nameField: 'name' },
-  { key: 'resource', label: 'RESOURCE',  endpoint: '/api/audio-assets',  dataKey: 'rows', pk: 'id',         nameField: 'asset_key' },
+  { key: 'skill',    label: 'SKILL',     endpoint: '/api/skills',        dataKey: 'rows', pk: 'id',        nameField: 'name' },
+  { key: 'mob',      label: 'MOB / BOSS',endpoint: '/api/monsters',      dataKey: 'rows', pk: 'id',        nameField: 'name' },
+  { key: 'effect',   label: 'EFFECT',    endpoint: '/api/sound-events',  dataKey: 'rows', pk: 'event_key', nameField: 'event_key' },
+  { key: 'map',      label: 'MAP',       endpoint: '/api/maps',          dataKey: 'rows', pk: 'id',        nameField: 'name' },
+  { key: 'npc',      label: 'NPC',       endpoint: '/api/npcs',          dataKey: 'rows', pk: 'id',        nameField: 'name' },
+  { key: 'resource', label: 'RESOURCE',  endpoint: '/api/audio-assets',  dataKey: 'rows', pk: 'id',        nameField: 'asset_key' },
 ];
 
 type Row = Record<string, any>;
@@ -40,6 +39,8 @@ export default function StudioApp() {
   const [tab, setTab] = useState<'general' | 'frames' | 'vfx' | 'preview'>('general');
   const [busy, setBusy] = useState('');
   const [msg, setMsg] = useState('');
+  const [keyVal, setKeyVal] = useState(localStorage.getItem('studio_key') || '');
+  const [showConn, setShowConn] = useState(!localStorage.getItem('studio_key'));
 
   const loadList = useCallback(async (s: Section) => {
     setBusy('list'); setSelected(null);
@@ -60,6 +61,8 @@ export default function StudioApp() {
     setBusy('');
   };
 
+  const saveKey = () => { localStorage.setItem('studio_key', keyVal); setShowConn(false); loadList(section); };
+
   const filtered = list.filter(r =>
     String(r[section.nameField] ?? '').toLowerCase().includes(search.toLowerCase()) ||
     String(r[section.pk] ?? '').includes(search));
@@ -70,16 +73,29 @@ export default function StudioApp() {
       <header className="flex items-center gap-4 px-4 h-12 bg-gradient-to-r from-[#2a1207] to-[#3a1a08] border-b border-[#5a2e10]">
         <div className="flex items-center gap-2">
           <span className="text-[#f0a020] font-bold tracking-widest text-sm">NEXUS STUDIO</span>
-          <span className="text-[10px] text-gray-500">DATA TOOL</span>
+          <span className="text-[10px] text-gray-500">v1.0 · DATA TOOL</span>
         </div>
         <div className="flex-1" />
+        <button onClick={() => setShowConn(v => !v)} className="text-xs text-gray-400 hover:text-white">Ket noi</button>
         <button onClick={save} disabled={!selected}
           className="px-3 py-1 text-xs rounded bg-[#f0a020] text-black font-semibold disabled:opacity-30">Save Data</button>
-        <a href="/sys/internal/v2/dashboard" className="text-xs text-gray-400 hover:text-white">← Admin</a>
       </header>
 
+      {/* Connection bar */}
+      {showConn && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-[#15152e] border-b border-white/10 text-xs">
+          <span className="text-gray-400">API:</span>
+          <span className="text-gray-300">{API_BASE || '(proxy /api)'}</span>
+          <span className="text-gray-400 ml-3">Key:</span>
+          <input value={keyVal} onChange={e => setKeyVal(e.target.value)} type="password" placeholder="Admin/Studio key"
+            className="bg-[#0b0b1a] border border-white/10 rounded px-2 py-1 w-64" />
+          <button onClick={saveKey} className="px-2 py-1 rounded bg-[#4ecca3] text-black">Luu & Ket noi</button>
+          <span className="text-gray-600">Doi VITE_API_BASE trong .env de tro server khac.</span>
+        </div>
+      )}
+
       <div className="flex-1 flex min-h-0">
-        {/* Left: section nav + library */}
+        {/* Left: module nav + library */}
         <aside className="w-64 flex flex-col bg-[#0e0e22] border-r border-white/5">
           <nav className="grid grid-cols-2 gap-1 p-2">
             {SECTIONS.map(s => (
@@ -104,18 +120,15 @@ export default function StudioApp() {
                 <span className="opacity-50 mr-1">{row[section.pk]}</span>{row[section.nameField] ?? ''}
               </button>
             ))}
-            {!busy && filtered.length === 0 && <div className="text-xs text-gray-600 p-2">Khong co du lieu</div>}
+            {!busy && filtered.length === 0 && <div className="text-xs text-gray-600 p-2">Khong co du lieu (kiem tra Ket noi)</div>}
           </div>
         </aside>
 
         {/* Center: preview / frames */}
         <main className="flex-1 flex flex-col min-w-0 bg-[#08081a]">
-          <div className="flex-1 flex items-center justify-center p-6">
-            {tab === 'frames'
-              ? <SpriteSlicer />
-              : <PreviewArea row={draft} section={section} />}
+          <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
+            {tab === 'frames' ? <SpriteSlicer /> : <PreviewArea row={draft} section={section} />}
           </div>
-          {/* tab strip */}
           <div className="flex gap-1 px-3 h-9 items-center border-t border-white/5 bg-[#0e0e22]">
             {(['general','frames','vfx','preview'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
@@ -134,15 +147,13 @@ export default function StudioApp() {
             ? <div className="p-4 text-xs text-gray-600">Chon mot muc ben trai de sua.</div>
             : tab === 'vfx'
               ? <VfxTab draft={draft} setDraft={setDraft} setMsg={setMsg} busy={busy} setBusy={setBusy} />
-              : <GeneralTab draft={draft} setDraft={setDraft} section={section}
-                  setMsg={setMsg} busy={busy} setBusy={setBusy} />}
+              : <GeneralTab draft={draft} setDraft={setDraft} section={section} setMsg={setMsg} busy={busy} setBusy={setBusy} />}
         </aside>
       </div>
     </div>
   );
 }
 
-/* ── Editor tab: schema-driven fields + AI-assist ───────────── */
 function GeneralTab({ draft, setDraft, section, setMsg, busy, setBusy }: {
   draft: Row; setDraft: (r: Row) => void; section: Section;
   setMsg: (s: string) => void; busy: string; setBusy: (s: string) => void;
@@ -192,7 +203,6 @@ function GeneralTab({ draft, setDraft, section, setMsg, busy, setBusy }: {
   );
 }
 
-/* ── VFX tab: AI tạo cấu hình VFX (JSON) ────────────────────── */
 function VfxTab({ draft, setDraft, setMsg, busy, setBusy }: {
   draft: Row; setDraft: (r: Row) => void; setMsg: (s: string) => void; busy: string; setBusy: (s: string) => void;
 }) {
@@ -206,14 +216,14 @@ function VfxTab({ draft, setDraft, setMsg, busy, setBusy }: {
     setBusy('');
   };
   const apply = () => {
-    const key = 'vfx_key' in draft ? 'vfx_config' : ('config_json' in draft ? 'config_json' : null);
+    const key = 'vfx_config' in draft ? 'vfx_config' : ('config_json' in draft ? 'config_json' : null);
     if (key) { setDraft({ ...draft, [key]: out }); setMsg('Da gan VFX vao ' + key); }
     else setMsg('Muc nay khong co truong VFX/config de gan');
   };
   return (
     <div className="p-3 space-y-3">
-      <p className="text-[11px] text-gray-400">Mo ta hieu ung (vd: "vu no lua do, rung man hinh, tia lua bay len") → AI tao JSON cau hinh VFX.</p>
-      <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={3} placeholder="Mo ta hieu ung..."
+      <p className="text-[11px] text-gray-400">Mo ta hieu ung → AI tao JSON cau hinh VFX (particle/shake/flash).</p>
+      <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={3} placeholder="vd: vu no lua do, rung man hinh, tia lua bay len"
         className="w-full bg-[#15152e] border border-white/10 rounded px-2 py-1.5 text-xs" />
       <button onClick={gen} disabled={!!busy}
         className="px-3 py-1 text-xs rounded bg-[#2a1f4a] text-[#b090f0] disabled:opacity-40">
@@ -226,7 +236,6 @@ function VfxTab({ draft, setDraft, setMsg, busy, setBusy }: {
   );
 }
 
-/* ── Tách ảnh: upload sprite sheet → /api/studio/slice → khung frame ── */
 function SpriteSlicer() {
   const [img, setImg] = useState<string>('');
   const [frames, setFrames] = useState<any[]>([]);
@@ -272,13 +281,10 @@ function SpriteSlicer() {
   );
 }
 
-/* ── Preview ─────────────────────────────────────────────────── */
 function PreviewArea({ row, section }: { row: Row; section: Section }) {
   return (
     <div className="text-center">
-      <div className="w-40 h-40 mx-auto rounded-lg bg-[#15152e] border border-white/10 flex items-center justify-center text-gray-600 text-xs">
-        Preview
-      </div>
+      <div className="w-40 h-40 mx-auto rounded-lg bg-[#15152e] border border-white/10 flex items-center justify-center text-gray-600 text-xs">Preview</div>
       <div className="mt-3 text-sm text-gray-300">{row[section.nameField] ?? '—'}</div>
       <div className="text-[11px] text-gray-600">ID: {row[section.pk] ?? '—'} · {section.label}</div>
     </div>
