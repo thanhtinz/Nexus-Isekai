@@ -127,7 +127,9 @@ export default function StudioApp() {
         {/* Center: preview / frames */}
         <main className="flex-1 flex flex-col min-w-0 bg-surface-950">
           <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
-            {tab === 'frames' ? <AnimationEditor draft={draft} setDraft={setDraft} setMsg={setMsg} /> : <PreviewArea row={draft} section={section} />}
+            {section.key === 'map' && selected
+              ? <MapBuilder map={draft} setMsg={setMsg} />
+              : tab === 'frames' ? <AnimationEditor draft={draft} setDraft={setDraft} setMsg={setMsg} /> : <PreviewArea row={draft} section={section} />}
           </div>
           <div className="flex gap-1.5 px-3 h-10 items-center border-t border-white/5 bg-surface-850">
             {(['general','frames','vfx','preview'] as const).map(t => (
@@ -385,6 +387,183 @@ function PreviewArea({ row, section }: { row: Row; section: Section }) {
       <div className="w-40 h-40 mx-auto card flex items-center justify-center text-surface-200/40 text-xs">Preview</div>
       <div className="mt-3 text-sm text-surface-100">{row[section.nameField] ?? '—'}</div>
       <div className="text-[11px] text-surface-200/50">ID: {row[section.pk] ?? '—'} · {section.label}</div>
+    </div>
+  );
+}
+
+/* ── MAP BUILDER: dat bg-asset/NPC/vung dich chuyen + AI nhan dien anh dung nhap ── */
+type BgInst = { key: string; x: number; y: number; scale: number; z: number; file?: string };
+type NpcMarker = { id: number; name: string; x: number; y: number };
+type Portal = { x: number; y: number; w: number; h: number; dest_map: number; dest_x: number; dest_y: number };
+
+function assetUrl(file?: string) {
+  if (!file) return '';
+  if (/^https?:/.test(file)) return file;
+  return (API_BASE || '') + '/' + file.replace(/^\//, '');
+}
+
+function MapBuilder({ map, setMsg }: { map: Row; setMsg: (s: string) => void }) {
+  const [palette, setPalette] = useState<Row[]>([]);
+  const [npcs, setNpcs] = useState<Row[]>([]);
+  const [bg, setBg] = useState<BgInst[]>([]);
+  const [markers, setMarkers] = useState<NpcMarker[]>([]);
+  const [portals, setPortals] = useState<Portal[]>([]);
+  const [tool, setTool] = useState<'select' | 'bg' | 'npc' | 'portal'>('select');
+  const [palKey, setPalKey] = useState<string>('');
+  const [npcId, setNpcId] = useState<number>(0);
+  const [sel, setSel] = useState<{ type: string; i: number } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const drag = useRef<{ type: string; i: number; dx: number; dy: number } | null>(null);
+
+  // load palette + npcs + layout co san
+  useEffect(() => {
+    (async () => {
+      const pa = await api('/api/map-assets'); setPalette(pa?.rows || []);
+      const np = await api('/api/npcs'); setNpcs((np?.rows || []).filter((n: Row) => String(n.map_id) === String(map.id)));
+    })();
+  }, [map.id]);
+  useEffect(() => {
+    try {
+      const L = typeof map.layout_json === 'string' && map.layout_json ? JSON.parse(map.layout_json) : null;
+      setBg(L?.bg || []); setMarkers(L?.npcs || []); setPortals(L?.portals || []);
+    } catch { setBg([]); setMarkers([]); setPortals([]); }
+  }, [map.id, map.layout_json]);
+
+  const palFile = (key: string) => palette.find(p => p.asset_key === key)?.file_path;
+
+  const onStageClick = (e: React.MouseEvent) => {
+    if (drag.current) return;
+    const r = stageRef.current!.getBoundingClientRect();
+    const x = Math.round(e.clientX - r.left), y = Math.round(e.clientY - r.top);
+    if (tool === 'bg' && palKey) setBg(b => [...b, { key: palKey, x, y, scale: 1, z: b.length, file: palFile(palKey) }]);
+    else if (tool === 'npc' && npcId) { const n = npcs.find(x => x.id === npcId); if (n) setMarkers(m => [...m, { id: npcId, name: n.name, x, y }]); }
+    else if (tool === 'portal') setPortals(p => [...p, { x, y, w: 64, h: 64, dest_map: 0, dest_x: 0, dest_y: 0 }]);
+  };
+  const startDrag = (e: React.MouseEvent, type: string, i: number) => {
+    e.stopPropagation();
+    const r = stageRef.current!.getBoundingClientRect();
+    const item: any = type === 'bg' ? bg[i] : type === 'npc' ? markers[i] : portals[i];
+    drag.current = { type, i, dx: (e.clientX - r.left) - item.x, dy: (e.clientY - r.top) - item.y };
+    setSel({ type, i });
+  };
+  const onMove = (e: React.MouseEvent) => {
+    if (!drag.current) return;
+    const r = stageRef.current!.getBoundingClientRect();
+    const x = Math.round(e.clientX - r.left - drag.current.dx), y = Math.round(e.clientY - r.top - drag.current.dy);
+    const { type, i } = drag.current;
+    if (type === 'bg') setBg(b => b.map((it, k) => k === i ? { ...it, x, y } : it));
+    else if (type === 'npc') setMarkers(m => m.map((it, k) => k === i ? { ...it, x, y } : it));
+    else setPortals(p => p.map((it, k) => k === i ? { ...it, x, y } : it));
+  };
+  const endDrag = () => { setTimeout(() => { drag.current = null; }, 0); };
+  const delSel = () => {
+    if (!sel) return;
+    if (sel.type === 'bg') setBg(b => b.filter((_, k) => k !== sel.i));
+    else if (sel.type === 'npc') setMarkers(m => m.filter((_, k) => k !== sel.i));
+    else setPortals(p => p.filter((_, k) => k !== sel.i));
+    setSel(null);
+  };
+
+  const aiSuggest = (f: File) => {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      setBusy(true);
+      const r = await api('/api/studio/map-suggest', 'POST', {
+        image_base64: reader.result,
+        assets: palette.map(p => ({ key: p.asset_key, category: p.category })),
+      });
+      if (r?.success) {
+        try {
+          const L = JSON.parse(String(r.result).replace(/```json|```/g, '').trim());
+          if (Array.isArray(L.bg)) setBg(L.bg.map((b: any, i: number) => ({ key: b.key, x: b.x || 0, y: b.y || 0, scale: b.scale || 1, z: b.z ?? i, file: palFile(b.key) })));
+          setMsg('AI da dung nhap layout — chinh lai roi Luu');
+        } catch { setMsg('AI tra ve khong phai JSON hop le'); }
+      } else setMsg(`Loi: ${r?.message || 'AI'}`);
+      setBusy(false);
+    };
+    reader.readAsDataURL(f);
+  };
+
+  const save = async () => {
+    setBusy(true);
+    const layout = JSON.stringify({ bg, npcs: markers, portals });
+    const r = await api('/api/maps', 'POST', { action: 'upsert', id: map.id, layout_json: layout });
+    setMsg(r?.error ? `Loi: ${r.error}` : 'Da luu map layout');
+    setBusy(false);
+  };
+
+  return (
+    <div className="w-full h-full flex gap-3">
+      {/* palette + tools */}
+      <div className="w-52 flex flex-col gap-2 text-xs">
+        <div className="flex gap-1">
+          {(['select','bg','npc','portal'] as const).map(t => (
+            <button key={t} onClick={() => setTool(t)}
+              className={`flex-1 py-1.5 rounded-lg ${tool === t ? 'bg-brand-500 text-white' : 'bg-white/5 text-surface-200/70'}`}>
+              {t === 'select' ? 'Chon' : t === 'bg' ? 'BG' : t === 'npc' ? 'NPC' : 'Portal'}</button>
+          ))}
+        </div>
+        <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+          onChange={e => e.target.files?.[0] && aiSuggest(e.target.files[0])} />
+        <button onClick={() => fileRef.current?.click()} disabled={busy} className="btn-secondary !text-brand-300 !py-1.5">
+          {busy ? 'AI dang dung...' : 'AI: Nhan dien anh → dung'}</button>
+        {tool === 'bg' && (
+          <div className="flex-1 overflow-y-auto card p-2 grid grid-cols-3 gap-1">
+            {palette.map(p => (
+              <button key={p.asset_key} onClick={() => setPalKey(p.asset_key)} title={p.asset_key}
+                className={`aspect-square rounded bg-surface-950 overflow-hidden border ${palKey === p.asset_key ? 'border-brand-500' : 'border-white/10'}`}>
+                <img src={assetUrl(p.file_path)} alt="" className="w-full h-full object-contain" style={{ imageRendering: 'pixelated' }} />
+              </button>
+            ))}
+            {palette.length === 0 && <span className="col-span-3 text-surface-200/40">Chua co bg asset (them o RESOURCE/client_assets)</span>}
+          </div>
+        )}
+        {tool === 'npc' && (
+          <select value={npcId} onChange={e => setNpcId(+e.target.value)} className="input">
+            <option value={0}>— Chon NPC —</option>
+            {npcs.map(n => <option key={n.id} value={n.id}>{n.id} · {n.name}</option>)}
+          </select>
+        )}
+        {sel && <button onClick={delSel} className="btn-danger !py-1.5">Xoa muc dang chon</button>}
+        <button onClick={save} disabled={busy} className="btn-gold !py-2 mt-auto">Luu Map Layout</button>
+      </div>
+
+      {/* stage */}
+      <div ref={stageRef} onClick={onStageClick} onMouseMove={onMove} onMouseUp={endDrag} onMouseLeave={endDrag}
+        className="relative flex-1 card overflow-hidden cursor-crosshair"
+        style={{ minHeight: 400, backgroundImage: 'repeating-conic-gradient(#11112a 0 25%, #0d0d24 0 50%)', backgroundSize: '24px 24px' }}>
+        {bg.map((b, i) => (
+          <img key={'b' + i} src={assetUrl(b.file)} alt="" draggable={false}
+            onMouseDown={e => startDrag(e, 'bg', i)}
+            className={`absolute select-none ${sel?.type === 'bg' && sel.i === i ? 'ring-2 ring-brand-500' : ''}`}
+            style={{ left: b.x, top: b.y, transform: `scale(${b.scale})`, zIndex: b.z, imageRendering: 'pixelated' }} />
+        ))}
+        {portals.map((p, i) => (
+          <div key={'p' + i} onMouseDown={e => startDrag(e, 'portal', i)}
+            className={`absolute bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-[10px] text-emerald-200 ${sel?.type === 'portal' && sel.i === i ? 'ring-2 ring-white' : ''}`}
+            style={{ left: p.x, top: p.y, width: p.w, height: p.h, zIndex: 9998 }}>→{p.dest_map || '?'}</div>
+        ))}
+        {markers.map((mk, i) => (
+          <div key={'n' + i} onMouseDown={e => startDrag(e, 'npc', i)}
+            className={`absolute -translate-x-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded bg-brand-500 text-white text-[10px] whitespace-nowrap ${sel?.type === 'npc' && sel.i === i ? 'ring-2 ring-white' : ''}`}
+            style={{ left: mk.x, top: mk.y, zIndex: 9999 }}>◈ {mk.name}</div>
+        ))}
+        <div className="absolute bottom-1 right-2 text-[10px] text-surface-200/40">{map.name} · {bg.length} bg · {markers.length} npc · {portals.length} portal</div>
+      </div>
+
+      {/* portal inspector */}
+      {sel?.type === 'portal' && (
+        <div className="w-44 card p-2 space-y-2 text-xs h-fit">
+          <div className="text-surface-200/60">Vung dich chuyen</div>
+          {(['dest_map','dest_x','dest_y','w','h'] as const).map(f => (
+            <label key={f} className="block">{f}
+              <input type="number" value={(portals[sel.i] as any)[f]} className="input !py-1"
+                onChange={e => setPortals(p => p.map((it, k) => k === sel.i ? { ...it, [f]: +e.target.value } : it))} /></label>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

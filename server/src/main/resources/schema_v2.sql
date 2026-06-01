@@ -4352,3 +4352,12 @@ INSERT IGNORE INTO mob_soul_config (monster_id,soul_id,drop_rate) VALUES (1,7001
 INSERT IGNORE INTO soul_exchange (id,name,soul_id,soul_cost,reward_json) VALUES
  (1,'Đổi Trứng Pet Thường',7001,50,'{"type":"item","id":8101,"qty":1}'),
  (2,'Đổi Trứng Pet Hiếm',7002,10,'{"type":"item","id":8102,"qty":1}');
+
+-- NPC: che do tuong tac + chuc nang hien thi + thoai/voice/action
+ALTER TABLE npcs ADD COLUMN IF NOT EXISTS interact_mode  VARCHAR(16) NOT NULL DEFAULT 'function'; -- function=hien menu chuc nang | dialog=chi thoai+voice+action
+ALTER TABLE npcs ADD COLUMN IF NOT EXISTS functions_json TEXT;  -- mode=function: ["shop","quest","bank","craft","upgrade","teleport","heal","storage"]
+ALTER TABLE npcs ADD COLUMN IF NOT EXISTS voice_key      VARCHAR(64) DEFAULT NULL; -- voice khi tuong tac
+ALTER TABLE npcs ADD COLUMN IF NOT EXISTS action_json    TEXT;  -- mode=dialog: [{"type":"dialog","text":".."},{"type":"give_item","id":..,"qty":..},{"type":"warp","map":..,"x":..,"y":..},{"type":"emote","name":".."}]
+
+-- MAP: scene da dung (layout) cho Map Builder
+ALTER TABLE maps ADD COLUMN IF NOT EXISTS layout_json TEXT; -- {"bg":[{"key":..,"x":..,"y":..,"scale":..,"z":..}],"npcs":[{"id":..,"x":..,"y":..}],"portals":[{"x":..,"y":..,"w":..,"h":..,"dest_map":..,"dest_x":..,"dest_y":..}]}

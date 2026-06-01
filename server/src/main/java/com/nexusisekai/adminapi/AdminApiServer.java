@@ -262,6 +262,8 @@ public class AdminApiServer {
         httpServer.createContext("/api/ai/review",         ex -> handleAuth(ex, this::handleAIReview));
         httpServer.createContext("/api/studio/ai",        ex -> handleAuth(ex, this::handleStudioAI));
         httpServer.createContext("/api/studio/slice",     ex -> handleAuth(ex, this::handleStudioSlice));
+        httpServer.createContext("/api/map-assets",       ex -> handleAuth(ex, this::handleMapAssets));
+        httpServer.createContext("/api/studio/map-suggest",ex -> handleAuth(ex, this::handleStudioMapSuggest));
         httpServer.createContext("/api/assets/upload",    ex -> handleAuth(ex, this::handleAssetUpload));
         httpServer.createContext("/api/assets",           ex -> handleAuth(ex, this::handleAssets));
         httpServer.createContext("/api/assets/bundles",   ex -> handleAuth(ex, this::handleAssetBundles));
@@ -1026,11 +1028,11 @@ public class AdminApiServer {
         if (!"GET".equals(ex.getRequestMethod())) world.reloadMonsters();
     }
     private void handleNpcsCfg(HttpExchange ex) throws Exception {
-        crudConfig(ex, "npcs", "id", new String[]{"name","map_id","pos_x","pos_y","npc_type","dialog_json","shop_id","icon_id","spine_key","sfx_key","is_active"});
+        crudConfig(ex, "npcs", "id", new String[]{"name","map_id","pos_x","pos_y","npc_type","interact_mode","functions_json","dialog_json","action_json","shop_id","icon_id","spine_key","sfx_key","voice_key","is_active"});
         if (!"GET".equals(ex.getRequestMethod())) world.reloadNpcs();
     }
     private void handleMapsCfg(HttpExchange ex) throws Exception {
-        crudConfig(ex, "maps", "id", new String[]{"name","file_name","width","height","min_level","max_level","is_pvp","is_safe","bg_music","is_active"});
+        crudConfig(ex, "maps", "id", new String[]{"name","file_name","width","height","min_level","max_level","is_pvp","is_safe","bg_music","layout_json","is_active"});
         if (!"GET".equals(ex.getRequestMethod())) world.reloadMaps();
     }
     private void handleSkillsCfg(HttpExchange ex) throws Exception {
@@ -3781,6 +3783,70 @@ public class AdminApiServer {
             sendJson(ex, 200, Map.of("success", true, "width", W, "height", H, "count", frames.size(), "frames", frames));
         } catch (Exception e) {
             sendJson(ex, 500, Map.of("success", false, "message", "Loi tach anh: " + e.getMessage()));
+        }
+    }
+
+    /** GET /api/map-assets — palette bg/tile/object cho Map Builder (loc tu client_assets). */
+    private void handleMapAssets(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            sendTableResult(ex, c.prepareStatement(
+                "SELECT asset_key,asset_type,category,file_path,display_name,width,height FROM client_assets " +
+                "WHERE asset_type IN ('bg','tileset','sprite','atlas','effect') " +
+                "OR category IN ('map_bg','map_tile','sky','parallax','furniture','npc','monster') " +
+                "ORDER BY category,asset_key"), "rows");
+        }
+    }
+
+    /** Goi Claude voi anh (vision) — tra text. */
+    private String callClaudeVision(String systemPrompt, String userText, String imageB64, String mediaType) throws Exception {
+        String apiKey = System.getenv("ANTHROPIC_API_KEY");
+        if (apiKey == null || apiKey.isEmpty()) apiKey = ServerConfig.getInstance().get("anthropic.api.key", "");
+        if (apiKey.isEmpty()) throw new IllegalStateException("ANTHROPIC_API_KEY chưa cấu hình");
+        com.fasterxml.jackson.databind.ObjectMapper m = new com.fasterxml.jackson.databind.ObjectMapper();
+        var content = java.util.List.of(
+            Map.of("type","image","source", Map.of("type","base64","media_type",mediaType,"data",imageB64)),
+            Map.of("type","text","text",userText));
+        String body = m.writeValueAsString(Map.of(
+            "model","claude-sonnet-4-20250514","max_tokens",2000,
+            "system",systemPrompt,
+            "messages", java.util.List.of(Map.of("role","user","content",content))));
+        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) new java.net.URL("https://api.anthropic.com/v1/messages").openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type","application/json");
+        conn.setRequestProperty("x-api-key",apiKey);
+        conn.setRequestProperty("anthropic-version","2023-06-01");
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(body.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        int code = conn.getResponseCode();
+        String resp = new String((code==200?conn.getInputStream():conn.getErrorStream()).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        if (code != 200) throw new RuntimeException("AI API " + code + ": " + resp);
+        return m.readTree(resp).path("content").get(0).path("text").asText();
+    }
+
+    /** POST /api/studio/map-suggest — {image_base64, assets:[{key,category}]} → AI goi y layout JSON dung asset co san. */
+    private void handleStudioMapSuggest(HttpExchange ex) throws Exception {
+        if (!"POST".equals(ex.getRequestMethod())) { sendJson(ex, 405, Map.of("error","Method Not Allowed")); return; }
+        Map<String,Object> b = parseBody(ex);
+        String data = str(b,"image_base64");
+        String mediaType = "image/png";
+        int comma = data.indexOf(",");
+        if (data.startsWith("data:")) { int sc = data.indexOf(";"); if (sc>5) mediaType = data.substring(5, sc); }
+        if (comma >= 0) data = data.substring(comma+1);
+        Object assets = b.get("assets");
+        String assetList;
+        try { assetList = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(assets); } catch (Exception e) { assetList = "[]"; }
+        String sys = "Ban la cong cu dung map game 2D side-scroll. Cho mot anh tham khao va danh sach asset bg/tile/object co san (key+category), " +
+            "hay tra ve layout JSON BO TRI cac asset gan dung voi anh. CHI dung key co trong danh sach. " +
+            "Tra ve DUNG dinh dang: {\"bg\":[{\"key\":\"..\",\"x\":0,\"y\":0,\"scale\":1,\"z\":0}],\"notes\":\"..\"}. " +
+            "Toa do theo pixel goc tren-trai. Chi tra JSON, khong giai thich ngoai JSON. " +
+            "Day la ban nhap de nguoi dung chinh lai, khong can chinh xac tung pixel.";
+        String user = "Asset co san: " + assetList + "\nHay bo tri layout gan giong anh tham khao.";
+        try {
+            String result = callClaudeVision(sys, user, data, mediaType);
+            auditLog(ex, "studio_map_suggest", "map", "", "");
+            sendJson(ex, 200, Map.of("success", true, "result", result));
+        } catch (Exception e) {
+            sendJson(ex, 500, Map.of("success", false, "message", e.getMessage()));
         }
     }
 
