@@ -317,4 +317,15 @@ public interface PacketOpcode {
     public static final short C2S_VIP_DAILY = (short)0x4203;
     public static final short S2C_VIP_INFO = (short)0x4211;
     public static final short S2C_VIP_REWARD = (short)0x4212;
+    // Hoat Dong
+    public static final short C2S_ACTIVITY_LIST = (short)0x4301;
+    public static final short C2S_ACTIVITY_DETAIL = (short)0x4302;
+    public static final short C2S_ACTIVITY_CLAIM = (short)0x4303;
+    public static final short C2S_ACTIVITY_EXCHANGE = (short)0x4304;
+    public static final short C2S_ACTIVITY_JOIN = (short)0x4305;
+    public static final short C2S_ACTIVITY_RANKING = (short)0x4306;
+    public static final short S2C_ACTIVITY_LIST = (short)0x4311;
+    public static final short S2C_ACTIVITY_DETAIL = (short)0x4312;
+    public static final short S2C_ACTIVITY_RESULT = (short)0x4313;
+    public static final short S2C_ACTIVITY_RANKING = (short)0x4314;
 }

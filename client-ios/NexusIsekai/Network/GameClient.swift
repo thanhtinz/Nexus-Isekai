@@ -491,4 +491,15 @@ extension FixedWidthInteger {
     static let C2S_VIP_DAILY: Int16 = 0x4203
     static let S2C_VIP_INFO: Int16 = 0x4211
     static let S2C_VIP_REWARD: Int16 = 0x4212
+    // Hoat Dong
+    static let C2S_ACTIVITY_LIST: Int16 = 0x4301
+    static let C2S_ACTIVITY_DETAIL: Int16 = 0x4302
+    static let C2S_ACTIVITY_CLAIM: Int16 = 0x4303
+    static let C2S_ACTIVITY_EXCHANGE: Int16 = 0x4304
+    static let C2S_ACTIVITY_JOIN: Int16 = 0x4305
+    static let C2S_ACTIVITY_RANKING: Int16 = 0x4306
+    static let S2C_ACTIVITY_LIST: Int16 = 0x4311
+    static let S2C_ACTIVITY_DETAIL: Int16 = 0x4312
+    static let S2C_ACTIVITY_RESULT: Int16 = 0x4313
+    static let S2C_ACTIVITY_RANKING: Int16 = 0x4314
 }
