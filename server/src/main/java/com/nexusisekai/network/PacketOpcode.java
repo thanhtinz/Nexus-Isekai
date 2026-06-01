@@ -672,4 +672,14 @@ public final class PacketOpcode {
     public static final short S2C_WELFARE_LIST      = (short)0x4511;
     public static final short S2C_WELFARE_DETAIL    = (short)0x4512;
     public static final short S2C_WELFARE_RESULT    = (short)0x4513;
+
+    // ───── Kho Báu + Vòng Quay May Mắn (0x46xx) ─────
+    public static final short C2S_TREASURE_LIST     = (short)0x4601;
+    public static final short C2S_TREASURE_DIG      = (short)0x4602; // [int chestId]
+    public static final short S2C_TREASURE_LIST     = (short)0x4611;
+    public static final short S2C_TREASURE_RESULT   = (short)0x4612; // [string msg][string rewardLabel]
+    public static final short C2S_WHEEL_LIST        = (short)0x4603;
+    public static final short C2S_WHEEL_SPIN        = (short)0x4604; // [int wheelId]
+    public static final short S2C_WHEEL_LIST        = (short)0x4613;
+    public static final short S2C_WHEEL_RESULT      = (short)0x4614; // [int segmentIndex][string label][string msg]
 }

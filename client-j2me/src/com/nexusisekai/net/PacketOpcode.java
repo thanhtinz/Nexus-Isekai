@@ -349,4 +349,13 @@ public interface PacketOpcode {
     public static final short S2C_WELFARE_LIST = (short)0x4511;
     public static final short S2C_WELFARE_DETAIL = (short)0x4512;
     public static final short S2C_WELFARE_RESULT = (short)0x4513;
+    // Kho Bau + Vong Quay
+    public static final short C2S_TREASURE_LIST = (short)0x4601;
+    public static final short C2S_TREASURE_DIG = (short)0x4602;
+    public static final short S2C_TREASURE_LIST = (short)0x4611;
+    public static final short S2C_TREASURE_RESULT = (short)0x4612;
+    public static final short C2S_WHEEL_LIST = (short)0x4603;
+    public static final short C2S_WHEEL_SPIN = (short)0x4604;
+    public static final short S2C_WHEEL_LIST = (short)0x4613;
+    public static final short S2C_WHEEL_RESULT = (short)0x4614;
 }

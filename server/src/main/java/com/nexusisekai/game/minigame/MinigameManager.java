@@ -195,7 +195,134 @@ public class MinigameManager {
 
     // ─── List rooms ───────────────────────────────────────────────
 
+    // ─── Đá Gà (da_ga) ────────────────────────────────────────────
+    public void daGaBet(GameSession session, long roomId, int rooster, int betAmount) throws Exception {
+        GameRoom room = rooms.get(roomId);
+        if (!(room instanceof DaGaRoom dgr)) throw new IllegalStateException("Không phải phòng Đá Gà.");
+        if (dgr.status != RoomStatus.BETTING) throw new IllegalStateException("Không trong giai đoạn đặt cược.");
+        validateBet(session, betAmount, dgr.minBet, dgr.maxBet, dgr.currency);
+        deductBet(session, betAmount, dgr.currency);
+        dgr.bets.put(session.getPlayer().getCharId(), new BetEntry(rooster & 1, betAmount));
+    }
+    public void daGaResolve(long roomId) {
+        GameRoom room = rooms.get(roomId);
+        if (!(room instanceof DaGaRoom dgr)) return;
+        dgr.status = RoomStatus.PLAYING;
+        // 5 hiệp, gà nào thắng nhiều hiệp hơn thắng
+        int w0 = 0, w1 = 0; int[] hp = {100, 100};
+        Random rng = new Random();
+        for (int i = 0; i < 5 && hp[0] > 0 && hp[1] > 0; i++) {
+            if (rng.nextBoolean()) { hp[1] -= 15 + rng.nextInt(20); w0++; }
+            else { hp[0] -= 15 + rng.nextInt(20); w1++; }
+        }
+        int winner = (hp[0] <= 0) ? 1 : (hp[1] <= 0) ? 0 : (w0 >= w1 ? 0 : 1);
+        Map<Long, Integer> payouts = new HashMap<>();
+        for (var bet : dgr.bets.entrySet()) {
+            if (bet.getValue().symbol == winner) {
+                int win = (int)(bet.getValue().amount * 1.9);
+                payouts.put(bet.getKey(), win);
+                creditPlayer(bet.getKey(), win, dgr.currency);
+            }
+        }
+        ByteBuf buf = Unpooled.buffer();
+        buf.writeShort(PacketOpcode.S2C_MINIGAME_RESULT);
+        buf.writeLong(roomId); buf.writeByte(2); // type 2 = da_ga
+        buf.writeInt(winner); buf.writeInt(w0); buf.writeInt(w1);
+        broadcastToRoom(dgr, buf);
+        try { logMinigameResults(roomId, dgr.players, payouts); } catch (Exception e) {}
+        dgr.bets.clear(); dgr.status = RoomStatus.BETTING;
+    }
+
+    // ─── Ô Ăn Quan (o_an_quan) ─────────────────────────────────────
+    public void oAnQuanStart(long roomId) {
+        if (rooms.get(roomId) instanceof OAnQuanRoom r) { r.reset(); r.status = RoomStatus.PLAYING; broadcastOAnQuan(r); }
+    }
+    public void oAnQuanMove(GameSession session, long roomId, int hole, int dir) throws Exception {
+        GameRoom room = rooms.get(roomId);
+        if (!(room instanceof OAnQuanRoom r)) throw new IllegalStateException("Không phải phòng Ô Ăn Quan.");
+        long cid = session.getPlayer().getCharId();
+        Integer seat = r.seatOf(cid);
+        if (seat == null || seat != r.turn) throw new IllegalStateException("Chưa tới lượt.");
+        if (!r.legalHole(seat, hole)) throw new IllegalStateException("Ô không hợp lệ.");
+        r.sow(hole, dir == 1);
+        broadcastOAnQuan(r);
+        if (r.isOver()) {
+            r.settle();
+            ByteBuf buf = Unpooled.buffer();
+            buf.writeShort(PacketOpcode.S2C_MINIGAME_RESULT);
+            buf.writeLong(roomId); buf.writeByte(3); // type 3 = o_an_quan
+            buf.writeInt(r.score[0]); buf.writeInt(r.score[1]);
+            buf.writeInt(r.score[0] > r.score[1] ? 0 : 1);
+            broadcastToRoom(r, buf);
+            r.status = RoomStatus.FINISHED;
+        }
+    }
+    private void broadcastOAnQuan(OAnQuanRoom r) {
+        ByteBuf buf = Unpooled.buffer();
+        buf.writeShort(PacketOpcode.S2C_MINIGAME_ROOM_UPDATE);
+        buf.writeLong(r.roomId); buf.writeByte(r.turn);
+        buf.writeShort(r.board.length);
+        for (int v : r.board) buf.writeInt(v);
+        buf.writeInt(r.score[0]); buf.writeInt(r.score[1]);
+        broadcastToRoom(r, buf);
+    }
+
+    // ─── Tiến Lên (tien_len) ──────────────────────────────────────
+    public void tienLenStart(long roomId) {
+        if (rooms.get(roomId) instanceof TienLenRoom r) { r.deal(); r.status = RoomStatus.PLAYING; broadcastTienLen(r, -1); }
+    }
+    /** action: cards rỗng = bỏ lượt (pass); ngược lại đánh bài. */
+    public void tienLenPlay(GameSession session, long roomId, int[] cards) throws Exception {
+        GameRoom room = rooms.get(roomId);
+        if (!(room instanceof TienLenRoom r)) throw new IllegalStateException("Không phải phòng Tiến Lên.");
+        long cid = session.getPlayer().getCharId();
+        Integer seat = r.seatOf(cid);
+        if (seat == null || seat != r.turn) throw new IllegalStateException("Chưa tới lượt.");
+        if (cards == null || cards.length == 0) { r.pass(); broadcastTienLen(r, seat); }
+        else {
+            if (!r.play(seat, cards)) throw new IllegalStateException("Nước đánh không hợp lệ.");
+            broadcastTienLen(r, seat);
+            if (r.hand(seat).isEmpty()) {
+                int pot = r.minBet * r.players.size();
+                creditPlayer(cid, (int)(pot * 0.95), r.currency);
+                ByteBuf buf = Unpooled.buffer();
+                buf.writeShort(PacketOpcode.S2C_MINIGAME_RESULT);
+                buf.writeLong(roomId); buf.writeByte(4); // type 4 = tien_len
+                buf.writeInt(seat);
+                broadcastToRoom(r, buf);
+                r.status = RoomStatus.FINISHED;
+            }
+        }
+    }
+    private void broadcastTienLen(TienLenRoom r, int lastSeat) {
+        ByteBuf buf = Unpooled.buffer();
+        buf.writeShort(PacketOpcode.S2C_MINIGAME_ROOM_UPDATE);
+        buf.writeLong(r.roomId); buf.writeByte(r.turn); buf.writeInt(lastSeat);
+        buf.writeShort(r.lastPlay == null ? 0 : r.lastPlay.length);
+        if (r.lastPlay != null) for (int c : r.lastPlay) buf.writeInt(c);
+        broadcastToRoom(r, buf);
+    }
+
+    // ─── Router: định tuyến bet/action theo loại phòng ─────────────
+    public void placeBet(GameSession s, long roomId, int symbol, int amount) throws Exception {
+        GameRoom room = rooms.get(roomId);
+        if (room instanceof BauCuaRoom) bauCuaBet(s, roomId, symbol, amount);
+        else if (room instanceof DuaThuRoom) duaThuBet(s, roomId, symbol, amount);
+        else if (room instanceof DaGaRoom) daGaBet(s, roomId, symbol, amount);
+        else throw new IllegalStateException("Phòng không nhận cược.");
+    }
+    public void roomAction(GameSession s, long roomId, int action, int p1, int p2, int[] cards) throws Exception {
+        GameRoom room = rooms.get(roomId);
+        if (room instanceof BauCuaRoom) bauCuaReveal(roomId);
+        else if (room instanceof DuaThuRoom) duaThuStart(roomId);
+        else if (room instanceof DaGaRoom) daGaResolve(roomId);
+        else if (room instanceof DoVuiRoom) doVuiAnswer(s, roomId, p1);
+        else if (room instanceof OAnQuanRoom) { if (action == 0) oAnQuanStart(roomId); else oAnQuanMove(s, roomId, p1, p2); }
+        else if (room instanceof TienLenRoom) { if (action == 0) tienLenStart(roomId); else tienLenPlay(s, roomId, cards); }
+    }
+
     public void sendRoomList(GameSession session, String gameType) throws SQLException {
+
         List<Map<String,Object>> roomList = new ArrayList<>();
         try (Connection c = DatabaseManager.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(
@@ -343,6 +470,9 @@ public class MinigameManager {
             case "bau_cua"  -> new BauCuaRoom(id, minBet, maxBet, currency, host);
             case "dua_thu"  -> new DuaThuRoom(id, minBet, maxBet, currency, host);
             case "do_vui"   -> new DoVuiRoom(id, host);
+            case "da_ga"    -> new DaGaRoom(id, minBet, maxBet, currency, host);
+            case "o_an_quan"-> new OAnQuanRoom(id, host);
+            case "tien_len" -> new TienLenRoom(id, minBet, maxBet, currency, host);
             default         -> new GenericRoom(id, type, minBet, maxBet, currency, host);
         };
     }
@@ -391,6 +521,111 @@ public class MinigameManager {
         Map<Long, Integer> scores = new ConcurrentHashMap<>();
         DoVuiRoom(long id, GameSession host) { roomId=id; addPlayer(host); }
         @Override int getMaxPlayers() { return 8; }
+    }
+
+    static class DaGaRoom extends GameRoom {
+        Map<Long, BetEntry> bets = new ConcurrentHashMap<>();
+        DaGaRoom(long id, int min, int max, int cur, GameSession host) {
+            roomId=id; minBet=min; maxBet=max; currency=cur; addPlayer(host); status=RoomStatus.BETTING;
+        }
+        @Override int getMaxPlayers() { return 20; }
+    }
+
+    static class OAnQuanRoom extends GameRoom {
+        // board[0..4]=ô dân ghế 0, [5]=quan phải, [6..10]=ô dân ghế 1, [11]=quan trái
+        int[] board = new int[12];
+        int[] score = new int[2];
+        int turn = 0;
+        long[] seats = new long[2];
+        OAnQuanRoom(long id, GameSession host) { roomId=id; seats[0]=host.getPlayer().getCharId(); addPlayer(host); }
+        void reset() {
+            for (int i=0;i<12;i++) board[i]=5;
+            board[5]=10; board[11]=10; // quan
+            score[0]=score[1]=0; turn=0;
+        }
+        @Override void addPlayer(GameSession s){ super.addPlayer(s); if(seats[1]==0 && s.getPlayer().getCharId()!=seats[0]) seats[1]=s.getPlayer().getCharId(); }
+        Integer seatOf(long cid){ if(cid==seats[0]) return 0; if(cid==seats[1]) return 1; return null; }
+        boolean legalHole(int seat, int hole){ // ô dân của ghế đó, có quân
+            int base = seat==0?0:6; return hole>=base && hole<base+5 && board[hole]>0;
+        }
+        void sow(int hole, boolean clockwise){
+            int n=board[hole]; board[hole]=0; int pos=hole;
+            while(n>0){ pos=(pos+(clockwise?11:1))%12; board[pos]++; n--; }
+            int next=(pos+(clockwise?11:1))%12;
+            // ăn: nếu ô kế tiếp trống và ô sau nữa có quân (không phải quan)
+            while(board[next]==0){
+                int eat=(next+(clockwise?11:1))%12;
+                if(eat==5||eat==11) break;
+                if(board[eat]>0){ score[turn]+=board[eat]; board[eat]=0; next=(eat+(clockwise?11:1))%12; }
+                else break;
+            }
+            turn=1-turn;
+        }
+        boolean isOver(){
+            boolean a=true,b=true;
+            for(int i=0;i<5;i++) if(board[i]>0) a=false;
+            for(int i=6;i<11;i++) if(board[i]>0) b=false;
+            return a||b || (board[5]==0&&board[11]==0);
+        }
+        void settle(){
+            score[0]+=board[5]; for(int i=0;i<5;i++) score[0]+=board[i];
+            score[1]+=board[11]; for(int i=6;i<11;i++) score[1]+=board[i];
+        }
+        @Override int getMaxPlayers() { return 2; }
+    }
+
+    static class TienLenRoom extends GameRoom {
+        List<List<Integer>> hands = new ArrayList<>();
+        List<Long> seatList = new ArrayList<>();
+        int turn = 0, passCount = 0;
+        int[] lastPlay = null; int lastSeat = -1;
+        TienLenRoom(long id, int min, int max, int cur, GameSession host) {
+            roomId=id; minBet=min; maxBet=max; currency=cur; addPlayer(host); seatList.add(host.getPlayer().getCharId());
+        }
+        @Override void addPlayer(GameSession s){ super.addPlayer(s); long c=s.getPlayer().getCharId(); if(!seatList.contains(c)) seatList.add(c); }
+        Integer seatOf(long cid){ int i=seatList.indexOf(cid); return i<0?null:i; }
+        List<Integer> hand(int seat){ return seat<hands.size()?hands.get(seat):new ArrayList<>(); }
+        void deal(){
+            List<Integer> deck=new ArrayList<>(); for(int i=0;i<52;i++) deck.add(i);
+            Collections.shuffle(deck);
+            hands.clear(); int n=Math.max(2,seatList.size());
+            for(int s=0;s<n;s++) hands.add(new ArrayList<>());
+            for(int i=0;i<n*13 && i<52;i++) hands.get(i%n).add(deck.get(i));
+            for(var h:hands) Collections.sort(h);
+            // người có 3 bích (card 0) đi trước
+            turn=0; for(int s=0;s<n;s++) if(hands.get(s).contains(0)){ turn=s; break; }
+            lastPlay=null; lastSeat=-1; passCount=0;
+        }
+        // rank = card/4 (0..12, 3..2), chất = card%4
+        boolean play(int seat, int[] cards){
+            List<Integer> h=hands.get(seat);
+            for(int c:cards) if(!h.contains(c)) return false;
+            if(!validCombo(cards)) return false;
+            if(lastPlay!=null && lastSeat!=seat && !beats(cards,lastPlay)) return false;
+            for(int c:cards){ h.remove(Integer.valueOf(c)); }
+            lastPlay=cards.clone(); lastSeat=seat; passCount=0;
+            advance(); return true;
+        }
+        void pass(){
+            passCount++; advance();
+            if(passCount>=seatList.size()-1){ lastPlay=null; lastSeat=-1; passCount=0; } // vòng mới
+        }
+        void advance(){ int n=hands.size(); do{ turn=(turn+1)%n; } while(hands.get(turn).isEmpty()); }
+        boolean validCombo(int[] c){
+            if(c.length==0) return false;
+            if(c.length==1) return true;
+            int[] r=new int[c.length]; for(int i=0;i<c.length;i++) r[i]=c[i]/4; java.util.Arrays.sort(r);
+            boolean same=true; for(int x:r) if(x!=r[0]) same=false;
+            if(same) return c.length<=4; // đôi/ba/tứ
+            if(c.length>=3){ for(int i=1;i<r.length;i++) if(r[i]!=r[i-1]+1) return false; return r[r.length-1]<12; } // sảnh (không gồm 2)
+            return false;
+        }
+        boolean beats(int[] a,int[] b){
+            if(a.length!=b.length) return false;
+            return maxCard(a)>maxCard(b);
+        }
+        int maxCard(int[] c){ int m=-1; for(int x:c) m=Math.max(m,x); return m; }
+        @Override int getMaxPlayers() { return 4; }
     }
 
     static class GenericRoom extends GameRoom {

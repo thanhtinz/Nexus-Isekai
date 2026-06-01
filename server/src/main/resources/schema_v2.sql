@@ -4208,3 +4208,57 @@ INSERT IGNORE INTO welfare_milestones (welfare_id,milestone_order,requirement,re
  (7,1,10,'{"gold":5000}',NULL,'Cấp 10'),(7,2,50,'{"diamond":100}',NULL,'Cấp 50'),
  (8,1,1000,'{"gold":10000}',NULL,'1000 LC'),(8,2,5000,'{"diamond":80}',NULL,'5000 LC'),
  (9,1,1,'{"items":[[1,1]]}',NULL,'Bước 1'),(9,2,5,'{"diamond":50}',NULL,'Bước 5');
+
+-- ═════════════════════════════════════════════════════════════
+-- KHO BÁU (Treasure) — đào/mở rương nhận thưởng ngẫu nhiên, admin config
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS treasure_chests (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(64) NOT NULL,
+    description   VARCHAR(256) DEFAULT '',
+    icon_id       INT NOT NULL DEFAULT 0,
+    map_id        INT NOT NULL DEFAULT 0,        -- 0=mọi map
+    cost_amount   INT NOT NULL DEFAULT 0,        -- giá mỗi lần đào
+    cost_currency TINYINT NOT NULL DEFAULT 0,    -- 0=vàng,1=kim cương,2=vật phẩm
+    cost_item_id  INT NOT NULL DEFAULT 0,        -- nếu currency=2 (vd chìa khoá/bản đồ)
+    daily_limit   INT NOT NULL DEFAULT 0,        -- 0=không giới hạn
+    reward_pool_json TEXT NOT NULL,              -- [{"type":"gold|diamond|item","id":..,"qty":..,"weight":..}]
+    is_enabled    TINYINT NOT NULL DEFAULT 1,
+    sort_order    INT NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS treasure_dig_log (
+    char_id    BIGINT NOT NULL,
+    chest_id   INT NOT NULL,
+    dig_date   DATE NOT NULL,
+    dig_count  INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (char_id, chest_id, dig_date)
+);
+INSERT IGNORE INTO treasure_chests (id,name,description,cost_amount,cost_currency,cost_item_id,daily_limit,reward_pool_json) VALUES
+ (1,'Rương Đồng','Đào bằng vàng, thưởng cơ bản',5000,0,0,20,'[{"type":"gold","qty":10000,"weight":50},{"type":"gold","qty":30000,"weight":25},{"type":"diamond","qty":10,"weight":15},{"type":"item","id":8001,"qty":1,"weight":5},{"type":"diamond","qty":100,"weight":2}]'),
+ (2,'Rương Vàng','Mở bằng Chìa Vàng, thưởng hiếm',1,2,9001,10,'[{"type":"diamond","qty":50,"weight":40},{"type":"diamond","qty":200,"weight":20},{"type":"item","id":8002,"qty":1,"weight":10},{"type":"item","id":8003,"qty":1,"weight":3}]');
+
+-- ═════════════════════════════════════════════════════════════
+-- VÒNG QUAY MAY MẮN (Lucky Wheel) — quay nhận thưởng theo trọng số, admin config
+-- ═════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS lucky_wheels (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(64) NOT NULL,
+    description   VARCHAR(256) DEFAULT '',
+    icon_id       INT NOT NULL DEFAULT 0,
+    cost_amount   INT NOT NULL DEFAULT 0,        -- giá 1 lượt quay
+    cost_currency TINYINT NOT NULL DEFAULT 1,    -- 0=vàng,1=kim cương,2=vật phẩm(vé)
+    cost_item_id  INT NOT NULL DEFAULT 0,        -- vé quay nếu currency=2
+    segments_json TEXT NOT NULL,                 -- [{"label":..,"type":..,"id":..,"qty":..,"weight":..}] đúng thứ tự ô
+    pity_count    INT NOT NULL DEFAULT 0,        -- 0=không; >0: sau N lượt chắc trúng ô hiếm (is_jackpot)
+    is_enabled    TINYINT NOT NULL DEFAULT 1,
+    sort_order    INT NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS lucky_wheel_progress (
+    char_id    BIGINT NOT NULL,
+    wheel_id   INT NOT NULL,
+    spins      INT NOT NULL DEFAULT 0,           -- tổng lượt (cho pity)
+    since_pity INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (char_id, wheel_id)
+);
+INSERT IGNORE INTO lucky_wheels (id,name,description,cost_amount,cost_currency,cost_item_id,pity_count,segments_json) VALUES
+ (1,'Vòng Quay May Mắn','Quay bằng kim cương',20,1,0,0,'[{"label":"10K Vàng","type":"gold","qty":10000,"weight":40},{"label":"50 KC","type":"diamond","qty":50,"weight":20},{"label":"Trang bị","type":"item","id":8001,"qty":1,"weight":10},{"label":"100K Vàng","type":"gold","qty":100000,"weight":15},{"label":"200 KC","type":"diamond","qty":200,"weight":8},{"label":"Skin hiếm","type":"item","id":8003,"qty":1,"weight":2,"is_jackpot":1}]');

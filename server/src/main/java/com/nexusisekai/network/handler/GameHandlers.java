@@ -65,15 +65,20 @@ class MinigameHandler {
         long roomId = buf.readLong();
         int  symbol = buf.readInt();
         int  amount = buf.readInt();
-        try { MinigameManager.getInstance().bauCuaBet(session, roomId, symbol, amount); }
+        try { MinigameManager.getInstance().placeBet(session, roomId, symbol, amount); }
         catch (Exception e) { session.sendError(PacketOpcode.S2C_SYSTEM_MSG, e.getMessage()); }
     }
 
     static void handleAnswer(GameSession session, ByteBuf buf) {
         if (!session.isInGame() || buf.readableBytes() < 9) return;
-        long roomId    = buf.readLong();
-        int  answerIdx = buf.readByte() & 0xFF;
-        try { MinigameManager.getInstance().doVuiAnswer(session, roomId, answerIdx); }
+        long roomId = buf.readLong();
+        int  action = buf.readByte() & 0xFF;   // 0=bắt đầu/quay, 1=trả lời/đánh, 2=move
+        int  p1 = buf.readableBytes() >= 4 ? buf.readInt() : 0;
+        int  p2 = buf.readableBytes() >= 4 ? buf.readInt() : 0;
+        int  nCards = buf.readableBytes() >= 2 ? buf.readShort() : 0;
+        int[] cards = new int[Math.max(0, nCards)];
+        for (int i = 0; i < cards.length && buf.readableBytes() >= 4; i++) cards[i] = buf.readInt();
+        try { MinigameManager.getInstance().roomAction(session, roomId, action, p1, p2, cards); }
         catch (Exception e) { session.sendError(PacketOpcode.S2C_SYSTEM_MSG, e.getMessage()); }
     }
 }

@@ -236,6 +236,9 @@ public class AdminApiServer {
         httpServer.createContext("/api/welfare",            ex -> handleAuth(ex, this::handleWelfareCfg));
         httpServer.createContext("/api/welfare-milestones", ex -> handleAuth(ex, this::handleWelfareMilestonesCfg));
         httpServer.createContext("/api/welfare-types",      ex -> handleAuth(ex, this::handleWelfareTypesCfg));
+        httpServer.createContext("/api/treasure",       ex -> handleAuth(ex, this::handleTreasureCfg));
+        httpServer.createContext("/api/lucky-wheels",   ex -> handleAuth(ex, this::handleLuckyWheelCfg));
+        httpServer.createContext("/api/minigame-config",ex -> handleAuth(ex, this::handleMinigameCfg));
         httpServer.createContext("/api/stickers",         ex -> handleAuth(ex, this::handleStickers));
         httpServer.createContext("/api/admin-accounts",   ex -> handleAuth(ex, this::handleAdminAccounts));
         httpServer.createContext("/api/portals",          ex -> handleAuth(ex, this::handlePortals));
@@ -871,6 +874,15 @@ public class AdminApiServer {
     }
     private void handleWelfareTypesCfg(HttpExchange ex) throws Exception {
         crudConfig(ex, "welfare_types", "type_key", new String[]{"display_name","category","claim_mode","description"});
+    }
+    private void handleTreasureCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "treasure_chests", "id", new String[]{"name","description","icon_id","map_id","cost_amount","cost_currency","cost_item_id","daily_limit","reward_pool_json","is_enabled","sort_order"});
+    }
+    private void handleLuckyWheelCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "lucky_wheels", "id", new String[]{"name","description","icon_id","cost_amount","cost_currency","cost_item_id","segments_json","pity_count","is_enabled","sort_order"});
+    }
+    private void handleMinigameCfg(HttpExchange ex) throws Exception {
+        crudConfig(ex, "minigame_config", "game_type", new String[]{"min_bet","max_bet","house_edge","config_json","is_active"});
     }
 
     private void sendJson(HttpExchange ex, int code, Object data) throws IOException {

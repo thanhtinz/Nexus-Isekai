@@ -593,6 +593,15 @@ namespace NexusIsekai.Network
         public const short S2C_WELFARE_LIST      = 0x4511;
         public const short S2C_WELFARE_DETAIL    = 0x4512;
         public const short S2C_WELFARE_RESULT    = 0x4513;
+        // Kho Bau + Vong Quay
+        public const short C2S_TREASURE_LIST     = 0x4601;
+        public const short C2S_TREASURE_DIG      = 0x4602;
+        public const short S2C_TREASURE_LIST     = 0x4611;
+        public const short S2C_TREASURE_RESULT   = 0x4612;
+        public const short C2S_WHEEL_LIST        = 0x4603;
+        public const short C2S_WHEEL_SPIN        = 0x4604;
+        public const short S2C_WHEEL_LIST        = 0x4613;
+        public const short S2C_WHEEL_RESULT      = 0x4614;
 
     }
 }

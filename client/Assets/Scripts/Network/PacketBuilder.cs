@@ -304,8 +304,18 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_MENTOR_GRADUATE));
         public static void SendMentorInfo()
             => Send(new PacketBuilder(PacketOpcode.C2S_MENTOR_INFO));
-        public static void SendMinigameAction(long roomId, int actionType, int value)
-            => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_ACTION).WriteLong(roomId).WriteInt(actionType).WriteInt(value));
+        // Minigame action: [long roomId][byte action][int p1][int p2][short nCards][int cards...]
+        public static void SendMinigameAction(long roomId, int action, int p1, int p2, int[] cards = null) {
+            var pb = new PacketBuilder(PacketOpcode.C2S_MINIGAME_ACTION).WriteLong(roomId).WriteByte((byte)action).WriteInt(p1).WriteInt(p2);
+            pb.WriteShort((short)(cards?.Length ?? 0));
+            if (cards != null) foreach (var cd in cards) pb.WriteInt(cd);
+            Send(pb);
+        }
+        public static void SendMinigameStart(long roomId) => SendMinigameAction(roomId, 0, 0, 0);            // quay/đua/đá/ván mới
+        public static void SendDoVuiAnswer(long roomId, int idx) => SendMinigameAction(roomId, 1, idx, 0);   // đố vui
+        public static void SendOAnQuanMove(long roomId, int hole, int dir) => SendMinigameAction(roomId, 2, hole, dir); // ô ăn quan
+        public static void SendTienLenPlay(long roomId, int[] cards) => SendMinigameAction(roomId, 1, 0, 0, cards);     // tiến lên đánh
+        public static void SendTienLenPass(long roomId) => SendMinigameAction(roomId, 1, 0, 0);             // tiến lên bỏ lượt
         public static void SendMinigameAnswer(long roomId, byte answerIdx)
             => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_ANSWER)
                 .WriteLong(roomId).WriteByte(answerIdx));
@@ -317,6 +327,11 @@ namespace NexusIsekai.Network
                 .WriteString(gameType).WriteInt(minBet).WriteInt(maxBet).WriteByte(currency));
         public static void SendMinigameJoin(long roomId)
             => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_JOIN).WriteLong(roomId));
+        // Kho Báu + Vòng Quay
+        public static void SendTreasureList() => Send(new PacketBuilder(PacketOpcode.C2S_TREASURE_LIST));
+        public static void SendTreasureDig(int chestId) => Send(new PacketBuilder(PacketOpcode.C2S_TREASURE_DIG).WriteInt(chestId));
+        public static void SendWheelList() => Send(new PacketBuilder(PacketOpcode.C2S_WHEEL_LIST));
+        public static void SendWheelSpin(int wheelId) => Send(new PacketBuilder(PacketOpcode.C2S_WHEEL_SPIN).WriteInt(wheelId));
         public static void SendMinigameLeave(long roomId)
             => Send(new PacketBuilder(PacketOpcode.C2S_MINIGAME_LEAVE).WriteLong(roomId));
         public static void SendMinigameRoomList(string gameType)

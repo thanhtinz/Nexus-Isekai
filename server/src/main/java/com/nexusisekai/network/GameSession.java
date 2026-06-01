@@ -231,6 +231,11 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_WELFARE_CLAIM_ALL -> { requireInGame(); WelfareHandler.handleClaimAll(this, toBuf(p)); }
             case PacketOpcode.C2S_WELFARE_ACTIVATE  -> { requireInGame(); WelfareHandler.handleActivate(this, toBuf(p)); }
             case PacketOpcode.C2S_WELFARE_PURCHASE  -> { requireInGame(); WelfareHandler.handlePurchase(this, toBuf(p)); }
+            // Kho Báu + Vòng Quay
+            case PacketOpcode.C2S_TREASURE_LIST     -> { requireInGame(); TreasureHandler.handleTreasureList(this, toBuf(p)); }
+            case PacketOpcode.C2S_TREASURE_DIG      -> { requireInGame(); TreasureHandler.handleTreasureDig(this, toBuf(p)); }
+            case PacketOpcode.C2S_WHEEL_LIST        -> { requireInGame(); TreasureHandler.handleWheelList(this, toBuf(p)); }
+            case PacketOpcode.C2S_WHEEL_SPIN        -> { requireInGame(); TreasureHandler.handleWheelSpin(this, toBuf(p)); }
             case PacketOpcode.C2S_FARM_VISIT    -> { requireInGame(); FarmingHandler.handleFarmVisit(this, toBuf(p)); }
 
             // ── Housing ───────────────────────────────────────────────

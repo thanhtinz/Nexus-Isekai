@@ -85,6 +85,10 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_WELFARE_LIST,   OnWelfareList);
             d.Register(PacketOpcode.S2C_WELFARE_DETAIL, OnWelfareDetail);
             d.Register(PacketOpcode.S2C_WELFARE_RESULT, OnWelfareResult);
+            d.Register(PacketOpcode.S2C_TREASURE_LIST,  OnTreasureList);
+            d.Register(PacketOpcode.S2C_TREASURE_RESULT,OnTreasureResult);
+            d.Register(PacketOpcode.S2C_WHEEL_LIST,     OnWheelList);
+            d.Register(PacketOpcode.S2C_WHEEL_RESULT,   OnWheelResult);
             d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
             d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
             d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
@@ -829,6 +833,24 @@ namespace NexusIsekai.Game
             WelfareUI.Instance?.ShowDetail();
         }
         private void OnWelfareResult(PacketReader r) { GameState.Instance?.ShowToast(r.ReadString()); PacketBuilder.SendWelfareList(); }
+        private void OnTreasureList(PacketReader r) {
+            int n=r.ReadShort(); TreasureUI.Instance?.ClearList();
+            for(int i=0;i<n;i++){ int id=r.ReadInt(); string name=r.ReadString(); string desc=r.ReadString();
+                int icon=r.ReadInt(); int cost=r.ReadInt(); int cur=r.ReadByte(); int itemId=r.ReadInt(); int limit=r.ReadInt(); int left=r.ReadInt();
+                TreasureUI.Instance?.AddChest(id,name,desc,icon,cost,cur,itemId,limit,left); }
+            TreasureUI.Instance?.Open();
+        }
+        private void OnTreasureResult(PacketReader r) { string msg=r.ReadString(); string label=r.ReadString(); TreasureUI.Instance?.ShowResult(msg,label); PacketBuilder.SendTreasureList(); }
+        private void OnWheelList(PacketReader r) {
+            int n=r.ReadShort(); LuckyWheelUI.Instance?.ClearList();
+            for(int i=0;i<n;i++){ int id=r.ReadInt(); string name=r.ReadString(); string desc=r.ReadString(); int icon=r.ReadInt();
+                int cost=r.ReadInt(); int cur=r.ReadByte(); int itemId=r.ReadInt(); int pity=r.ReadInt();
+                int ns=r.ReadShort(); string[] labels=new string[ns]; for(int j=0;j<ns;j++) labels[j]=r.ReadString();
+                LuckyWheelUI.Instance?.AddWheel(id,name,desc,icon,cost,cur,itemId,pity,labels); }
+            LuckyWheelUI.Instance?.Open();
+        }
+        private void OnWheelResult(PacketReader r) { int idx=r.ReadInt(); string label=r.ReadString(); string msg=r.ReadString(); LuckyWheelUI.Instance?.PlaySpin(idx,label,msg); }
+
         private void OnFxConfig(PacketReader r) {
             int ns = r.ReadShort();
             for (int i=0;i<ns;i++){ int id=r.ReadInt(); FxManager.Instance?.RegisterSkill(id, r.ReadString(), r.ReadString(), r.ReadString()); }

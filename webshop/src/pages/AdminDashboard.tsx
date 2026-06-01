@@ -254,6 +254,9 @@ const PANELS: PanelConfig[] = [
   { key: 'welfare',      label: 'Phuc Loi',        group: 'Tinh Nang',  endpoint: '/api/welfare',           dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'welfare_mile', label: 'Phuc Loi - Moc',  group: 'Tinh Nang',  endpoint: '/api/welfare-milestones',dataKey: 'rows', editable: true, pk: 'id' },
   { key: 'welfare_types',label: 'Phuc Loi - Loai', group: 'Tinh Nang',  endpoint: '/api/welfare-types',     dataKey: 'rows', editable: true, pk: 'type_key' },
+  { key: 'treasure',     label: 'Kho Bau',         group: 'Tinh Nang',  endpoint: '/api/treasure',          dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'lucky_wheels', label: 'Vong Quay',       group: 'Tinh Nang',  endpoint: '/api/lucky-wheels',      dataKey: 'rows', editable: true, pk: 'id' },
+  { key: 'minigame_cfg', label: 'Minigame - Cau Hinh',group: 'Tinh Nang',endpoint: '/api/minigame-config',  dataKey: 'rows', editable: true, pk: 'game_type' },
 
   // Bo sung vao nhom san
   { key: 'cosmetics',    label: 'Cosmetic',        group: 'Xa Hoi',     endpoint: '/api/cosmetics',         dataKey: 'rows', editable: true, pk: 'id' },

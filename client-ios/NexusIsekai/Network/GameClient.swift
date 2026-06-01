@@ -523,4 +523,13 @@ extension FixedWidthInteger {
     static let S2C_WELFARE_LIST: Int16 = 0x4511
     static let S2C_WELFARE_DETAIL: Int16 = 0x4512
     static let S2C_WELFARE_RESULT: Int16 = 0x4513
+    // Kho Bau + Vong Quay
+    static let C2S_TREASURE_LIST: Int16 = 0x4601
+    static let C2S_TREASURE_DIG: Int16 = 0x4602
+    static let S2C_TREASURE_LIST: Int16 = 0x4611
+    static let S2C_TREASURE_RESULT: Int16 = 0x4612
+    static let C2S_WHEEL_LIST: Int16 = 0x4603
+    static let C2S_WHEEL_SPIN: Int16 = 0x4604
+    static let S2C_WHEEL_LIST: Int16 = 0x4613
+    static let S2C_WHEEL_RESULT: Int16 = 0x4614
 }
