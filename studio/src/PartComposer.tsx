@@ -71,7 +71,7 @@ export default function PartComposer({ draft, setDraft, setMsg }: { draft: any; 
 
   const buildJson = () => ({
     type: 'costume', fps, frameCount,
-    slots: slots.map(s => ({ name: s.name, cols: s.cols, rows: s.rows, frames: s.frames, offsets: s.offsets, visible: s.visible })),
+    slots: slots.map(s => ({ name: s.name, cols: s.cols, rows: s.rows, frames: s.frames, visible: s.visible, offsets: Object.entries(s.offsets).map(([f, o]) => ({ f: +f, dx: o[0], dy: o[1] })) })),
   });
   const exportJson = () => {
     const key = 'costume_json' in draft ? 'costume_json' : ('config_json' in draft ? 'config_json' : 'costume_json');

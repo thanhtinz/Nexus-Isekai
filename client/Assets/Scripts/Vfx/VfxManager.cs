@@ -62,6 +62,19 @@ namespace NexusIsekai.Vfx
             if (go != null) StartCoroutine(KillAfter(go, ttlSeconds));
         }
 
+        /// <summary>Phat effect dang atlas (EffectComposer JSON) tai vi tri. atlas = texture tu KHO.</summary>
+        public GameObject PlayAtlasEffect(string atlasEffectJson, Texture2D atlas, Vector3 worldPos, bool loop)
+        {
+            var data = AtlasEffect.Parse(atlasEffectJson);
+            if (data == null) { Debug.LogWarning("[VFX] atlas-effect JSON khong hop le"); return null; }
+            var go = new GameObject("atlasFx"); go.transform.position = worldPos;
+            var pl = go.AddComponent<AtlasEffectPlayer>();
+            pl.pixelsPerUnit = defaultPixelsPerUnit;
+            if (!loop) pl.onFinished = () => { if (go != null) Destroy(go); };
+            pl.Init(data, atlas, loop);
+            return go;
+        }
+
         IEnumerator KillAfter(GameObject go, float t)
         {
             yield return new WaitForSeconds(t);
