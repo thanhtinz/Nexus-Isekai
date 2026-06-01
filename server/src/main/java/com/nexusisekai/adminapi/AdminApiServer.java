@@ -117,6 +117,10 @@ public class AdminApiServer {
         httpServer.createContext("/api/ban",        ex -> handleAuth(ex, this::handleBan));
         httpServer.createContext("/api/unban",      ex -> handleAuth(ex, this::handleUnban));
         httpServer.createContext("/api/broadcast",  ex -> handleAuth(ex, this::handleBroadcast));
+        httpServer.createContext("/api/give-currency", ex -> handleAuth(ex, this::handleGiveCurrency));
+        httpServer.createContext("/api/give-item",     ex -> handleAuth(ex, this::handleGiveItem));
+        httpServer.createContext("/api/set-level",      ex -> handleAuth(ex, this::handleSetLevel));
+        httpServer.createContext("/api/mute",           ex -> handleAuth(ex, this::handleMute));
         httpServer.createContext("/api/maps",       ex -> handleAuth(ex, this::handleMapsCfg));
         httpServer.createContext("/api/monsters",   ex -> handleAuth(ex, this::handleMonstersCfg));
         httpServer.createContext("/api/npcs",       ex -> handleAuth(ex, this::handleNpcsCfg));
@@ -412,6 +416,74 @@ public class AdminApiServer {
         System.arraycopy(msg, 0, payload, 2, msg.length);
         networkServer.broadcast(com.nexusisekai.network.PacketOpcode.S2C_SERVER_MSG, payload);
         sendJson(ex, 200, Map.of("success", true, "sent_to", networkServer.getOnlineCount()));
+    }
+
+    // ─── THAO TÁC NHANH (live-ops) ───────────────────────────────
+    /** Cộng/trừ tiền cho nhân vật. body: {charName, currency:'gold'|'diamond', amount} */
+    private void handleGiveCurrency(HttpExchange ex) throws Exception {
+        if (!"POST".equals(ex.getRequestMethod())) { sendJson(ex, 405, Map.of("error","Method Not Allowed")); return; }
+        Map<String,Object> b = parseBody(ex);
+        String charName = str(b,"charName");
+        String cur = str(b,"currency").equals("diamond") ? "diamond" : "gold";
+        int amount = num(b,"amount");
+        try (Connection c = DatabaseManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "UPDATE characters SET "+cur+"=GREATEST("+cur+"+?,0) WHERE name=?")) {
+            ps.setInt(1, amount); ps.setString(2, charName);
+            int rows = ps.executeUpdate();
+            if (rows == 0) { sendJson(ex, 404, Map.of("error","Nhân vật không tồn tại")); return; }
+        }
+        auditLog(ex, "give_currency", "character", charName, cur+" "+amount);
+        sendJson(ex, 200, Map.of("success", true, "charName", charName, "currency", cur, "amount", amount));
+    }
+
+    /** Tặng vật phẩm vào túi. body: {charName, itemId, qty} */
+    private void handleGiveItem(HttpExchange ex) throws Exception {
+        if (!"POST".equals(ex.getRequestMethod())) { sendJson(ex, 405, Map.of("error","Method Not Allowed")); return; }
+        Map<String,Object> b = parseBody(ex);
+        String charName = str(b,"charName"); int itemId = num(b,"itemId"); int qty = Math.max(1, num(b,"qty"));
+        try (Connection c = DatabaseManager.getConnection()) {
+            Long charId = null;
+            try (PreparedStatement ps = c.prepareStatement("SELECT id FROM characters WHERE name=?")) {
+                ps.setString(1, charName); var rs = ps.executeQuery(); if (rs.next()) charId = rs.getLong(1);
+            }
+            if (charId == null) { sendJson(ex, 404, Map.of("error","Nhân vật không tồn tại")); return; }
+            try (PreparedStatement ps = c.prepareStatement(
+                 "INSERT INTO character_inventory (char_id,item_id,qty,slot) VALUES (?,?,?,-1)")) {
+                ps.setLong(1, charId); ps.setInt(2, itemId); ps.setInt(3, qty); ps.executeUpdate();
+            }
+        }
+        auditLog(ex, "give_item", "character", charName, "item="+itemId+" x"+qty);
+        sendJson(ex, 200, Map.of("success", true, "charName", charName, "itemId", itemId, "qty", qty));
+    }
+
+    /** Đặt cấp độ. body: {charName, level} */
+    private void handleSetLevel(HttpExchange ex) throws Exception {
+        if (!"POST".equals(ex.getRequestMethod())) { sendJson(ex, 405, Map.of("error","Method Not Allowed")); return; }
+        Map<String,Object> b = parseBody(ex);
+        String charName = str(b,"charName"); int level = Math.max(1, num(b,"level"));
+        try (Connection c = DatabaseManager.getConnection();
+             PreparedStatement ps = c.prepareStatement("UPDATE characters SET level=? WHERE name=?")) {
+            ps.setInt(1, level); ps.setString(2, charName);
+            if (ps.executeUpdate() == 0) { sendJson(ex, 404, Map.of("error","Nhân vật không tồn tại")); return; }
+        }
+        auditLog(ex, "set_level", "character", charName, "level="+level);
+        sendJson(ex, 200, Map.of("success", true, "charName", charName, "level", level));
+    }
+
+    /** Cấm chat tạm thời. body: {charName, minutes} (minutes=0 = bỏ cấm) */
+    private void handleMute(HttpExchange ex) throws Exception {
+        if (!"POST".equals(ex.getRequestMethod())) { sendJson(ex, 405, Map.of("error","Method Not Allowed")); return; }
+        Map<String,Object> b = parseBody(ex);
+        String charName = str(b,"charName"); int minutes = num(b,"minutes");
+        long until = minutes <= 0 ? 0 : System.currentTimeMillis() + minutes * 60_000L;
+        try (Connection c = DatabaseManager.getConnection();
+             PreparedStatement ps = c.prepareStatement("UPDATE characters SET muted_until=? WHERE name=?")) {
+            ps.setLong(1, until); ps.setString(2, charName);
+            if (ps.executeUpdate() == 0) { sendJson(ex, 404, Map.of("error","Nhân vật không tồn tại")); return; }
+        }
+        auditLog(ex, "mute", "character", charName, minutes+"m");
+        sendJson(ex, 200, Map.of("success", true, "charName", charName, "minutes", minutes));
     }
 
     private void handleMaps(HttpExchange ex) throws Exception {

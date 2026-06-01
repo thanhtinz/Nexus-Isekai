@@ -80,9 +80,24 @@ public class ChatHandler {
         buf.readBytes(msgBytes);
         String text = new String(msgBytes, StandardCharsets.UTF_8).trim();
         if (text.isEmpty()) return;
+
+        // Kiểm cấm chat (admin mute qua panel Thao Tác Nhanh)
+        if (isMuted(p.getCharId())) {
+            session.sendError(com.nexusisekai.network.PacketOpcode.S2C_SYSTEM_MSG, "Ban dang bi cam chat.");
+            return;
+        }
         text = sanitize(text);
 
         dispatch(session, p, channel, CT_TEXT, text, null);
+    }
+
+    /** Còn bị cấm chat không (muted_until > hiện tại). */
+    private static boolean isMuted(long charId) {
+        try (java.sql.Connection c = com.nexusisekai.database.DatabaseManager.getInstance().getConnection();
+             java.sql.PreparedStatement ps = c.prepareStatement("SELECT muted_until FROM characters WHERE id=?")) {
+            ps.setLong(1, charId); var rs = ps.executeQuery();
+            return rs.next() && rs.getLong(1) > System.currentTimeMillis();
+        } catch (Exception e) { return false; }
     }
 
     /** C2S_CHAT_STICKER: [byte channel][int stickerId] */

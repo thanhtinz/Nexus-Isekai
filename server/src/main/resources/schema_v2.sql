@@ -4262,3 +4262,4 @@ CREATE TABLE IF NOT EXISTS lucky_wheel_progress (
 );
 INSERT IGNORE INTO lucky_wheels (id,name,description,cost_amount,cost_currency,cost_item_id,pity_count,segments_json) VALUES
  (1,'Vòng Quay May Mắn','Quay bằng kim cương',20,1,0,0,'[{"label":"10K Vàng","type":"gold","qty":10000,"weight":40},{"label":"50 KC","type":"diamond","qty":50,"weight":20},{"label":"Trang bị","type":"item","id":8001,"qty":1,"weight":10},{"label":"100K Vàng","type":"gold","qty":100000,"weight":15},{"label":"200 KC","type":"diamond","qty":200,"weight":8},{"label":"Skin hiếm","type":"item","id":8003,"qty":1,"weight":2,"is_jackpot":1}]');
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS muted_until BIGINT NOT NULL DEFAULT 0;

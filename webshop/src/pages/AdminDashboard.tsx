@@ -183,6 +183,7 @@ const PANELS: PanelConfig[] = [
   // Tong quan
   { key: 'status',       label: 'Trang Thai',      group: 'Tong Quan',  endpoint: '/api/status',            dataKey: '' },
   { key: 'stats',        label: 'Thong Ke',        group: 'Tong Quan',  endpoint: '/api/logs',              dataKey: 'logs' },
+  { key: 'quick',        label: 'Thao Tac Nhanh',   group: 'Tong Quan',  endpoint: '',                       dataKey: '' },
 
   // Nguoi choi
   { key: 'players',      label: 'Nguoi Choi',      group: 'Nguoi Choi', endpoint: '/api/players',           dataKey: 'players' },
@@ -272,6 +273,108 @@ const PANELS: PanelConfig[] = [
 ];
 
 //  AI Generate Panel 
+
+function QuickActions() {
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState('');
+  // người chơi
+  const [pName, setPName] = useState('');
+  const [cur, setCur] = useState('gold');
+  const [amount, setAmount] = useState('');
+  const [itemId, setItemId] = useState('');
+  const [qty, setQty] = useState('1');
+  const [level, setLevel] = useState('');
+  const [muteMin, setMuteMin] = useState('10');
+  // toàn server
+  const [bcast, setBcast] = useState('');
+
+  const run = async (label: string, path: string, body: Record<string,string>, needName = true) => {
+    if (needName && !pName.trim()) { setMsg('Nhap ten nhan vat truoc'); return; }
+    setBusy(label);
+    try {
+      const r = await api(path, 'POST', body);
+      setMsg(r?.error ? `Loi: ${r.error}` : `OK: ${label}`);
+    } catch { setMsg(`Loi: ${label}`); }
+    setBusy('');
+  };
+
+  const Field = ({ ph, val, set, w = 'w-28', type = 'text' }:
+    { ph: string; val: string; set: (s: string)=>void; w?: string; type?: string }) => (
+    <input value={val} onChange={e => set(e.target.value)} placeholder={ph} type={type}
+      className={`${w} bg-[#0a0a1e] border border-white/10 rounded px-2 py-1.5 text-xs text-gray-200`} />
+  );
+
+  const Card = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="bg-[#12122a] border border-white/5 rounded-xl p-4 space-y-3">
+      <h3 className="text-sm font-medium text-white">{title}</h3>
+      {children}
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      {msg && <div className="text-xs px-3 py-2 rounded-lg bg-[#1a1a3a] text-[#f0c050]">{msg}</div>}
+
+      <Card title="Nhan vat muc tieu">
+        <Field ph="Ten nhan vat" val={pName} set={setPName} w="w-full md:w-64" />
+      </Card>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <Card title="Cong / tru tien">
+          <div className="flex flex-wrap items-center gap-2">
+            <select value={cur} onChange={e => setCur(e.target.value)}
+              className="bg-[#0a0a1e] border border-white/10 rounded px-2 py-1.5 text-xs text-gray-200">
+              <option value="gold">Vang</option><option value="diamond">Kim cuong</option>
+            </select>
+            <Field ph="So luong (am = tru)" val={amount} set={setAmount} type="number" />
+            <ActionButton onClick={() => run('Cong tien', '/api/give-currency', { charName: pName, currency: cur, amount })}>
+              {busy === 'Cong tien' ? '...' : 'Thuc hien'}</ActionButton>
+          </div>
+        </Card>
+
+        <Card title="Tang vat pham">
+          <div className="flex flex-wrap items-center gap-2">
+            <Field ph="Item ID" val={itemId} set={setItemId} type="number" w="w-24" />
+            <Field ph="SL" val={qty} set={setQty} type="number" w="w-16" />
+            <ActionButton onClick={() => run('Tang item', '/api/give-item', { charName: pName, itemId, qty })}>
+              {busy === 'Tang item' ? '...' : 'Tang'}</ActionButton>
+          </div>
+        </Card>
+
+        <Card title="Dat cap do">
+          <div className="flex flex-wrap items-center gap-2">
+            <Field ph="Level" val={level} set={setLevel} type="number" w="w-20" />
+            <ActionButton onClick={() => run('Set level', '/api/set-level', { charName: pName, level })}>
+              {busy === 'Set level' ? '...' : 'Dat'}</ActionButton>
+          </div>
+        </Card>
+
+        <Card title="Ky luat nhan vat">
+          <div className="flex flex-wrap items-center gap-2">
+            <Field ph="Phut mute" val={muteMin} set={setMuteMin} type="number" w="w-20" />
+            <ActionButton variant="outline" onClick={() => run('Mute', '/api/mute', { charName: pName, minutes: muteMin })}>Cam chat</ActionButton>
+            <ActionButton variant="outline" onClick={() => run('Bo mute', '/api/mute', { charName: pName, minutes: '0' })}>Bo cam</ActionButton>
+            <ActionButton variant="outline" onClick={() => run('Kick', '/api/kick', { charName: pName })}>Kick</ActionButton>
+            <ActionButton variant="danger" onClick={() => run('Ban', '/api/ban', { username: pName })}>Ban</ActionButton>
+            <ActionButton variant="outline" onClick={() => run('Unban', '/api/unban', { username: pName })}>Unban</ActionButton>
+          </div>
+          <p className="text-[10px] text-gray-500">Ban/Unban dung theo TEN TAI KHOAN; Kick/Mute theo TEN NHAN VAT.</p>
+        </Card>
+
+        <Card title="Toan server">
+          <div className="flex flex-wrap items-center gap-2">
+            <Field ph="Noi dung thong bao" val={bcast} set={setBcast} w="w-full md:w-72" />
+            <ActionButton onClick={() => { if (bcast.trim()) run('Broadcast', '/api/broadcast', { message: bcast }, false); }}>Broadcast</ActionButton>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <ActionButton variant="outline" onClick={() => run('Reload config', '/api/reload', {}, false)}>Reload Config</ActionButton>
+            <ActionButton variant="danger" onClick={() => run('Bao tri', '/api/maintenance', { enabled: 'true' }, false)}>Bao Tri</ActionButton>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
 
 function AIPanel() {
   const [genType, setGenType] = useState('quest');
@@ -514,7 +617,9 @@ export default function AdminDashboard() {
 
           {!loading && activePanel === 'ai' && <AIPanel />}
 
-          {!loading && activePanel !== 'status' && activePanel !== 'ai' && (
+          {!loading && activePanel === 'quick' && <QuickActions />}
+
+          {!loading && activePanel !== 'status' && activePanel !== 'ai' && activePanel !== 'quick' && (
             <div className="bg-[#12122a] border border-white/5 rounded-xl overflow-hidden">
               {currentPanel?.editable
                 ? <ConfigEditor endpoint={currentPanel.endpoint} pk={currentPanel.pk || 'id'} data={panelData} onReload={() => loadPanel(activePanel)} />
