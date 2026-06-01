@@ -3994,19 +3994,31 @@ public class AdminApiServer {
                         up.setString(1, ch.path(col).asText()); up.setLong(2, charId); up.executeUpdate();
                     }
                 }
-                // khoi phuc inventory: xoa hien tai roi nap lai tu snapshot
+                // khoi phuc inventory: xoa hien tai roi nap lai tu snapshot (generic theo cot da luu)
                 c.prepareStatement("DELETE FROM character_inventory WHERE char_id=" + charId).executeUpdate();
                 var inv = snap.path("inventory");
                 if (inv.isArray()) for (var it : inv) {
-                    int itemId = it.path("item_id").asInt();
-                    int qty = it.path("qty").asInt(1);
-                    int slot = it.has("slot") ? it.path("slot").asInt(-1) : -1;
-                    String opt = it.has("options_json") && !it.path("options_json").isNull() ? it.path("options_json").asText() : null;
-                    PreparedStatement ins = c.prepareStatement("INSERT INTO character_inventory (char_id,item_id,qty,slot,options_json) VALUES (?,?,?,?,?)");
-                    ins.setLong(1, charId); ins.setInt(2, itemId); ins.setInt(3, qty); ins.setInt(4, slot); ins.setString(5, opt); ins.executeUpdate();
+                    var fields = new java.util.ArrayList<String>();
+                    var vals = new java.util.ArrayList<String>();
+                    it.fields().forEachRemaining(e -> {
+                        if (!e.getKey().equals("id")) { fields.add(e.getKey()); vals.add(e.getValue().isNull() ? null : e.getValue().asText()); }
+                    });
+                    if (fields.isEmpty()) continue;
+                    String cols = String.join(",", fields);
+                    String qs = String.join(",", java.util.Collections.nCopies(fields.size(), "?"));
+                    PreparedStatement ins = c.prepareStatement("INSERT INTO character_inventory (" + cols + ") VALUES (" + qs + ")");
+                    for (int i = 0; i < fields.size(); i++) {
+                        if (fields.get(i).equals("char_id")) ins.setLong(i + 1, charId);
+                        else ins.setString(i + 1, vals.get(i));
+                    }
+                    ins.executeUpdate();
                 }
                 auditLog(ex, "snapshot_restore", "character", String.valueOf(charId), "snapshot #" + id);
                 sendJson(ex, 200, Map.of("success", true, "message", "Da khoi phuc (nguoi choi nen relog)"));
+            } else if ("snapshot_all".equals(action)) {
+                new Thread(com.nexusisekai.game.snapshot.SnapshotService::autoSnapshotActive, "snapshot-all").start();
+                auditLog(ex, "snapshot_all", "system", "", "thu cong");
+                sendJson(ex, 200, Map.of("success", true, "message", "Dang chup snapshot cac nhan vat active (chay nen)"));
             } else sendJson(ex, 400, Map.of("success", false));
         }
     }

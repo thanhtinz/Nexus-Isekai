@@ -107,6 +107,10 @@ public class MarketHandler {
                 p.getCharId(), itemId, qty, enh);
             // trả tiền cho người bán
             SqlSafe.update(c,"UPDATE characters SET "+col+"="+col+"+? WHERE id=?", price, seller);
+            // ghi nhat ky tien te (phat hien RMT/chuyen vang qua cho)
+            String curName = currency==1?"gold":"diamond";
+            com.nexusisekai.game.economy.CurrencyLog.log(p.getCharId(), curName, -price, 0, "market_buy", "listing "+lid+" item "+itemId);
+            com.nexusisekai.game.economy.CurrencyLog.log(seller, curName, price, 0, "market_sell", "listing "+lid+" item "+itemId);
             if(currency==1) p.setGold((int)Math.max(0, p.getGold()-price));
             ActivityHandler.fire(p.getCharId(), "market_buy", 1);
             result(s,"Da mua "+qty+"x "+l.get("item_name")+" het "+price+(currency==1?" vang":" KC"));

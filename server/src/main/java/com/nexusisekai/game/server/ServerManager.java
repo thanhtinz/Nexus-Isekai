@@ -33,6 +33,9 @@ public class ServerManager {
         this.currentServerId = serverId;
         // Kiểm tra maintenance mỗi phút
         scheduler.scheduleAtFixedRate(this::checkMaintenance, 0, 60, TimeUnit.SECONDS);
+        // Auto-snapshot nhân vật active mỗi 24h (rollback sau hack/bug), trễ 30 phút sau khởi động
+        scheduler.scheduleAtFixedRate(
+            com.nexusisekai.game.snapshot.SnapshotService::autoSnapshotActive, 30, 1440, TimeUnit.MINUTES);
         log.info("[SERVER] ServerManager started for server id={}", serverId);
     }
 

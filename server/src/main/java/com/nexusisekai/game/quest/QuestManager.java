@@ -192,6 +192,8 @@ public class QuestManager {
                      "UPDATE characters SET gold=gold+? WHERE id=?")) {
                 ps.setInt(1, gold); ps.setLong(2, player.getCharId());
                 ps.executeUpdate();
+                long bal = 0; try (var br = conn.prepareStatement("SELECT gold FROM characters WHERE id="+player.getCharId()).executeQuery()) { if (br.next()) bal = br.getLong(1); }
+                com.nexusisekai.game.economy.CurrencyLog.gold(player.getCharId(), gold, bal, "quest", "quest " + qt.getId());
             }
         }
 

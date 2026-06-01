@@ -393,6 +393,8 @@ public class MinigameManager {
             ps.setInt(3, amount);
             int rows = ps.executeUpdate();
             if (rows == 0) throw new RuntimeException("Không đủ vàng để cược.");
+            long bal = 0; try (var br = c.prepareStatement("SELECT gold FROM characters WHERE id="+session.getPlayer().getCharId()).executeQuery()) { if (br.next()) bal = br.getLong(1); }
+            com.nexusisekai.game.economy.CurrencyLog.gold(session.getPlayer().getCharId(), -amount, bal, "minigame", "bet");
         } catch (Exception e) { throw new RuntimeException(e); }
     }
 
@@ -401,6 +403,8 @@ public class MinigameManager {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             PreparedStatement ps = c.prepareStatement("UPDATE characters SET gold=gold+? WHERE id=?");
             ps.setInt(1, amount); ps.setLong(2, charId); ps.executeUpdate();
+            long bal = 0; try (var br = c.prepareStatement("SELECT gold FROM characters WHERE id="+charId).executeQuery()) { if (br.next()) bal = br.getLong(1); }
+            com.nexusisekai.game.economy.CurrencyLog.gold(charId, amount, bal, "minigame", "win");
         } catch (Exception e) { log.error("creditPlayer: {}", e.getMessage()); }
     }
 

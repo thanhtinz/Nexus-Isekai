@@ -255,6 +255,12 @@ public class Player {
     public void setInstanceId(long id)    { this.instanceId = id; }
     public int getGold()                  { return gold; }
     public void setGold(int gold)         { this.gold = gold; }
+    /** Cộng/trừ vàng + ghi nhật ký currency_log. Dùng thay setGold tại các điểm phát/tiêu để giám sát kinh tế. */
+    public void addGold(int delta, String source, String detail) {
+        this.gold += delta;
+        if (this.gold < 0) this.gold = 0;
+        com.nexusisekai.game.economy.CurrencyLog.gold(charId, delta, this.gold, source, detail);
+    }
     public long getGuildId()              { return guildId; }
     public boolean isInCombat()           { return inCombat; }
     public void setInCombat(boolean b)    { this.inCombat = b; }
