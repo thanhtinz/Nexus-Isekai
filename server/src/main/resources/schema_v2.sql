@@ -1928,7 +1928,6 @@ INSERT IGNORE INTO character_sprite_config VALUES
 ('animation_format', 'spine', 'Spine animation cho NPCs va effects');
 
 -- Tao nhan vat: class_id(1-5) + gender(0/1)
-ALTER TABLE characters ADD COLUMN IF NOT EXISTS gender TINYINT NOT NULL DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS animation_states (
     id              INT AUTO_INCREMENT PRIMARY KEY,
@@ -3343,7 +3342,6 @@ INSERT IGNORE INTO map_portals (map_id, pos_x, pos_y, portal_type, facility_cate
  (203, 250, 150, 'facility', 'house_interior', 'Vào Nhà', 1);
 
 -- Tương tác nội thất
-ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS interaction_type   VARCHAR(16) NOT NULL DEFAULT 'none'; -- sit,lie,eat,drink,none
 ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS animation_state    VARCHAR(32) NOT NULL DEFAULT '';      -- sit_chair,lie_bed,eat,drink
 ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS interaction_effect VARCHAR(256) NOT NULL DEFAULT '';     -- JSON {"hp_regen":50,"buff":"rested","duration":300}
 ALTER TABLE furniture_catalog ADD COLUMN IF NOT EXISTS is_consumable      TINYINT NOT NULL DEFAULT 0;           -- ăn/uống có tốn không
