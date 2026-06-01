@@ -110,6 +110,7 @@ public class EnhancementHandler {
                 // Roll cường hoá
                 float roll = ThreadLocalRandom.current().nextFloat() * 100f;
                 boolean success = roll <= successRate;
+                if (success) ActivityHandler.fire(session.getPlayer().getCharId(), "enhance", 1);
 
                 int newLevel;
                 if (success) {

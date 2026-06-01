@@ -61,6 +61,7 @@ public class QuestHandler {
         boolean done = QuestManager.getInstance().completeQuest(player, questId);
 
         if (done) {
+            ActivityHandler.fire(player.getCharId(), "quest_complete", 1);
             sendQuestList(session, player);
             InventoryHandler.sendInventory(session, player);
             InventoryHandler.sendPlayerStats(session, player);

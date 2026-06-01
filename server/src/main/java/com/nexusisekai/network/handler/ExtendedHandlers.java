@@ -1080,12 +1080,13 @@ public class ExtendedHandlers {
             com.nexusisekai.database.SqlSafe.update(c,
                 "UPDATE character_inventory SET gem_slot_" + (socketIdx+1) + "=? WHERE char_id=? AND slot=?",
                 gem, p.getCharId(), slot);
+            ActivityHandler.fire(p.getCharId(), "gem_socket", 1);
             msg(s, "Kham ngoc thanh cong");
         } catch (Exception e) { msg(s, "Loi kham ngoc"); }
     }
     public static void handleRefine(GameSession s, ByteBuf b) {
         long uid=b.readInt(); Player p=s.getPlayer(); if(p==null) return;
-        try { var r=com.nexusisekai.game.service.RefineService.refine(p.getCharId(), uid); msg(s, r.message); }
+        try { var r=com.nexusisekai.game.service.RefineService.refine(p.getCharId(), uid); ActivityHandler.fire(p.getCharId(), "refine", 1); msg(s, r.message); }
         catch(Exception e){ msg(s,"Loi tinh luyen"); }
     }
     public static void handleNewsList(GameSession s, ByteBuf b) {
@@ -1183,6 +1184,7 @@ public class ExtendedHandlers {
         int bid = b.readInt(); int cnt = b.readInt();
         Player p = s.getPlayer(); if (p == null) return;
         try {
+            ActivityHandler.fire(p.getCharId(), "gacha_pull", cnt >= 10 ? 10 : 1);
             if (cnt >= 10) {
                 var results = GachaService.pullTen(p.getCharId(), bid);
                 ByteBuf pkt = Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_GACHA_RESULT);

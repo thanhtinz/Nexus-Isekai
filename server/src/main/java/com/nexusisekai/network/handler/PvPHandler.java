@@ -149,6 +149,8 @@ public class PvPHandler {
         GameSession winnerSession = findSession(winnerId);
         GameSession loserSession  = findSession(loserId);
 
+        ActivityHandler.fire(winnerId, "pvp_win", 1);
+        ActivityHandler.fire(winnerId, "pvp_kill", 1);
         broadcastDuelEnd(winnerSession, loserSession, winnerId, reason);
         log.info("[PVP] Duel {} ended. Winner={} reason={}", duel.id, winnerId, reason);
     }

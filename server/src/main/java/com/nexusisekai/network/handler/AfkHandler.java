@@ -51,6 +51,7 @@ public class AfkHandler {
             // trừ diamond per-character
             int rows=SqlSafe.update(c,"UPDATE characters SET diamond=diamond-? WHERE id=? AND diamond>=?",price,p.getCharId(),price);
             if(rows==0){ msg(s,"Khong du kim cuong"); return; }
+            ActivityHandler.fire(p.getCharId(), "spend_diamond", price);
             SqlSafe.update(c,
                 "INSERT INTO character_afk (char_id,card_id,map_id,expires_at,last_claim_at,is_active) "+
                 "VALUES (?,?,?,DATE_ADD(NOW(),INTERVAL ? HOUR),NOW(),1) "+

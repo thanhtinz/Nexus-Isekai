@@ -50,6 +50,7 @@ public class EndgameHandler {
             if(bo==null || ((Number)bo.get("is_alive")).intValue()!=1){ return; }
             long cur=bo.get("current_hp")==null?((Number)bo.get("hp")).longValue():((Number)bo.get("current_hp")).longValue();
             long applied=Math.min(dmg, cur);
+            ActivityHandler.fire(p.getCharId(), "world_boss", applied); // Hoạt Động: điểm = sát thương
             long newHp=cur-applied;
             // cộng damage tích luỹ (xếp hạng)
             SqlSafe.update(c,

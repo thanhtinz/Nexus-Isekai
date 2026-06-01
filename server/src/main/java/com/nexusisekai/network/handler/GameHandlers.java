@@ -135,6 +135,7 @@ class FarmingHandler {
             int itemId = ((Number) result.get("item_id")).intValue();
             int qty    = ((Number) result.get("qty")).intValue();
             session.sendError(PacketOpcode.S2C_SYSTEM_MSG, "Thu hoạch được " + qty + " vật phẩm #" + itemId + "!");
+            ActivityHandler.fire(session.getPlayer().getCharId(), "farm_harvest", 1);
             handleFarmState(session, Unpooled.EMPTY_BUFFER);
         } catch (Exception e) { session.sendError(PacketOpcode.S2C_SYSTEM_MSG, e.getMessage()); }
     }

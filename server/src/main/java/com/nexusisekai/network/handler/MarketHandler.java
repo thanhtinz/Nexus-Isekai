@@ -73,6 +73,7 @@ public class MarketHandler {
                 "VALUES (?,?,?,?,?,?,?,?,?,?,DATE_ADD(NOW(),INTERVAL 3 DAY))",
                 p.getCharId(), p.getName(), invId, ((Number)it.get("item_id")).intValue(), (String)it.get("name"),
                 qty, ((Number)it.get("enhance_level")).intValue(), currency, price, (String)it.get("category"));
+            ActivityHandler.fire(p.getCharId(), "market_sell", 1);
             result(s,"Da dang ban "+qty+"x "+it.get("name")+" gia "+price+(currency==1?" vang":" KC"));
         }catch(Exception e){ result(s,"Loi dang ban"); }
     }
@@ -107,6 +108,7 @@ public class MarketHandler {
             // trả tiền cho người bán
             SqlSafe.update(c,"UPDATE characters SET "+col+"="+col+"+? WHERE id=?", price, seller);
             if(currency==1) p.setGold((int)Math.max(0, p.getGold()-price));
+            ActivityHandler.fire(p.getCharId(), "market_buy", 1);
             result(s,"Da mua "+qty+"x "+l.get("item_name")+" het "+price+(currency==1?" vang":" KC"));
         }catch(Exception e){ result(s,"Loi mua hang"); }
     }
