@@ -198,10 +198,6 @@ const PANELS: PanelConfig[] = [
 
   // Noi dung (cot truyen, item, NPC, ky nang, audio)
   { key: 'registry',     label: 'Kho Tong',        group: 'Noi Dung',   endpoint: '/api/registry',          dataKey: 'items' },
-  { key: 'items',        label: 'Items',           group: 'Noi Dung',   endpoint: '/api/items',             dataKey: 'items' },
-  { key: 'class_change', label: 'Chuyen Lop',      group: 'Noi Dung',   endpoint: '/api/class-change',      dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'child_shop',   label: 'Shop Tre Em',     group: 'Noi Dung',   endpoint: '/api/child-shop',        dataKey: 'rows', editable: true, pk: 'id' },
-  { key: 'voice_lines',  label: 'Loi Thoai (Voice)',group: 'Noi Dung',  endpoint: '/api/voice-lines',       dataKey: 'rows', editable: true, pk: 'id' },
 
   // Kinh te (shop, nap, giftcode, su menh)
   { key: 'webshop',      label: 'Webshop',         group: 'Kinh Te',    endpoint: '/api/webshop',           dataKey: 'products' },
