@@ -181,6 +181,38 @@ public class GameSession extends SimpleChannelInboundHandler<ByteBuf> {
             case PacketOpcode.C2S_ANIMAL_COLLECT-> { requireInGame(); FarmingHandler.handleAnimalCollect(this, toBuf(p)); }
             case PacketOpcode.C2S_FARM_FERTILIZE-> { requireInGame(); FarmingHandler.handleFertilize(this, toBuf(p)); }
             case PacketOpcode.C2S_ANIMAL_BREED  -> { requireInGame(); FarmingHandler.handleAnimalBreed(this, toBuf(p)); }
+
+            // AFK
+            case PacketOpcode.C2S_AFK_CARD_LIST -> { requireInGame(); AfkHandler.handleCardList(this, toBuf(p)); }
+            case PacketOpcode.C2S_AFK_BUY       -> { requireInGame(); AfkHandler.handleBuy(this, toBuf(p)); }
+            case PacketOpcode.C2S_AFK_CLAIM     -> { requireInGame(); AfkHandler.handleClaim(this, toBuf(p)); }
+            case PacketOpcode.C2S_AFK_STOP      -> { requireInGame(); AfkHandler.handleStop(this, toBuf(p)); }
+            case PacketOpcode.C2S_AFK_STATUS    -> { requireInGame(); AfkHandler.handleStatus(this, toBuf(p)); }
+            // Chợ người chơi
+            case PacketOpcode.C2S_MARKET_LIST   -> { requireInGame(); MarketHandler.handleList(this, toBuf(p)); }
+            case PacketOpcode.C2S_MARKET_SELL   -> { requireInGame(); MarketHandler.handleSell(this, toBuf(p)); }
+            case PacketOpcode.C2S_MARKET_BUY    -> { requireInGame(); MarketHandler.handleBuy(this, toBuf(p)); }
+            case PacketOpcode.C2S_MARKET_CANCEL -> { requireInGame(); MarketHandler.handleCancel(this, toBuf(p)); }
+            case PacketOpcode.C2S_MARKET_MINE   -> { requireInGame(); MarketHandler.handleMine(this, toBuf(p)); }
+            // PK mode / jail
+            case PacketOpcode.C2S_SET_COMBAT_MODE -> { requireInGame(); CombatModeHandler.handleSetMode(this, toBuf(p)); }
+            case PacketOpcode.C2S_PK_STATUS     -> { requireInGame(); CombatModeHandler.handleStatus(this, toBuf(p)); }
+            // World boss
+            case PacketOpcode.C2S_WORLDBOSS_INFO   -> { requireInGame(); EndgameHandler.handleWorldBossInfo(this, toBuf(p)); }
+            case PacketOpcode.C2S_WORLDBOSS_ATTACK -> { requireInGame(); EndgameHandler.handleWorldBossAttack(this, toBuf(p)); }
+            case PacketOpcode.C2S_WORLDBOSS_RANK   -> { requireInGame(); EndgameHandler.handleWorldBossRank(this, toBuf(p)); }
+            // Guild war
+            case PacketOpcode.C2S_GUILDWAR_INFO    -> { requireInGame(); EndgameHandler.handleGuildWarInfo(this, toBuf(p)); }
+            case PacketOpcode.C2S_GUILDWAR_DECLARE -> { requireInGame(); EndgameHandler.handleGuildWarDeclare(this, toBuf(p)); }
+            case PacketOpcode.C2S_GUILDWAR_JOIN    -> { requireInGame(); EndgameHandler.handleGuildWarJoin(this, toBuf(p)); }
+            // Ngoại vực
+            case PacketOpcode.C2S_OUTER_FLOORS  -> { requireInGame(); EndgameHandler.handleOuterFloors(this, toBuf(p)); }
+            case PacketOpcode.C2S_OUTER_ENTER   -> { requireInGame(); EndgameHandler.handleOuterEnter(this, toBuf(p)); }
+            case PacketOpcode.C2S_OUTER_LEAVE   -> { requireInGame(); EndgameHandler.handleOuterLeave(this, toBuf(p)); }
+            // VIP
+            case PacketOpcode.C2S_VIP_INFO      -> { requireInGame(); EndgameHandler.handleVipInfo(this, toBuf(p)); }
+            case PacketOpcode.C2S_VIP_CLAIM     -> { requireInGame(); EndgameHandler.handleVipClaim(this, toBuf(p)); }
+            case PacketOpcode.C2S_VIP_DAILY     -> { requireInGame(); EndgameHandler.handleVipDaily(this, toBuf(p)); }
             case PacketOpcode.C2S_FARM_VISIT    -> { requireInGame(); FarmingHandler.handleFarmVisit(this, toBuf(p)); }
 
             // ── Housing ───────────────────────────────────────────────

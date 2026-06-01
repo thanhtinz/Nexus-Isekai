@@ -579,4 +579,62 @@ public final class PacketOpcode {
     public static final short C2S_FARM_VISIT     = (short)0x3803;
     public static final short S2C_FARM_VISIT     = (short)0x3811;
     public static final short S2C_ANIMAL_BREED   = (short)0x3812;
+
+    // ───── AFK / Treo máy (0x3Cxx) ─────
+    public static final short C2S_AFK_CARD_LIST  = (short)0x3C01;
+    public static final short C2S_AFK_BUY        = (short)0x3C02;  // mua thẻ + bật AFK
+    public static final short C2S_AFK_CLAIM      = (short)0x3C03;  // nhận thưởng tích luỹ
+    public static final short C2S_AFK_STOP       = (short)0x3C04;
+    public static final short C2S_AFK_STATUS     = (short)0x3C05;
+    public static final short S2C_AFK_CARD_LIST  = (short)0x3C11;
+    public static final short S2C_AFK_STATUS     = (short)0x3C12;
+    public static final short S2C_AFK_REWARD     = (short)0x3C13;
+
+    // ───── Chợ người chơi (0x3Dxx) ─────
+    public static final short C2S_MARKET_LIST    = (short)0x3D01;  // xem chợ (lọc category/currency)
+    public static final short C2S_MARKET_SELL    = (short)0x3D02;  // đăng bán
+    public static final short C2S_MARKET_BUY     = (short)0x3D03;  // mua
+    public static final short C2S_MARKET_CANCEL  = (short)0x3D04;  // huỷ bán
+    public static final short C2S_MARKET_MINE    = (short)0x3D05;  // hàng của tôi
+    public static final short S2C_MARKET_LIST    = (short)0x3D11;
+    public static final short S2C_MARKET_RESULT  = (short)0x3D12;
+
+    // ───── Guild War (0x3Exx) ─────
+    public static final short C2S_GUILDWAR_INFO  = (short)0x3E01;
+    public static final short C2S_GUILDWAR_DECLARE = (short)0x3E02;
+    public static final short C2S_GUILDWAR_JOIN   = (short)0x3E03;
+    public static final short S2C_GUILDWAR_INFO  = (short)0x3E11;
+    public static final short S2C_GUILDWAR_UPDATE = (short)0x3E12; // cập nhật điểm realtime
+
+    // ───── World Boss hạn giờ (0x3Fxx) ─────
+    public static final short C2S_WORLDBOSS_INFO = (short)0x3F01;
+    public static final short C2S_WORLDBOSS_ATTACK = (short)0x3F02;
+    public static final short C2S_WORLDBOSS_RANK  = (short)0x3F03;
+    public static final short S2C_WORLDBOSS_INFO = (short)0x3F11;
+    public static final short S2C_WORLDBOSS_SPAWN = (short)0x3F12;
+    public static final short S2C_WORLDBOSS_HP   = (short)0x3F13;
+    public static final short S2C_WORLDBOSS_DEAD = (short)0x3F14;  // ai kết liễu + thưởng
+    public static final short S2C_WORLDBOSS_RANK = (short)0x3F15;
+
+    // ───── Ngoại Vực (0x40xx) ─────
+    public static final short C2S_OUTER_FLOORS   = (short)0x4001;
+    public static final short C2S_OUTER_ENTER    = (short)0x4002;
+    public static final short C2S_OUTER_LEAVE    = (short)0x4003;
+    public static final short S2C_OUTER_FLOORS   = (short)0x4011;
+    public static final short S2C_OUTER_RESULT   = (short)0x4012;
+
+    // ───── PK mode + Truy nã + Nhà tù (0x41xx) ─────
+    public static final short C2S_SET_COMBAT_MODE = (short)0x4101;
+    public static final short C2S_PK_STATUS      = (short)0x4102;
+    public static final short S2C_COMBAT_MODE    = (short)0x4111;
+    public static final short S2C_PK_STATUS      = (short)0x4112;
+    public static final short S2C_WANTED_UPDATE  = (short)0x4113;
+    public static final short S2C_JAILED         = (short)0x4114;
+
+    // ───── VIP (0x42xx) ─────
+    public static final short C2S_VIP_INFO       = (short)0x4201;
+    public static final short C2S_VIP_CLAIM      = (short)0x4202;  // nhận thưởng mốc
+    public static final short C2S_VIP_DAILY      = (short)0x4203;  // nhận đặc quyền ngày
+    public static final short S2C_VIP_INFO       = (short)0x4211;
+    public static final short S2C_VIP_REWARD     = (short)0x4212;
 }

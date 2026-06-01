@@ -512,5 +512,57 @@ namespace NexusIsekai.Network
         public const short S2C_FARM_VISIT     = 0x3811;
         public const short S2C_ANIMAL_BREED   = 0x3812;
 
+        // AFK
+        public const short C2S_AFK_CARD_LIST  = 0x3C01;
+        public const short C2S_AFK_BUY        = 0x3C02;
+        public const short C2S_AFK_CLAIM      = 0x3C03;
+        public const short C2S_AFK_STOP       = 0x3C04;
+        public const short C2S_AFK_STATUS     = 0x3C05;
+        public const short S2C_AFK_CARD_LIST  = 0x3C11;
+        public const short S2C_AFK_STATUS     = 0x3C12;
+        public const short S2C_AFK_REWARD     = 0x3C13;
+        // Chợ
+        public const short C2S_MARKET_LIST    = 0x3D01;
+        public const short C2S_MARKET_SELL    = 0x3D02;
+        public const short C2S_MARKET_BUY     = 0x3D03;
+        public const short C2S_MARKET_CANCEL  = 0x3D04;
+        public const short C2S_MARKET_MINE    = 0x3D05;
+        public const short S2C_MARKET_LIST    = 0x3D11;
+        public const short S2C_MARKET_RESULT  = 0x3D12;
+        // Guild War
+        public const short C2S_GUILDWAR_INFO    = 0x3E01;
+        public const short C2S_GUILDWAR_DECLARE = 0x3E02;
+        public const short C2S_GUILDWAR_JOIN    = 0x3E03;
+        public const short S2C_GUILDWAR_INFO    = 0x3E11;
+        public const short S2C_GUILDWAR_UPDATE  = 0x3E12;
+        // World Boss
+        public const short C2S_WORLDBOSS_INFO   = 0x3F01;
+        public const short C2S_WORLDBOSS_ATTACK = 0x3F02;
+        public const short C2S_WORLDBOSS_RANK   = 0x3F03;
+        public const short S2C_WORLDBOSS_INFO   = 0x3F11;
+        public const short S2C_WORLDBOSS_SPAWN  = 0x3F12;
+        public const short S2C_WORLDBOSS_HP     = 0x3F13;
+        public const short S2C_WORLDBOSS_DEAD   = 0x3F14;
+        public const short S2C_WORLDBOSS_RANK   = 0x3F15;
+        // Ngoại Vực
+        public const short C2S_OUTER_FLOORS   = 0x4001;
+        public const short C2S_OUTER_ENTER    = 0x4002;
+        public const short C2S_OUTER_LEAVE    = 0x4003;
+        public const short S2C_OUTER_FLOORS   = 0x4011;
+        public const short S2C_OUTER_RESULT   = 0x4012;
+        // PK mode
+        public const short C2S_SET_COMBAT_MODE = 0x4101;
+        public const short C2S_PK_STATUS      = 0x4102;
+        public const short S2C_COMBAT_MODE    = 0x4111;
+        public const short S2C_PK_STATUS      = 0x4112;
+        public const short S2C_WANTED_UPDATE  = 0x4113;
+        public const short S2C_JAILED         = 0x4114;
+        // VIP
+        public const short C2S_VIP_INFO       = 0x4201;
+        public const short C2S_VIP_CLAIM      = 0x4202;
+        public const short C2S_VIP_DAILY      = 0x4203;
+        public const short S2C_VIP_INFO       = 0x4211;
+        public const short S2C_VIP_REWARD     = 0x4212;
+
     }
 }

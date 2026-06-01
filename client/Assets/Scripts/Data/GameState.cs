@@ -104,4 +104,13 @@ namespace NexusIsekai.Game
 
     public void PlayChildInteract(long childId){ /* bé phản ứng vui khi được chơi */ }
     public void MoveChildNpc(long childId, float x, float y){ /* di chuyển NPC bé trong nhà */ }
+
+    // ───── Combat mode / PK / VIP UI hooks ─────
+    public string CombatMode { get; private set; } = "peace";
+    public int WantedLevel { get; private set; }
+    public void ShowToast(string msg){ /* hiện thông báo ngắn trên HUD */ }
+    public void SetCombatMode(string mode){ CombatMode = mode; }
+    public void SetPkStatus(string mode, int wanted, int kills, int jailSecs){ CombatMode = mode; WantedLevel = wanted; }
+    public void SetWanted(int wanted){ WantedLevel = wanted; }
+    public void ShowJailed(int secs){ /* hiện màn hình bị giam + đếm ngược */ }
 }

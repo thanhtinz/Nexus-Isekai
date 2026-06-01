@@ -44,6 +44,34 @@ namespace NexusIsekai.Game
             d.Register(PacketOpcode.S2C_INTRO_VIDEO_CONFIG, OnIntroVideoConfig);
             d.Register(PacketOpcode.S2C_FARM_VISIT,   OnFarmVisit);
             d.Register(PacketOpcode.S2C_ANIMAL_BREED, OnAnimalBreed);
+
+            // AFK
+            d.Register(PacketOpcode.S2C_AFK_CARD_LIST, OnAfkCardList);
+            d.Register(PacketOpcode.S2C_AFK_STATUS,    OnAfkStatus);
+            d.Register(PacketOpcode.S2C_AFK_REWARD,    OnAfkReward);
+            // Chợ
+            d.Register(PacketOpcode.S2C_MARKET_LIST,   OnMarketList);
+            d.Register(PacketOpcode.S2C_MARKET_RESULT, OnMarketResult);
+            // Guild war
+            d.Register(PacketOpcode.S2C_GUILDWAR_INFO,   OnGuildWarInfo);
+            d.Register(PacketOpcode.S2C_GUILDWAR_UPDATE, OnGuildWarUpdate);
+            // World boss
+            d.Register(PacketOpcode.S2C_WORLDBOSS_INFO,  OnWorldBossInfo);
+            d.Register(PacketOpcode.S2C_WORLDBOSS_SPAWN, OnWorldBossSpawn);
+            d.Register(PacketOpcode.S2C_WORLDBOSS_HP,    OnWorldBossHp);
+            d.Register(PacketOpcode.S2C_WORLDBOSS_DEAD,  OnWorldBossDead);
+            d.Register(PacketOpcode.S2C_WORLDBOSS_RANK,  OnWorldBossRank);
+            // Ngoại vực
+            d.Register(PacketOpcode.S2C_OUTER_FLOORS,  OnOuterFloors);
+            d.Register(PacketOpcode.S2C_OUTER_RESULT,  OnOuterResult);
+            // PK mode
+            d.Register(PacketOpcode.S2C_COMBAT_MODE,   OnCombatMode);
+            d.Register(PacketOpcode.S2C_PK_STATUS,     OnPkStatus);
+            d.Register(PacketOpcode.S2C_WANTED_UPDATE, OnWantedUpdate);
+            d.Register(PacketOpcode.S2C_JAILED,        OnJailed);
+            // VIP
+            d.Register(PacketOpcode.S2C_VIP_INFO,      OnVipInfo);
+            d.Register(PacketOpcode.S2C_VIP_REWARD,    OnVipReward);
             d.Register(PacketOpcode.S2C_CHILD_SHOP,      OnChildShop);
             d.Register(PacketOpcode.S2C_CHILD_BUY,        OnChildBuy);
             d.Register(PacketOpcode.S2C_CHILD_INTERACT,   OnChildInteract);
@@ -594,6 +622,125 @@ namespace NexusIsekai.Game
             // server gửi qua S2C_SYSTEM_MSG là chính; hook để refresh nếu cần
             FarmUI.Instance?.RefreshAnimals();
         }
+
+        // ───── AFK ─────
+        private void OnAfkCardList(PacketReader r) {
+            int n = r.ReadShort();
+            AfkUI.Instance?.ClearCards();
+            for (int i = 0; i < n; i++) {
+                int id = r.ReadInt(); string name = r.ReadString();
+                int hours = r.ReadInt(); int price = r.ReadInt();
+                float expR = r.ReadFloat(); float goldR = r.ReadFloat(); float dropR = r.ReadFloat();
+                AfkUI.Instance?.AddCard(id, name, hours, price, expR, goldR, dropR);
+            }
+            AfkUI.Instance?.Open();
+        }
+        private void OnAfkStatus(PacketReader r) {
+            bool active = r.ReadBool();
+            if (active) {
+                int cardId = r.ReadInt(); int secsLeft = r.ReadInt();
+                long exp = r.ReadLong(); long gold = r.ReadLong();
+                AfkUI.Instance?.SetStatus(cardId, secsLeft, exp, gold);
+            } else AfkUI.Instance?.SetInactive();
+        }
+        private void OnAfkReward(PacketReader r) { GameState.Instance?.ShowToast(r.ReadString()); }
+
+        // ───── Chợ ─────
+        private void OnMarketList(PacketReader r) {
+            int n = r.ReadShort();
+            MarketUI.Instance?.ClearListings();
+            for (int i = 0; i < n; i++) {
+                long id = r.ReadLong(); string seller = r.ReadString();
+                int itemId = r.ReadInt(); string itemName = r.ReadString();
+                int qty = r.ReadInt(); int enh = r.ReadInt();
+                int currency = r.ReadByte(); long price = r.ReadLong(); string cat = r.ReadString();
+                MarketUI.Instance?.AddListing(id, seller, itemId, itemName, qty, enh, currency, price, cat);
+            }
+            MarketUI.Instance?.Open();
+        }
+        private void OnMarketResult(PacketReader r) { GameState.Instance?.ShowToast(r.ReadString()); MarketUI.Instance?.Refresh(); }
+
+        // ───── Guild War ─────
+        private void OnGuildWarInfo(PacketReader r) {
+            int n = r.ReadShort();
+            GuildWarUI.Instance?.ClearWars();
+            for (int i = 0; i < n; i++) {
+                int id = r.ReadInt(); int ga = r.ReadInt(); int gb = r.ReadInt(); int mapId = r.ReadInt();
+                string status = r.ReadString(); int sa = r.ReadInt(); int sb = r.ReadInt(); int secs = r.ReadInt();
+                GuildWarUI.Instance?.AddWar(id, ga, gb, mapId, status, sa, sb, secs);
+            }
+            GuildWarUI.Instance?.Open();
+        }
+        private void OnGuildWarUpdate(PacketReader r) { GameState.Instance?.ShowToast(r.ReadString()); }
+
+        // ───── World Boss ─────
+        private void OnWorldBossInfo(PacketReader r) {
+            int n = r.ReadShort();
+            WorldBossUI.Instance?.ClearBosses();
+            for (int i = 0; i < n; i++) {
+                int id = r.ReadInt(); string name = r.ReadString(); int mapId = r.ReadInt();
+                long hp = r.ReadLong(); long cur = r.ReadLong(); int secs = r.ReadInt();
+                WorldBossUI.Instance?.AddBoss(id, name, mapId, hp, cur, secs);
+            }
+            WorldBossUI.Instance?.Open();
+        }
+        private void OnWorldBossSpawn(PacketReader r) {
+            int id = r.ReadInt(); string name = r.ReadString();
+            GameState.Instance?.ShowToast("World Boss xuất hiện: " + name);
+        }
+        private void OnWorldBossHp(PacketReader r) {
+            int id = r.ReadInt(); long hp = r.ReadLong();
+            WorldBossUI.Instance?.UpdateHp(id, hp);
+        }
+        private void OnWorldBossDead(PacketReader r) {
+            int id = r.ReadInt(); string killer = r.ReadString();
+            GameState.Instance?.ShowToast("Boss bị hạ bởi " + killer + "!");
+            WorldBossUI.Instance?.OnBossDead(id, killer);
+        }
+        private void OnWorldBossRank(PacketReader r) {
+            int bossId = r.ReadInt(); int n = r.ReadShort();
+            WorldBossUI.Instance?.ClearRank();
+            for (int i = 0; i < n; i++) { string name = r.ReadString(); long dmg = r.ReadLong(); WorldBossUI.Instance?.AddRank(name, dmg); }
+            WorldBossUI.Instance?.ShowRank();
+        }
+
+        // ───── Ngoại Vực ─────
+        private void OnOuterFloors(PacketReader r) {
+            int n = r.ReadShort();
+            OuterRealmUI.Instance?.ClearFloors();
+            for (int i = 0; i < n; i++) {
+                int floor = r.ReadInt(); string name = r.ReadString(); int mapId = r.ReadInt();
+                int minLv = r.ReadInt(); bool pvp = r.ReadBool(); int mMin = r.ReadInt(); int mMax = r.ReadInt(); bool canEnter = r.ReadBool();
+                OuterRealmUI.Instance?.AddFloor(floor, name, mapId, minLv, pvp, mMin, mMax, canEnter);
+            }
+            OuterRealmUI.Instance?.Open();
+        }
+        private void OnOuterResult(PacketReader r) { GameState.Instance?.ShowToast(r.ReadString()); }
+
+        // ───── PK mode ─────
+        private void OnCombatMode(PacketReader r) {
+            string mode = r.ReadString();
+            GameState.Instance?.SetCombatMode(mode);
+            GameState.Instance?.ShowToast("Chế độ: " + mode);
+        }
+        private void OnPkStatus(PacketReader r) {
+            bool ok = r.ReadBool();
+            if (!ok) { GameState.Instance?.ShowToast(r.ReadString()); return; }
+            string mode = r.ReadString(); int wanted = r.ReadInt(); int kills = r.ReadInt(); int jailSecs = r.ReadInt();
+            GameState.Instance?.SetPkStatus(mode, wanted, kills, jailSecs);
+        }
+        private void OnWantedUpdate(PacketReader r) { int wanted = r.ReadInt(); GameState.Instance?.SetWanted(wanted); }
+        private void OnJailed(PacketReader r) { int secs = r.ReadInt(); GameState.Instance?.ShowJailed(secs); }
+
+        // ───── VIP ─────
+        private void OnVipInfo(PacketReader r) {
+            int vip = r.ReadInt(); string name = r.ReadString();
+            int daily = r.ReadInt(); float afkBonus = r.ReadFloat();
+            int bag = r.ReadInt(); int market = r.ReadInt(); int nextReq = r.ReadInt();
+            VipUI.Instance?.SetInfo(vip, name, daily, afkBonus, bag, market, nextReq);
+            VipUI.Instance?.Open();
+        }
+        private void OnVipReward(PacketReader r) { GameState.Instance?.ShowToast(r.ReadString()); }
 
         private void OnClassStory(PacketReader r)
         {

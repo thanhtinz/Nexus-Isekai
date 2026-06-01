@@ -3482,3 +3482,157 @@ ALTER TABLE gem_templates    ADD COLUMN IF NOT EXISTS category VARCHAR(24) NOT N
 -- Phân loại monster hiện có theo is_boss
 UPDATE monsters SET category='boss' WHERE is_boss=1;
 UPDATE monsters SET category='normal' WHERE is_boss=0;
+
+-- ═════════════════════════════════════════════════════════════
+-- BATCH TÍNH NĂNG MỚI: AFK, Chợ, Guild War, Boss hạn giờ, Ngoại Vực, PK mode, VIP
+-- ═════════════════════════════════════════════════════════════
+
+-- ───── 1. AFK / TREO MÁY (thẻ theo thời gian) ─────
+CREATE TABLE IF NOT EXISTS afk_cards (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    name         VARCHAR(64) NOT NULL,
+    duration_hours INT NOT NULL,                 -- số giờ chạy AFK
+    price_diamond  INT NOT NULL DEFAULT 0,
+    exp_rate     FLOAT NOT NULL DEFAULT 1.0,      -- hệ số exp khi treo
+    gold_rate    FLOAT NOT NULL DEFAULT 1.0,
+    drop_rate    FLOAT NOT NULL DEFAULT 1.0,
+    is_active    TINYINT NOT NULL DEFAULT 1
+);
+INSERT IGNORE INTO afk_cards (id,name,duration_hours,price_diamond,exp_rate,gold_rate,drop_rate) VALUES
+ (1,'Thẻ AFK 2 giờ',   2,  50, 1.0,1.0,1.0),
+ (2,'Thẻ AFK 6 giờ',   6, 120, 1.1,1.1,1.0),
+ (3,'Thẻ AFK 12 giờ', 12, 200, 1.2,1.2,1.1),
+ (4,'Thẻ AFK 24 giờ', 24, 350, 1.3,1.3,1.2),
+ (5,'Thẻ AFK 7 ngày',168,1800,1.5,1.5,1.3);
+-- phiên AFK của nhân vật (treo cả khi off)
+CREATE TABLE IF NOT EXISTS character_afk (
+    char_id      BIGINT NOT NULL PRIMARY KEY,
+    card_id      INT NOT NULL,
+    map_id       INT NOT NULL,
+    started_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at   DATETIME NOT NULL,
+    last_claim_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    accrued_exp  BIGINT NOT NULL DEFAULT 0,
+    accrued_gold BIGINT NOT NULL DEFAULT 0,
+    is_active    TINYINT NOT NULL DEFAULT 1
+);
+
+-- ───── 2. CHỢ NGƯỜI CHƠI (giá cố định, gold HOẶC diamond) ─────
+CREATE TABLE IF NOT EXISTS market_listings (
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    seller_char_id BIGINT NOT NULL,
+    seller_name   VARCHAR(32) NOT NULL,
+    inventory_id  BIGINT NOT NULL,
+    item_id       INT NOT NULL,
+    item_name     VARCHAR(64) NOT NULL,
+    qty           INT NOT NULL DEFAULT 1,
+    enhance_level INT NOT NULL DEFAULT 0,
+    currency      TINYINT NOT NULL DEFAULT 1,    -- 1=gold, 2=diamond
+    price         BIGINT NOT NULL,               -- giá cho cả lô
+    category      VARCHAR(24) NOT NULL DEFAULT 'misc', -- lọc theo danh mục item
+    listed_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at    DATETIME NULL,                 -- hết hạn tự trả lại
+    status        VARCHAR(12) NOT NULL DEFAULT 'active', -- active,sold,cancelled,expired
+    buyer_char_id BIGINT DEFAULT NULL,
+    sold_at       DATETIME DEFAULT NULL,
+    INDEX idx_status_cat (status, category), INDEX idx_seller (seller_char_id)
+);
+
+-- ───── 3. GUILD WAR (guild chiến) ─────
+CREATE TABLE IF NOT EXISTS guild_wars (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    guild_a      INT NOT NULL, guild_b INT NOT NULL,
+    map_id       INT NOT NULL,                   -- map chiến trường
+    status       VARCHAR(12) NOT NULL DEFAULT 'scheduled', -- scheduled,ongoing,ended
+    score_a      INT NOT NULL DEFAULT 0, score_b INT NOT NULL DEFAULT 0,
+    start_at     DATETIME NOT NULL, end_at DATETIME NOT NULL,
+    winner_guild INT DEFAULT NULL,
+    reward_json  VARCHAR(512) DEFAULT NULL
+);
+CREATE TABLE IF NOT EXISTS guild_war_kills (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    war_id       INT NOT NULL, killer_char_id BIGINT NOT NULL, victim_char_id BIGINT NOT NULL,
+    killer_guild INT NOT NULL, points INT NOT NULL DEFAULT 1, created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_war (war_id)
+);
+
+-- ───── 4. WORLD BOSS hạn giờ + first-kill + damage ranking ─────
+ALTER TABLE world_bosses ADD COLUMN IF NOT EXISTS duration_min INT NOT NULL DEFAULT 30;   -- tồn tại bao lâu
+ALTER TABLE world_bosses ADD COLUMN IF NOT EXISTS active_until DATETIME NULL;              -- thời điểm despawn
+ALTER TABLE world_bosses ADD COLUMN IF NOT EXISTS current_hp BIGINT NULL;                  -- hp hiện tại (live)
+ALTER TABLE world_bosses ADD COLUMN IF NOT EXISTS first_kill_reward_json VARCHAR(512) DEFAULT NULL; -- thưởng lớn cho người kết liễu
+ALTER TABLE world_bosses ADD COLUMN IF NOT EXISTS is_alive TINYINT NOT NULL DEFAULT 0;
+-- damage của từng người (xếp hạng thưởng theo sát thương)
+CREATE TABLE IF NOT EXISTS world_boss_damage (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    boss_id      INT NOT NULL, spawn_seq INT NOT NULL DEFAULT 0, -- lần spawn thứ mấy
+    char_id      BIGINT NOT NULL, char_name VARCHAR(32) NOT NULL,
+    total_damage BIGINT NOT NULL DEFAULT 0, last_hit_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq (boss_id, spawn_seq, char_id), INDEX idx_boss (boss_id, spawn_seq)
+);
+
+-- ───── 5. NGOẠI VỰC (tháp nhiều tầng, theo level, có PK) ─────
+CREATE TABLE IF NOT EXISTS outer_realm_floors (
+    floor        INT NOT NULL PRIMARY KEY,        -- tầng 1,2,3...
+    name         VARCHAR(64) NOT NULL,
+    map_id       INT NOT NULL,
+    min_level    INT NOT NULL DEFAULT 1,           -- level tối thiểu vào tầng
+    max_players  INT NOT NULL DEFAULT 50,
+    is_pvp       TINYINT NOT NULL DEFAULT 1,       -- ngoại vực cho PK
+    monster_min_level INT NOT NULL DEFAULT 1, monster_max_level INT NOT NULL DEFAULT 10,
+    clear_reward_json VARCHAR(512) DEFAULT NULL,
+    is_active    TINYINT NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS outer_realm_bosses (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    floor        INT NOT NULL, monster_id INT NOT NULL, boss_level INT NOT NULL DEFAULT 1,
+    spawn_x FLOAT DEFAULT 0, spawn_y FLOAT DEFAULT 0, reward_json VARCHAR(512) DEFAULT NULL,
+    INDEX idx_floor (floor)
+);
+INSERT IGNORE INTO outer_realm_floors (floor,name,map_id,min_level,monster_min_level,monster_max_level) VALUES
+ (1,'Ngoại Vực - Tầng 1',400,1,1,10),
+ (2,'Ngoại Vực - Tầng 2',401,15,10,25),
+ (3,'Ngoại Vực - Tầng 3',402,30,25,45),
+ (4,'Ngoại Vực - Tầng 4',403,50,45,70),
+ (5,'Ngoại Vực - Tầng 5',404,75,70,100);
+
+-- ───── 6. PK MODE + TRUY NÃ + NHÀ TÙ ─────
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS combat_mode VARCHAR(12) NOT NULL DEFAULT 'peace'; -- peace,guild,faction,server,berserk
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS faction_id INT NOT NULL DEFAULT 0;
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS wanted_level INT NOT NULL DEFAULT 0;     -- mức truy nã (giết người vô tội)
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS pk_kills INT NOT NULL DEFAULT 0;
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS jailed_until DATETIME NULL;              -- bị nhốt tới khi nào
+CREATE TABLE IF NOT EXISTS pk_log (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    killer_char_id BIGINT NOT NULL, victim_char_id BIGINT NOT NULL,
+    map_id INT NOT NULL, killer_mode VARCHAR(12), victim_innocent TINYINT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP, INDEX idx_killer (killer_char_id)
+);
+-- map an toàn (tân thủ chỉ hoà bình)
+ALTER TABLE maps ADD COLUMN IF NOT EXISTS force_peace TINYINT NOT NULL DEFAULT 0;  -- 1 = ép chế độ hoà bình
+ALTER TABLE maps ADD COLUMN IF NOT EXISTS allow_pk TINYINT NOT NULL DEFAULT 0;
+
+-- ───── 7. VIP (mốc thưởng + đặc quyền) ─────
+CREATE TABLE IF NOT EXISTS vip_levels (
+    vip_level    INT NOT NULL PRIMARY KEY,
+    exp_required INT NOT NULL,                    -- điểm VIP (thường = tổng nạp)
+    name         VARCHAR(32) NOT NULL,
+    daily_diamond INT NOT NULL DEFAULT 0,         -- đặc quyền: kim cương mỗi ngày
+    afk_bonus_pct FLOAT NOT NULL DEFAULT 0,       -- +% reward AFK
+    extra_bag_slots INT NOT NULL DEFAULT 0,
+    extra_market_slots INT NOT NULL DEFAULT 0,
+    privileges_json VARCHAR(512) DEFAULT NULL     -- đặc quyền khác (auto-pick, free teleport...)
+);
+INSERT IGNORE INTO vip_levels (vip_level,exp_required,name,daily_diamond,afk_bonus_pct,extra_bag_slots,extra_market_slots) VALUES
+ (0,0,'Thường',0,0,0,0),(1,100,'VIP 1',5,0.05,5,1),(2,500,'VIP 2',10,0.10,10,2),
+ (3,1500,'VIP 3',20,0.15,15,3),(4,3000,'VIP 4',35,0.20,20,4),(5,6000,'VIP 5',50,0.30,30,5),
+ (6,15000,'VIP 6',80,0.40,40,6),(7,30000,'VIP 7',120,0.50,50,8),(8,60000,'VIP 8',200,0.70,70,10);
+-- mốc thưởng VIP (nhận 1 lần khi đạt mốc)
+CREATE TABLE IF NOT EXISTS vip_milestone_rewards (
+    vip_level    INT NOT NULL PRIMARY KEY,
+    reward_json  VARCHAR(512) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS character_vip_claims (
+    char_id      BIGINT NOT NULL, vip_level INT NOT NULL,
+    claimed_at   DATETIME DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (char_id, vip_level)
+);

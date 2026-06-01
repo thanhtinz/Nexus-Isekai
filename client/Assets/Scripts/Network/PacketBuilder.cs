@@ -494,6 +494,40 @@ namespace NexusIsekai.Network
         public static void SendWarehouseDeposit(int itemId, int qty) => SendWarehouse(0, itemId, qty);
         public static void SendWarehouseWithdraw(int itemId, int qty)=> SendWarehouse(1, itemId, qty);
         public static void SendWarehouseSell(int itemId, int qty)    => SendWarehouse(3, itemId, qty);
+
+        // AFK
+        public static void SendAfkCardList() => Send(new PacketBuilder(PacketOpcode.C2S_AFK_CARD_LIST));
+        public static void SendAfkBuy(int cardId) => Send(new PacketBuilder(PacketOpcode.C2S_AFK_BUY).WriteInt(cardId));
+        public static void SendAfkClaim() => Send(new PacketBuilder(PacketOpcode.C2S_AFK_CLAIM));
+        public static void SendAfkStop() => Send(new PacketBuilder(PacketOpcode.C2S_AFK_STOP));
+        public static void SendAfkStatus() => Send(new PacketBuilder(PacketOpcode.C2S_AFK_STATUS));
+        // Chợ
+        public static void SendMarketList(string category, int currency, int page)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MARKET_LIST).WriteString(category).WriteInt(currency).WriteInt(page));
+        public static void SendMarketSell(long invId, int qty, int currency, long price)
+            => Send(new PacketBuilder(PacketOpcode.C2S_MARKET_SELL).WriteLong(invId).WriteInt(qty).WriteByte((byte)currency).WriteLong(price));
+        public static void SendMarketBuy(long listingId) => Send(new PacketBuilder(PacketOpcode.C2S_MARKET_BUY).WriteLong(listingId));
+        public static void SendMarketCancel(long listingId) => Send(new PacketBuilder(PacketOpcode.C2S_MARKET_CANCEL).WriteLong(listingId));
+        public static void SendMarketMine() => Send(new PacketBuilder(PacketOpcode.C2S_MARKET_MINE));
+        // PK mode
+        public static void SendSetCombatMode(string mode) => Send(new PacketBuilder(PacketOpcode.C2S_SET_COMBAT_MODE).WriteString(mode));
+        public static void SendPkStatus() => Send(new PacketBuilder(PacketOpcode.C2S_PK_STATUS));
+        // World boss
+        public static void SendWorldBossInfo() => Send(new PacketBuilder(PacketOpcode.C2S_WORLDBOSS_INFO));
+        public static void SendWorldBossAttack(int bossId, long dmg) => Send(new PacketBuilder(PacketOpcode.C2S_WORLDBOSS_ATTACK).WriteInt(bossId).WriteLong(dmg));
+        public static void SendWorldBossRank(int bossId) => Send(new PacketBuilder(PacketOpcode.C2S_WORLDBOSS_RANK).WriteInt(bossId));
+        // Guild war
+        public static void SendGuildWarInfo() => Send(new PacketBuilder(PacketOpcode.C2S_GUILDWAR_INFO));
+        public static void SendGuildWarDeclare(int targetGuild) => Send(new PacketBuilder(PacketOpcode.C2S_GUILDWAR_DECLARE).WriteInt(targetGuild));
+        public static void SendGuildWarJoin(int warId) => Send(new PacketBuilder(PacketOpcode.C2S_GUILDWAR_JOIN).WriteInt(warId));
+        // Ngoại vực
+        public static void SendOuterFloors() => Send(new PacketBuilder(PacketOpcode.C2S_OUTER_FLOORS));
+        public static void SendOuterEnter(int floor) => Send(new PacketBuilder(PacketOpcode.C2S_OUTER_ENTER).WriteInt(floor));
+        public static void SendOuterLeave() => Send(new PacketBuilder(PacketOpcode.C2S_OUTER_LEAVE));
+        // VIP
+        public static void SendVipInfo() => Send(new PacketBuilder(PacketOpcode.C2S_VIP_INFO));
+        public static void SendVipClaim(int vipLevel) => Send(new PacketBuilder(PacketOpcode.C2S_VIP_CLAIM).WriteInt(vipLevel));
+        public static void SendVipDaily() => Send(new PacketBuilder(PacketOpcode.C2S_VIP_DAILY));
         public static void SendWedding(long targetCharId, int weddingMapId)
             => Send(new PacketBuilder(PacketOpcode.C2S_WEDDING)
                 .WriteLong(targetCharId).WriteInt(weddingMapId));
