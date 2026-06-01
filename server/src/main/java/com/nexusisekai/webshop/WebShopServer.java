@@ -106,14 +106,24 @@ public class WebShopServer {
             var body = parseBody(ex);
             String user = str(body,"username").replace("'",""), pass = str(body,"password").replace("'","");
             try (Connection conn = DatabaseManager.getInstance().getConnection()) {
-                PreparedStatement ps = conn.prepareStatement("SELECT id,password_hash FROM accounts WHERE username=?");
+                PreparedStatement ps = conn.prepareStatement("SELECT id,password_hash,is_admin FROM accounts WHERE username=?");
                 ps.setString(1, user); ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
                     String hash = rs.getString("password_hash");
                     if (hash.equals(org.apache.commons.codec.digest.DigestUtils.sha256Hex(pass)) || hash.equals(pass)) {
                         long accId = rs.getLong("id");
+                        int isAdmin = rs.getInt("is_admin");
+                        // Chặn tài khoản đang bị cấm (ban còn hiệu lực)
+                        PreparedStatement bp = conn.prepareStatement(
+                            "SELECT reason,expires_at FROM sanctions WHERE account_id=? AND type IN ('ban_temp','ban_perm') AND status='active' " +
+                            "AND (expires_at IS NULL OR expires_at>NOW()) ORDER BY id DESC LIMIT 1");
+                        bp.setLong(1, accId); ResultSet br = bp.executeQuery();
+                        if (br.next()) {
+                            sendJson(ex, 200, Map.of("success",false,"error","Tai khoan bi cam: " + br.getString("reason"),"banned",true));
+                            return;
+                        }
                         String token = java.util.UUID.randomUUID().toString();
-                        sendJson(ex, 200, Map.of("success",true,"account_id",accId,"token",token));
+                        sendJson(ex, 200, Map.of("success",true,"account_id",accId,"token",token,"is_admin",isAdmin));
                     } else sendJson(ex, 200, Map.of("success",false,"error","Wrong password"));
                 } else sendJson(ex, 200, Map.of("success",false,"error","Account not found"));
             } catch(Exception e) { sendJson(ex, 500, Map.of("error","db")); }
@@ -135,9 +145,19 @@ public class WebShopServer {
         });
         httpServer.createContext("/api/servers", ex -> {
             try (Connection conn = DatabaseManager.getInstance().getConnection()) {
-                ResultSet rs = conn.prepareStatement("SELECT id,name,status,group_name,online_count,is_new,is_recommend,is_hot FROM game_servers WHERE status>0 ORDER BY sort_order,id").executeQuery();
+                var p = parseQuery(ex.getRequestURI().getQuery());
+                long accId = Long.parseLong(p.getOrDefault("account_id","0"));
+                boolean isAdmin = false;
+                if (accId > 0) {
+                    PreparedStatement ap = conn.prepareStatement("SELECT is_admin FROM accounts WHERE id=?");
+                    ap.setLong(1, accId); ResultSet ar = ap.executeQuery();
+                    if (ar.next()) isAdmin = ar.getInt("is_admin") == 1;
+                }
+                // user thuong khong thay server test (server_type=1); admin thay tat ca
+                String filter = isAdmin ? "" : " AND server_type<>1";
+                ResultSet rs = conn.prepareStatement("SELECT id,name,status,group_name,online_count,is_new,is_recommend,is_hot,server_type FROM game_servers WHERE status>0" + filter + " ORDER BY sort_order,id").executeQuery();
                 var list = new java.util.ArrayList<java.util.Map<String,Object>>();
-                while(rs.next()) list.add(java.util.Map.of("id",rs.getInt("id"),"name",rs.getString("name"),"status",rs.getInt("status"),"group_name",rs.getString("group_name")!=null?rs.getString("group_name"):""));
+                while(rs.next()) list.add(java.util.Map.of("id",rs.getInt("id"),"name",rs.getString("name"),"status",rs.getInt("status"),"group_name",rs.getString("group_name")!=null?rs.getString("group_name"):"","server_type",rs.getInt("server_type")));
                 sendJson(ex, 200, java.util.Map.of("servers", list));
             } catch(Exception e) { sendJson(ex, 500, java.util.Map.of("error","db")); }
         });
@@ -291,7 +311,7 @@ public class WebShopServer {
 
             try (Connection c = DatabaseManager.getInstance().getConnection();
                  PreparedStatement ps = c.prepareStatement(
-                     "SELECT id, password, diamond FROM accounts WHERE username=? AND is_banned=0")) {
+                     "SELECT id, password, diamond, is_admin FROM accounts WHERE username=? AND is_banned=0")) {
                 ps.setString(1, username);
                 ResultSet rs = ps.executeQuery();
                 if (!rs.next()) {
@@ -313,6 +333,7 @@ public class WebShopServer {
 
                 long accountId = rs.getLong("id");
                 int diamond    = rs.getInt("diamond");
+                int isAdmin    = rs.getInt("is_admin");
 
                 // Sinh web token
                 String token = java.util.UUID.randomUUID().toString().replace("-","");
@@ -340,7 +361,7 @@ public class WebShopServer {
                     "session", Map.of(
                         "accountId", accountId, "charId", charId,
                         "charName", charName, "level", level,
-                        "diamond", diamond, "token", token
+                        "diamond", diamond, "token", token, "isAdmin", isAdmin
                     )
                 ));
             }

@@ -4,6 +4,7 @@ import { api } from '../api/client';
 interface Character { id: number; name: string; class_id: number; level: number; gender: number; }
 interface AuthContextType {
   isLoggedIn: boolean;
+  isAdmin: boolean;
   accountId: number;
   username: string;
   selectedServer: number;
@@ -27,13 +28,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [selectedChar, setSelectedChar] = useState<Character | null>(null);
   const [characters, setCharacters] = useState<Character[]>([]);
   const [servers, setServers] = useState<any[]>([]);
+  const [isAdmin, setIsAdmin] = useState(() => sessionStorage.getItem('is_admin') === '1');
 
   const isLoggedIn = accountId > 0 && token.length > 0;
   const ready = isLoggedIn && selectedServer > 0 && selectedChar !== null;
 
   useEffect(() => {
-    api.get('/api/servers').then((r: any) => setServers((r.data.servers || []).filter((s: any) => s.status === 1))).catch(() => {});
-  }, []);
+    api.get(`/api/servers?account_id=${accountId}`).then((r: any) => setServers((r.data.servers || []).filter((s: any) => s.status === 1))).catch(() => {});
+  }, [accountId]);
 
   useEffect(() => {
     if (isLoggedIn && selectedServer > 0) {
@@ -53,6 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionStorage.setItem('acc_id', String(r.data.account_id));
         sessionStorage.setItem('username', user);
         sessionStorage.setItem('token', r.data.token || 'session');
+        setIsAdmin(r.data.is_admin === 1);
+        sessionStorage.setItem('is_admin', String(r.data.is_admin || 0));
         return true;
       }
     } catch {}
@@ -60,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    setAccountId(0); setUsername(''); setToken(''); setSelectedServer(0); setSelectedChar(null);
+    setAccountId(0); setUsername(''); setToken(''); setSelectedServer(0); setSelectedChar(null); setIsAdmin(false);
     sessionStorage.clear();
   };
 
@@ -72,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const selectCharacter = (char: Character) => setSelectedChar(char);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, accountId, username, selectedServer, selectedChar, characters, servers, login, logout, selectServer, selectCharacter, ready }}>
+    <AuthContext.Provider value={{ isLoggedIn, isAdmin, accountId, username, selectedServer, selectedChar, characters, servers, login, logout, selectServer, selectCharacter, ready }}>
       {children}
     </AuthContext.Provider>
   );

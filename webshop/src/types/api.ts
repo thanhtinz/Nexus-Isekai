@@ -11,6 +11,7 @@ export interface Session {
   level: number
   diamond: number
   token: string
+  isAdmin?: number
 }
 
 export interface LoginResponse {

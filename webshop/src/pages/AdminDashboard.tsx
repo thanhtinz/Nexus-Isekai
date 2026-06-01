@@ -190,6 +190,8 @@ const PANELS: PanelConfig[] = [
   { key: 'accounts',     label: 'Tai Khoan',       group: 'Nguoi Choi', endpoint: '/api/accounts',          dataKey: 'accounts' },
   { key: 'mail',         label: 'Thu',             group: 'Nguoi Choi', endpoint: '/api/mail',              dataKey: 'mails' },
   { key: 'reports',      label: 'Bao Cao',         group: 'Nguoi Choi', endpoint: '/api/reports',           dataKey: 'reports' },
+  { key: 'sanctions',    label: 'Cam / Phat',      group: 'Nguoi Choi', endpoint: '/api/sanctions',         dataKey: 'sanctions' },
+  { key: 'economy',      label: 'Giam Sat Kinh Te',group: 'Nguoi Choi', endpoint: '/api/economy',           dataKey: 'top_gold' },
 
   // Noi dung (cot truyen, item, NPC, ky nang, audio)
   { key: 'story',        label: 'Cot Truyen',      group: 'Noi Dung',   endpoint: '/api/story',             dataKey: 'chapters' },

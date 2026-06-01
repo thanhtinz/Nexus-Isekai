@@ -4368,3 +4368,33 @@ ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS status VARCHAR(12) NOT NULL
 ALTER TABLE items           ADD COLUMN IF NOT EXISTS status VARCHAR(12) NOT NULL DEFAULT 'live';
 ALTER TABLE maps            ADD COLUMN IF NOT EXISTS status VARCHAR(12) NOT NULL DEFAULT 'live';
 ALTER TABLE npcs            ADD COLUMN IF NOT EXISTS status VARCHAR(12) NOT NULL DEFAULT 'live';
+
+-- ═══ CẤM/PHẠT (sanctions) — cảnh cáo/mute/ban tạm/ban vĩnh viễn + kháng cáo ═══
+CREATE TABLE IF NOT EXISTS sanctions (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    account_id   BIGINT NOT NULL,
+    char_id      BIGINT DEFAULT NULL,
+    type         VARCHAR(16) NOT NULL,                 -- warn|mute|ban_temp|ban_perm
+    reason       VARCHAR(255) NOT NULL,
+    evidence     TEXT DEFAULT NULL,                    -- link/log liên quan (vd từ anticheat_log/player_reports)
+    created_by   VARCHAR(64) NOT NULL DEFAULT 'system',
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at   DATETIME DEFAULT NULL,                -- NULL = vĩnh viễn
+    status       VARCHAR(12) NOT NULL DEFAULT 'active',-- active|lifted|expired
+    appeal_text  TEXT DEFAULT NULL,                    -- nội dung kháng cáo của người chơi
+    appeal_status VARCHAR(12) DEFAULT NULL,            -- NULL|pending|accepted|rejected
+    INDEX idx_acc (account_id), INDEX idx_status (status)
+);
+
+-- ═══ NHẬT KÝ TIỀN TỆ (currency_log) — phát hiện dupe/gian lận + giám sát kinh tế ═══
+CREATE TABLE IF NOT EXISTS currency_log (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id     BIGINT NOT NULL,
+    currency    VARCHAR(12) NOT NULL,                  -- gold|diamond
+    delta       BIGINT NOT NULL,                       -- +/- thay đổi
+    balance     BIGINT NOT NULL DEFAULT 0,             -- số dư sau giao dịch
+    source      VARCHAR(48) NOT NULL,                  -- quest|drop|shop|trade|mail|gm|topup|minigame|...
+    detail      VARCHAR(128) DEFAULT NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_char (char_id), INDEX idx_src (source), INDEX idx_time (created_at)
+);

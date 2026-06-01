@@ -1381,7 +1381,8 @@ public class ExtendedHandlers {
     }
     public static void handleServerList(GameSession s, ByteBuf b) {
         try (java.sql.Connection c=DatabaseManager.getInstance().getConnection()) {
-            var servers=SqlSafe.query(c,"SELECT id,name,group_name,online_count,load_status,is_new,is_recommend,is_hot FROM game_servers WHERE status=1 ORDER BY sort_order");
+            String filter = s.isAdmin() ? "" : " AND server_type<>1"; // user thuong khong thay server test
+            var servers=SqlSafe.query(c,"SELECT id,name,group_name,online_count,load_status,is_new,is_recommend,is_hot FROM game_servers WHERE status=1" + filter + " ORDER BY sort_order");
             ByteBuf pkt=Unpooled.buffer(); pkt.writeShort(PacketOpcode.S2C_SERVER_LIST); pkt.writeShort(servers.size());
             for(var sv:servers){pkt.writeInt(((Number)sv.get("id")).intValue());writeStr(pkt,(String)sv.get("name"));writeStr(pkt,sv.get("group_name")!=null?(String)sv.get("group_name"):"");pkt.writeInt(((Number)sv.get("online_count")).intValue());pkt.writeByte(((Number)sv.get("load_status")).intValue());pkt.writeByte(((Number)sv.get("is_new")).intValue());pkt.writeByte(((Number)sv.get("is_recommend")).intValue());pkt.writeByte(((Number)sv.get("is_hot")).intValue());}
             s.send(pkt);

@@ -60,6 +60,10 @@ export function Header() {
                   <span className="font-medium">{session.charName}</span>
                   <span style={{ color: '#5b538080' }}>Lv.{session.level}</span>
                 </div>
+                {session.isAdmin === 1 && (<>
+                  <a href="/sys/internal/v2/dashboard" className="hidden sm:inline text-xs px-3 py-1.5 rounded-lg font-semibold no-underline" style={{ background: '#6c3ef320', color: '#6c3ef3' }}>Admin</a>
+                  <a href={(import.meta as any).env?.VITE_STUDIO_URL || '/studio/'} className="hidden sm:inline text-xs px-3 py-1.5 rounded-lg font-semibold no-underline" style={{ background: '#d4a82020', color: '#b8860b' }}>Studio</a>
+                </>)}
                 <button onClick={logout} className="p-2 rounded-lg transition-colors" style={{ color: '#5b538099' }} title="Đăng xuất"><LogOut size={16} /></button>
               </>
             ) : (

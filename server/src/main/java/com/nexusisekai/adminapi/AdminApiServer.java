@@ -257,6 +257,8 @@ public class AdminApiServer {
         httpServer.createContext("/api/player/grant",     ex -> handleAuth(ex, this::handlePlayerGrant));
         httpServer.createContext("/api/mail",             ex -> handleAuth(ex, this::handleMailAdmin));
         httpServer.createContext("/api/reports",           ex -> handleAuth(ex, this::handleReports));
+        httpServer.createContext("/api/sanctions",        ex -> handleAuth(ex, this::handleSanctions));
+        httpServer.createContext("/api/economy",          ex -> handleAuth(ex, this::handleEconomy));
         httpServer.createContext("/api/audit-log",         ex -> handleAuth(ex, this::handleAuditLog));
         httpServer.createContext("/api/scheduled-tasks",   ex -> handleAuth(ex, this::handleScheduledTasks));
         httpServer.createContext("/api/ai/review",         ex -> handleAuth(ex, this::handleAIReview));
@@ -3850,6 +3852,91 @@ public class AdminApiServer {
         } catch (Exception e) {
             sendJson(ex, 500, Map.of("success", false, "message", e.getMessage()));
         }
+    }
+
+    // ─── CẤM/PHẠT (sanctions) ───────────────────────────────────
+    /** GET/POST /api/sanctions — list / create (warn|mute|ban_temp|ban_perm) / lift / appeal-resolve */
+    private void handleSanctions(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if ("GET".equals(ex.getRequestMethod())) {
+                var p = parseQuery(ex.getRequestURI().getQuery());
+                String st = p.getOrDefault("status", "");
+                String where = st.isEmpty() ? "" : " WHERE status='" + st.replace("'","") + "'";
+                sendTableResult(ex, c.prepareStatement("SELECT * FROM sanctions" + where + " ORDER BY id DESC LIMIT 300"), "sanctions");
+                return;
+            }
+            var b = parseBody(ex);
+            String action = str(b, "action");
+            switch (action) {
+                case "create" -> {
+                    long accId = num(b, "account_id");
+                    String type = str(b, "type");      // warn|mute|ban_temp|ban_perm
+                    int days = b.containsKey("days") ? num(b, "days") : 0;
+                    String expSql = (type.equals("ban_temp") || type.equals("mute")) && days > 0
+                        ? "DATE_ADD(NOW(), INTERVAL " + days + " DAY)" : (type.equals("ban_perm") ? "NULL" : "NULL");
+                    PreparedStatement ps = c.prepareStatement(
+                        "INSERT INTO sanctions (account_id,char_id,type,reason,evidence,created_by,expires_at) VALUES (?,?,?,?,?,?," + expSql + ")");
+                    ps.setLong(1, accId); ps.setObject(2, b.get("char_id") != null ? num(b,"char_id") : null);
+                    ps.setString(3, type); ps.setString(4, str(b,"reason")); ps.setString(5, str(b,"evidence"));
+                    ps.setString(6, adminName(ex)); ps.executeUpdate();
+                    // áp dụng hiệu lực
+                    if (type.equals("ban_temp") || type.equals("ban_perm"))
+                        c.prepareStatement("UPDATE accounts SET is_banned=1 WHERE id=" + accId).executeUpdate();
+                    if (type.equals("mute") && b.get("char_id") != null) {
+                        String mu = days > 0 ? "DATE_ADD(NOW(), INTERVAL " + days + " DAY)" : "DATE_ADD(NOW(), INTERVAL 100 YEAR)";
+                        c.prepareStatement("UPDATE characters SET muted_until=" + mu + " WHERE id=" + num(b,"char_id")).executeUpdate();
+                    }
+                    auditLog(ex, "sanction_" + type, "account", String.valueOf(accId), str(b,"reason"));
+                    sendJson(ex, 200, Map.of("success", true));
+                }
+                case "lift" -> {
+                    long id = num(b, "id"); long accId = num(b, "account_id");
+                    c.prepareStatement("UPDATE sanctions SET status='lifted' WHERE id=" + id).executeUpdate();
+                    c.prepareStatement("UPDATE accounts SET is_banned=0 WHERE id=" + accId).executeUpdate();
+                    if (b.get("char_id") != null) c.prepareStatement("UPDATE characters SET muted_until=NULL WHERE id=" + num(b,"char_id")).executeUpdate();
+                    auditLog(ex, "sanction_lift", "sanction", String.valueOf(id), "");
+                    sendJson(ex, 200, Map.of("success", true));
+                }
+                case "appeal_resolve" -> {
+                    long id = num(b, "id"); String verdict = str(b, "verdict"); // accepted|rejected
+                    c.prepareStatement("UPDATE sanctions SET appeal_status='" + verdict.replace("'","") +
+                        "'" + ("accepted".equals(verdict) ? ",status='lifted'" : "") + " WHERE id=" + id).executeUpdate();
+                    if ("accepted".equals(verdict)) c.prepareStatement("UPDATE accounts SET is_banned=0 WHERE id=(SELECT account_id FROM sanctions WHERE id=" + id + ")").executeUpdate();
+                    auditLog(ex, "appeal_" + verdict, "sanction", String.valueOf(id), "");
+                    sendJson(ex, 200, Map.of("success", true));
+                }
+                default -> sendJson(ex, 400, Map.of("success", false, "message", "action khong hop le"));
+            }
+        }
+    }
+    private String adminName(HttpExchange ex) {
+        String h = ex.getRequestHeaders().getFirst("X-Admin-User");
+        return h != null ? h : "admin";
+    }
+
+    /** GET /api/economy — giám sát kinh tế: tổng tiền, top giàu, nguồn phát/tiêu (currency_log). */
+    private void handleEconomy(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            Map<String,Object> out = new java.util.LinkedHashMap<>();
+            ResultSet t = c.prepareStatement("SELECT COUNT(*) cnt, COALESCE(SUM(gold),0) gold, COALESCE(SUM(diamond),0) dia FROM characters").executeQuery();
+            if (t.next()) { out.put("char_count", t.getLong("cnt")); out.put("total_gold", t.getLong("gold")); out.put("total_diamond", t.getLong("dia")); }
+            // top giàu
+            var top = new java.util.ArrayList<Map<String,Object>>();
+            ResultSet tr = c.prepareStatement("SELECT id,name,gold,diamond FROM characters ORDER BY gold DESC LIMIT 10").executeQuery();
+            while (tr.next()) top.add(Map.of("id",tr.getInt("id"),"name",tr.getString("name"),"gold",tr.getLong("gold"),"diamond",tr.getLong("diamond")));
+            out.put("top_gold", top);
+            // nguồn phát/tiêu 7 ngày (faucet/sink) tu currency_log
+            var src = new java.util.ArrayList<Map<String,Object>>();
+            ResultSet sr = c.prepareStatement(
+                "SELECT source, SUM(CASE WHEN delta>0 THEN delta ELSE 0 END) faucet, SUM(CASE WHEN delta<0 THEN -delta ELSE 0 END) sink " +
+                "FROM currency_log WHERE currency='gold' AND created_at>DATE_SUB(NOW(),INTERVAL 7 DAY) GROUP BY source ORDER BY faucet DESC LIMIT 20").executeQuery();
+            while (sr.next()) src.add(Map.of("source",sr.getString("source"),"faucet",sr.getLong("faucet"),"sink",sr.getLong("sink")));
+            out.put("gold_flow_7d", src);
+            // nạp 7 ngày
+            ResultSet pr = c.prepareStatement("SELECT COALESCE(SUM(amount),0) s FROM topup_orders WHERE status='paid' AND created_at>DATE_SUB(NOW(),INTERVAL 7 DAY)").executeQuery();
+            if (pr.next()) out.put("topup_7d", pr.getLong("s"));
+            sendJson(ex, 200, out);
+        } catch (Exception e) { sendJson(ex, 500, Map.of("error", e.getMessage())); }
     }
 
     /** GET/POST /api/hot-config — Quản lý hot config */
