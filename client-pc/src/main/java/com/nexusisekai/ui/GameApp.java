@@ -112,6 +112,7 @@ public class GameApp extends Application {
             case PacketOpcode.S2C_PLAYER_MOVE  -> { long id=r.readLong(); float x=r.readFloat(),y=r.readFloat(); var p=state.remotePlayers.get(id); if(p!=null){p.x=x;p.y=y;} }
             case PacketOpcode.S2C_MONSTER_MOVE -> { int id=r.readInt(); float x=r.readFloat(),y=r.readFloat(); var m=state.monsters.get(id); if(m!=null){m.x=x;m.y=y;} }
             case PacketOpcode.S2C_POSITION_CORRECT -> { state.posX=r.readFloat(); state.posY=r.readFloat(); }
+            case PacketOpcode.S2C_SKILL_EFFECT -> { int sid=r.readInt(); float x=r.readFloat(),y=r.readFloat(); String vfx=r.readString(),sfx=r.readString(); int hf=r.readInt(),sf=r.readInt(); int cs=r.readInt(),rw=r.readInt(),fr=r.readInt(),fp=r.readInt(); int ox=r.readInt(),oy=r.readInt(),sc=r.readInt(); /* TODO render sheet vfx tai (x,y)+offset; sfx tai sf */ }
             case PacketOpcode.S2C_ATTACK_RESULT-> { r.readLong(); int dmg=r.readInt(); boolean crit=r.readBool(); int thp=r.readInt(); if(gamePane!=null) gamePane.notify((crit?"CRIT! ":"")+"-"+dmg); }
             case PacketOpcode.S2C_MONSTER_DEAD -> { int id=r.readInt(); state.monsters.remove(id); if(gamePane!=null) gamePane.notify("+"+r.readInt()+" EXP +"+r.readInt()+"G"); }
             case PacketOpcode.S2C_LEVEL_UP     -> { state.level=r.readInt(); state.maxHp=r.readInt(); state.maxMp=r.readInt(); r.readInt();r.readInt();r.readLong(); state.hp=state.maxHp; state.mp=state.maxMp; if(gamePane!=null) gamePane.notify("LEVEL UP! Lv."+state.level); }

@@ -54,6 +54,7 @@ public interface PacketOpcode {
     short S2C_MONSTER_RESPAWN   = 0x041B;
     short S2C_MONSTERS_IN_ZONE  = 0x041C;
     short S2C_MONSTER_MOVE      = 0x3B04;
+    short S2C_SKILL_EFFECT      = 0x0418;
 
     // ── INVENTORY ────────────────────────────────────────────
     short C2S_INVENTORY_OPEN    = 0x0501;

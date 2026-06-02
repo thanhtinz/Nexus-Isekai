@@ -37,6 +37,7 @@ public class PacketHandler {
             case PacketOpcode.S2C_PLAYER_LEAVE:     onPlayerLeave(r);    break;
             case PacketOpcode.S2C_PLAYER_MOVE:      onPlayerMove(r);     break;
             case PacketOpcode.S2C_MONSTER_MOVE:     onMonsterMove(r);    break;
+            case PacketOpcode.S2C_SKILL_EFFECT:     onSkillEffect(r);    break;
             case PacketOpcode.S2C_POSITION_CORRECT: onPositionCorrect(r);break;
             case PacketOpcode.S2C_MAP_CHANGE_FAILED:onMapChangeFailed(r);break;
 
@@ -255,6 +256,17 @@ public class PacketHandler {
         float x = r.readFloat(); float y = r.readFloat();
         GameState.MonsterInfo mi = (GameState.MonsterInfo) gs.monsters.get(new Integer(instanceId));
         if (mi != null) { mi.x = x; mi.y = y; }
+    }
+
+    private void onSkillEffect(PacketReader r) {
+        int skillId = r.readInt();
+        float x = r.readFloat(); float y = r.readFloat();
+        String vfxKey = r.readString();
+        String sfxKey = r.readString();
+        int hitFrame = r.readInt(); int soundFrame = r.readInt();
+        int cols = r.readInt(); int rows = r.readInt(); int frames = r.readInt(); int fps = r.readInt();
+        int ox = r.readInt(); int oy = r.readInt(); int scale = r.readInt();
+        // TODO render: ve sheet vfxKey (cols x rows, frames, fps) tai (x+ox, y+oy) scale; phat sfxKey tai soundFrame
     }
 
     private void onPositionCorrect(PacketReader r) {

@@ -73,6 +73,15 @@ public class GameViewModel extends ViewModel implements GameClient.PacketListene
             case Opcodes.S2C_CHAR_CREATE_OK  -> { notification.postValue("Tạo nhân vật thành công!"); GameClient.getInstance().send(PacketWriter.charList()); }
             case Opcodes.S2C_CHAR_CREATE_FAIL-> notification.postValue(r.readString());
             case Opcodes.S2C_CHAR_ENTER_GAME -> handleEnterGame(r);
+            case Opcodes.S2C_SKILL_EFFECT -> {
+                int skillId = r.readInt();
+                float x = Float.intBitsToFloat(r.readInt()), y = Float.intBitsToFloat(r.readInt());
+                String vfxKey = r.readString(), sfxKey = r.readString();
+                int hitFrame = r.readInt(), soundFrame = r.readInt();
+                int cols = r.readInt(), rows = r.readInt(), frames = r.readInt(), fps = r.readInt();
+                int ox = r.readInt(), oy = r.readInt(), scale = r.readInt();
+                // TODO render: ve sheet vfxKey tai (x,y)+offset, scale; phat sfxKey tai soundFrame
+            }
             case Opcodes.S2C_MAP_DATA        -> handleMapData(r);
             case Opcodes.S2C_PLAYERS_IN_ZONE -> handlePlayersInZone(r);
             case Opcodes.S2C_MONSTERS_IN_ZONE-> handleMonstersInZone(r);

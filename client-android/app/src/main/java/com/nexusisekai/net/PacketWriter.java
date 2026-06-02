@@ -29,6 +29,7 @@ class Opcodes {
     // COMBAT
     static final short C2S_ATTACK = 0x0401, C2S_USE_SKILL = 0x0402;
     static final short S2C_ATTACK_RESULT = 0x0411, S2C_MONSTER_DEAD = 0x0413;
+    static final short S2C_SKILL_EFFECT = (short)0x0418;
     static final short S2C_PLAYER_DEAD = 0x0414, S2C_LEVEL_UP = 0x0415;
     static final short S2C_PLAYER_REVIVE = 0x3B02, S2C_EXP_GAIN = 0x0417;
     static final short S2C_PLAYER_STATS = 0x041A, S2C_MONSTER_RESPAWN = 0x041B;

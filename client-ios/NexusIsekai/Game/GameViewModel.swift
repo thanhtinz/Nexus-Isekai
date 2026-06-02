@@ -89,6 +89,14 @@ final class GameViewModel: ObservableObject {
         case Op.S2C_PLAYER_LEAVE:      remotePlayers.removeAll { $0.charId == r.readInt64() }
         case Op.S2C_PLAYER_MOVE:       onPlayerMove(r)
         case Op.S2C_MONSTER_MOVE:      onMonsterMove(r)
+        case Op.S2C_SKILL_EFFECT:
+            let skillId = r.readInt32(); let x = r.readFloat(); let y = r.readFloat()
+            let vfxKey = r.readString(); let sfxKey = r.readString()
+            let hitFrame = r.readInt32(); let soundFrame = r.readInt32()
+            let cols = r.readInt32(); let rows = r.readInt32(); let frames = r.readInt32(); let fps = r.readInt32()
+            let ox = r.readInt32(); let oy = r.readInt32(); let scale = r.readInt32()
+            _ = (skillId, x, y, vfxKey, sfxKey, hitFrame, soundFrame, cols, rows, frames, fps, ox, oy, scale)
+            // TODO render effect
         case Op.S2C_POSITION_CORRECT:  posX = r.readFloat(); posY = r.readFloat()
         // COMBAT
         case Op.S2C_ATTACK_RESULT:     onAttackResult(r)

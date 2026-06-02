@@ -42,6 +42,7 @@ enum Op {
     static let C2S_ATTACK:         UInt16 = 0x0401
     static let C2S_USE_SKILL:      UInt16 = 0x0402
     static let S2C_ATTACK_RESULT:  UInt16 = 0x0411
+    static let S2C_SKILL_EFFECT:   UInt16 = 0x0418
     static let S2C_MONSTER_DEAD:   UInt16 = 0x0413
     static let S2C_PLAYER_DEAD:    UInt16 = 0x0414
     static let S2C_LEVEL_UP:       UInt16 = 0x0415
