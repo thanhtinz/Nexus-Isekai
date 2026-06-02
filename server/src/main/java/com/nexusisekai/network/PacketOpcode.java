@@ -275,7 +275,7 @@ public final class PacketOpcode {
     public static final short S2C_SKILL_COOLDOWN    = 0x3B03; // alias
     public static final short S2C_SKILL_EFFECT      = 0x0418;
     public static final short S2C_MONSTER_HP_UPDATE = 0x0419;
-    public static final short S2C_MONSTER_MOVE      = 0x3B04; // client 0x0418
+    public static final short S2C_MONSTER_MOVE      = 0x3B04;
 
     // ── INVENTORY & SHOP (5xx) ────────────────────────────────
     public static final short C2S_INVENTORY_OPEN    = 0x0501;
