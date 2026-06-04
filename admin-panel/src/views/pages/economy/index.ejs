@@ -1,0 +1,44 @@
+
+<div class="filter-bar">
+  <form method="GET" style="display:flex;gap:10px">
+    <select name="server_id" onchange="this.form.submit()">
+      <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=selectedServer?.id==sv.id?'selected':''>><%= sv.name %></option><% }) %>
+    </select>
+  </form>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="card">
+    <div class="card-header"><h3><i class="fas fa-trophy"></i> Bảng Giàu Nhất</h3></div>
+    <table>
+      <thead><tr><th>Hạng</th><th>Nhân vật</th><th>Gold</th></tr></thead>
+      <tbody>
+      <% leaderboard.forEach((e,i)=>{ %>
+      <tr>
+        <td><% if(i<3){%><span><%=['🥇','🥈','🥉'][i]%></span><%}else{%>#<%= i+1 %><%}%></td>
+        <td><strong><%= e.name %></strong></td>
+        <td style="color:#fbbf24"><strong>💰 <%= (e.score||0).toLocaleString() %></strong></td>
+      </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3 style="margin-bottom:14px"><i class="fas fa-coins"></i> Thao tác Kinh tế</h3>
+    <div class="form-group"><label>Broadcast thưởng toàn server</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="reward-msg" placeholder="VD: Tặng 5000G nhân dịp lễ!">
+        <button class="btn btn-success" onclick="broadcastReward()"><i class="fas fa-gift"></i></button>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:.8rem">Thưởng gold/item: dùng tính năng Giftcode để phân phối tự động</p>
+    <a href="/giftcode/create" class="btn btn-primary" style="margin-top:12px"><i class="fas fa-gift"></i> Tạo Giftcode thưởng</a>
+  </div>
+</div>
+<script>
+async function broadcastReward(){
+  const m=document.getElementById('reward-msg').value.trim();
+  if(!m)return toast('Nhập nội dung',false);
+  const r=await api('POST','/economy/give-gold-all',{message:m});
+  toast(r.ok?`Đã broadcast tới ${r.sent}/${r.total} server!`:r.error,r.ok);
+}
+</script>

@@ -1,0 +1,75 @@
+
+<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+  <a href="/servers/add" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm Server</a>
+  <span style="color:var(--muted);font-size:.85rem"><%= servers.length %> server — <%= servers.filter(s=>s.liveStatus?.status==='running').length %> đang chạy</span>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px">
+<% servers.forEach(sv => { %>
+<div class="card" id="sv-card-<%= sv.id %>">
+  <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <% if(sv.liveStatus?.status==='running'){ %><span class="status-dot dot-green"></span>
+        <% } else if(sv.status==='starting'){ %><span class="status-dot dot-yellow"></span>
+        <% } else { %><span class="status-dot dot-red"></span><% } %>
+        <strong style="font-size:1rem"><%= sv.name %></strong>
+      </div>
+      <div style="margin-top:4px">
+        <span class="badge badge-<%= sv.type %>"><%= sv.type.toUpperCase() %></span>
+        <span class="badge badge-gray" style="margin-left:4px"><%= sv.slug %></span>
+      </div>
+    </div>
+    <a href="/servers/<%= sv.id %>" class="btn btn-ghost btn-sm"><i class="fas fa-cog"></i></a>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;font-size:.8rem">
+    <div style="background:#0f0f1a;border-radius:8px;padding:8px;text-align:center">
+      <div style="font-size:1.2rem;font-weight:700;color:#c4b5fd" id="sv-online-<%= sv.id %>"><%= sv.liveStatus?.online||0 %></div>
+      <div style="color:var(--muted)">Online</div>
+    </div>
+    <div style="background:#0f0f1a;border-radius:8px;padding:8px;text-align:center">
+      <div style="font-size:1.2rem;font-weight:700;color:#60a5fa">:<%= sv.game_port %></div>
+      <div style="color:var(--muted)">Game Port</div>
+    </div>
+    <div style="background:#0f0f1a;border-radius:8px;padding:8px;text-align:center">
+      <div style="font-size:1.2rem;font-weight:700;color:#34d399"><%= sv.max_players %></div>
+      <div style="color:var(--muted)">Max</div>
+    </div>
+  </div>
+
+  <% if(sv.description){ %><p style="font-size:.8rem;color:var(--muted);margin-bottom:12px"><%= sv.description %></p><% } %>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <% if(sv.liveStatus?.status==='running'){ %>
+    <button class="btn btn-warn btn-sm" onclick="svAction(<%= sv.id %>,'stop')"><i class="fas fa-stop"></i> Dừng</button>
+    <button class="btn btn-ghost btn-sm" onclick="svAction(<%= sv.id %>,'restart')"><i class="fas fa-redo"></i> Restart</button>
+    <% } else { %>
+    <button class="btn btn-success btn-sm" onclick="svAction(<%= sv.id %>,'start')"><i class="fas fa-play"></i> Khởi động</button>
+    <% } %>
+    <button class="btn btn-danger btn-sm" onclick="deleteServer(<%= sv.id %>,'<%= sv.name %>')"><i class="fas fa-trash"></i></button>
+  </div>
+</div>
+<% }) %>
+</div>
+
+<script>
+async function svAction(id, action){
+  toast(`Đang ${action} server...`);
+  const r = await api('POST',`/servers/${id}/${action}`);
+  toast(r.ok ? `Thành công!` : r.error, r.ok);
+  if(r.ok) setTimeout(()=>location.reload(),3000);
+}
+async function deleteServer(id,name){
+  if(!confirm(`Xóa server "${name}"? Hành động này không thể hoàn tác.`)) return;
+  const r = await api('DELETE',`/servers/${id}`);
+  toast(r.ok ? 'Đã xóa server' : r.error, r.ok);
+  if(r.ok) location.reload();
+}
+socket.on('servers_summary', function(servers){
+  servers.forEach(sv => {
+    const el = document.getElementById('sv-online-'+sv.id);
+    if(el) el.textContent = sv.online||0;
+  });
+});
+</script>

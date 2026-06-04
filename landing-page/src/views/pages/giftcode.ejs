@@ -1,0 +1,46 @@
+<%- include('../layout_head', {pageTitle:'Nhập Giftcode'}) %>
+<div class="giftcode-page">
+  <div class="section-title" style="text-align:center">
+    <h2>🎁 Nhập Giftcode</h2>
+    <p>Nhập code để nhận quà từ sự kiện, chương trình khuyến mãi</p>
+  </div>
+  <div class="gc-form">
+    <h3><i class="fas fa-gift"></i> Nhập mã quà tặng</h3>
+    <form method="POST" action="/giftcode">
+      <div class="form-group">
+        <label>Tên nhân vật *</label>
+        <input name="character_name" placeholder="Nhập chính xác tên nhân vật trong game" required>
+      </div>
+      <div class="form-group">
+        <label>Mã Giftcode *</label>
+        <input name="code" placeholder="VD: EVENT2024-ABCD" required style="letter-spacing:.05em;text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label>Server</label>
+        <select name="server_id">
+          <option value="">Tất cả server</option>
+          <!-- Populated dynamically or static -->
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">
+        <i class="fas fa-gift"></i> Nhận quà
+      </button>
+    </form>
+    <% if(result){ %>
+    <div class="gc-result <%= result.ok?'gc-ok':'gc-err' %>">
+      <i class="fas fa-<%= result.ok?'check-circle':'times-circle' %>"></i>
+      <%= result.ok ? result.message : result.error %>
+      <% if(result.ok && result.rewards){ %>
+      <div class="reward-tags">
+        <% try{ (result.rewards||[]).forEach(r=>{ %><span class="reward-tag"><%= r.type==='gold'?'💰 '+r.amount+'G':'📦 Item #'+r.itemId+'x'+r.qty %></span><% }) }catch(e){} %>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+  </div>
+  <div style="margin-top:24px;text-align:center;color:var(--muted);font-size:.85rem">
+    <p>Mã Giftcode được phát trong các sự kiện, livestream và chương trình khuyến mãi.</p>
+    <p style="margin-top:8px">Theo dõi <a href="#" style="color:#c4b5fd">Facebook Fanpage</a> để không bỏ lỡ!</p>
+  </div>
+</div>
+<%- include('../layout_foot') %>

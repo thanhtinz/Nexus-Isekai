@@ -1,0 +1,47 @@
+
+<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+  <a href="/news/create" class="btn btn-primary"><i class="fas fa-pen"></i> Viết bài mới</a>
+  <div class="filter-bar" style="margin-bottom:0">
+    <form method="GET" style="display:flex;gap:8px">
+      <select name="category" onchange="this.form.submit()">
+        <option value="">Tất cả danh mục</option>
+        <% ['general','update','event','maintenance','notice'].forEach(c=>{ %>
+        <option value="<%= c %>" <%=category===c?'selected':''>><%= c %></option>
+        <% }) %>
+      </select>
+      <select name="server_id" onchange="this.form.submit()">
+        <option value="">Tất cả server</option>
+        <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=selectedServer==sv.id?'selected':''>><%= sv.name %></option><% }) %>
+      </select>
+    </form>
+  </div>
+</div>
+<div class="card" style="padding:0;overflow:hidden">
+  <table>
+    <thead><tr><th>Tiêu đề</th><th>Danh mục</th><th>Server</th><th>Lượt xem</th><th>Trạng thái</th><th>Ngày</th><th></th></tr></thead>
+    <tbody>
+    <% articles.forEach(a=>{ %>
+    <tr>
+      <td>
+        <% if(a.is_pinned){ %><i class="fas fa-thumbtack" style="color:#f59e0b;margin-right:6px;font-size:.75rem"></i><% } %>
+        <strong><%= a.title %></strong>
+      </td>
+      <td><span class="badge badge-blue"><%= a.category %></span></td>
+      <td style="color:var(--muted);font-size:.8rem"><%= a.server_name||'Tất cả' %></td>
+      <td style="color:var(--muted);font-size:.8rem"><%= a.views||0 %></td>
+      <td><span class="badge <%= a.is_published?'badge-green':'badge-gray' %>"><%= a.is_published?'Đã đăng':'Nháp' %></span></td>
+      <td style="color:var(--muted);font-size:.8rem"><%= moment(a.created_at).format('DD/MM/YY') %></td>
+      <td style="display:flex;gap:4px">
+        <a href="/news/<%= a.id %>/edit" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+        <button class="btn btn-warn btn-sm" onclick="togglePin(<%= a.id %>)"><i class="fas fa-thumbtack"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteArticle(<%= a.id %>)"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</div>
+<script>
+async function togglePin(id){ const r=await api('POST',`/news/${id}/toggle-pin`); toast(r.ok?'OK':r.error,r.ok); if(r.ok)location.reload(); }
+async function deleteArticle(id){ if(!confirm('Xóa bài viết này?'))return; const r=await api('DELETE',`/news/${id}`); toast(r.ok?'Đã xóa':r.error,r.ok); if(r.ok)location.reload(); }
+</script>

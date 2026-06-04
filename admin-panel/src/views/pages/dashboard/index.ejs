@@ -1,0 +1,122 @@
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value" id="dash-online"><%= totalOnline %></div>
+    <div class="stat-label"><i class="fas fa-users"></i> Online tổng</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= servers.length %></div>
+    <div class="stat-label"><i class="fas fa-server"></i> Server</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= servers.filter(s=>s.liveStatus?.status==='running').length %></div>
+    <div class="stat-label"><i class="fas fa-play-circle" style="color:#10b981"></i> Đang chạy</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= recentGiftcodes.length %></div>
+    <div class="stat-label"><i class="fas fa-gift"></i> Giftcode gần đây</div>
+  </div>
+</div>
+
+<!-- Servers Status -->
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-server"></i> Trạng thái Server</h3>
+    <a href="/servers/add" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Thêm server</a>
+  </div>
+  <table>
+    <thead><tr><th>Server</th><th>Loại</th><th>Trạng thái</th><th>Online</th><th>Port Game</th><th>Thao tác</th></tr></thead>
+    <tbody>
+    <% servers.forEach(sv => { %>
+    <tr>
+      <td><strong><%= sv.name %></strong><br><small style="color:var(--muted)"><%= sv.slug %></small></td>
+      <td><span class="badge badge-<%= sv.type %>"><%= sv.type.toUpperCase() %></span></td>
+      <td>
+        <% if(sv.liveStatus?.status==='running'){ %>
+          <span class="status-dot dot-green"></span>Online
+        <% } else if(sv.status==='starting'){ %>
+          <span class="status-dot dot-yellow"></span>Đang khởi động
+        <% } else { %>
+          <span class="status-dot dot-red"></span>Offline
+        <% } %>
+      </td>
+      <td><strong><%= sv.liveStatus?.online||0 %></strong> / <%= sv.max_players %></td>
+      <td>:<%= sv.game_port %></td>
+      <td>
+        <a href="/servers/<%= sv.id %>" class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i></a>
+        <% if(sv.status!=='running'){ %>
+        <button class="btn btn-success btn-sm" onclick="serverAction(<%= sv.id %>,'start')"><i class="fas fa-play"></i></button>
+        <% } else { %>
+        <button class="btn btn-warn btn-sm" onclick="serverAction(<%= sv.id %>,'stop')"><i class="fas fa-stop"></i></button>
+        <% } %>
+      </td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<!-- Recent logs + Quick actions -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-scroll"></i> Hoạt động gần đây</h3>
+      <a href="/logs" class="btn btn-ghost btn-sm">Xem hết</a>
+    </div>
+    <% recentLogs.slice(0,10).forEach(log => { %>
+    <div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:.8rem">
+      <span style="color:var(--muted)"><%= moment(log.created_at).fromNow() %></span>
+      <strong style="color:#c4b5fd"> <%= log.username||'system' %></strong>
+      — <%= log.action %>
+      <% if(log.target_id){ %><span style="color:var(--muted)"> #<%= log.target_id %></span><% } %>
+    </div>
+    <% }) %>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-bottom:16px"><i class="fas fa-broadcast-tower"></i> Thông báo nhanh</h3>
+    <div class="form-group">
+      <label>Server</label>
+      <select id="bc-server">
+        <option value="">Tất cả server</option>
+        <% servers.forEach(sv => { %><option value="<%= sv.id %>"><%= sv.name %></option><% }) %>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Nội dung</label>
+      <input type="text" id="bc-msg" placeholder="Tin nhắn thông báo toàn server...">
+    </div>
+    <button class="btn btn-primary" onclick="sendBroadcast()"><i class="fas fa-bullhorn"></i> Gửi thông báo</button>
+    <br><br>
+    <h3 style="margin-bottom:12px"><i class="fas fa-bolt"></i> Kích hoạt sự kiện</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <% ['DRAGON_APPEARS','METEOR_SHOWER','MERCHANT_SHIP','TREASURE_HUNT','FULL_MOON_FESTIVAL'].forEach(ev=>{ %>
+      <button class="btn btn-warn btn-sm" onclick="triggerEvent('<%= ev %>')"><%= ev.replace(/_/g,' ') %></button>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<script>
+async function serverAction(id, action){
+  const r = await api('POST',`/servers/${id}/${action}`);
+  toast(r.ok ? `Server đã ${action}` : r.error, r.ok);
+  if(r.ok) setTimeout(()=>location.reload(),2000);
+}
+async function sendBroadcast(){
+  const sv = document.getElementById('bc-server').value;
+  const msg = document.getElementById('bc-msg').value.trim();
+  if(!msg) return toast('Nhập nội dung thông báo',false);
+  const url = sv ? '/players/broadcast' : '/players/broadcast';
+  const r = await api('POST', url, { server_id: sv, message: msg });
+  toast(r.ok ? 'Đã gửi thông báo!' : r.error, r.ok);
+}
+async function triggerEvent(type){
+  const r = await api('POST','/events/trigger', { type, all_servers: true });
+  toast(r.ok ? `Đã kích hoạt: ${type}` : r.error, r.ok);
+}
+socket.on('servers_summary', function(servers){
+  const total = servers.reduce((s,sv)=>s+(sv.online||0),0);
+  document.getElementById('dash-online').textContent = total;
+});
+</script>

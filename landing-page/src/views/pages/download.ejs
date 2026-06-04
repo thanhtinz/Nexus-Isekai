@@ -1,0 +1,62 @@
+<%- include('../layout_head', {pageTitle:'Tải Game'}) %>
+<div class="download-page">
+  <div class="download-hero">
+    <h1>⬇️ Tải Fantasy Realm Online</h1>
+    <p style="color:var(--muted)">Hoàn toàn miễn phí — Không có pay-to-win</p>
+  </div>
+  <div class="download-cards">
+    <div class="dl-card">
+      <div class="dl-icon">🖥️</div>
+      <h3>Windows PC</h3>
+      <p>Khuyến nghị — Trải nghiệm tốt nhất với full graphics và tất cả tính năng.</p>
+      <a href="#" class="btn btn-primary" style="justify-content:center">
+        <i class="fas fa-windows"></i> Tải cho Windows
+      </a>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:8px">~150MB • Windows 10/11</p>
+    </div>
+    <div class="dl-card">
+      <div class="dl-icon">📱</div>
+      <h3>Unity Mobile</h3>
+      <p>Client Unity cho Android/iOS — Cùng server với PC, đầy đủ tính năng.</p>
+      <a href="#" class="btn btn-primary" style="justify-content:center">
+        <i class="fas fa-mobile-alt"></i> Android APK
+      </a>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:8px">~80MB • Android 8+</p>
+    </div>
+    <div class="dl-card">
+      <div class="dl-icon">📟</div>
+      <h3>J2ME Mobile</h3>
+      <p>Cho điện thoại Java cũ — Giao diện nhẹ, chức năng cơ bản, kết nối cùng server.</p>
+      <a href="#" class="btn btn-outline" style="justify-content:center">
+        <i class="fas fa-download"></i> Tải JAR
+      </a>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:8px">~500KB • Java MIDP 2.0</p>
+    </div>
+  </div>
+
+  <!-- Server selection -->
+  <% if(servers.filter(s=>s.type!=='test').length){ %>
+  <div style="margin-top:48px">
+    <h2 style="text-align:center;margin-bottom:24px;font-size:1.3rem">Chọn server để kết nối</h2>
+    <div class="server-cards">
+      <% servers.filter(s=>s.type!=='test').forEach(sv=>{ %>
+      <div class="server-card">
+        <div class="sv-header">
+          <span class="sv-name"><%= sv.name %></span>
+          <span class="sv-type sv-<%= sv.type %>"><%= sv.type.toUpperCase() %></span>
+        </div>
+        <div class="sv-status">
+          <div class="dot dot-<%= sv.status==='running'?'on':'off' %>"></div>
+          <span><%= sv.status==='running' ? 'Đang hoạt động' : 'Offline' %></span>
+        </div>
+        <% if(sv.description){ %><div class="sv-desc"><%= sv.description %></div><% } %>
+        <div style="font-size:.78rem;color:var(--muted);background:#0a0a14;padding:8px 12px;border-radius:8px;font-family:monospace">
+          HOST: localhost | PORT: <%= sv.game_port %>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+  <% } %>
+</div>
+<%- include('../layout_foot') %>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Đăng nhập — FRO Admin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0d0d1a;color:#e0e0f0;
+  min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-box{background:#16162a;border:1px solid #2a2a4a;border-radius:16px;padding:40px;
+  width:100%;max-width:380px}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo h1{font-size:1.5rem;color:#c4b5fd;margin-bottom:6px}
+.login-logo p{color:#6b6b8a;font-size:.85rem}
+.form-group{margin-bottom:16px}
+label{display:block;font-size:.8rem;color:#6b6b8a;margin-bottom:6px}
+input{width:100%;background:#0f0f1a;border:1px solid #2a2a4a;border-radius:8px;
+  color:#e0e0f0;padding:10px 14px;font-size:.9rem}
+input:focus{outline:none;border-color:#7c3aed}
+.btn-login{width:100%;background:#7c3aed;color:#fff;border:none;border-radius:8px;
+  padding:11px;font-size:.9rem;font-weight:600;cursor:pointer;margin-top:8px}
+.btn-login:hover{background:#5b21b6}
+.error{background:#7f1d1d33;border:1px solid #991b1b;color:#f87171;
+  padding:10px 14px;border-radius:8px;font-size:.83rem;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div class="login-box">
+  <div class="login-logo">
+    <h1>⚔️ FRO Admin</h1>
+    <p>Fantasy Realm Online — Quản trị</p>
+  </div>
+  <% if(error){ %><div class="error"><i class="fas fa-exclamation-triangle"></i> <%=error%></div><% } %>
+  <form method="POST" action="/login">
+    <div class="form-group">
+      <label>Tài khoản</label>
+      <input type="text" name="username" placeholder="admin" required autofocus>
+    </div>
+    <div class="form-group">
+      <label>Mật khẩu</label>
+      <input type="password" name="password" placeholder="••••••••" required>
+    </div>
+    <button class="btn-login" type="submit"><i class="fas fa-sign-in-alt"></i> Đăng nhập</button>
+  </form>
+</div>
+</body>
+</html>

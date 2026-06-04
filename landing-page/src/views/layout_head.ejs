@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' — ' : '' %>Fantasy Realm Online</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/" class="nav-brand">⚔️ <span>Fantasy Realm</span></a>
+    <div class="nav-links">
+      <a href="/" class="nav-link <%= page==='home'?'active':'' %>">🏠 Trang chủ</a>
+      <a href="/news" class="nav-link <%= page==='news'?'active':'' %>">📰 Tin tức</a>
+      <a href="/events" class="nav-link <%= page==='events'?'active':'' %>">⚡ Sự kiện</a>
+      <a href="/leaderboard" class="nav-link <%= page==='leaderboard'?'active':'' %>">🏆 Bảng xếp hạng</a>
+      <a href="/giftcode" class="nav-link <%= page==='giftcode'?'active':'' %>">🎁 Giftcode</a>
+      <a href="/download" class="nav-link nav-cta <%= page==='download'?'active':'' %>">⬇️ Tải game</a>
+    </div>
+    <button class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</nav>

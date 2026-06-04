@@ -1,0 +1,49 @@
+
+<div class="filter-bar">
+  <form method="GET" style="display:flex;gap:10px">
+    <select name="action" onchange="this.form.submit()">
+      <option value="">Tất cả hành động</option>
+      <% ['kick','give_gold','broadcast','trigger_event','create_giftcode','add_server','start_server','stop_server'].forEach(a=>{ %>
+      <option value="<%= a %>" <%=action===a?'selected':''>><%= a %></option>
+      <% }) %>
+    </select>
+    <select name="server_id" onchange="this.form.submit()">
+      <option value="">Server logs</option>
+      <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=selectedServer==sv.id?'selected':''>><%= sv.name %></option><% }) %>
+    </select>
+    <select name="limit" onchange="this.form.submit()">
+      <option>100</option><option>200</option><option>500</option>
+    </select>
+  </form>
+</div>
+
+<div style="display:grid;grid-template-columns:<%= serverLogs.length?'1fr 1fr':'1fr' %>;gap:16px">
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:14px 20px;border-bottom:1px solid var(--border)"><h3><i class="fas fa-user-shield"></i> Admin Actions</h3></div>
+    <table>
+      <thead><tr><th>Thời gian</th><th>Admin</th><th>Hành động</th><th>Mục tiêu</th><th>IP</th></tr></thead>
+      <tbody>
+      <% logs.forEach(l=>{ %>
+      <tr>
+        <td style="font-size:.75rem;color:var(--muted);white-space:nowrap"><%= moment(l.created_at).format('DD/MM HH:mm:ss') %></td>
+        <td><strong style="color:#c4b5fd"><%= l.username||'system' %></strong></td>
+        <td><span class="badge badge-blue"><%= l.action %></span></td>
+        <td style="font-size:.8rem"><%= l.target_type %> #<%= l.target_id||'-' %></td>
+        <td style="font-size:.75rem;color:var(--muted)"><%= l.ip||'-' %></td>
+      </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% if(serverLogs.length){ %>
+  <div class="card">
+    <div style="font-family:monospace;font-size:.75rem;max-height:600px;overflow-y:auto">
+      <% serverLogs.forEach(l=>{ %>
+      <div style="padding:2px 0;border-bottom:1px solid rgba(42,42,74,.3);color:<%= l.level==='ERROR'?'#f87171':l.level==='WARN'?'#fbbf24':'#60a5fa' %>">
+        [<%= moment(l.created_at).format('HH:mm:ss') %>] [<%= l.level %>] <%= l.message %>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+  <% } %>
+</div>

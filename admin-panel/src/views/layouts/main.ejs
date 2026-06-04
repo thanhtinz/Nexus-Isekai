@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title><%= title %> — FRO Admin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d1a;--sidebar:#111125;--card:#16162a;--border:#2a2a4a;
+  --accent:#7c3aed;--accent2:#5b21b6;--green:#10b981;--red:#ef4444;
+  --yellow:#f59e0b;--blue:#3b82f6;--text:#e0e0f0;--muted:#6b6b8a;
+  --sidebar-w:240px;
+}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* Sidebar */
+#sidebar{width:var(--sidebar-w);background:var(--sidebar);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100}
+.sidebar-logo{padding:20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-logo h2{font-size:1rem;color:#c4b5fd;font-weight:700}
+.sidebar-logo span{font-size:.75rem;color:var(--muted)}
+.nav-section{padding:8px 0}
+.nav-section-title{padding:8px 16px 4px;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;color:var(--muted);
+  font-size:.85rem;cursor:pointer;transition:.15s;border-left:3px solid transparent}
+.nav-item:hover{color:var(--text);background:rgba(124,58,237,.1)}
+.nav-item.active{color:#c4b5fd;background:rgba(124,58,237,.15);border-color:var(--accent)}
+.nav-item i{width:16px;text-align:center}
+.sidebar-footer{margin-top:auto;padding:12px 16px;border-top:1px solid var(--border);font-size:.75rem;color:var(--muted)}
+
+/* Main */
+#main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+#topbar{background:var(--sidebar);border-bottom:1px solid var(--border);padding:12px 24px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+#topbar h1{font-size:1rem;font-weight:600;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:16px;font-size:.8rem;color:var(--muted)}
+.admin-badge{background:rgba(124,58,237,.2);border:1px solid var(--accent);color:#c4b5fd;
+  padding:3px 10px;border-radius:12px;font-size:.75rem}
+#content{padding:24px;flex:1}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.card-title{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-header h3{font-size:.95rem;font-weight:600}
+
+/* Stats grid */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.stat-value{font-size:2rem;font-weight:700;color:#c4b5fd;line-height:1}
+.stat-label{font-size:.75rem;color:var(--muted);margin-top:6px}
+.stat-delta{font-size:.75rem;margin-top:4px}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{padding:10px 12px;color:var(--muted);border-bottom:1px solid var(--border);font-weight:500;text-align:left}
+td{padding:10px 12px;border-bottom:1px solid rgba(42,42,74,.5)}
+tr:hover td{background:rgba(124,58,237,.05)}
+
+/* Buttons */
+.btn{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-size:.83rem;font-weight:500;
+  transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
+.btn-success{background:#065f46;color:#34d399}.btn-success:hover{background:#047857}
+.btn-danger{background:#7f1d1d;color:#f87171}.btn-danger:hover{background:#991b1b}
+.btn-warn{background:#78350f;color:#fbbf24}.btn-warn:hover{background:#92400e}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}.btn-ghost:hover{color:var(--text);border-color:var(--accent)}
+.btn-sm{padding:4px 10px;font-size:.75rem}
+
+/* Forms */
+input,select,textarea{background:#0f0f1a;border:1px solid var(--border);border-radius:8px;
+  color:var(--text);padding:8px 12px;font-size:.85rem;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:5px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* Badges */
+.badge{padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600;display:inline-block}
+.badge-green{background:#064e3b;color:#34d399}.badge-red{background:#7f1d1d;color:#f87171}
+.badge-yellow{background:#78350f;color:#fbbf24}.badge-blue{background:#1e3a8a;color:#93c5fd}
+.badge-purple{background:#4c1d95;color:#c4b5fd}.badge-gray{background:#1f2937;color:#9ca3af}
+
+/* Server type badges */
+.badge-live{background:#064e3b;color:#34d399}
+.badge-beta{background:#78350f;color:#fbbf24}
+.badge-test{background:#1e3a8a;color:#93c5fd}
+
+/* Status dot */
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.dot-green{background:#10b981;box-shadow:0 0 6px #10b981}
+.dot-red{background:#ef4444}
+.dot-yellow{background:#f59e0b;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Toast */
+#toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:10px;
+  font-size:.85rem;z-index:9999;display:none;max-width:360px}
+.toast-ok{background:#064e3b;color:#34d399;border:1px solid #047857}
+.toast-err{background:#7f1d1d;color:#f87171;border:1px solid #991b1b}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+  display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px;min-width:360px;max-width:520px;width:90%}
+.modal h3{color:#c4b5fd;margin-bottom:16px}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.filter-bar select,.filter-bar input{width:auto;min-width:140px}
+
+/* Pagination stub */
+.page-info{color:var(--muted);font-size:.8rem}
+
+@media(max-width:768px){
+  #sidebar{transform:translateX(-100%)}
+  #main{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <h2>⚔️ FRO Admin</h2>
+    <span>Fantasy Realm Online</span>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Tổng quan</div>
+    <a href="/dashboard" class="nav-item <%= activePage==='dashboard'?'active':'' %>"><i class="fas fa-chart-line"></i> Dashboard</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Game Server</div>
+    <a href="/servers"    class="nav-item <%= activePage==='servers'?'active':'' %>"><i class="fas fa-server"></i> Quản lý Server</a>
+    <a href="/players"    class="nav-item <%= activePage==='players'?'active':'' %>"><i class="fas fa-users"></i> Người chơi</a>
+    <a href="/economy"    class="nav-item <%= activePage==='economy'?'active':'' %>"><i class="fas fa-coins"></i> Kinh tế</a>
+    <a href="/events"     class="nav-item <%= activePage==='events'?'active':'' %>"><i class="fas fa-bolt"></i> Sự kiện</a>
+    <a href="/leaderboard"class="nav-item <%= activePage==='leaderboard'?'active':'' %>"><i class="fas fa-trophy"></i> Bảng xếp hạng</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Nội dung</div>
+    <a href="/giftcode"   class="nav-item <%= activePage==='giftcode'?'active':'' %>"><i class="fas fa-gift"></i> Giftcode</a>
+    <a href="/news"       class="nav-item <%= activePage==='news'?'active':'' %>"><i class="fas fa-newspaper"></i> Tin tức</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Hệ thống</div>
+    <a href="/config"     class="nav-item <%= activePage==='config'?'active':'' %>"><i class="fas fa-cog"></i> Cài đặt</a>
+    <a href="/logs"       class="nav-item <%= activePage==='logs'?'active':'' %>"><i class="fas fa-scroll"></i> Nhật ký</a>
+    <a href="/" target="_blank" class="nav-item"><i class="fas fa-globe"></i> Website</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div>👤 <%= admin?.username %> <span class="badge badge-purple" style="font-size:.6rem"><%= admin?.role %></span></div>
+    <a href="/logout" style="color:var(--red);font-size:.75rem;margin-top:6px;display:block">Đăng xuất</a>
+  </div>
+</nav>
+
+<div id="main">
+  <div id="topbar">
+    <h1><%= title %></h1>
+    <div class="topbar-right">
+      <span id="total-online-topbar">
+        <i class="fas fa-circle" style="color:#10b981;font-size:.5rem"></i> Đang tải...
+      </span>
+      <span>⏰ <span id="topbar-time"></span></span>
+    </div>
+  </div>
+
+  <div id="content">
+    <% if(typeof error !== 'undefined' && error) { %>
+    <div class="card" style="border-color:#991b1b;background:#7f1d1d22;margin-bottom:16px">
+      <i class="fas fa-exclamation-triangle" style="color:#f87171"></i> <%- error %>
+    </div>
+    <% } %>
+    <% if(typeof success !== 'undefined' && success) { %>
+    <div class="card" style="border-color:#047857;background:#06593422;margin-bottom:16px">
+      <i class="fas fa-check-circle" style="color:#34d399"></i> <%- success %>
+    </div>
+    <% } %>
+    <%- body %>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+<script>
+// Toast
+function toast(msg, ok=true){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=ok?'toast-ok':'toast-err';
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',3500);
+}
+
+// Clock
+function updateClock(){ document.getElementById('topbar-time').textContent = new Date().toLocaleTimeString('vi-VN'); }
+setInterval(updateClock,1000); updateClock();
+
+// Socket.IO
+const socket = io();
+socket.on('servers_summary', function(servers){
+  const total = servers.reduce((s,sv)=>s+(sv.online||0),0);
+  document.getElementById('total-online-topbar').innerHTML =
+    `<i class="fas fa-circle" style="color:#10b981;font-size:.5rem"></i> ${total} online (${servers.filter(s=>s.status==='running').length}/${servers.length} SV)`;
+});
+
+// Confirm helper
+function confirmAction(msg, cb){
+  if(confirm(msg)) cb();
+}
+
+// API helper
+async function api(method, url, data){
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if(data) opts.body = JSON.stringify(data);
+  const r = await fetch(url, opts);
+  return r.json();
+}
+</script>
+</body>
+</html>

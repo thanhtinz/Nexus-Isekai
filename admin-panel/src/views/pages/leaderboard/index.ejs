@@ -1,0 +1,37 @@
+
+<div class="filter-bar">
+  <form method="GET" style="display:flex;gap:10px">
+    <select name="server_id" onchange="this.form.submit()">
+      <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=selectedServer?.id==sv.id?'selected':''>><%= sv.name %></option><% }) %>
+    </select>
+    <% boards.forEach(b=>{ %>
+    <a href="?server_id=<%= selectedServer?.id %>&board=<%= b %>" class="btn <%= selectedBoard===b?'btn-primary':'btn-ghost' %> btn-sm"><%= b %></a>
+    <% }) %>
+  </form>
+</div>
+<% if(error){ %><div class="card" style="border-color:#991b1b;color:#f87171"><i class="fas fa-exclamation-triangle"></i> <%=error%></div><% } %>
+<div class="card" style="padding:0;overflow:hidden">
+  <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+    <h3><i class="fas fa-trophy"></i> <%= selectedBoard %> — <%= selectedServer?.name||'' %></h3>
+  </div>
+  <table>
+    <thead><tr><th>Hạng</th><th>Nhân vật</th><th>Phe</th><th>Điểm</th></tr></thead>
+    <tbody>
+    <% if(!entries.length){ %><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">Không có dữ liệu</td></tr><% } %>
+    <% entries.forEach((e,i)=>{ %>
+    <tr>
+      <td>
+        <% if(i===0){ %><span style="font-size:1.2rem">🥇</span>
+        <% } else if(i===1){ %><span style="font-size:1.2rem">🥈</span>
+        <% } else if(i===2){ %><span style="font-size:1.2rem">🥉</span>
+        <% } else { %><span style="color:var(--muted)">#<%= e.rank||i+1 %></span>
+        <% } %>
+      </td>
+      <td><strong><%= e.name||e.characterName %></strong></td>
+      <td><span class="badge badge-purple"><%= e.faction %></span></td>
+      <td><strong style="color:#c4b5fd"><%= (e.score||0).toLocaleString() %></strong></td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</div>

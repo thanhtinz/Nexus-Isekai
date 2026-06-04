@@ -1,0 +1,135 @@
+<%- include('../layout_head', {pageTitle:'Trang chủ'}) %>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">⚔️ MMORPG Xã Hội Fantasy Việt Nam</div>
+    <h1>Thế Giới<br><span>Fantasy Realm</span><br>Đang Chờ Bạn</h1>
+    <p>Khám phá thế giới fantasy đặc sắc — xây dựng nhân vật, kết bạn bốn phương,<br>
+    chinh phục sự kiện, và viết nên câu chuyện của riêng bạn.</p>
+    <div class="hero-btns">
+      <a href="/download" class="btn btn-primary"><i class="fas fa-download"></i> Tải Game Miễn Phí</a>
+      <a href="#servers" class="btn btn-outline"><i class="fas fa-server"></i> Xem Server</a>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features">
+  <div class="section-title">
+    <h2>Tại sao chơi Fantasy Realm?</h2>
+    <p>Không chỉ là game — đây là cộng đồng, nghề nghiệp và thời trang</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">👗</div>
+      <h3>Thời Trang Vô Hạn</h3>
+      <p>Hàng nghìn bộ trang phục, tùy biến từng chi tiết. Trở thành biểu tượng thời trang của server.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔨</div>
+      <h3>15 Nghề Nghiệp</h3>
+      <p>Từ Ngư Dân, Đầu Bếp, Nông Dân đến Thợ Rèn, Nhà Giả Kim, Tên Trộm... đa dạng con đường phát triển.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏰</div>
+      <h3>4 Phe Phái</h3>
+      <p>Đế Quốc Ánh Sáng, Liên Minh Elf, Vương Quốc Thú Nhân, Ma Tộc — mỗi phe có đặc quyền riêng.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💰</div>
+      <h3>Kinh Tế Năng Động</h3>
+      <p>Chợ player-driven, stall buôn bán, giá thị trường biến động theo mùa và sự kiện server.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🐾</div>
+      <h3>Thuần Hóa Thú Cưng</h3>
+      <p>12+ loại thú từ Common đến Legendary. Thú cưng theo bạn mọi nơi, hỗ trợ câu cá, farming...</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎭</div>
+      <h3>Sự Kiện Liên Tục</h3>
+      <p>Rồng xuất hiện, mưa sao băng, boss cộng đồng, lễ hội trăng tròn... mỗi ngày luôn có điều mới.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎣</div>
+      <h3>Câu Cá Huyền Thoại</h3>
+      <p>13 loại cá, tỉ lệ thay đổi theo giờ, mùa và trăng tròn. Cá huyền thoại cực hiếm!</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🗳️</div>
+      <h3>Chính Trị & Bầu Cử</h3>
+      <p>Bầu chọn Thị Trưởng hàng tuần, đọc báo, viết tin tức. Bạn có thể tạo ra lịch sử server!</p>
+    </div>
+  </div>
+</section>
+
+<!-- Servers -->
+<section class="servers-section" id="servers">
+  <div class="servers-container">
+    <div class="section-title">
+      <h2>Chọn Server</h2>
+      <p>Nhiều server để bạn lựa chọn — cùng bạn bè hoặc tự mình khám phá</p>
+    </div>
+    <div class="server-cards">
+      <% if(!servers.length){ %>
+      <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px">
+        <i class="fas fa-server" style="font-size:2rem;margin-bottom:12px;display:block"></i>
+        Thông tin server đang cập nhật...
+      </div>
+      <% } %>
+      <% servers.forEach(sv=>{ %>
+      <div class="server-card">
+        <div class="sv-header">
+          <span class="sv-name"><%= sv.name %></span>
+          <span class="sv-type sv-<%= sv.type %>"><%= sv.type.toUpperCase() %></span>
+        </div>
+        <div class="sv-status">
+          <div class="dot dot-<%= sv.status==='running'?'on':'off' %>"></div>
+          <span><%= sv.status==='running' ? 'Đang hoạt động' : 'Offline' %></span>
+        </div>
+        <% if(sv.description){ %><div class="sv-desc"><%= sv.description %></div><% } %>
+        <div class="sv-action">
+          <a href="/download" class="btn btn-primary" style="font-size:.83rem;padding:8px 18px">
+            <i class="fas fa-play"></i> Vào server
+          </a>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- Latest News -->
+<% if(news.length){ %>
+<section class="news-section">
+  <div class="section-title">
+    <h2>Tin Tức Mới Nhất</h2>
+    <p>Cập nhật sự kiện, bản vá, thông báo từ Ban Quản Lý</p>
+  </div>
+  <div class="news-grid">
+    <% news.slice(0,6).forEach(a=>{ %>
+    <a href="/news/<%= a.slug %>" class="news-card">
+      <div class="news-thumb">
+        <% if(a.thumbnail){ %><img src="<%= a.thumbnail %>" alt="<%= a.title %>">
+        <% } else { %><% const icons={'event':'⚡','update':'🔧','maintenance':'🛠️','notice':'📢'}; %><%= icons[a.category]||'📰' %><% } %>
+      </div>
+      <div class="news-body">
+        <span class="news-cat"><%= a.category %></span>
+        <div class="news-title"><%= a.title %></div>
+        <% if(a.excerpt){ %><div class="news-excerpt"><%= a.excerpt %></div><% } %>
+        <div class="news-meta">
+          <i class="fas fa-eye"></i> <%= a.views||0 %> lượt xem •
+          <%= a.published_at ? new Date(a.published_at).toLocaleDateString('vi-VN') : '' %>
+        </div>
+      </div>
+    </a>
+    <% }) %>
+  </div>
+  <div style="text-align:center;margin-top:32px">
+    <a href="/news" class="btn btn-outline">Xem tất cả tin tức →</a>
+  </div>
+</section>
+<% } %>
+
+<%- include('../layout_foot') %>

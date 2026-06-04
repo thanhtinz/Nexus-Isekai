@@ -1,0 +1,35 @@
+
+<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+  <a href="/giftcode/create" class="btn btn-primary"><i class="fas fa-plus"></i> Tạo Giftcode</a>
+  <span style="color:var(--muted);font-size:.85rem"><%= codes.length %> giftcode</span>
+</div>
+<div class="card" style="padding:0;overflow:hidden">
+  <table>
+    <thead><tr><th>Code</th><th>Mô tả</th><th>Server</th><th>Phần thưởng</th><th>Dùng</th><th>Hạn</th><th>Trạng thái</th><th></th></tr></thead>
+    <tbody>
+    <% codes.forEach(c=>{ %>
+    <tr>
+      <td><code style="background:#0f0f1a;padding:3px 8px;border-radius:4px;font-size:.8rem;color:#c4b5fd"><%= c.code %></code></td>
+      <td style="color:var(--muted);font-size:.8rem"><%= c.description||'-' %></td>
+      <td><%= c.server_name||'Tất cả SV' %></td>
+      <td style="font-size:.75rem">
+        <% try{ JSON.parse(c.rewards||'[]').forEach(r=>{ %>
+          <span class="badge badge-green" style="margin:1px"><%= r.type==='gold'?'💰 '+r.amount+'G':'📦 Item#'+r.itemId+'x'+r.qty %></span>
+        <% })}catch(e){} %>
+      </td>
+      <td><%= c.real_uses||c.uses %>/<%= c.max_uses %></td>
+      <td style="font-size:.75rem;color:var(--muted)"><%= c.expires_at ? moment(c.expires_at).format('DD/MM/YY') : '∞' %></td>
+      <td><span class="badge <%= c.is_active?'badge-green':'badge-red' %>"><%= c.is_active?'Hoạt động':'Tắt' %></span></td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-warn btn-sm" onclick="toggleCode(<%= c.id %>)"><i class="fas fa-toggle-on"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCode(<%= c.id %>)"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</div>
+<script>
+async function toggleCode(id){ const r=await api('POST',`/giftcode/${id}/toggle`); toast(r.ok?'Đã đổi trạng thái':r.error,r.ok); if(r.ok)location.reload(); }
+async function deleteCode(id){ if(!confirm('Xóa giftcode này?'))return; const r=await api('DELETE',`/giftcode/${id}`); toast(r.ok?'Đã xóa':r.error,r.ok); if(r.ok)location.reload(); }
+</script>

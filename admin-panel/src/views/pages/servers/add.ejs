@@ -1,0 +1,72 @@
+
+<div class="card" style="max-width:640px">
+  <div class="card-header">
+    <h3><i class="fas fa-plus-circle"></i> Thêm Server mới</h3>
+    <a href="/servers" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i> Quay lại</a>
+  </div>
+  <form method="POST" action="/servers/add">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tên server *</label>
+        <input name="name" placeholder="Server 2" required>
+      </div>
+      <div class="form-group">
+        <label>Slug (ID ngắn) *</label>
+        <input name="slug" placeholder="sv2" required pattern="[a-z0-9_-]+">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Loại server</label>
+        <select name="type">
+          <option value="live">🟢 Live — Chính thức</option>
+          <option value="beta">🟡 Beta — Thử nghiệm công khai</option>
+          <option value="test">🔵 Test — Nội bộ dev</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Host / IP</label>
+        <input name="host" value="localhost" placeholder="localhost hoặc IP">
+      </div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group">
+        <label>Game Port (TCP)</label>
+        <input name="game_port" type="number" value="7777" required>
+      </div>
+      <div class="form-group">
+        <label>Admin Port (HTTP)</label>
+        <input name="admin_port" type="number" value="8080" required>
+      </div>
+      <div class="form-group">
+        <label>Max Players</label>
+        <input name="max_players" type="number" value="500">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tên DB PostgreSQL</label>
+        <input name="db_name" placeholder="fantasyrealm_sv2">
+      </div>
+      <div class="form-group">
+        <label>Ngày mở server</label>
+        <input name="opens_at" type="datetime-local">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>API User (GM)</label>
+        <input name="api_user" value="gm">
+      </div>
+      <div class="form-group">
+        <label>API Password</label>
+        <input name="api_pass" value="gm_secret_2024" type="password">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Mô tả</label>
+      <textarea name="description" rows="3" placeholder="Server mới với phiên bản..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Thêm server</button>
+  </form>
+</div>

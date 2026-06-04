@@ -1,0 +1,48 @@
+<%- include('../layout_head', {pageTitle:'Bảng Xếp Hạng'}) %>
+<div style="max-width:860px;margin:0 auto;padding:48px 24px">
+  <div class="section-title">
+    <h2>🏆 Bảng Xếp Hạng</h2>
+    <p>Top người chơi xuất sắc nhất Fantasy Realm Online</p>
+  </div>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">
+    <% servers.filter(s=>s.type==='live').forEach((sv,i)=>{ %>
+    <button class="sv-btn <%= i===0?'active':'' %>" onclick="selectServer('<%= sv.id %>',this)"><%= sv.name %></button>
+    <% }) %>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:24px" id="board-btns">
+    <% ['FASHION','FISHING','WEALTH','COOKING','FOLLOWERS'].forEach((b,i)=>{ %>
+    <button class="sv-btn <%= i===0?'active':'' %>" onclick="selectBoard('<%= b %>',this)"><%= {'FASHION':'👗 Thời Trang','FISHING':'🎣 Câu Cá','WEALTH':'💰 Giàu Có','COOKING':'🍜 Nấu Ăn','FOLLOWERS':'⭐ Nổi Tiếng'}[b] %></button>
+    <% }) %>
+  </div>
+  <div class="lb-table-wrap">
+    <table class="lb-table">
+      <thead><tr><th>Hạng</th><th>Nhân vật</th><th>Phe</th><th>Điểm</th></tr></thead>
+      <tbody id="lb-rows"><tr><td colspan="4" style="text-align:center;padding:40px;color:var(--muted)">Chọn server để xem bảng xếp hạng</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<script>
+let currentServer = '<%= servers.filter(s=>s.type==="live")[0]?.id||"" %>';
+let currentBoard = 'WEALTH';
+function selectServer(id, btn){
+  document.querySelectorAll('.sv-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); currentServer=id;
+  loadLB();
+}
+function selectBoard(b, btn){
+  document.querySelectorAll('#board-btns .sv-btn').forEach(x=>x.classList.remove('active'));
+  btn.classList.add('active'); currentBoard=b;
+  loadLB();
+}
+async function loadLB(){
+  const rows=document.getElementById('lb-rows');
+  rows.innerHTML='<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i> Đang tải...</td></tr>';
+  try{
+    // Gọi thẳng đến admin API via proxy route — cần thêm route proxy vào website app
+    // Hoặc embed iframe từ admin
+    rows.innerHTML='<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted)">Chức năng đang cập nhật...</td></tr>';
+  }catch(e){}
+}
+if(currentServer) loadLB();
+</script>
+<%- include('../layout_foot') %>

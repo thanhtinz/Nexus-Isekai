@@ -1,0 +1,142 @@
+
+<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+  <a href="/servers" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  <h2><%= server.name %></h2>
+  <span class="badge badge-<%= server.type %>"><%= server.type.toUpperCase() %></span>
+  <% if(liveStatus.status==='running'){ %>
+    <span class="badge badge-green"><i class="fas fa-circle"></i> Online</span>
+  <% } else { %>
+    <span class="badge badge-red">Offline</span>
+  <% } %>
+  <div style="margin-left:auto;display:flex;gap:8px">
+    <% if(liveStatus.status==='running'){ %>
+    <button class="btn btn-warn btn-sm" onclick="svAct('stop')"><i class="fas fa-stop"></i> Dừng</button>
+    <button class="btn btn-ghost btn-sm" onclick="svAct('restart')"><i class="fas fa-redo"></i> Restart</button>
+    <% } else { %>
+    <button class="btn btn-success btn-sm" onclick="svAct('start')"><i class="fas fa-play"></i> Khởi động</button>
+    <% } %>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+  <div>
+    <!-- Stats -->
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card">
+        <div class="stat-value" id="sv-online"><%= liveStatus.online||0 %></div>
+        <div class="stat-label">Online</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= liveStatus.zones||0 %></div>
+        <div class="stat-label">Zones</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="font-size:1.2rem"><%= liveStatus.gameTime||'--' %></div>
+        <div class="stat-label">Giờ game</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="font-size:1.2rem"><%= liveStatus.season||'--' %></div>
+        <div class="stat-label">Mùa</div>
+      </div>
+    </div>
+
+    <!-- Players -->
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-users"></i> Players online (<%= players.length %>)</h3>
+        <a href="/players?server_id=<%= server.id %>" class="btn btn-ghost btn-sm">Quản lý đầy đủ</a>
+      </div>
+      <table>
+        <thead><tr><th>Tên</th><th>Phe</th><th>Level</th><th>Gold</th><th>Zone</th><th></th></tr></thead>
+        <tbody>
+        <% players.slice(0,20).forEach(p => { %>
+        <tr>
+          <td><strong><%= p.name||p.characterName %></strong></td>
+          <td><%= p.faction %></td>
+          <td>Lv.<%= p.level %></td>
+          <td>💰 <%= (p.gold||0).toLocaleString() %></td>
+          <td>Zone <%= p.zoneId %></td>
+          <td>
+            <button class="btn btn-success btn-sm" onclick="giveGold(<%= p.playerId %>)"><i class="fas fa-coins"></i></button>
+            <button class="btn btn-warn btn-sm" onclick="teleport(<%= p.playerId %>)"><i class="fas fa-map-marker-alt"></i></button>
+            <button class="btn btn-danger btn-sm" onclick="kickPlayer(<%= p.playerId %>,'<%= p.name||p.characterName %>')"><i class="fas fa-ban"></i></button>
+          </td>
+        </tr>
+        <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Events -->
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-bolt"></i> Sự kiện đang chạy</h3>
+      </div>
+      <% if(gameEvents.length){ %>
+        <% gameEvents.forEach(ev=>{ %><div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem">
+          <span class="badge badge-yellow"><%= ev.type||ev.title %></span>
+          <span style="color:var(--muted);margin-left:8px"><%= ev.endsIn||'' %></span>
+        </div><% }) %>
+      <% } else { %><p style="color:var(--muted);font-size:.85rem">Không có sự kiện</p><% } %>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <% ['DRAGON_APPEARS','METEOR_SHOWER','MERCHANT_SHIP','TREASURE_HUNT','FULL_MOON_FESTIVAL','COMMUNITY_BOSS'].forEach(ev=>{ %>
+        <button class="btn btn-warn btn-sm" onclick="trigEvent('<%= ev %>')"><%= ev.replace(/_/g,' ') %></button>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <!-- Quick actions -->
+    <div class="card">
+      <h3 style="margin-bottom:14px"><i class="fas fa-broadcast-tower"></i> Thông báo</h3>
+      <div class="form-group">
+        <textarea id="bc-msg" rows="3" placeholder="Nhập nội dung thông báo..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="sendBC()"><i class="fas fa-bullhorn"></i> Gửi</button>
+    </div>
+
+    <!-- Server info -->
+    <div class="card">
+      <h3 style="margin-bottom:14px"><i class="fas fa-info-circle"></i> Thông tin</h3>
+      <div style="font-size:.83rem;line-height:2">
+        <div>🔌 Game port: <strong>:<%= server.game_port %></strong></div>
+        <div>⚙️ Admin port: <strong>:<%= server.admin_port %></strong></div>
+        <div>🌐 Host: <strong><%= server.host %></strong></div>
+        <div>💾 DB: <strong><%= server.db_name||'-' %></strong></div>
+        <div>👥 Max: <strong><%= server.max_players %></strong></div>
+      </div>
+    </div>
+
+    <!-- Logs -->
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-terminal"></i> Logs gần đây</h3>
+        <button class="btn btn-ghost btn-sm" onclick="refreshLogs()"><i class="fas fa-sync"></i></button>
+      </div>
+      <div id="log-container" style="max-height:300px;overflow-y:auto;font-family:monospace;font-size:.75rem">
+        <% logs.slice(0,30).forEach(l=>{ %>
+        <div style="padding:2px 0;color:<%= l.level==='ERROR'?'#f87171':l.level==='WARN'?'#fbbf24':'#60a5fa' %>">
+          [<%= moment(l.created_at).format('HH:mm:ss') %>] [<%= l.level %>] <%= l.message %>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SVid = <%= server.id %>;
+socket.emit('subscribe_server', SVid);
+socket.on('server_stats', d => {
+  if(d.id!=SVid) return;
+  document.getElementById('sv-online').textContent = d.online||0;
+});
+async function svAct(action){ const r=await api('POST',`/servers/${SVid}/${action}`); toast(r.ok?'OK':r.error,r.ok); if(r.ok)setTimeout(()=>location.reload(),3000); }
+async function sendBC(){ const m=document.getElementById('bc-msg').value.trim(); if(!m)return toast('Nhập nội dung',false); const r=await api('POST','/players/broadcast',{server_id:SVid,message:m}); toast(r.ok?'Đã gửi!':r.error,r.ok); }
+async function trigEvent(t){ const r=await api('POST',`/servers/${SVid}/trigger-event`,{type:t}); toast(r.ok?'Đã kích hoạt!':r.error,r.ok); }
+async function giveGold(pid){ const a=prompt('Số gold:'); if(!a)return; const r=await api('POST',`/players/${pid}/give-gold`,{server_id:SVid,amount:parseInt(a)}); toast(r.ok?r.message:r.error,r.ok); }
+async function teleport(pid){ const z=prompt('Zone ID (1-10):')||'1'; const r=await api('POST',`/players/${pid}/teleport`,{server_id:SVid,zoneId:parseInt(z)}); toast(r.ok?'Đã teleport!':r.error,r.ok); }
+async function kickPlayer(pid,name){ if(!confirm(`Kick ${name}?`))return; const r=await api('DELETE',`/players/${pid}/kick`,{server_id:SVid}); toast(r.ok?'Đã kick':r.error,r.ok); if(r.ok)location.reload(); }
+async function refreshLogs(){ const r=await api('GET',`/servers/${SVid}/logs`); const c=document.getElementById('log-container'); c.innerHTML=r.db.slice(0,50).map(l=>`<div style="padding:2px 0;color:${l.level==='ERROR'?'#f87171':l.level==='WARN'?'#fbbf24':'#60a5fa'}">[${l.created_at?.slice(11,19)||''}] [${l.level}] ${l.message}</div>`).join(''); }
+</script>

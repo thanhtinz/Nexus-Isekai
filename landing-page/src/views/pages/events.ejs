@@ -1,0 +1,37 @@
+<%- include('../layout_head', {pageTitle:'Sự kiện'}) %>
+<div style="max-width:1000px;margin:0 auto;padding:48px 24px">
+  <div class="section-title">
+    <h2>⚡ Sự Kiện</h2>
+    <p>Tham gia sự kiện server để nhận phần thưởng hấp dẫn!</p>
+  </div>
+  <!-- Recurring events info -->
+  <div class="features-grid" style="margin-bottom:48px">
+    <div class="feature-card"><div class="feature-icon">🐉</div><h3>Rồng Xuất Hiện</h3><p>Rồng cổ đại bay qua thành phố! Tham gia tiêu diệt để nhận rare drops và exp bonus.</p></div>
+    <div class="feature-card"><div class="feature-icon">☄️</div><h3>Mưa Sao Băng</h3><p>Sao băng rơi khắp bản đồ — nhặt thiên thạch đổi lấy vật phẩm hiếm.</p></div>
+    <div class="feature-card"><div class="feature-icon">⛵</div><h3>Tàu Buôn Ghé Cảng</h3><p>Thương nhân huyền bí mang hàng hiếm — chỉ có 30 phút!</p></div>
+    <div class="feature-card"><div class="feature-icon">💎</div><h3>Săn Kho Báu</h3><p>GM giấu 3 rương kho báu trên map — người tìm thấy sẽ nhận được đại phần thưởng.</p></div>
+    <div class="feature-card"><div class="feature-icon">🌕</div><h3>Lễ Hội Trăng Tròn</h3><p>Mỗi 15 đêm game — NPC bí ẩn xuất hiện, cá huyền thoại x10 tỉ lệ!</p></div>
+    <div class="feature-card"><div class="feature-icon">👑</div><h3>Boss Cộng Đồng</h3><p>Boss huyền thoại yêu cầu toàn server hợp tác — phần thưởng chia đều!</p></div>
+  </div>
+
+  <!-- Latest event news -->
+  <% if(events.length){ %>
+  <h3 style="margin-bottom:20px;font-size:1.1rem">📰 Tin sự kiện mới nhất</h3>
+  <div class="news-grid">
+    <% events.forEach(a=>{ %>
+    <a href="/news/<%= a.slug %>" class="news-card">
+      <div class="news-thumb" style="height:140px">
+        <% if(a.thumbnail){ %><img src="<%= a.thumbnail %>" alt="">
+        <% } else { %>⚡<% } %>
+      </div>
+      <div class="news-body">
+        <span class="news-cat">event</span>
+        <div class="news-title"><%= a.title %></div>
+        <% if(a.excerpt){ %><div class="news-excerpt"><%= a.excerpt %></div><% } %>
+      </div>
+    </a>
+    <% }) %>
+  </div>
+  <% } %>
+</div>
+<%- include('../layout_foot') %>

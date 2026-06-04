@@ -272,3 +272,124 @@ INSERT INTO item_definitions (code, name, category, rarity, base_price) VALUES
     ('fish_epic1',     'Cá Thần Long',       'fish',       3,10000),
     ('fish_legendary1','Cá Trăng Huyền Thoại','fish',      4,50000)
 ON CONFLICT (code) DO NOTHING;
+
+-- ============================================================
+-- ADMIN PANEL TABLES
+-- ============================================================
+
+-- Admin users
+CREATE TABLE IF NOT EXISTS admin_users (
+    id              BIGSERIAL PRIMARY KEY,
+    username        VARCHAR(64) UNIQUE NOT NULL,
+    password_hash   VARCHAR(255) NOT NULL,
+    role            VARCHAR(32) DEFAULT 'moderator',
+    email           VARCHAR(128),
+    is_active       BOOLEAN DEFAULT TRUE,
+    last_login      TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+-- Default superadmin (password: SuperAdmin@2024)
+INSERT INTO admin_users(username,password_hash,role,email) VALUES
+  ('superadmin','$2b$12$placeholder_hash_change_me_on_first_run','superadmin','admin@fantasyrealm.vn')
+ON CONFLICT DO NOTHING;
+
+-- Admin action logs
+CREATE TABLE IF NOT EXISTS admin_logs (
+    id          BIGSERIAL PRIMARY KEY,
+    admin_id    BIGINT REFERENCES admin_users(id),
+    action      VARCHAR(64) NOT NULL,
+    detail      TEXT,
+    ip          VARCHAR(64),
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_admin_logs_time ON admin_logs(created_at DESC);
+
+-- Multi-server registry
+CREATE TABLE IF NOT EXISTS game_servers (
+    server_id   BIGSERIAL PRIMARY KEY,
+    name        VARCHAR(128) NOT NULL,
+    server_type VARCHAR(16) DEFAULT 'MAIN',
+    api_host    VARCHAR(128) NOT NULL,
+    api_port    INT DEFAULT 8080,
+    game_port   INT DEFAULT 7777,
+    admin_user  VARCHAR(64) DEFAULT 'gm',
+    admin_pass  VARCHAR(128) DEFAULT 'gm_secret_2024',
+    description TEXT,
+    max_players INT DEFAULT 500,
+    is_active   BOOLEAN DEFAULT TRUE,
+    created_at  TIMESTAMPTZ DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+-- Auto-register the main game server
+INSERT INTO game_servers(name,server_type,api_host,api_port,game_port,description)
+  VALUES('SV1 - Chính Thức','MAIN','game-server',8080,7777,'Server chính thức đầu tiên')
+ON CONFLICT DO NOTHING;
+
+-- Giftcodes
+CREATE TABLE IF NOT EXISTS giftcodes (
+    id              BIGSERIAL PRIMARY KEY,
+    name            VARCHAR(128) NOT NULL,
+    code            VARCHAR(32) UNIQUE NOT NULL,
+    rewards_json    TEXT DEFAULT '{}',
+    max_uses        INT DEFAULT 1,
+    expires_at      TIMESTAMPTZ,
+    apply_servers   VARCHAR(32) DEFAULT 'all',
+    is_active       BOOLEAN DEFAULT TRUE,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS giftcode_uses (
+    id              BIGSERIAL PRIMARY KEY,
+    code_id         BIGINT NOT NULL REFERENCES giftcodes(id) ON DELETE CASCADE,
+    character_id    BIGINT,
+    server_id       BIGINT,
+    used_at         TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(code_id, character_id)
+);
+CREATE INDEX IF NOT EXISTS idx_gc_uses_code ON giftcode_uses(code_id);
+
+-- News & Articles
+CREATE TABLE IF NOT EXISTS news (
+    id          BIGSERIAL PRIMARY KEY,
+    title       VARCHAR(256) NOT NULL,
+    slug        VARCHAR(256) UNIQUE NOT NULL,
+    content     TEXT,
+    excerpt     TEXT,
+    category    VARCHAR(32) DEFAULT 'news',
+    thumbnail   TEXT,
+    is_published BOOLEAN DEFAULT FALSE,
+    is_pinned   BOOLEAN DEFAULT FALSE,
+    views       INT DEFAULT 0,
+    author_id   BIGINT REFERENCES admin_users(id),
+    created_at  TIMESTAMPTZ DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_news_cat ON news(category, is_published);
+CREATE INDEX IF NOT EXISTS idx_news_slug ON news(slug);
+
+-- Scheduled events
+CREATE TABLE IF NOT EXISTS scheduled_events (
+    id          BIGSERIAL PRIMARY KEY,
+    event_type  VARCHAR(64) NOT NULL,
+    server_id   BIGINT,
+    trigger_at  TIMESTAMPTZ NOT NULL,
+    note        TEXT,
+    executed    BOOLEAN DEFAULT FALSE,
+    created_by  BIGINT REFERENCES admin_users(id),
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- System config
+CREATE TABLE IF NOT EXISTS system_config (
+    key         VARCHAR(128) PRIMARY KEY,
+    value       TEXT,
+    updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+INSERT INTO system_config(key,value) VALUES
+  ('maintenance_mode','false'),
+  ('exp_rate','1.0'),
+  ('gold_rate','1.0'),
+  ('drop_rate','1.0'),
+  ('crosssv_enabled','true'),
+  ('new_server_open','false')
+ON CONFLICT DO NOTHING;

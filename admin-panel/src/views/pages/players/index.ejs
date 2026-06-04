@@ -1,0 +1,82 @@
+
+<div class="filter-bar">
+  <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;width:100%">
+    <select name="server_id" onchange="this.form.submit()">
+      <% servers.forEach(sv=>{ %>
+      <option value="<%= sv.id %>" <%= selectedServer?.id==sv.id?'selected':'' %>><%= sv.name %></option>
+      <% }) %>
+    </select>
+    <input name="search" value="<%= search %>" placeholder="Tìm tên nhân vật / ID..." style="width:200px">
+    <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i></button>
+  </form>
+</div>
+
+<% if(error){ %><div class="card" style="border-color:#991b1b;color:#f87171;margin-bottom:16px"><i class="fas fa-exclamation-triangle"></i> <%=error%></div><% } %>
+
+<!-- Broadcast bar -->
+<div class="card" style="padding:12px 20px;margin-bottom:16px">
+  <div style="display:flex;gap:10px;align-items:center">
+    <input type="text" id="bc-msg" placeholder="Thông báo toàn server..." style="flex:1">
+    <button class="btn btn-warn" onclick="sendBroadcast()"><i class="fas fa-bullhorn"></i> Broadcast</button>
+  </div>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden">
+  <table>
+    <thead><tr><th>#</th><th>Nhân vật</th><th>Phe</th><th>Level</th><th>Gold</th><th>Zone</th><th>Thao tác</th></tr></thead>
+    <tbody>
+    <% if(!players.length){ %>
+    <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px"><i class="fas fa-users-slash"></i> <%= error ? 'Không kết nối được server' : 'Không có người chơi online' %></td></tr>
+    <% } %>
+    <% players.forEach((p,i) => { %>
+    <tr>
+      <td style="color:var(--muted)"><%= i+1 %></td>
+      <td>
+        <strong><%= p.name||p.characterName %></strong>
+        <span style="color:var(--muted);font-size:.75rem;margin-left:6px">#<%= p.playerId %></span>
+      </td>
+      <td>
+        <% const fc={'Đế Quốc Ánh Sáng':'badge-yellow','Liên Minh Elf':'badge-green','Vương Quốc Thú Nhân':'badge-purple','Ma Tộc':'badge-blue'}; %>
+        <span class="badge <%= fc[p.faction]||'badge-gray' %>"><%= p.faction %></span>
+      </td>
+      <td>Lv.<strong><%= p.level %></strong></td>
+      <td>💰 <%= (p.gold||0).toLocaleString() %>G</td>
+      <td>Zone <%= p.zoneId %></td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-success btn-sm" title="Tặng gold" onclick="giveGold('<%= p.playerId %>','<%= p.name||p.characterName %>')"><i class="fas fa-coins"></i></button>
+        <button class="btn btn-blue btn-sm" title="Teleport" onclick="teleport('<%= p.playerId %>')" style="background:#1e3a8a;color:#93c5fd"><i class="fas fa-map-marker-alt"></i></button>
+        <button class="btn btn-danger btn-sm" title="Kick" onclick="kickPlayer('<%= p.playerId %>','<%= p.name||p.characterName %>')"><i class="fas fa-ban"></i></button>
+      </td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</div>
+<div class="page-info" style="margin-top:8px"><%= players.length %> người chơi online</div>
+
+<script>
+const SID = '<%= selectedServer?.id||'' %>';
+async function giveGold(pid,name){
+  const a = prompt(`Tặng gold cho ${name}:`);
+  if(!a || isNaN(a)) return;
+  const r = await api('POST',`/players/${pid}/give-gold`,{server_id:SID,amount:parseInt(a)});
+  toast(r.ok ? r.message||'Đã tặng gold!' : r.error, r.ok);
+}
+async function teleport(pid){
+  const z = prompt('Zone ID (1-10):'); if(!z) return;
+  const r = await api('POST',`/players/${pid}/teleport`,{server_id:SID,zoneId:parseInt(z)});
+  toast(r.ok ? 'Đã teleport!' : r.error, r.ok);
+}
+async function kickPlayer(pid,name){
+  if(!confirm(`Kick "${name}"?`)) return;
+  const r = await api('DELETE',`/players/${pid}/kick`,{server_id:SID});
+  toast(r.ok ? 'Đã kick: '+name : r.error, r.ok);
+  if(r.ok) setTimeout(()=>location.reload(),1500);
+}
+async function sendBroadcast(){
+  const m = document.getElementById('bc-msg').value.trim();
+  if(!m) return toast('Nhập nội dung',false);
+  const r = await api('POST','/players/broadcast',{server_id:SID,message:m});
+  toast(r.ok ? 'Đã gửi thông báo!' : r.error, r.ok);
+}
+</script>

@@ -1,0 +1,121 @@
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <!-- Admin accounts -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-user-shield"></i> Tài khoản Admin</h3>
+      <% if(admin.role==='superadmin'){ %>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('add-admin-modal').classList.add('open')"><i class="fas fa-plus"></i></button>
+      <% } %>
+    </div>
+    <table>
+      <thead><tr><th>Tài khoản</th><th>Role</th><th>Đăng nhập lần cuối</th><th></th></tr></thead>
+      <tbody>
+      <% admins.forEach(a=>{ %>
+      <tr>
+        <td><strong><%= a.username %></strong></td>
+        <td><span class="badge <%= a.role==='superadmin'?'badge-purple':'badge-blue' %>"><%= a.role %></span></td>
+        <td style="font-size:.75rem;color:var(--muted)"><%= a.last_login ? moment(a.last_login).fromNow() : 'Chưa đăng nhập' %></td>
+        <td>
+          <% if(a.id !== admin.id && admin.role==='superadmin'){ %>
+          <button class="btn btn-danger btn-sm" onclick="deleteAdmin(<%= a.id %>,'<%= a.username %>')"><i class="fas fa-trash"></i></button>
+          <% } %>
+        </td>
+      </tr>
+      <% }) %>
+      </tbody>
+    </table>
+    <hr style="border-color:var(--border);margin:16px 0">
+    <h4 style="margin-bottom:12px;font-size:.9rem">Đổi mật khẩu của tôi</h4>
+    <div class="form-group"><label>Mật khẩu cũ</label><input type="password" id="old-pw"></div>
+    <div class="form-group"><label>Mật khẩu mới</label><input type="password" id="new-pw"></div>
+    <button class="btn btn-warn" onclick="changePw()"><i class="fas fa-lock"></i> Đổi mật khẩu</button>
+  </div>
+
+  <!-- Server configs -->
+  <div class="card">
+    <h3 style="margin-bottom:14px"><i class="fas fa-server"></i> Cấu hình Server</h3>
+    <% servers.forEach(sv=>{ %>
+    <div style="background:#0f0f1a;border-radius:8px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong><%= sv.name %></strong>
+        <span class="badge badge-<%= sv.type %>"><%= sv.type %></span>
+      </div>
+      <div style="font-size:.8rem;color:var(--muted);line-height:1.8">
+        Game: :<%= sv.game_port %> | Admin: :<%= sv.admin_port %> | Host: <%= sv.host %>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="editServer(<%= sv.id %>,'<%= sv.name %>',<%= sv.max_players %>,'<%= sv.host %>',<%= sv.game_port %>,<%= sv.admin_port %>,'<%= sv.api_user %>')">
+        <i class="fas fa-edit"></i> Sửa
+      </button>
+    </div>
+    <% }) %>
+  </div>
+</div>
+
+<!-- Add admin modal -->
+<div class="modal-overlay" id="add-admin-modal">
+  <div class="modal">
+    <h3><i class="fas fa-user-plus"></i> Thêm tài khoản Admin</h3>
+    <div class="form-group"><label>Tài khoản</label><input id="new-admin-user" placeholder="username"></div>
+    <div class="form-group"><label>Mật khẩu</label><input type="password" id="new-admin-pw"></div>
+    <div class="form-group"><label>Role</label>
+      <select id="new-admin-role"><option value="admin">admin</option><option value="mod">mod</option><option value="superadmin">superadmin</option></select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="addAdmin()"><i class="fas fa-save"></i> Thêm</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('add-admin-modal').classList.remove('open')">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit server modal -->
+<div class="modal-overlay" id="edit-sv-modal">
+  <div class="modal">
+    <h3><i class="fas fa-server"></i> Sửa Server</h3>
+    <input type="hidden" id="esv-id">
+    <div class="form-row">
+      <div class="form-group"><label>Tên</label><input id="esv-name"></div>
+      <div class="form-group"><label>Max Players</label><input type="number" id="esv-max"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Host</label><input id="esv-host"></div>
+      <div class="form-group"><label>API User</label><input id="esv-apiuser"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Game Port</label><input type="number" id="esv-gport"></div>
+      <div class="form-group"><label>Admin Port</label><input type="number" id="esv-aport"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="saveServer()"><i class="fas fa-save"></i> Lưu</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('edit-sv-modal').classList.remove('open')">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function editServer(id,name,max,host,gport,aport,apiuser){
+  document.getElementById('esv-id').value=id;
+  document.getElementById('esv-name').value=name;
+  document.getElementById('esv-max').value=max;
+  document.getElementById('esv-host').value=host;
+  document.getElementById('esv-gport').value=gport;
+  document.getElementById('esv-aport').value=aport;
+  document.getElementById('esv-apiuser').value=apiuser;
+  document.getElementById('edit-sv-modal').classList.add('open');
+}
+async function saveServer(){
+  const id=document.getElementById('esv-id').value;
+  const data={name:document.getElementById('esv-name').value,max_players:document.getElementById('esv-max').value,
+    host:document.getElementById('esv-host').value,game_port:document.getElementById('esv-gport').value,
+    admin_port:document.getElementById('esv-aport').value,api_user:document.getElementById('esv-apiuser').value};
+  const r=await api('PUT',`/config/server/${id}`,data);
+  toast(r.ok?'Đã lưu!':r.error,r.ok);
+  if(r.ok)location.reload();
+}
+async function addAdmin(){
+  const r=await api('POST','/config/admin/add',{username:document.getElementById('new-admin-user').value,password:document.getElementById('new-admin-pw').value,role:document.getElementById('new-admin-role').value});
+  toast(r.ok?'Đã thêm!':r.error,r.ok); if(r.ok)location.reload();
+}
+async function deleteAdmin(id,name){ if(!confirm(`Xóa admin "${name}"?`))return; const r=await api('DELETE',`/config/admin/${id}`); toast(r.ok?'Đã xóa':r.error,r.ok); if(r.ok)location.reload(); }
+async function changePw(){ const r=await api('POST','/config/admin/change-password',{old_password:document.getElementById('old-pw').value,new_password:document.getElementById('new-pw').value}); toast(r.ok?'Đã đổi mật khẩu!':r.error,r.ok); }
+</script>

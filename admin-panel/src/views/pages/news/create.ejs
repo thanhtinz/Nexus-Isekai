@@ -1,0 +1,51 @@
+
+<div class="card" style="max-width:800px">
+  <div class="card-header">
+    <h3><i class="fas fa-pen"></i> <%= article ? 'Sửa bài viết' : 'Viết bài mới' %></h3>
+    <a href="/news" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  </div>
+  <form method="POST" action="<%= article ? '/news/'+article.id+'?_method=PUT' : '/news/create' %>" enctype="multipart/form-data">
+    <div class="form-group">
+      <label>Tiêu đề *</label>
+      <input name="title" value="<%= article?.title||'' %>" required placeholder="Tiêu đề bài viết...">
+    </div>
+    <div class="form-row-3">
+      <div class="form-group">
+        <label>Danh mục</label>
+        <select name="category">
+          <% ['general','update','event','maintenance','notice'].forEach(c=>{ %>
+          <option value="<%= c %>" <%= article?.category===c?'selected':'' %>><%= c %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Server</label>
+        <select name="server_id">
+          <option value="">Tất cả server</option>
+          <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=article?.server_id==sv.id?'selected':''%>><%= sv.name %></option><% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Ảnh thumbnail</label>
+        <input type="file" name="thumbnail" accept="image/*">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Tóm tắt</label>
+      <input name="excerpt" value="<%= article?.excerpt||'' %>" placeholder="Tóm tắt ngắn hiển thị ngoài danh sách...">
+    </div>
+    <div class="form-group">
+      <label>Nội dung (Markdown/HTML)</label>
+      <textarea name="content" rows="12" style="font-family:monospace" placeholder="Nội dung bài viết..."><%= article?.content||'' %></textarea>
+    </div>
+    <div style="display:flex;gap:16px;align-items:center">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" name="is_published" value="1" <%= article?.is_published?'checked':'' %>> Đăng ngay
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" name="is_pinned" value="1" <%= article?.is_pinned?'checked':'' %>> Ghim lên đầu
+      </label>
+      <button type="submit" class="btn btn-primary" style="margin-left:auto"><i class="fas fa-save"></i> Lưu bài viết</button>
+    </div>
+  </form>
+</div>

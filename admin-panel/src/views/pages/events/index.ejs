@@ -1,0 +1,114 @@
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+  <!-- Trigger panel -->
+  <div class="card">
+    <h3 style="margin-bottom:16px"><i class="fas fa-bolt"></i> Kích hoạt sự kiện</h3>
+    <div class="form-group">
+      <label>Server</label>
+      <select id="trigger-sv">
+        <option value="">Tất cả server đang chạy</option>
+        <% servers.forEach(sv=>{ %><option value="<%= sv.id %>"><%= sv.name %></option><% }) %>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <% [
+        ['DRAGON_APPEARS','🐉 Rồng Xuất Hiện'],
+        ['METEOR_SHOWER','☄️ Mưa Sao Băng'],
+        ['MERCHANT_SHIP','⛵ Tàu Buôn'],
+        ['MONSTER_ATTACK','👹 Quái Tấn Công'],
+        ['TREASURE_HUNT','💎 Săn Kho Báu'],
+        ['COMMUNITY_BOSS','👑 Boss Cộng Đồng'],
+        ['FULL_MOON_FESTIVAL','🌕 Lễ Hội Trăng'],
+        ['SEASONAL_FESTIVAL','🎉 Lễ Hội Mùa']
+      ].forEach(([type,label])=>{ %>
+      <button class="btn btn-warn" style="justify-content:flex-start" onclick="triggerEv('<%= type %>')"><%= label %></button>
+      <% }) %>
+    </div>
+  </div>
+
+  <!-- Schedule panel -->
+  <div class="card">
+    <h3 style="margin-bottom:16px"><i class="fas fa-calendar-plus"></i> Lên lịch sự kiện</h3>
+    <form id="schedule-form">
+      <div class="form-group">
+        <label>Tên sự kiện</label>
+        <input name="name" placeholder="VD: Sinh nhật Server 1">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Loại</label>
+          <select name="type">
+            <option value="DRAGON_APPEARS">Rồng Xuất Hiện</option>
+            <option value="METEOR_SHOWER">Mưa Sao Băng</option>
+            <option value="TREASURE_HUNT">Săn Kho Báu</option>
+            <option value="COMMUNITY_BOSS">Boss Cộng Đồng</option>
+            <option value="FULL_MOON_FESTIVAL">Lễ Hội Trăng</option>
+            <option value="SEASONAL_FESTIVAL">Lễ Hội Mùa</option>
+            <option value="CUSTOM">Tùy chỉnh</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Server</label>
+          <select name="server_id">
+            <option value="">Tất cả</option>
+            <% servers.forEach(sv=>{ %><option value="<%= sv.id %>"><%= sv.name %></option><% }) %>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Bắt đầu</label><input type="datetime-local" name="starts_at"></div>
+        <div class="form-group"><label>Kết thúc</label><input type="datetime-local" name="ends_at"></div>
+      </div>
+      <button type="button" class="btn btn-primary" onclick="scheduleEvent()"><i class="fas fa-calendar-check"></i> Lên lịch</button>
+    </form>
+  </div>
+</div>
+
+<!-- Live events -->
+<div class="card">
+  <h3 style="margin-bottom:14px"><i class="fas fa-fire"></i> Sự kiện đang diễn ra (Live)</h3>
+  <% if(!liveEvents.length){ %><p style="color:var(--muted)">Không có sự kiện đang chạy</p>
+  <% } else { %>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <% liveEvents.forEach(ev=>{ %><div class="card" style="background:#0f0f1a;padding:12px 16px;margin:0;flex:0 0 auto">
+      <div class="badge badge-yellow"><%= ev.type||ev.title %></div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Zone <%= ev.zone||ev.zoneId||'-' %> | Còn <%= ev.endsIn||'--' %></div>
+    </div><% }) %>
+  </div>
+  <% } %>
+</div>
+
+<!-- Scheduled events -->
+<div class="card">
+  <h3 style="margin-bottom:14px"><i class="fas fa-calendar"></i> Sự kiện đã lên lịch</h3>
+  <table>
+    <thead><tr><th>Tên</th><th>Loại</th><th>Server</th><th>Bắt đầu</th><th>Kết thúc</th><th>Người tạo</th></tr></thead>
+    <tbody>
+    <% dbEvents.forEach(ev=>{ %>
+    <tr>
+      <td><%= ev.name %></td>
+      <td><span class="badge badge-yellow"><%= ev.type %></span></td>
+      <td><%= ev.server_name||'Tất cả' %></td>
+      <td style="font-size:.8rem"><%= ev.starts_at ? moment(ev.starts_at).format('DD/MM HH:mm') : '-' %></td>
+      <td style="font-size:.8rem"><%= ev.ends_at ? moment(ev.ends_at).format('DD/MM HH:mm') : '-' %></td>
+      <td style="color:var(--muted);font-size:.8rem"><%= ev.creator||'system' %></td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+async function triggerEv(type){
+  const sv = document.getElementById('trigger-sv').value;
+  const r = await api('POST','/events/trigger',{type, server_id:sv||null, all_servers:!sv});
+  toast(r.ok ? `Đã kích hoạt: ${type} (${r.sent}/${r.total} server)` : r.error, r.ok);
+}
+async function scheduleEvent(){
+  const f = document.getElementById('schedule-form');
+  const data = Object.fromEntries(new FormData(f));
+  const r = await api('POST','/events/schedule',data);
+  toast(r.ok ? 'Đã lên lịch!' : r.error, r.ok);
+  if(r.ok) location.reload();
+}
+</script>
