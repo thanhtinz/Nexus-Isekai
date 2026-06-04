@@ -3,6 +3,7 @@ package com.nexusisekai.game.character;
 public class CharacterClassFactory {
     public static CharacterClass create(int classId) {
         return switch (classId) {
+            case 0 -> new VoNghe();   // chua chon nghe (huong cozy)
             case 1 -> new KiemSi();
             case 2 -> new PhapSu();
             case 3 -> new XaThu();

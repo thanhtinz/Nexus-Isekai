@@ -179,6 +179,8 @@ public class AdminApiServer {
         httpServer.createContext("/api/pass/seasons",  ex -> handleAuth(ex, this::handlePassSeasons));
         httpServer.createContext("/api/pass/rewards",  ex -> handleAuth(ex, this::handlePassRewards));
         httpServer.createContext("/api/pets",          ex -> handleAuth(ex, this::handlePetTemplates));
+        httpServer.createContext("/api/races",         ex -> handleAuth(ex, this::handleRaces));
+        httpServer.createContext("/api/professions",   ex -> handleAuth(ex, this::handleProfessions));
         httpServer.createContext("/api/mounts",        ex -> handleAuth(ex, this::handleMountTemplates));
         httpServer.createContext("/api/classes",       ex -> handleAuth(ex, this::handleClasses));
         httpServer.createContext("/api/warehouse",            ex -> handleAuth(ex, this::handleWarehouse));
@@ -1528,6 +1530,44 @@ public class AdminApiServer {
                 ps.setInt(6,num(body,"diamond")); ps.setInt(7,num(body,"gold")); ps.setString(8,str(body,"description"));
                 ps.executeUpdate();
                 sendJson(ex, 200, Map.of("success",true));
+            }
+        }
+    }
+
+    private void handleProfessions(HttpExchange ex) throws Exception {
+        crudConfig(ex, "professions", "id", new String[]{"name","category","description","icon_id","unlock_quest_id","is_combat","status","is_active"});
+    }
+
+    private void handleRaces(HttpExchange ex) throws Exception {
+        try (Connection c = DatabaseManager.getInstance().getConnection()) {
+            if (ex.getRequestMethod().equals("GET")) {
+                PreparedStatement ps = c.prepareStatement("SELECT * FROM race_templates ORDER BY id");
+                ResultSet rs = ps.executeQuery();
+                List<Map<String,Object>> list = new ArrayList<>();
+                ResultSetMetaData meta = rs.getMetaData();
+                while (rs.next()) {
+                    Map<String,Object> row = new LinkedHashMap<>();
+                    for (int i=1;i<=meta.getColumnCount();i++) row.put(meta.getColumnName(i), rs.getObject(i));
+                    list.add(row);
+                }
+                sendJson(ex, 200, Map.of("rows", list));
+            } else {
+                @SuppressWarnings("unchecked") Map<String,Object> body = parseBody(ex);
+                String action = str(body,"action");
+                if ("delete".equals(action)) {
+                    c.prepareStatement("DELETE FROM race_templates WHERE id="+num(body,"id")).executeUpdate();
+                } else {
+                    PreparedStatement ps = c.prepareStatement(
+                        "REPLACE INTO race_templates (id,name,base_hp,base_mp,base_atk,base_def,sprite_male,sprite_female,trait,status,is_active) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+                    ps.setInt(1,num(body,"id")); ps.setString(2,str(body,"name"));
+                    ps.setInt(3,num(body,"base_hp")); ps.setInt(4,num(body,"base_mp"));
+                    ps.setInt(5,num(body,"base_atk")); ps.setInt(6,num(body,"base_def"));
+                    ps.setString(7,str(body,"sprite_male")); ps.setString(8,str(body,"sprite_female"));
+                    ps.setString(9,str(body,"trait")); ps.setString(10, str(body,"status").isEmpty()?"live":str(body,"status"));
+                    ps.setInt(11, body.get("is_active")!=null?num(body,"is_active"):1);
+                    ps.executeUpdate();
+                }
+                sendJson(ex, 200, Map.of("success", true));
             }
         }
     }

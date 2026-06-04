@@ -4466,3 +4466,55 @@ ALTER TABLE player_pets ADD COLUMN IF NOT EXISTS personality VARCHAR(32) DEFAULT
 ALTER TABLE player_pets ADD COLUMN IF NOT EXISTS color       VARCHAR(16) DEFAULT '';
 ALTER TABLE player_pets ADD COLUMN IF NOT EXISTS mood        INT NOT NULL DEFAULT 100;
 ALTER TABLE player_pets ADD COLUMN IF NOT EXISTS energy      INT NOT NULL DEFAULT 100;
+
+-- ═══ CHUNG TOC + GIOI TINH (bo class luc tao; con nguoi & yeu tinh song hoa hop) ═══
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS race TINYINT NOT NULL DEFAULT 0; -- 0=Con Nguoi, 1=Yeu Tinh
+
+CREATE TABLE IF NOT EXISTS race_templates (
+    id         TINYINT PRIMARY KEY,           -- = gia tri byte race khi tao
+    name       VARCHAR(32) NOT NULL,
+    base_hp    INT NOT NULL DEFAULT 100,
+    base_mp    INT NOT NULL DEFAULT 50,
+    base_atk   INT NOT NULL DEFAULT 10,
+    base_def   INT NOT NULL DEFAULT 5,
+    sprite_male   VARCHAR(64) DEFAULT NULL,
+    sprite_female VARCHAR(64) DEFAULT NULL,
+    trait      VARCHAR(128) DEFAULT '',        -- dac tinh chung toc
+    status     VARCHAR(12) NOT NULL DEFAULT 'live',
+    is_active  TINYINT NOT NULL DEFAULT 1
+);
+INSERT INTO race_templates (id,name,base_hp,base_mp,base_atk,base_def,trait) VALUES
+  (0,'Con Nguoi',100,50,10,6,'Can bang, hoc nghe nhanh'),
+  (1,'Yeu Tinh', 90,70,9,5,'Tinh thong phep thuat, than thuoc thien nhien')
+ON DUPLICATE KEY UPDATE name=VALUES(name);
+
+-- ═══ NGHE NGHIEP (chuc nghiep) — mo SAU qua nhiem vu, nguoi choi chon sau ═══
+CREATE TABLE IF NOT EXISTS professions (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(48) NOT NULL,
+    category      VARCHAR(24) NOT NULL DEFAULT 'craft', -- craft/gather/combat/service
+    description   VARCHAR(255) DEFAULT '',
+    icon_id       INT NOT NULL DEFAULT 0,
+    unlock_quest_id INT NOT NULL DEFAULT 0,    -- nhiem vu mo nghe (0=mo san)
+    is_combat     TINYINT NOT NULL DEFAULT 0,  -- huong cozy: phan lon khong combat
+    status        VARCHAR(12) NOT NULL DEFAULT 'live',
+    is_active     TINYINT NOT NULL DEFAULT 1
+);
+INSERT IGNORE INTO professions (id,name,category,description,is_combat) VALUES
+  (1,'Nha Gia Kim','craft','Che thuoc, bao boi tu nguyen lieu ma phap',0),
+  (2,'Tho Ren','craft','Ren vu khi, giap, dung cu',0),
+  (3,'Nguoi Dua Thu','service','Van chuyen, giao hang giua cac vung',0),
+  (4,'Tho San Tien Thuong','combat','Nhan lenh truy bat — co chien dau',1),
+  (5,'Nha Khao Co','gather','Khai quat di tich, kho bau co',0),
+  (6,'Nguoi Cham Soc Thu Ma Phap','service','Nuoi duong, chua tri thu cung',0);
+
+CREATE TABLE IF NOT EXISTS player_professions (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id      BIGINT NOT NULL,
+    profession_id INT NOT NULL,
+    mastery      INT NOT NULL DEFAULT 1,     -- tay nghe (thay cho level combat)
+    exp          INT NOT NULL DEFAULT 0,
+    is_primary   TINYINT NOT NULL DEFAULT 0, -- nghe chinh dang theo
+    unlocked_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_char_prof (char_id, profession_id)
+);

@@ -34,7 +34,7 @@ public class CharHandler {
     public void handleCharList() throws Exception {
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(
-                     "SELECT id,name,class_id,level,story_chapter FROM characters WHERE account_id=? ORDER BY id")) {
+                     "SELECT id,name,race,level,story_chapter FROM characters WHERE account_id=? ORDER BY id")) {
             ps.setLong(1, session.getAccountId());
             ResultSet rs = ps.executeQuery();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -46,7 +46,7 @@ public class CharHandler {
                 buf.putLong(rs.getLong("id"));
                 buf.putShort((short) nameBytes.length);
                 buf.put(nameBytes);
-                buf.put((byte) rs.getInt("class_id"));
+                buf.put((byte) rs.getInt("race"));
                 buf.putInt(rs.getInt("level"));
                 buf.putInt(rs.getInt("story_chapter"));
                 chars.add(buf.array());
@@ -65,7 +65,7 @@ public class CharHandler {
         byte[] nameBytes = new byte[nameLen];
         buf.get(nameBytes);
         String name    = new String(nameBytes, StandardCharsets.UTF_8).trim();
-        int classId    = buf.get() & 0xFF;   // 1-7
+        int race       = buf.get() & 0xFF;   // 0=Con Nguoi, 1=Yeu Tinh
         int gender     = buf.get() & 0xFF;   // 0=nam, 1=nu
 
         // Validate
@@ -75,8 +75,8 @@ public class CharHandler {
         if (!name.matches("[\\p{L}\\p{N}_\\s]+")) {
             session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Ten chua ky tu khong hop le."); return;
         }
-        if (classId < 1 || classId > 7) {
-            session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Class khong hop le."); return;
+        if (race < 0 || race > 1) {
+            session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Chung toc khong hop le."); return;
         }
         if (gender > 1) gender = 0;
 
@@ -88,26 +88,25 @@ public class CharHandler {
                 session.sendError(PacketOpcode.S2C_CHAR_ERROR, "Ten da ton tai."); return;
             }
 
-            // Lay base stats tu class config
-            PreparedStatement cps = conn.prepareStatement("SELECT * FROM class_change_config WHERE class_id=?");
-            cps.setInt(1, classId);
+            // Base stats theo CHUNG TOC (race_templates)
+            PreparedStatement cps = conn.prepareStatement("SELECT * FROM race_templates WHERE id=?");
+            cps.setInt(1, race);
             ResultSet crs = cps.executeQuery();
-            int baseHp = 100, baseMp = 50, baseAtk = 10, baseDef = 5;
-            String className = "Unknown";
+            int baseHp = 100, baseMp = 50;
+            String raceName = race == 1 ? "Yeu Tinh" : "Con Nguoi";
             if (crs.next()) {
                 baseHp = crs.getInt("base_hp"); baseMp = crs.getInt("base_mp");
-                baseAtk = crs.getInt("base_atk"); baseDef = crs.getInt("base_def");
-                className = crs.getString("class_name");
+                raceName = crs.getString("name");
             }
 
             // Tao nhan vat — chon class ngay khi tao (giong NRO)
             PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO characters (account_id,name,class_id,gender,level,hp,max_hp,mp,max_mp," +
-                    "map_id,pos_x,pos_y) VALUES (?,?,?,?,1,?,?,?,?,1,5.0,5.0)",
+                    "INSERT INTO characters (account_id,name,class_id,race,gender,level,hp,max_hp,mp,max_mp," +
+                    "map_id,pos_x,pos_y) VALUES (?,?,0,?,?,1,?,?,?,?,1,5.0,5.0)",
                     Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, session.getAccountId());
             ps.setString(2, name);
-            ps.setInt(3, classId);
+            ps.setInt(3, race);
             ps.setInt(4, gender);
             ps.setInt(5, baseHp); ps.setInt(6, baseHp);
             ps.setInt(7, baseMp); ps.setInt(8, baseMp);
@@ -127,9 +126,9 @@ public class CharHandler {
             ByteBuffer resp = ByteBuffer.allocate(1 + 8 + 2 + nBytes.length + 2);
             resp.put((byte) 1); resp.putLong(charId);
             resp.putShort((short) nBytes.length); resp.put(nBytes);
-            resp.put((byte) classId); resp.put((byte) gender);
+            resp.put((byte) race); resp.put((byte) gender);
             session.send(PacketOpcode.S2C_CHAR_CREATE_OK, resp.array());
-            log.info("[CHAR_CREATE] {} tao \'{}\' class={} gender={}", session.getAccountName(), name, className, gender);
+            log.info("[CHAR_CREATE] {} tao \'{}\' race={} gender={}", session.getAccountName(), name, raceName, gender);
         }
     }
 
