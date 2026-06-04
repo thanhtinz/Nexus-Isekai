@@ -34,6 +34,8 @@ public class PetManager {
                         rs.getInt("id"), rs.getString("name"), rs.getString("element"),
                         rs.getInt("rarity"), rs.getInt("base_hp"), rs.getInt("base_atk"),
                         rs.getInt("base_def"), rs.getInt("skill_id"), rs.getInt("icon_id"));
+                    t.personalities = rs.getString("personalities"); t.colors = rs.getString("colors");
+                    t.catchRate = rs.getInt("catch_rate"); t.capturable = rs.getInt("capturable"); t.evolveTo = rs.getInt("evolve_to");
                     petCache.put(t.id, t);
                 }
             }
@@ -53,15 +55,58 @@ public class PetManager {
 
     // ─── Pet operations ───────────────────────
 
+    private static final java.util.Random RNG = new java.util.Random();
+    /** Chon ngau nhien 1 phan tu tu pool CSV (tinh cach / mau). */
+    private static String pick(String csv) {
+        if (csv == null || csv.isEmpty()) return "";
+        String[] a = csv.split(",");
+        return a[RNG.nextInt(a.length)].trim();
+    }
+
+    /** Nhan 1 pet: tu roll tinh cach + mau tu pool cua template (moi con mot ve). */
     public long givePet(long charId, int templateId) throws SQLException {
+        PetTemplate t = petCache.get(templateId);
+        String personality = t != null ? pick(t.personalities) : "";
+        String color = t != null ? pick(t.colors) : "";
         try (Connection c = DatabaseManager.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(
-                 "INSERT INTO player_pets (char_id,template_id) VALUES (?,?)",
+                 "INSERT INTO player_pets (char_id,template_id,personality,color) VALUES (?,?,?,?)",
                  Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, charId); ps.setInt(2, templateId);
+            ps.setString(3, personality); ps.setString(4, color);
             ps.executeUpdate();
             ResultSet keys = ps.getGeneratedKeys();
             return keys.next() ? keys.getLong(1) : -1;
+        }
+    }
+
+    /**
+     * Bat thu hoang bang KET THAN (khong combat): kiem capturable + roll catch_rate.
+     * Tra ve: -1 = khong the bat, 0 = truot (thu chay), >0 = bat duoc (petId).
+     */
+    public long catchPet(long charId, int templateId) throws SQLException {
+        PetTemplate t = petCache.get(templateId);
+        if (t == null || t.capturable == 0) return -1;
+        if (RNG.nextInt(100) >= Math.max(1, t.catchRate)) return 0;
+        return givePet(charId, templateId);
+    }
+
+    /** Tien hoa pet len template evolve_to khi du than thiet (loyalty>=80). Tra ve true neu thanh cong. */
+    public boolean evolvePet(long petId, long charId) throws SQLException {
+        try (Connection c = DatabaseManager.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                 "SELECT template_id, loyalty FROM player_pets WHERE id=? AND char_id=?")) {
+            ps.setLong(1, petId); ps.setLong(2, charId);
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) return false;
+            int tid = rs.getInt("template_id"), loyalty = rs.getInt("loyalty");
+            PetTemplate t = petCache.get(tid);
+            if (t == null || t.evolveTo == 0 || loyalty < 80) return false;
+            PreparedStatement upd = c.prepareStatement(
+                "UPDATE player_pets SET template_id=? WHERE id=? AND char_id=?");
+            upd.setInt(1, t.evolveTo); upd.setLong(2, petId); upd.setLong(3, charId);
+            upd.executeUpdate();
+            return true;
         }
     }
 
@@ -194,6 +239,8 @@ public class PetManager {
     public static class PetTemplate {
         public final int id, rarity, baseHp, baseAtk, baseDef, skillId, iconId;
         public final String name, element;
+        public String personalities = "", colors = ""; // pool CSV (data-driven tu Studio)
+        public int catchRate = 50, capturable = 1, evolveTo = 0;
         public PetTemplate(int id, String name, String el, int rar, int hp, int atk, int def, int skill, int icon) {
             this.id=id; this.name=name; element=el; rarity=rar;
             baseHp=hp; baseAtk=atk; baseDef=def; skillId=skill; iconId=icon;
