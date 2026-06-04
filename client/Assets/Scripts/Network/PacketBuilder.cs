@@ -116,9 +116,9 @@ namespace NexusIsekai.Network
             => Send(new PacketBuilder(PacketOpcode.C2S_CHANNEL_SELECT).WriteInt(channelId));
         public static void SendCharAction(int actionId)
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_ACTION).WriteInt(actionId));
-        public static void SendCharCreate(string name, int classId, int gender)
+        public static void SendCharCreate(string name, int race, int gender)
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_CREATE)
-                .WriteString(name).WriteByte((byte)classId).WriteByte((byte)gender));
+                .WriteString(name).WriteByte((byte)race).WriteByte((byte)gender));
         public static void SendCharDelete(long charId)
             => Send(new PacketBuilder(PacketOpcode.C2S_CHAR_DELETE).WriteLong(charId));
         public static void SendCharList()

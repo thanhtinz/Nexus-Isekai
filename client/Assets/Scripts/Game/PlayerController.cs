@@ -48,7 +48,7 @@ namespace NexusIsekai.Game
 
             // Set sprite theo class
             var p = GameState.Instance.MyPlayer;
-            if (p != null && classSprites != null && p.ClassId - 1 < classSprites.Length)
+            if (p != null && classSprites != null && p.ClassId - 1 >= 0 && p.ClassId - 1 < classSprites.Length)
                 _sr.sprite = classSprites[p.ClassId - 1];
 
             // Đặt vị trí ban đầu
