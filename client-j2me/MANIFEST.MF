@@ -1,0 +1,8 @@
+MIDlet-Name: Fantasy Realm Online
+MIDlet-Version: 1.0.0
+MIDlet-Vendor: FantasyRealm Studio
+MIDlet-1: Fantasy Realm Online,,FantasyRealmMIDlet
+MicroEdition-Profile: MIDP-2.0
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-Jar-URL: FantasyRealm.jar
+MIDlet-Jar-Size: 0

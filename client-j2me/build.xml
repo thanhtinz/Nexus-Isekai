@@ -1,163 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  build.xml — Ant build script cho J2ME client
-  ========================================================
-  Yêu cầu:
-    - Java JDK 8 (J2ME compile target)
-    - WTK (Wireless Toolkit) hoặc CLDC/MIDP stub JARs
-    - Ant 1.9+
-
-  Cài WTK stub JARs (nếu không có WTK):
-    Đặt cltdc.jar + midpapi20.jar vào thư mục lib/
-
-  Cách build:
-    ant clean build       → compile + preverify + jar
-    ant emulator          → chạy trên emulator (cần WTK)
-    ant sign              → ký JAR (cần keystore)
-    ant release           → build + ký sẵn cho production
-
-  Output:
-    dist/nexus-isekai.jar   → file cài vào điện thoại
-    dist/nexus-isekai.jad   → descriptor
--->
-<project name="NexusIsekaiJ2ME" default="build" basedir=".">
-
-    <!-- ── Paths ─────────────────────────────────────────── -->
+<project name="FantasyRealmMIDlet" default="package" basedir=".">
+    <property name="wtk.home"      value="${env.WTK_HOME}"/>
+    <property name="midp.api"      value="${wtk.home}/lib/midpapi20.jar"/>
+    <property name="cldc.api"      value="${wtk.home}/lib/cldcapi11.jar"/>
     <property name="src.dir"       value="src"/>
-    <property name="res.dir"       value="res"/>
     <property name="build.dir"     value="build"/>
-    <property name="preverify.dir" value="build/preverified"/>
     <property name="dist.dir"      value="dist"/>
-    <property name="lib.dir"       value="lib"/>
 
-    <!-- WTK location — đổi theo máy bạn -->
-    <property name="wtk.home" value="C:/WTK2.5.2"/>
-    <!-- Trên Linux/Mac: /opt/WTK2.5.2 hoặc ~/WTK2.5.2 -->
-
-    <!-- J2ME stubs -->
-    <property name="cldc.jar"  value="${wtk.home}/lib/cltdc11.jar"/>
-    <property name="midp.jar"  value="${wtk.home}/lib/midpapi20.jar"/>
-    <property name="preverify" value="${wtk.home}/bin/preverify"/>
-
-    <!-- App info -->
-    <property name="app.name"    value="nexus-isekai"/>
-    <property name="app.version" value="1.0.0"/>
-    <property name="midlet.class" value="com.nexusisekai.NexusIsekaiMIDlet"/>
-
-    <!-- Signing (optional) -->
-    <property name="keystore.file" value="nexus.keystore"/>
-    <property name="keystore.alias" value="nexusisekai"/>
-    <property name="keystore.password" value="changeme"/>
-
-    <!-- ── Clean ──────────────────────────────────────────── -->
     <target name="clean">
-        <delete dir="${build.dir}"/>
-        <delete dir="${dist.dir}"/>
-        <echo>Cleaned build directories</echo>
+        <delete dir="${build.dir}"/><delete dir="${dist.dir}"/>
     </target>
 
-    <!-- ── Compile ───────────────────────────────────────── -->
-    <target name="compile" depends="init">
-        <javac srcdir="${src.dir}"
-               destdir="${build.dir}/classes"
-               source="1.3" target="1.3"
-               bootclasspath="${cldc.jar}:${midp.jar}"
-               classpath="${cldc.jar}:${midp.jar}"
-               encoding="UTF-8"
-               debug="false"
-               optimize="true">
-            <compilerarg value="-Xlint:none"/>
+    <target name="compile">
+        <mkdir dir="${build.dir}/classes"/>
+        <javac srcdir="${src.dir}" destdir="${build.dir}/classes"
+               bootclasspath="${cldc.api}:${midp.api}"
+               source="1.3" target="1.1" preverify="false">
+            <sourcepath><pathelement location="${src.dir}"/></sourcepath>
         </javac>
-        <echo>Compiled successfully</echo>
     </target>
 
-    <!-- ── Preverify (required for J2ME CLDC) ────────────── -->
     <target name="preverify" depends="compile">
-        <exec executable="${preverify}" failonerror="true">
-            <arg value="-classpath"/>
-            <arg value="${cldc.jar}:${midp.jar}"/>
-            <arg value="-d"/>
-            <arg value="${preverify.dir}"/>
+        <mkdir dir="${build.dir}/preverified"/>
+        <exec executable="${wtk.home}/bin/preverify">
+            <arg value="-classpath"/><arg value="${cldc.api}:${midp.api}"/>
+            <arg value="-d"/><arg value="${build.dir}/preverified"/>
             <arg value="${build.dir}/classes"/>
         </exec>
-        <echo>Preverification complete</echo>
     </target>
 
-    <!-- ── Package JAR ───────────────────────────────────── -->
-    <target name="jar" depends="preverify">
+    <target name="package" depends="preverify">
         <mkdir dir="${dist.dir}"/>
-
-        <!-- Main JAR -->
-        <jar destfile="${dist.dir}/${app.name}.jar"
-             basedir="${preverify.dir}"
-             manifest="${res.dir}/MANIFEST.MF">
-            <!-- Include resources (icons, etc.) -->
-            <fileset dir="${res.dir}">
-                <include name="icons/**"/>
-                <exclude name="MANIFEST.MF"/>
-            </fileset>
-        </jar>
-
-        <!-- Update JAR size in manifest -->
-        <length property="jar.size" file="${dist.dir}/${app.name}.jar"/>
-
-        <!-- Create JAD descriptor -->
-        <echo file="${dist.dir}/${app.name}.jad">MIDlet-1: Nexus Isekai,,${midlet.class}
-MIDlet-Name: Nexus Isekai MMORPG
-MIDlet-Vendor: NexusIsekai Team
-MIDlet-Version: ${app.version}
-MIDlet-Icon: /icons/icon.png
-MicroEdition-Configuration: CLDC-1.1
-MicroEdition-Profile: MIDP-2.0
-MIDlet-Jar-URL: ${app.name}.jar
-MIDlet-Jar-Size: ${jar.size}
-MIDlet-Data-Size: 8192
-</echo>
-
-        <echo>JAR: ${dist.dir}/${app.name}.jar (${jar.size} bytes)</echo>
-        <echo>JAD: ${dist.dir}/${app.name}.jad</echo>
+        <jar destfile="${dist.dir}/FantasyRealm.jar" basedir="${build.dir}/preverified"
+             manifest="MANIFEST.MF"/>
     </target>
-
-    <!-- ── Full build ────────────────────────────────────── -->
-    <target name="build" depends="clean, jar">
-        <echo>===================================</echo>
-        <echo>Build complete!</echo>
-        <echo>Install: ${dist.dir}/${app.name}.jar</echo>
-        <echo>===================================</echo>
-    </target>
-
-    <!-- ── Run on WTK emulator ───────────────────────────── -->
-    <target name="emulator" depends="build">
-        <exec executable="${wtk.home}/bin/emulator" failonerror="false">
-            <arg value="-Xdescriptor:${dist.dir}/${app.name}.jad"/>
-            <arg value="-Xdevice:DefaultColorPhone"/>
-        </exec>
-    </target>
-
-    <!-- ── Sign JAR (cho production) ────────────────────── -->
-    <target name="sign" depends="build">
-        <signjar jar="${dist.dir}/${app.name}.jar"
-                 keystore="${keystore.file}"
-                 alias="${keystore.alias}"
-                 storepass="${keystore.password}"/>
-        <echo>JAR signed!</echo>
-    </target>
-
-    <!-- ── Release (build + sign) ────────────────────────── -->
-    <target name="release" depends="sign">
-        <echo>Release build complete!</echo>
-    </target>
-
-    <!-- ── Init ──────────────────────────────────────────── -->
-    <target name="init">
-        <mkdir dir="${build.dir}/classes"/>
-        <mkdir dir="${preverify.dir}"/>
-        <mkdir dir="${dist.dir}"/>
-
-        <!-- Check WTK exists -->
-        <available file="${cldc.jar}" property="wtk.available"/>
-        <fail unless="wtk.available"
-              message="WTK not found at ${wtk.home}. Install from: https://www.oracle.com/java/technologies/java-archive-downloads-javame-downloads.html or set wtk.home property"/>
-    </target>
-
 </project>

@@ -1,71 +1,110 @@
-<div align="center">
+# Fantasy Realm Online (FRO)
 
-# ⚜ VỌNG LINH GIỚI ⚜
-### NEXUS ISEKAI
+MMORPG xã hội fantasy — Avatar Zing Me + Animal Crossing + Stardew Valley  
+Giữ chân bằng **thời trang · nghề nghiệp · cộng đồng · kinh tế** — không phải cày level.
 
-*Cõi giới giữa những thế giới — nơi định mệnh của muôn loài được viết lại.*
+## Kiến trúc
 
-</div>
+```
+client-unity-scripts/   Unity 2D client (desktop/mobile)
+client-j2me/            J2ME mobile client (Nokia/Java phone)
+server-java/            Game server (Java 21 + Netty + Spring Boot)
+tools-gm/               GM Dashboard (browser-based)
+deploy/                 nginx config, scripts
+docker-compose.yml      Full stack orchestration
+```
 
----
+## Quick Start (Docker)
 
-## ❖ Khởi Nguyên
+```bash
+# 1. Clone và cấu hình
+cp .env.example .env
+# Sửa .env: DB_PASS, JWT_SECRET, ADMIN_PASS
 
-Năm ngàn năm trước, khi ranh giới giữa các thế giới vẫn còn vững chắc, vũ trụ tồn tại trong một trật tự thiêng liêng. Mỗi chiều không gian là một thế giới riêng biệt, ngăn cách bởi những bức tường vô hình do các vị Thần Thượng Cổ dựng nên.
+# 2. Khởi động
+docker compose up -d
 
-Nhưng sự yên bình ấy không kéo dài mãi.
+# 3. Kiểm tra
+curl http://localhost:8080/api/admin/status \
+     -u gm:gm_secret_2024
 
-## ❖ Cuộc Chiến Đại Hoành Điểu
+# 4. GM Dashboard
+open http://localhost:9090
+```
 
-**Tiểu Thần Azaroth** — kẻ khát khao quyền năng tuyệt đối — đã phát động cuộc chiến **Đại Hoành Điểu**, với tham vọng phá vỡ những bức tường ngăn cách các chiều không gian, hợp nhất mọi thế giới dưới sự thống trị của hắn.
+## Ports
 
-Bầu trời rực cháy. Đại dương sôi trào. Vô số sinh linh ngã xuống dưới gót chân của vị tiểu thần điên loạn.
+| Port | Service |
+|------|---------|
+| 7777 | Game TCP (Netty) |
+| 8080 | Admin REST API (Spring Boot) |
+| 9090 | GM Dashboard (nginx) |
+| 5432 | PostgreSQL |
+| 6379 | Redis |
 
-## ❖ Bảy Anh Hùng Thượng Cổ
+## Game Design
 
-Khi tất cả tưởng chừng đã tuyệt vọng, **Bảy Anh Hùng Thượng Cổ** đã đứng lên. Họ đến từ bảy thế giới khác nhau, mang trong mình bảy nguồn sức mạnh nguyên thuỷ.
+### 4 Phe phái
+| Phe | Bonus |
+|-----|-------|
+| Đế Quốc Ánh Sáng | -10% phí chợ, +10% doanh thu |
+| Liên Minh Elf     | Bonus kỹ năng phép thuật |
+| Vương Quốc Thú Nhân | +30% tỉ lệ thuần hóa thú |
+| Ma Tộc            | Mở khóa nghề **Trộm** (đêm +50%) |
 
-Trong trận chiến cuối cùng, họ đã **hy sinh chính sinh mệnh của mình** để niêm phong Azaroth vào sâu trong hư không. Bức tường được dựng lại — nhưng không còn nguyên vẹn.
+### Nghề nghiệp (15 loại)
+Ngư Dân · Đầu Bếp · Nông Dân · Thợ Rèn · Thợ May · Nhà Giả Kim  
+Nhạc Sĩ · Họa Sĩ · Botanist · Nhà Khảo Cổ  
+**Đặc biệt:** Trộm · Bác Sĩ · Phóng Viên · Thị Trưởng · Nghệ Sĩ
 
-Sự hy sinh ấy để lại những **vết nứt không gian** rải rác khắp thế giới, như những vết sẹo không bao giờ lành của một vũ trụ từng suýt sụp đổ.
+### Hệ thống chính
+- **Câu cá**: 13 loại cá Common→Legendary, tỉ lệ theo giờ/mùa/trăng tròn
+- **Nông trại**: 8 loại cây, mùa vụ, tưới nước, phân bón
+- **Chế tạo**: 9+ recipe (nấu ăn/rèn/may/giả kim), craft timer async
+- **Thú cưng**: 12 template, faction-exclusive pets, tame/equip/feed
+- **Bảo tàng**: Hiến tặng cá/hóa thạch/cổ vật, gold reward
+- **Chợ**: Player stalls, NPC shops, dynamic pricing theo mùa
+- **Bầu cử**: Thị trưởng vote mỗi tuần, thưởng 100,000G
+- **Báo chí**: Publish article, like/view, weekly feature 50,000G reward
+- **Sự kiện**: 8 loại event tự động (rồng/meteor/boss/kho báu...)
 
-## ❖ Hiện Tại — Vết Nứt Mở Rộng
+### Packet Protocol
+```
+[4-byte length][2-byte typeId][payload]
+```
+All packets big-endian. Strings: `[2-byte length][UTF-8 bytes]`.
 
-Năm ngàn năm trôi qua. Phong ấn bắt đầu suy yếu.
+### C_ACTION (0x90) — Gameplay sub-actions
+| Byte | Action |
+|------|--------|
+| 10-12 | Fishing (cast/reel/cancel) |
+| 20-22 | Pet (tame/equip/feed) |
+| 30-32 | Farming (plant/water/harvest) |
+| 40-41 | Crafting (start/list) |
+| 50-52 | Inventory (view/use/drop) |
+| 60-61 | Museum (donate/catalog) |
+| 70    | Thief (steal) |
+| 80-83 | NPC (dialog/choice/buy/shop) |
+| 90    | Leaderboard |
 
-Những vết nứt năm xưa **đang mở rộng từng ngày**. Từ các chiều không gian khác, quái vật tràn vào thế giới này — đói khát, hỗn loạn, không thể ngăn cản.
+## Build Server
 
-Tệ hơn nữa, một thế lực bóng tối đã trỗi dậy: **Giáo Phái Vọng Linh** — những kẻ cuồng tín thờ phụng Azaroth, âm mưu phá vỡ phong ấn cuối cùng và **phục sinh vị tiểu thần** để mở ra kỷ nguyên huỷ diệt.
+```bash
+cd server-java
+mvn package -DskipTests
+java -jar target/fantasy-realm-server-1.0.0.jar
+```
 
-## ❖ Cổng Thời Không
+## Environment Variables
 
-Và rồi, giữa lúc thế giới đứng bên bờ vực, **một cổng thời không xuất hiện trên bầu trời** — xé toạc không gian, nối liền nơi đây với vô số thế giới xa xôi.
-
-Từ cánh cổng ấy, **bạn** bước ra.
-
-## ❖ Lưu Dân — Hy Vọng Cuối Cùng
-
-Bạn là một **Lưu Dân** — kẻ lạc bước từ một thế giới khác, bị cuốn vào **Vọng Linh Giới**. Bạn không nhớ mình là ai, đến từ đâu. Nhưng trong huyết mạch của bạn ẩn chứa một sức mạnh mà cả thế giới này khao khát:
-
-> *Khả năng hấp thu linh lực từ những vết nứt không gian.*
-
-Đây là năng lực mà ngay cả Bảy Anh Hùng Thượng Cổ cũng không có được. Trong tay những kẻ như bạn, nó có thể **hàn gắn vết nứt** — hoặc **xé toạc chúng mãi mãi**.
-
-Bạn là hy vọng cuối cùng của Vọng Linh Giới.
-
-## ❖ Làng Khải Nguyên
-
-Hành trình của bạn bắt đầu tại **Làng Khải Nguyên** — ngôi làng nhỏ nằm ngay cạnh vết nứt đầu tiên, nơi bạn tỉnh dậy giữa một thế giới hoàn toàn xa lạ.
-
-Tại đây, Trưởng Làng sẽ trao cho bạn những bước đi đầu tiên. Phía trước là **Đồng Bằng Sương Mù** đầy quái vật, là những phong ấn đang rung chuyển, là âm mưu của Giáo Phái Vọng Linh — và sâu thẳm trong hư không, là **Azaroth** đang chờ ngày thức tỉnh.
-
----
-
-<div align="center">
-
-*Linh lực gọi tên bạn, Lưu Dân.*
-*Vận mệnh của Vọng Linh Giới giờ đây nằm trong tay bạn.*
-
-**⚜ Hành trình bắt đầu... ⚜**
-
-</div>
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_URL` | `jdbc:postgresql://localhost:5432/fantasyrealm` | PostgreSQL URL |
+| `DB_USER` | `fro` | DB username |
+| `DB_PASS` | `fro123` | DB password |
+| `REDIS_HOST` | `localhost` | Redis host |
+| `GAME_PORT` | `7777` | TCP game port |
+| `HTTP_PORT` | `8080` | Admin API port |
+| `JWT_SECRET` | _(required)_ | Min 32 chars |
+| `ADMIN_USER` | `gm` | GM Dashboard user |
+| `ADMIN_PASS` | `gm_secret_2024` | GM Dashboard password |

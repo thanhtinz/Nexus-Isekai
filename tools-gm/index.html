@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fantasy Realm Online — GM Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh}
+header{background:linear-gradient(135deg,#1a1a3e,#2d1b69);padding:16px 24px;display:flex;align-items:center;gap:16px;border-bottom:2px solid #4a3f8a}
+header h1{font-size:1.4rem;color:#c9b8ff}
+header span{color:#7c6fa0;font-size:.85rem}
+.status-pill{background:#1e3a2e;border:1px solid #2d6b4a;color:#4ade80;padding:4px 12px;border-radius:20px;font-size:.8rem}
+nav{background:#13132a;padding:0 24px;display:flex;gap:4px;border-bottom:1px solid #2a2a4a;overflow-x:auto}
+.tab{padding:12px 20px;cursor:pointer;color:#7c6fa0;border-bottom:3px solid transparent;white-space:nowrap;font-size:.9rem;transition:.2s}
+.tab.active{color:#c9b8ff;border-color:#8b5cf6}
+.tab:hover{color:#a98af5}
+main{padding:24px;max-width:1400px}
+.panel{display:none}.panel.active{display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:20px}
+.card h3{color:#9d8fd4;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.stat-big{font-size:2.5rem;font-weight:700;color:#c9b8ff}
+.stat-label{color:#6b6b8a;font-size:.8rem;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;padding:10px 12px;color:#7c6fa0;border-bottom:1px solid #2a2a4a;font-weight:500}
+td{padding:10px 12px;border-bottom:1px solid #1f1f35}
+tr:hover td{background:#1f1f40}
+.badge{padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
+.badge-1{background:#1a2e1a;color:#4ade80}
+.badge-2{background:#1a2a2e;color:#38bdf8}
+.badge-3{background:#2e1a1a;color:#fb923c}
+.badge-4{background:#2a1a2e;color:#c084fc}
+.btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:500;transition:.2s}
+.btn-primary{background:#6d28d9;color:#fff}.btn-primary:hover{background:#7c3aed}
+.btn-success{background:#065f46;color:#34d399}.btn-success:hover{background:#047857}
+.btn-danger{background:#7f1d1d;color:#f87171}.btn-danger:hover{background:#991b1b}
+.btn-warn{background:#78350f;color:#fbbf24}.btn-warn:hover{background:#92400e}
+.btn-sm{padding:5px 10px;font-size:.75rem}
+input,select,textarea{background:#0f0f1a;border:1px solid #2a2a4a;border-radius:8px;color:#e0e0f0;padding:8px 12px;font-size:.85rem;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#6d28d9}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;color:#7c6fa0;font-size:.8rem;margin-bottom:4px}
+.log-line{font-family:monospace;font-size:.8rem;padding:4px 8px;border-radius:4px}
+.log-info{color:#60a5fa}.log-warn{color:#fbbf24}.log-error{color:#f87171}.log-ok{color:#34d399}
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:.85rem;z-index:1000;display:none;transition:.3s}
+.toast-ok{background:#065f46;color:#34d399;border:1px solid #047857}
+.toast-err{background:#7f1d1d;color:#f87171;border:1px solid #991b1b}
+.faction-bar{height:8px;border-radius:4px;background:#1a1a2e;overflow:hidden;display:flex}
+.faction-bar div{height:100%}
+.online-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;margin-right:6px}
+.zone-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #1f1f35}
+.zone-bar-wrap{flex:1;background:#0f0f1a;border-radius:4px;height:8px;overflow:hidden}
+.zone-bar{height:100%;background:#6d28d9;border-radius:4px;transition:.5s}
+@media(max-width:768px){.grid2,.grid3,.grid4{grid-template-columns:1fr}nav{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>⚔️ Fantasy Realm Online</h1>
+    <span id="serverAddr">localhost:8080</span>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
+    <span class="status-pill" id="serverPill">⬤ Connecting...</span>
+    <button class="btn btn-primary btn-sm" onclick="loadAll()">↻ Refresh</button>
+    <input id="adminUser" placeholder="GM User" style="width:100px" value="gm">
+    <input id="adminPass" placeholder="Password" type="password" style="width:100px" value="gm_secret_2024">
+    <input id="apiBase"   placeholder="http://localhost:8080" style="width:180px" value="http://localhost:8080">
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="showTab('overview')">📊 Tổng Quan</div>
+  <div class="tab" onclick="showTab('players')">👥 Người Chơi</div>
+  <div class="tab" onclick="showTab('zones')">🗺️ Khu Vực</div>
+  <div class="tab" onclick="showTab('events')">⚡ Sự Kiện</div>
+  <div class="tab" onclick="showTab('economy')">💰 Kinh Tế</div>
+  <div class="tab" onclick="showTab('leaderboard')">🏆 BXH</div>
+  <div class="tab" onclick="showTab('broadcast')">📢 Thông Báo</div>
+  <div class="tab" onclick="showTab('logs')">📋 Logs</div>
+</nav>
+
+<main>
+<!-- OVERVIEW -->
+<div class="panel active" id="panel-overview">
+  <div class="grid4" style="margin-bottom:20px">
+    <div class="card"><h3>Online</h3><div class="stat-big" id="stat-online">—</div><div class="stat-label">Người chơi</div></div>
+    <div class="card"><h3>Thời gian</h3><div class="stat-big" id="stat-time">—</div><div class="stat-label" id="stat-season">—</div></div>
+    <div class="card"><h3>Sự kiện</h3><div class="stat-big" id="stat-events">—</div><div class="stat-label">Đang diễn ra</div></div>
+    <div class="card"><h3>Khu vực</h3><div class="stat-big" id="stat-zones">—</div><div class="stat-label">Zones active</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Phân bổ phe phái</h3>
+      <div class="faction-bar" id="faction-bar" style="height:20px;border-radius:8px;margin-bottom:12px"></div>
+      <div id="faction-legend" style="display:flex;gap:16px;font-size:.8rem;flex-wrap:wrap"></div>
+    </div>
+    <div class="card">
+      <h3>Hoạt động gần đây</h3>
+      <div id="recent-activity" style="max-height:160px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYERS -->
+<div class="panel" id="panel-players">
+  <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center">
+    <input id="player-search" placeholder="🔍 Tìm tên..." style="width:220px" oninput="filterPlayers()">
+    <select id="player-faction-filter" onchange="filterPlayers()" style="width:140px">
+      <option value="">Tất cả phe</option>
+      <option value="Đế Quốc Ánh Sáng">Ánh Sáng</option>
+      <option value="Liên Minh Elf">Elf</option>
+      <option value="Vương Quốc Thú Nhân">Thú Nhân</option>
+      <option value="Ma Tộc">Ma Tộc</option>
+    </select>
+    <span id="player-count" style="color:#7c6fa0;font-size:.85rem"></span>
+    <button class="btn btn-success btn-sm" onclick="loadPlayers()">↻</button>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>#</th><th>Tên</th><th>Phe</th><th>Level</th><th>Gold</th><th>Khu Vực</th><th>Hành động</th></tr></thead>
+      <tbody id="players-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ZONES -->
+<div class="panel" id="panel-zones">
+  <div class="grid2">
+    <div class="card">
+      <h3>Khu Vực Online</h3>
+      <div id="zone-list"></div>
+    </div>
+    <div class="card">
+      <h3>Teleport Người Chơi</h3>
+      <div class="form-group"><label>Player ID</label><input id="tp-pid" type="number" placeholder="123456"></div>
+      <div class="grid2">
+        <div class="form-group"><label>Zone</label>
+          <select id="tp-zone">
+            <option value="1">1 - Thành Phố</option><option value="2">2 - Học Viện</option>
+            <option value="3">3 - Phiêu Lưu</option><option value="4">4 - Giải Trí</option>
+            <option value="5">5 - Dân Cư</option><option value="6">6 - Đế Quốc</option>
+            <option value="7">7 - Rừng Elf</option><option value="8">8 - Thú Nhân</option>
+            <option value="9">9 - Ma Giới</option><option value="10">10 - Thần Giới</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Tọa độ X,Y</label>
+          <div style="display:flex;gap:8px">
+            <input id="tp-x" type="number" value="100" placeholder="X">
+            <input id="tp-y" type="number" value="100" placeholder="Y">
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="teleportPlayer()">🚀 Teleport</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVENTS -->
+<div class="panel" id="panel-events">
+  <div class="grid2">
+    <div class="card">
+      <h3>Sự kiện đang diễn ra</h3>
+      <div id="active-events-list"></div>
+    </div>
+    <div class="card">
+      <h3>Kích hoạt sự kiện</h3>
+      <div class="form-group"><label>Loại sự kiện</label>
+        <select id="event-type">
+          <option value="DRAGON_APPEARS">🐉 Rồng Xuất Hiện</option>
+          <option value="METEOR_SHOWER">☄️ Mưa Sao Băng</option>
+          <option value="MERCHANT_SHIP">⛵ Tàu Buôn Ghé Cảng</option>
+          <option value="MONSTER_ATTACK">👹 Quái Vật Tấn Công</option>
+          <option value="TREASURE_HUNT">💎 Săn Kho Báu</option>
+          <option value="COMMUNITY_BOSS">👑 Boss Cộng Đồng</option>
+          <option value="FULL_MOON_FESTIVAL">🌕 Lễ Hội Trăng Tròn</option>
+          <option value="SEASONAL_FESTIVAL">🎉 Lễ Hội Mùa</option>
+        </select>
+      </div>
+      <button class="btn btn-warn" onclick="triggerEvent()">⚡ Kích Hoạt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ECONOMY -->
+<div class="panel" id="panel-economy">
+  <div class="grid2">
+    <div class="card">
+      <h3>Tặng Gold</h3>
+      <div class="form-group"><label>Player ID</label><input id="gold-pid" type="number"></div>
+      <div class="form-group"><label>Số Gold</label><input id="gold-amt" type="number" value="10000"></div>
+      <button class="btn btn-success" onclick="giveGold()">💰 Tặng Gold</button>
+    </div>
+    <div class="card">
+      <h3>Thế giới hiện tại</h3>
+      <div id="world-info" style="font-size:.9rem;line-height:2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="panel" id="panel-leaderboard">
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <button class="btn btn-primary btn-sm" onclick="loadLeaderboard('FASHION')">👗 Thời Trang</button>
+    <button class="btn btn-primary btn-sm" onclick="loadLeaderboard('FISHING')">🎣 Câu Cá</button>
+    <button class="btn btn-primary btn-sm" onclick="loadLeaderboard('WEALTH')">💰 Giàu Có</button>
+    <button class="btn btn-primary btn-sm" onclick="loadLeaderboard('COOKING')">🍜 Nấu Ăn</button>
+    <button class="btn btn-primary btn-sm" onclick="loadLeaderboard('FOLLOWERS')">⭐ Nổi Tiếng</button>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:12px 20px;color:#9d8fd4;font-weight:600" id="lb-title">—</div>
+    <table>
+      <thead><tr><th>Hạng</th><th>Tên</th><th>Phe</th><th>Điểm</th></tr></thead>
+      <tbody id="lb-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- BROADCAST -->
+<div class="panel" id="panel-broadcast">
+  <div class="grid2">
+    <div class="card">
+      <h3>Thông Báo Toàn Server</h3>
+      <div class="form-group"><label>Nội dung</label>
+        <textarea id="broadcast-msg" rows="4" placeholder="Nhập thông báo..."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="sendBroadcast()">📢 Gửi tất cả</button>
+    </div>
+    <div class="card">
+      <h3>Kick người chơi</h3>
+      <div class="form-group"><label>Player ID</label><input id="kick-pid" type="number"></div>
+      <div class="form-group"><label>Lý do</label><input id="kick-reason" placeholder="Vi phạm luật chơi..."></div>
+      <button class="btn btn-danger" onclick="kickPlayer()">⚡ Kick</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGS -->
+<div class="panel" id="panel-logs">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+      <h3>GM Action Logs</h3>
+      <button class="btn btn-primary btn-sm" onclick="addLog('info','Dashboard loaded')">↻ Refresh</button>
+    </div>
+    <div id="log-container" style="max-height:500px;overflow-y:auto;font-family:monospace"></div>
+  </div>
+</div>
+</main>
+
+<div id="toast"></div>
+
+<!-- Player Action Modal -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center">
+  <div style="background:#1a1a2e;border:1px solid #2a2a4a;border-radius:16px;padding:24px;min-width:320px;max-width:480px">
+    <h3 id="modal-title" style="color:#c9b8ff;margin-bottom:16px"></h3>
+    <div id="modal-body"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" id="modal-confirm">Xác nhận</button>
+      <button class="btn btn-danger" onclick="closeModal()">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allPlayers = [];
+const factionColors = {'Đế Quốc Ánh Sáng':'#fbbf24','Liên Minh Elf':'#34d399','Vương Quốc Thú Nhân':'#fb923c','Ma Tộc':'#c084fc'};
+const factionBadge = {'Đế Quốc Ánh Sáng':'badge-1','Liên Minh Elf':'badge-2','Vương Quốc Thú Nhân':'badge-3','Ma Tộc':'badge-4'};
+
+function api(path, method='GET', body=null) {
+  const base = document.getElementById('apiBase').value;
+  const user = document.getElementById('adminUser').value;
+  const pass = document.getElementById('adminPass').value;
+  return fetch(base + path, {
+    method,
+    headers: {
+      'Content-Type':'application/json',
+      'Authorization':'Basic ' + btoa(user+':'+pass)
+    },
+    body: body ? JSON.stringify(body) : null
+  }).then(r => r.ok ? r.json().catch(()=>r.text()) : r.text().then(t=>{throw new Error(t)}));
+}
+
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = ok ? 'toast-ok' : 'toast-err';
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+
+function addLog(type, msg) {
+  const c = document.getElementById('log-container');
+  const d = new Date().toLocaleTimeString();
+  c.innerHTML = `<div class="log-line log-${type}">[${d}] ${msg}</div>` + c.innerHTML;
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', t.textContent.includes(
+    {overview:'Tổng',players:'Người',zones:'Khu',events:'Sự',economy:'Kinh',leaderboard:'BXH',broadcast:'Thông',logs:'Logs'}[name]||'__')));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if (name === 'players') loadPlayers();
+  if (name === 'zones') loadZones();
+  if (name === 'events') loadEvents();
+  if (name === 'economy') loadWorld();
+}
+// fix tab active
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if (name === 'players') loadPlayers();
+  if (name === 'zones') loadZones();
+  if (name === 'events') loadEvents();
+  if (name === 'economy') loadWorld();
+  if (name === 'leaderboard') loadLeaderboard('FASHION');
+}
+
+async function loadAll() {
+  try {
+    const s = await api('/api/admin/status');
+    document.getElementById('stat-online').textContent = s.online || 0;
+    document.getElementById('stat-time').textContent =
+      String(s.gameHour||0).padStart(2,'0') + ':' + String(s.gameMinute||0).padStart(2,'0');
+    document.getElementById('stat-season').textContent = (s.season||'—') + (s.fullMoon ? ' 🌕' : '');
+    document.getElementById('stat-events').textContent = s.activeEvents || 0;
+    document.getElementById('stat-zones').textContent = s.zones || 0;
+    document.getElementById('serverPill').textContent = '⬤ Online';
+    document.getElementById('serverPill').style.background = '#1e3a2e';
+    addLog('ok', `Status: ${s.online} players online, ${s.gameTime}`);
+  } catch(e) {
+    document.getElementById('serverPill').textContent = '⬤ Offline';
+    document.getElementById('serverPill').style.background = '#3a1e1e';
+    document.getElementById('serverPill').style.color = '#f87171';
+    addLog('error', 'Cannot connect to server: ' + e.message);
+  }
+}
+
+async function loadPlayers() {
+  try {
+    const data = await api('/api/admin/players');
+    allPlayers = data.players || [];
+    renderPlayers(allPlayers);
+    document.getElementById('player-count').textContent = allPlayers.length + ' online';
+  } catch(e) { toast(e.message, false); }
+}
+
+function renderPlayers(players) {
+  const tbody = document.getElementById('players-tbody');
+  tbody.innerHTML = players.map((p,i) => `
+    <tr>
+      <td style="color:#4a4a6a">${i+1}</td>
+      <td><span class="online-dot"></span>${p.name}</td>
+      <td><span class="badge ${factionBadge[p.faction]||''}">${p.faction}</span></td>
+      <td>Lv.${p.level}</td>
+      <td>💰 ${(p.gold||0).toLocaleString()}</td>
+      <td>Zone ${p.zoneId}</td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-success btn-sm" onclick="showGiveGold(${p.playerId},'${p.name}')">+G</button>
+        <button class="btn btn-primary btn-sm" onclick="showTeleport(${p.playerId},'${p.name}')">TP</button>
+        <button class="btn btn-danger btn-sm" onclick="kickById(${p.playerId},'${p.name}')">⚡</button>
+      </td>
+    </tr>`).join('');
+}
+
+function filterPlayers() {
+  const q = document.getElementById('player-search').value.toLowerCase();
+  const f = document.getElementById('player-faction-filter').value;
+  renderPlayers(allPlayers.filter(p =>
+    (!q || p.name.toLowerCase().includes(q)) &&
+    (!f || p.faction === f)
+  ));
+}
+
+async function loadZones() {
+  try {
+    const zones = await api('/api/admin/zones');
+    const html = zones.map(z => `
+      <div class="zone-row">
+        <span style="color:#c9b8ff;min-width:180px">${z.name}</span>
+        <div class="zone-bar-wrap">
+          <div class="zone-bar" style="width:${Math.min(100,z.players/z.max*100)}%"></div>
+        </div>
+        <span style="color:#6b6b8a;font-size:.8rem;min-width:80px">${z.players}/${z.max}</span>
+        <span style="color:#4a4a6a;font-size:.75rem">NPC:${z.npcs}</span>
+      </div>`).join('');
+    document.getElementById('zone-list').innerHTML = html;
+  } catch(e) { toast(e.message, false); }
+}
+
+async function loadEvents() {
+  try {
+    const events = await api('/api/admin/events');
+    const active = events.active || events;
+    document.getElementById('active-events-list').innerHTML = active.length
+      ? active.map(e => `<div style="padding:8px 0;border-bottom:1px solid #1f1f35">
+          <div style="color:#c9b8ff">${e.title}</div>
+          <div style="color:#4a4a6a;font-size:.8rem">Zone ${e.zone} — còn ${e.endsIn}</div>
+        </div>`).join('')
+      : '<div style="color:#4a4a6a;padding:16px">Không có sự kiện đang diễn ra</div>';
+    document.getElementById('stat-events').textContent = active.length;
+  } catch(e) { toast(e.message, false); }
+}
+
+async function loadWorld() {
+  try {
+    const s = await api('/api/admin/status');
+    document.getElementById('world-info').innerHTML = `
+      <div>🕐 Giờ game: <b>${s.gameHour}:${String(s.gameMinute).padStart(2,'0')}</b> (${s.gameTime})</div>
+      <div>🌸 Mùa: <b>${s.season}</b></div>
+      <div>🌕 Trăng tròn: <b>${s.fullMoon ? 'Có ✓' : 'Không'}</b></div>
+      <div>👥 Online: <b>${s.online}</b></div>
+      <div>⚡ Sự kiện: <b>${s.activeEvents}</b></div>`;
+  } catch(e) { toast(e.message, false); }
+}
+
+async function loadLeaderboard(type) {
+  try {
+    const data = await api(`/api/admin/leaderboard/${type}`);
+    document.getElementById('lb-title').textContent = `🏆 ${data.board || type}`;
+    document.getElementById('lb-tbody').innerHTML = (data.entries||[]).map(e => `
+      <tr>
+        <td><b style="color:${e.rank<=3?'#fbbf24':'#6b6b8a'}">#${e.rank}</b></td>
+        <td>${e.name}</td>
+        <td><span class="badge">${e.faction}</span></td>
+        <td>${(e.score||0).toLocaleString()}</td>
+      </tr>`).join('');
+  } catch(e) { toast(e.message, false); }
+}
+
+async function triggerEvent() {
+  const type = document.getElementById('event-type').value;
+  try {
+    await api('/api/admin/events/trigger', 'POST', {type});
+    toast('✓ Đã kích hoạt: ' + type);
+    addLog('warn', 'Event triggered: ' + type);
+    loadEvents();
+  } catch(e) { toast(e.message, false); }
+}
+
+async function sendBroadcast() {
+  const msg = document.getElementById('broadcast-msg').value.trim();
+  if (!msg) { toast('Nhập nội dung thông báo', false); return; }
+  try {
+    await api('/api/admin/broadcast', 'POST', {message: msg});
+    toast('📢 Đã gửi thông báo');
+    addLog('info', 'Broadcast: ' + msg);
+    document.getElementById('broadcast-msg').value = '';
+  } catch(e) { toast(e.message, false); }
+}
+
+async function giveGold() {
+  const pid = parseInt(document.getElementById('gold-pid').value);
+  const amt = parseInt(document.getElementById('gold-amt').value);
+  if (!pid || !amt) { toast('Nhập player ID và số gold', false); return; }
+  try {
+    const r = await api(`/api/admin/players/${pid}/give-gold`, 'POST', {amount: amt});
+    toast('✓ ' + r); addLog('ok', r);
+  } catch(e) { toast(e.message, false); }
+}
+
+function showGiveGold(pid, name) {
+  document.getElementById('modal-title').textContent = `💰 Tặng Gold cho ${name}`;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-group"><label>Số gold</label><input id="m-gold" type="number" value="10000"></div>`;
+  document.getElementById('modal-confirm').onclick = async () => {
+    const amt = parseInt(document.getElementById('m-gold').value);
+    try { const r = await api(`/api/admin/players/${pid}/give-gold`,'POST',{amount:amt}); toast('✓ '+r); closeModal(); }
+    catch(e) { toast(e.message,false); }
+  };
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function showTeleport(pid, name) {
+  document.getElementById('tp-pid').value = pid;
+  showTab('zones');
+}
+
+async function teleportPlayer() {
+  const pid = parseInt(document.getElementById('tp-pid').value);
+  const zone = parseInt(document.getElementById('tp-zone').value);
+  const x = parseFloat(document.getElementById('tp-x').value);
+  const y = parseFloat(document.getElementById('tp-y').value);
+  if (!pid) { toast('Nhập player ID', false); return; }
+  try {
+    const r = await api(`/api/admin/players/${pid}/teleport`,'POST',{zoneId:zone,x,y});
+    toast('✓ '+r); addLog('ok', r);
+  } catch(e) { toast(e.message, false); }
+}
+
+async function kickById(pid, name) {
+  if (!confirm(`Kick ${name}?`)) return;
+  try {
+    const r = await api(`/api/admin/players/${pid}/kick`,'DELETE');
+    toast('⚡ Đã kick: '+name); addLog('warn','Kicked: '+name);
+    loadPlayers();
+  } catch(e) { toast(e.message, false); }
+}
+
+async function kickPlayer() {
+  const pid = parseInt(document.getElementById('kick-pid').value);
+  const reason = document.getElementById('kick-reason').value || 'Vi phạm';
+  if (!pid) { toast('Nhập player ID', false); return; }
+  kickById(pid, 'ID:'+pid);
+}
+
+function closeModal() { document.getElementById('modal').style.display='none'; }
+document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+// Auto load
+loadAll();
+setInterval(loadAll, 30000);
+addLog('info', 'GM Dashboard initialized');
+</script>
+</body>
+</html>
