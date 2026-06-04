@@ -181,6 +181,7 @@ public class AdminApiServer {
         httpServer.createContext("/api/pets",          ex -> handleAuth(ex, this::handlePetTemplates));
         httpServer.createContext("/api/races",         ex -> handleAuth(ex, this::handleRaces));
         httpServer.createContext("/api/professions",   ex -> handleAuth(ex, this::handleProfessions));
+        httpServer.createContext("/api/appearance",    ex -> handleAuth(ex, this::handleAppearance));
         httpServer.createContext("/api/mounts",        ex -> handleAuth(ex, this::handleMountTemplates));
         httpServer.createContext("/api/classes",       ex -> handleAuth(ex, this::handleClasses));
         httpServer.createContext("/api/warehouse",            ex -> handleAuth(ex, this::handleWarehouse));
@@ -1536,6 +1537,10 @@ public class AdminApiServer {
 
     private void handleProfessions(HttpExchange ex) throws Exception {
         crudConfig(ex, "professions", "id", new String[]{"name","category","description","icon_id","unlock_quest_id","is_combat","status","is_active"});
+    }
+
+    private void handleAppearance(HttpExchange ex) throws Exception {
+        crudConfig(ex, "appearance_options", "id", new String[]{"type","name","sprite_key","color_hex","gender","race","sort_order","status","is_active"});
     }
 
     private void handleRaces(HttpExchange ex) throws Exception {

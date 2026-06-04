@@ -67,6 +67,8 @@ public class CharHandler {
         String name    = new String(nameBytes, StandardCharsets.UTF_8).trim();
         int race       = buf.get() & 0xFF;   // 0=Con Nguoi, 1=Yeu Tinh
         int gender     = buf.get() & 0xFF;   // 0=nam, 1=nu
+        int hair = 0, skin = 0, clothes = 0; // ngoai hinh co ban (client cu khong gui -> mac dinh)
+        if (buf.remaining() >= 6) { hair = buf.getShort() & 0xFFFF; skin = buf.getShort() & 0xFFFF; clothes = buf.getShort() & 0xFFFF; }
 
         // Validate
         if (name.length() < 2 || name.length() > 12) {
@@ -101,15 +103,16 @@ public class CharHandler {
 
             // Tao nhan vat — chon class ngay khi tao (giong NRO)
             PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO characters (account_id,name,class_id,race,gender,level,hp,max_hp,mp,max_mp," +
-                    "map_id,pos_x,pos_y) VALUES (?,?,0,?,?,1,?,?,?,?,1,5.0,5.0)",
+                    "INSERT INTO characters (account_id,name,class_id,race,gender,hair,skin,clothes,level,hp,max_hp,mp,max_mp," +
+                    "map_id,pos_x,pos_y) VALUES (?,?,0,?,?,?,?,?,1,?,?,?,?,1,5.0,5.0)",
                     Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, session.getAccountId());
             ps.setString(2, name);
             ps.setInt(3, race);
             ps.setInt(4, gender);
-            ps.setInt(5, baseHp); ps.setInt(6, baseHp);
-            ps.setInt(7, baseMp); ps.setInt(8, baseMp);
+            ps.setInt(5, hair); ps.setInt(6, skin); ps.setInt(7, clothes);
+            ps.setInt(8, baseHp); ps.setInt(9, baseHp);
+            ps.setInt(10, baseMp); ps.setInt(11, baseMp);
             ps.executeUpdate();
 
             ResultSet keys = ps.getGeneratedKeys();

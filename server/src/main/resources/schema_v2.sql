@@ -4518,3 +4518,30 @@ CREATE TABLE IF NOT EXISTS player_professions (
     unlocked_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_char_prof (char_id, profession_id)
 );
+
+-- ═══ NGOAI HINH co ban luc tao nhan vat (toc / mau da / quan ao) ═══
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS hair    SMALLINT NOT NULL DEFAULT 0; -- id appearance_options(type=hair)
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS skin    SMALLINT NOT NULL DEFAULT 0; -- id (type=skin)
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS clothes SMALLINT NOT NULL DEFAULT 0; -- id (type=clothes)
+
+CREATE TABLE IF NOT EXISTS appearance_options (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    type       VARCHAR(12) NOT NULL,        -- 'hair' | 'skin' | 'clothes'
+    name       VARCHAR(48) NOT NULL,
+    sprite_key VARCHAR(64) DEFAULT NULL,    -- cho hair/clothes (anh paper-doll)
+    color_hex  VARCHAR(9)  DEFAULT NULL,    -- cho skin (mau da)
+    gender     TINYINT NOT NULL DEFAULT 2,  -- 0=nam,1=nu,2=ca hai
+    race       TINYINT NOT NULL DEFAULT 2,  -- 0=Con Nguoi,1=Yeu Tinh,2=ca hai
+    sort_order INT NOT NULL DEFAULT 0,
+    status     VARCHAR(12) NOT NULL DEFAULT 'live',
+    is_active  TINYINT NOT NULL DEFAULT 1
+);
+INSERT IGNORE INTO appearance_options (id,type,name,sprite_key,color_hex,sort_order) VALUES
+  (1,'hair','Toc Ngan','hair_short',NULL,1),
+  (2,'hair','Toc Dai','hair_long',NULL,2),
+  (3,'hair','Toc Buoc','hair_tied',NULL,3),
+  (10,'skin','Da Sang',NULL,'#f1c6a7',1),
+  (11,'skin','Da Vua',NULL,'#d99a6c',2),
+  (12,'skin','Da Nau',NULL,'#a86b43',3),
+  (20,'clothes','Ao Vai Tho','outfit_basic',NULL,1),
+  (21,'clothes','Ao Lu Khach','outfit_traveler',NULL,2);
