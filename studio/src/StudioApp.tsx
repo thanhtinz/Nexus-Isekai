@@ -57,6 +57,7 @@ const SECTIONS: Section[] = [
   { key: 'npc',      label: 'NPC',       endpoint: '/api/npcs',          dataKey: 'rows', pk: 'id',        nameField: 'name' },
   { key: 'item',     label: 'ITEM',      endpoint: '/api/items',         dataKey: 'items', pk: 'id',       nameField: 'name' },
   { key: 'class',    label: 'NHAN VAT',  endpoint: '/api/classes',       dataKey: 'classes', pk: 'id',     nameField: 'name' },
+  { key: 'pet',      label: 'THU CUNG',  endpoint: '/api/pets',          dataKey: 'pets', pk: 'id',        nameField: 'name' },
   { key: 'quest',    label: 'NHIEM VU',  endpoint: '/api/quests',        dataKey: 'rows', pk: 'id',        nameField: 'name' },
   { key: 'story',    label: 'COT TRUYEN',endpoint: '/api/story',         dataKey: 'chapters', pk: 'id',    nameField: 'title' },
   { key: 'dialog',   label: 'NPC DIALOG',endpoint: '/api/dialogs',       dataKey: 'dialogs', pk: 'id',     nameField: 'dialog_key' },

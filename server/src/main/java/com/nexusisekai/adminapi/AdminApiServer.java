@@ -1532,6 +1532,18 @@ public class AdminApiServer {
         }
     }
 
+    private void bindPet(PreparedStatement ps, Map<String,Object> body) throws Exception {
+        ps.setString(1,str(body,"name")); ps.setString(2,str(body,"element"));
+        ps.setInt(3,num(body,"rarity")); ps.setInt(4,num(body,"base_hp"));
+        ps.setInt(5,num(body,"base_atk")); ps.setInt(6,num(body,"base_def"));
+        ps.setInt(7,num(body,"skill_id")); ps.setInt(8,num(body,"icon_id"));
+        ps.setString(9,str(body,"obtain_source")); ps.setString(10,str(body,"personalities"));
+        ps.setString(11,str(body,"colors")); ps.setInt(12,num(body,"catch_rate"));
+        ps.setInt(13,num(body,"capturable")); ps.setInt(14,num(body,"spawn_map_id"));
+        ps.setString(15,str(body,"sprite_key")); ps.setInt(16,num(body,"evolve_to"));
+        ps.setString(17,str(body,"food")); ps.setString(18, str(body,"status").isEmpty()?"live":str(body,"status"));
+    }
+
     private void handlePetTemplates(HttpExchange ex) throws Exception {
         try (Connection c = DatabaseManager.getInstance().getConnection()) {
             if (ex.getRequestMethod().equals("GET")) {
@@ -1548,14 +1560,17 @@ public class AdminApiServer {
             } else {
                 @SuppressWarnings("unchecked") Map<String,Object> body = parseBody(ex);
                 String action = str(body,"action");
+                if ("upsert".equals(action)) action = num(body,"id") > 0 ? "update" : "create";
                 if ("create".equals(action)) {
                     PreparedStatement ps = c.prepareStatement(
-                        "INSERT INTO pet_templates (name,element,rarity,base_hp,base_atk,base_def,skill_id,icon_id,obtain_source,is_active) VALUES (?,?,?,?,?,?,?,?,?,1)");
-                    ps.setString(1,str(body,"name")); ps.setString(2,str(body,"element"));
-                    ps.setInt(3,num(body,"rarity")); ps.setInt(4,num(body,"base_hp"));
-                    ps.setInt(5,num(body,"base_atk")); ps.setInt(6,num(body,"base_def"));
-                    ps.setInt(7,num(body,"skill_id")); ps.setInt(8,num(body,"icon_id"));
-                    ps.setString(9,str(body,"obtain_source")); ps.executeUpdate();
+                        "INSERT INTO pet_templates (name,element,rarity,base_hp,base_atk,base_def,skill_id,icon_id,obtain_source,personalities,colors,catch_rate,capturable,spawn_map_id,sprite_key,evolve_to,food,status,is_active) " +
+                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)");
+                    bindPet(ps, body); ps.executeUpdate();
+                    com.nexusisekai.game.pet.PetManager.getInstance().loadAll();
+                } else if ("update".equals(action)) {
+                    PreparedStatement ps = c.prepareStatement(
+                        "UPDATE pet_templates SET name=?,element=?,rarity=?,base_hp=?,base_atk=?,base_def=?,skill_id=?,icon_id=?,obtain_source=?,personalities=?,colors=?,catch_rate=?,capturable=?,spawn_map_id=?,sprite_key=?,evolve_to=?,food=?,status=?,is_active=? WHERE id=?");
+                    bindPet(ps, body); ps.setInt(19, body.get("is_active")!=null?num(body,"is_active"):1); ps.setInt(20, num(body,"id")); ps.executeUpdate();
                     com.nexusisekai.game.pet.PetManager.getInstance().loadAll();
                 } else if ("delete".equals(action)) {
                     c.prepareStatement("UPDATE pet_templates SET is_active=0 WHERE id="+num(body,"id")).executeUpdate();

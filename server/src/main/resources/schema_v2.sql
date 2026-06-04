@@ -4450,3 +4450,19 @@ ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_oy      INT NOT NULL DE
 ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS vfx_scale   INT NOT NULL DEFAULT 100; -- % phong to
 ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS hit_frame   INT NOT NULL DEFAULT -1;  -- frame trung don (game apply dmg) (-1=none)
 ALTER TABLE skill_templates ADD COLUMN IF NOT EXISTS sound_frame INT NOT NULL DEFAULT -1;  -- frame phat sfx_key (-1=none)
+
+-- ═══ THU CUNG (cozy): pool tinh cach/mau + bat/spawn/tien hoa ═══
+ALTER TABLE pet_templates ADD COLUMN IF NOT EXISTS personalities VARCHAR(255) DEFAULT '';  -- pool CSV: 'Nhut nhat,Tinh nghich,Trung thanh'
+ALTER TABLE pet_templates ADD COLUMN IF NOT EXISTS colors        VARCHAR(255) DEFAULT '';  -- pool CSV hex: '#ffd24d,#7fd8ff'
+ALTER TABLE pet_templates ADD COLUMN IF NOT EXISTS catch_rate    INT NOT NULL DEFAULT 50;   -- % bat duoc
+ALTER TABLE pet_templates ADD COLUMN IF NOT EXISTS capturable    TINYINT NOT NULL DEFAULT 1;
+ALTER TABLE pet_templates ADD COLUMN IF NOT EXISTS spawn_map_id  INT NOT NULL DEFAULT 0;
+ALTER TABLE pet_templates ADD COLUMN IF NOT EXISTS sprite_key    VARCHAR(64) DEFAULT NULL;
+ALTER TABLE pet_templates ADD COLUMN IF NOT EXISTS evolve_to     INT NOT NULL DEFAULT 0;     -- template tien hoa len
+ALTER TABLE pet_templates ADD COLUMN IF NOT EXISTS food          VARCHAR(64) DEFAULT '';     -- mon yeu thich
+ALTER TABLE pet_templates ADD COLUMN IF NOT EXISTS status        VARCHAR(12) NOT NULL DEFAULT 'live';
+-- per-instance: tinh cach/mau da roll + tam trang/nang luong
+ALTER TABLE player_pets ADD COLUMN IF NOT EXISTS personality VARCHAR(32) DEFAULT '';
+ALTER TABLE player_pets ADD COLUMN IF NOT EXISTS color       VARCHAR(16) DEFAULT '';
+ALTER TABLE player_pets ADD COLUMN IF NOT EXISTS mood        INT NOT NULL DEFAULT 100;
+ALTER TABLE player_pets ADD COLUMN IF NOT EXISTS energy      INT NOT NULL DEFAULT 100;
