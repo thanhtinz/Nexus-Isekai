@@ -39,6 +39,7 @@ public class AuthHandler {
         s.setMp(s.getMaxMp());
         s.setGold(r.gold());
         s.setOutfitJson(r.outfitJson() != null ? r.outfitJson() : "{}");
+        s.setGm(r.isAdmin()); // tài khoản admin có quyền GM + character riêng
         s.setAuthenticated(true);
         sessions.register(s);
 

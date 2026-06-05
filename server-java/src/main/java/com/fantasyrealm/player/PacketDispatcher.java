@@ -26,6 +26,7 @@ public class PacketDispatcher {
     @Autowired private com.fantasyrealm.combat.CombatService combat;
     @Autowired private com.fantasyrealm.combat.MobManager     mobManager;
     @Autowired private com.fantasyrealm.combat.SkillService   skills;
+    @Autowired private com.fantasyrealm.gm.GmService          gm;
 
     @FunctionalInterface
     interface Handler { void handle(PlayerSession s, Packet p); }
@@ -95,6 +96,22 @@ public class PacketDispatcher {
         handlers.put(PacketType.C_PLAYER_RESPAWN,  combat::onPlayerRespawn);
         handlers.put(PacketType.C_USE_SKILL,       skills::onUseSkill);
         handlers.put(PacketType.C_SKILL_LIST_REQ,  skills::onSkillListReq);
+
+        // GM/Admin
+        handlers.put(PacketType.C_GM_COMMAND, (s, p) -> {
+            String result = gm.executeCommand(s, p.readString());
+            s.send(new Packet(PacketType.S_GM_RESULT).writeString(result));
+        });
+        handlers.put(PacketType.C_GM_POSSESS, (s, p) -> {
+            String result = gm.executeCommand(s, "possess " + p.readString() + " " + p.readLong());
+            s.send(new Packet(PacketType.S_GM_RESULT).writeString(result));
+        });
+        handlers.put(PacketType.C_GM_POSSESS_MOVE,   gm::onPossessMove);
+        handlers.put(PacketType.C_GM_POSSESS_ACTION, gm::onPossessAction);
+        handlers.put(PacketType.C_GM_RELEASE, (s, p) ->
+            s.send(new Packet(PacketType.S_GM_RESULT).writeString(gm.executeCommand(s, "release"))));
+        handlers.put(PacketType.C_GM_INVISIBLE, (s, p) ->
+            s.send(new Packet(PacketType.S_GM_RESULT).writeString(gm.executeCommand(s, "invis " + p.readInt()))));
     }
 
     private static final java.util.Set<PacketType> NO_AUTH = java.util.Set.of(

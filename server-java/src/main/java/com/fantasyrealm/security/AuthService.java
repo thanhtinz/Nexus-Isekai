@@ -24,7 +24,7 @@ public class AuthService {
         boolean ok, String error,
         String token, long playerId, String characterName,
         int factionId, int level, long gold, String outfitJson,
-        int zoneId, float posX, float posY
+        int zoneId, float posX, float posY, boolean isAdmin
     ){}
 
     public record RegisterResult(boolean ok, String error, long playerId){}
@@ -46,7 +46,7 @@ public class AuthService {
         log.info("Login OK: {} char={}", username, c.getName());
         return new LoginResult(true, null, token, p.getId(), c.getName(),
             c.getFactionId(), c.getLevel(), c.getGold(), c.getOutfitJson(),
-            c.getZoneId(), c.getPosX(), c.getPosY());
+            c.getZoneId(), c.getPosX(), c.getPosY(), p.isAdmin());
     }
 
     @Transactional
@@ -85,6 +85,6 @@ public class AuthService {
     public long getPlayerId(String token)       { return jwt.getPlayerId(token); }
 
     private LoginResult fail(String msg) {
-        return new LoginResult(false, msg, null, 0, null, 0, 0, 0, null, 0, 0, 0);
+        return new LoginResult(false, msg, null, 0, null, 0, 0, 0, null, 0, 0, 0, false);
     }
 }

@@ -11,6 +11,7 @@ public class ChatHandler {
     private static final long COOLDOWN_MS = 500;
     @Autowired private ZoneManager    zoneManager;
     @Autowired private SessionManager sessions;
+    @Autowired private com.fantasyrealm.gm.GmService gmService;
     private final ConcurrentHashMap<Long,Long> lastChat = new ConcurrentHashMap<>();
 
     public void onChat(PlayerSession s, Packet p) {
@@ -18,6 +19,14 @@ public class ChatHandler {
         int    ch  = p.readByte(); // 0=zone 1=faction 2=trade 3=all
 
         if (msg == null || msg.isBlank() || msg.length() > MAX_LEN) return;
+
+        // GM chat command: tin nhắn bắt đầu "/" → xử lý như lệnh GM
+        if (msg.startsWith("/") && s.isGm()) {
+            String result = gmService.executeCommand(s, msg);
+            s.send(new Packet(PacketType.S_GM_RESULT).writeString(result));
+            return;
+        }
+
         long now = System.currentTimeMillis();
         Long last = lastChat.put(s.getPlayerId(), now);
         if (last != null && now - last < COOLDOWN_MS) return;

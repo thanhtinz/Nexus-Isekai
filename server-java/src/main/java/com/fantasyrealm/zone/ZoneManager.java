@@ -76,11 +76,16 @@ public class ZoneManager {
     }
 
     private Packet buildZoneData(Zone z, long viewerId) {
+        // Đếm số người hiện (loại bản thân + GM tàng hình)
+        int visibleCount = 0;
+        for (PlayerSession o : z.getPlayers())
+            if (o.getPlayerId() != viewerId && !o.isInvisible()) visibleCount++;
         Packet p = new Packet(PacketType.S_ZONE_DATA)
             .writeInt(z.getId()).writeString(z.getType().displayName)
-            .writeInt(z.getPlayerCount() - 1); // excluding self
+            .writeInt(visibleCount);
         for (PlayerSession other : z.getPlayers()) {
             if (other.getPlayerId() == viewerId) continue;
+            if (other.isInvisible()) continue; // GM tàng hình không hiện trong danh sách
             p.writeLong(other.getPlayerId());
             p.writeString(other.getCharacterName());
             p.writeInt(other.getFaction() != null ? other.getFaction().id : 0);

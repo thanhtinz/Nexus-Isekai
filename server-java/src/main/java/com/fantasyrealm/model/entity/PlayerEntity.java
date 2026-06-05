@@ -14,6 +14,7 @@ public class PlayerEntity {
     @Column(name="created_at") private Instant createdAt=Instant.now();
     @Column(name="last_login") private Instant lastLogin;
     @Column(name="is_banned") private boolean banned=false;
+    @Column(name="is_admin") private boolean admin=false;
     @Column(name="ban_reason") private String banReason;
     @Column(name="premium_expires") private Instant premiumExpires;
 
@@ -24,6 +25,7 @@ public class PlayerEntity {
     public String getSalt(){return salt;} public void setSalt(String v){salt=v;}
     public Instant getLastLogin(){return lastLogin;} public void setLastLogin(Instant v){lastLogin=v;}
     public boolean isBanned(){return banned;} public void setBanned(boolean v){banned=v;}
+    public boolean isAdmin(){return admin;} public void setAdmin(boolean v){admin=v;}
     public String getBanReason(){return banReason;} public void setBanReason(String v){banReason=v;}
     public Instant getPremiumExpires(){return premiumExpires;} public void setPremiumExpires(Instant v){premiumExpires=v;}
 }

@@ -9,6 +9,11 @@ public class PlayerSession {
     private final long sessionId;
     private final Channel channel;
     private final AtomicBoolean authenticated = new AtomicBoolean(false);
+    // GM/Admin state
+    private volatile boolean isGm = false;
+    private volatile int     invisibleLevel = 0; // 0=hiện, 1=ẩn khỏi list+no aggro, 2=tàng hình hoàn toàn
+    private volatile long    possessTargetId = 0; // id NPC/mob đang điều khiển (0 = không)
+    private volatile String  possessType = null;   // "npc" | "mob" | null
     private final AtomicLong lastActivity = new AtomicLong(System.currentTimeMillis());
 
     // character data (volatile for thread safety)
@@ -48,6 +53,17 @@ public class PlayerSession {
     public Channel   getChannel()     { return channel; }
     public boolean   isAuthenticated(){ return authenticated.get(); }
     public void      setAuthenticated(boolean v){ authenticated.set(v); }
+
+    public boolean   isGm()                  { return isGm; }
+    public void      setGm(boolean v)        { isGm = v; }
+    public int       getInvisibleLevel()     { return invisibleLevel; }
+    public void      setInvisibleLevel(int v){ invisibleLevel = Math.max(0, Math.min(2, v)); }
+    public boolean   isInvisible()           { return invisibleLevel > 0; }
+    public long      getPossessTargetId()    { return possessTargetId; }
+    public String    getPossessType()        { return possessType; }
+    public void      setPossess(String type, long id) { possessType = type; possessTargetId = id; }
+    public void      clearPossess()          { possessType = null; possessTargetId = 0; }
+    public boolean   isPossessing()          { return possessTargetId != 0; }
     public long      getCharacterId() { return characterId; }
     public void      setCharacterId(long v){ characterId = v; }
     public long      getPlayerId()    { return playerId; }
