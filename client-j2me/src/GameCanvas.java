@@ -85,23 +85,27 @@ public class GameCanvas extends javax.microedition.lcdui.game.GameCanvas impleme
     private void processPackets(GameConnection conn) {
         byte[] pkt;
         while ((pkt = conn.poll()) != null) {
-            PacketParser parser = new PacketParser(pkt);
-            int type = parser.readShort() & 0xFFFF;
-            switch (type) {
-                case 0x21: // S_CHAT
-                    parser.readLong();
-                    String sender = parser.readString();
-                    String msg    = parser.readString();
-                    lastChat = sender + ": " + msg;
-                    break;
-                case 0x11: // S_PLAYER_MOVE
-                    long pid = parser.readLong();
-                    float nx = parser.readFloat(), ny = parser.readFloat();
-                    updateOther(pid, null, nx, ny);
-                    break;
-                case 0x15: // S_PLAYER_LEFT
-                    removeOther(parser.readLong());
-                    break;
+            try {
+                PacketParser parser = new PacketParser(pkt);
+                int type = parser.readShort() & 0xFFFF;
+                switch (type) {
+                    case 0x21: // S_CHAT
+                        parser.readLong();
+                        String sender = parser.readString();
+                        String msg    = parser.readString();
+                        lastChat = sender + ": " + msg;
+                        break;
+                    case 0x11: // S_PLAYER_MOVE
+                        long pid = parser.readLong();
+                        float nx = parser.readFloat(), ny = parser.readFloat();
+                        updateOther(pid, null, nx, ny);
+                        break;
+                    case 0x15: // S_PLAYER_LEFT
+                        removeOther(parser.readLong());
+                        break;
+                }
+            } catch (java.io.IOException e) {
+                // gói lỗi định dạng — bỏ qua, đọc gói tiếp theo
             }
         }
     }

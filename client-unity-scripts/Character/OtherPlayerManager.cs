@@ -21,7 +21,8 @@ namespace FantasyRealm.Character
         }
 
         void OnZoneData(Packet p) {
-            int zoneId = p.ReadInt(); p.ReadString(); // name
+            int zoneId = p.ReadInt(); string zoneName = p.ReadString();
+            FantasyRealm.Systems.ClientZoneManager.Instance?.SetZone(zoneId, zoneName);
             int count  = p.ReadInt();
             // Remove all existing
             foreach (var go in _players.Values) Destroy(go);
@@ -39,10 +40,12 @@ namespace FantasyRealm.Character
             int dir = p.ReadByte();
             string name = p.ReadString(); int faction = p.ReadInt(); string outfit = p.ReadString();
             if (_players.TryGetValue(id, out var go)) {
-                go.transform.position = new Vector3(x, y, 0);
+                // Lerp mượt tới vị trí mới + chạy animation đi bộ theo hướng
+                var mover = go.GetComponent<RemotePlayerMover>();
+                if (mover != null) mover.MoveTo(new Vector3(x, y, 0), dir);
+                else go.transform.position = new Vector3(x, y, 0);
             } else if (name.Length > 0) {
-                // New player arrived
-                var go2 = Spawn(id, name, faction, outfit, x, y);
+                Spawn(id, name, faction, outfit, x, y);
             }
         }
 
@@ -53,7 +56,10 @@ namespace FantasyRealm.Character
 
         void OnOutfitChange(Packet p) {
             long id = p.ReadLong(); string outfit = p.ReadString();
-            // TODO: apply outfit to player GO
+            if (_players.TryGetValue(id, out var go)) {
+                var appearance = go.GetComponent<CharacterAppearance>();
+                if (appearance != null) appearance.ApplyJson(outfit);
+            }
         }
 
         void Spawn(Packet p) {
@@ -69,6 +75,9 @@ namespace FantasyRealm.Character
             go.name = $"Player_{id}";
             var nm = go.GetComponentInChildren<UnityEngine.UI.Text>();
             if (nm != null) nm.text = name;
+            // Áp ngoại hình paperdoll từ outfit JSON
+            var appearance = go.GetComponent<CharacterAppearance>();
+            if (appearance != null) appearance.ApplyJson(outfit);
             _players[id] = go;
             return go;
         }

@@ -78,6 +78,11 @@ public class CharCreationHandler {
         c.setOutfitJson(outfitJson);
         charRepo.save(c);
 
+        // Cập nhật session để các thao tác sau (đổi outfit, chat...) hoạt động
+        s.setCharacterId(c.getId());
+        s.setCharacterName(name);
+        s.setOutfitJson(outfitJson);
+
         log.info("Tạo nhân vật: {} (player {}, race {})", name, s.getPlayerId(), raceCode);
         s.send(new Packet(PacketType.S_CHAR_CREATE_OK)
             .writeLong(c.getId())

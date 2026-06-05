@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Collections.Generic;
 
 namespace FantasyRealm.Network
 {
@@ -15,6 +16,7 @@ namespace FantasyRealm.Network
         C_CHAR_CREATE_OPTIONS=0x36, S_CHAR_CREATE_OPTIONS=0x37,
         C_CHAR_CREATE=0x38, S_CHAR_CREATE_OK=0x39, S_CHAR_CREATE_FAIL=0x3A,
         C_FRIEND_REQUEST=0x40, S_FRIEND_REQUEST=0x41,
+        C_FRIEND_ACCEPT=0x42, S_FRIEND_ACCEPT=0x43,
         C_MAIL_SEND=0x44, S_MAIL_RECEIVE=0x45,
         C_GIFT_SEND=0x46, S_GIFT_RECEIVE=0x47,
         C_DONATE=0x48, S_DONATE_RESULT=0x49,
@@ -25,6 +27,8 @@ namespace FantasyRealm.Network
         C_STALL_OPEN=0x56, S_STALL_OPEN_OK=0x57,
         C_NPC_SHOP_BUY=0x58, S_NPC_SHOP_DATA=0x59,
         S_EVENT_START=0x60, S_EVENT_UPDATE=0x61, S_EVENT_END=0x62,
+        C_EVENT_JOIN=0x63, S_BOSS_SPAWN=0x64,
+        C_TREASURE_FIND=0x65, S_TREASURE_CLUE=0x66,
         S_ACHIEVEMENT=0x67,
         C_NPC_INTERACT=0x70, S_NPC_DIALOG=0x71,
         C_NPC_DIALOG_CHOICE=0x72, S_NPC_MOVE=0x73,
@@ -72,6 +76,9 @@ namespace FantasyRealm.Network
         public float  ReadFloat()  { var b=new byte[4]; Array.Copy(_data,_pos,b,0,4); _pos+=4; if(BitConverter.IsLittleEndian) Array.Reverse(b); return BitConverter.ToSingle(b,0); }
         public string ReadString() { int len=ReadShort(); var s=Encoding.UTF8.GetString(_data,_pos,len); _pos+=len; return s; }
         public bool   IsReadable() => _pos < (_data?.Length ?? 0);
+
+        /// <summary>Đưa con trỏ đọc về đầu — để nhiều handler đọc cùng 1 packet độc lập.</summary>
+        public void ResetRead() { _pos = 0; }
 
         // Encode: [4-byte length][2-byte typeId][payload]
         public byte[] Encode() {

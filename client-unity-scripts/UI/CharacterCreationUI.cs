@@ -42,6 +42,9 @@ namespace FantasyRealm.UI
         [Header("Sprite loading")]
         public string resourcesPath = "CharParts"; // Resources/CharParts/{slot}/{code}
 
+        [Header("Scene chuyển sau khi tạo nhân vật")]
+        public string gameSceneName = "GameWorld"; // đặt đúng tên scene game trong Build Settings
+
         // Dữ liệu options nhận từ server
         private CharOptions _opts;
         // Lựa chọn hiện tại
@@ -173,8 +176,20 @@ namespace FantasyRealm.UI
             int faction = p.ReadInt();
             string outfitJson = p.ReadString();
             Debug.Log($"[CharCreate] Tạo thành công: {name} (id {id}, faction {faction})");
-            // TODO: chuyển sang scene game / load nhân vật
-            gameObject.SetActive(false);
+
+            // Lưu thông tin nhân vật vừa tạo để scene game đọc lại
+            PlayerPrefs.SetString("char_name", name);
+            PlayerPrefs.SetInt("char_faction", faction);
+            PlayerPrefs.SetString("char_outfit", outfitJson);
+            PlayerPrefs.Save();
+
+            // Chuyển sang scene game (đặt tên scene trong field gameSceneName)
+            if (!string.IsNullOrEmpty(gameSceneName)) {
+                UnityEngine.SceneManagement.SceneManager.LoadScene(gameSceneName);
+            } else {
+                Debug.LogWarning("[CharCreate] Chưa đặt gameSceneName — ẩn UI tạm thời");
+                gameObject.SetActive(false);
+            }
         }
 
         void OnCreateFail(Packet p) {

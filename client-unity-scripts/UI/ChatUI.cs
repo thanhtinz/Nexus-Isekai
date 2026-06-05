@@ -57,7 +57,7 @@ namespace FantasyRealm.UI
             long pid = p.ReadLong(); p.ReadString();
             string from = p.ReadString();
             string msg  = p.ReadString();
-            AddMessage($"[귓속말:{from}] {msg}", colorWhisper);
+            AddMessage($"[Thì thầm:{from}] {msg}", colorWhisper);
         }
 
         void OnNotify(Packet p) {

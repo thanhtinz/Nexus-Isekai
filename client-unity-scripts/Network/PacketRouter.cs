@@ -28,6 +28,7 @@ namespace FantasyRealm.Network
         public void Route(Packet p) {
             if (!_handlers.TryGetValue(p.Type, out var list)) return;
             foreach (var h in list) {
+                p.ResetRead(); // mỗi handler đọc lại từ đầu, tránh đọc trùng con trỏ
                 try { h(p); }
                 catch (Exception e) { Debug.LogError($"[Router] {p.Type}: {e}"); }
             }
