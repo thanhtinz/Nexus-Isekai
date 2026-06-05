@@ -66,3 +66,33 @@ Xem docs/UNITY-SCENE-SETUP.md.
 - Kỹ năng (C_USE_SKILL đã có packet, chưa làm logic skill cụ thể)
 - Loot table chi tiết theo mob (hiện loot item mẫu)
 - PvP (đánh người chơi khác)
+
+---
+
+## Kỹ năng (Skill)
+
+11 skill: 3 skill chung (Đòn Mạnh, Lốc Xoáy, Hồi Phục) + mỗi phe 2 skill riêng.
+
+| Loại | Hiệu ứng |
+|------|----------|
+| DAMAGE | Sát thương đơn mục tiêu (× hệ số) |
+| AOE_DAMAGE | Sát thương vùng quanh người chơi (tầm 96) |
+| HEAL | Hồi máu theo % máu tối đa |
+| BUFF_ATK/DEF | Tăng sát thương/phòng thủ 10 giây |
+| DRAIN | Sát thương + hút 50% thành máu |
+
+Mỗi skill có mana cost + cooldown + cấp mở khóa + giới hạn phe.
+
+Mana (MP): 50 + (level-1)×10. HP/MP tự hồi 5%/giây (regen tick mỗi 3 giây).
+
+| Packet | ID | Nội dung |
+|--------|----|----|
+| C_SKILL_LIST_REQ | 0xCD | xin danh sách skill |
+| S_SKILL_LIST | 0xCC | count + [id, name, mana, cooldown, type] |
+| C_USE_SKILL | 0xCA | skillId, targetMobId |
+| S_SKILL_RESULT | 0xCE | skillId, mp, hp |
+| S_SKILL_COOLDOWN | 0xCF | skillId, remainMs |
+
+S_PLAYER_STATS giờ kèm mp/maxMp.
+
+Client: `SkillBarUI.cs` — thanh skill, bấm dùng (nhắm mob đang chọn), hiện cooldown overlay.

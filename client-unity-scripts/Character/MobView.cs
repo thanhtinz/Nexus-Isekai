@@ -58,9 +58,11 @@ namespace FantasyRealm.Character
             if (body != null) body.color = orig;
         }
 
-        // Click chuột / chạm vào quái → tấn công
+        // Click chuột / chạm vào quái → tấn công + chọn làm mục tiêu skill
         void OnMouseDown() {
             MobManager.Instance?.AttackMob(MobId);
+            var skillBar = FindObjectOfType<FantasyRealm.UI.SkillBarUI>();
+            if (skillBar != null) skillBar.SelectedTargetId = MobId;
         }
     }
 }

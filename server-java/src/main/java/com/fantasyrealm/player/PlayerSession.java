@@ -27,6 +27,8 @@ public class PlayerSession {
     // Combat stats
     private volatile int    hp = 100;
     private volatile int    maxHp = 100;
+    private volatile int    mp = 50;
+    private volatile int    maxMp = 50;
     private volatile long   exp = 0;
     private volatile long   lastAttackMs = 0;
 
@@ -67,6 +69,10 @@ public class PlayerSession {
     public void      setHp(int v)     { hp = Math.max(0, Math.min(v, maxHp)); }
     public int       getMaxHp()       { return maxHp; }
     public void      setMaxHp(int v)  { maxHp = Math.max(1, v); }
+    public int       getMp()          { return mp; }
+    public void      setMp(int v)     { mp = Math.max(0, Math.min(v, maxMp)); }
+    public int       getMaxMp()       { return maxMp; }
+    public void      setMaxMp(int v)  { maxMp = Math.max(1, v); }
     public long      getExp()         { return exp; }
     public void      setExp(long v)   { exp = Math.max(0, v); }
     public long      getLastAttackMs(){ return lastAttackMs; }
@@ -79,6 +85,8 @@ public class PlayerSession {
     public int       getDefense()     { return 2 + level; }
     /** Máu tối đa theo cấp. */
     public int       hpForLevel()     { return 100 + (level - 1) * 20; }
+    /** Mana tối đa theo cấp. */
+    public int       mpForLevel()     { return 50 + (level - 1) * 10; }
     public long      getGold()        { return gold; }
     public void      setGold(long v)  { gold = v; }
     public long      getPremiumCoins(){ return premiumCoins; }

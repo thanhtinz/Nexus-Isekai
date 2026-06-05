@@ -35,6 +35,8 @@ public class AuthHandler {
         s.setLevel(r.level());
         s.setMaxHp(s.hpForLevel());
         s.setHp(s.getMaxHp());
+        s.setMaxMp(s.mpForLevel());
+        s.setMp(s.getMaxMp());
         s.setGold(r.gold());
         s.setOutfitJson(r.outfitJson() != null ? r.outfitJson() : "{}");
         s.setAuthenticated(true);

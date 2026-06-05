@@ -70,10 +70,16 @@ namespace FantasyRealm.Systems
             }
         }
 
+        [Header("Mana")]
+        public Slider mpBar;
+        public Text   mpText;
+
         void OnStats(Packet p) {
             int level = p.ReadInt(); int hp = p.ReadInt(); int maxHp = p.ReadInt();
+            int mp = p.ReadInt(); int maxMp = p.ReadInt();
             long exp = p.ReadLong(); long expNext = p.ReadLong(); long gold = p.ReadLong();
             _curMaxHp = maxHp; SetHp(hp);
+            _curMaxMp = maxMp; SetMp(mp);
             if (levelText) levelText.text = "Lv." + level;
             if (expBar) expBar.value = expNext > 0 ? (float)exp / expNext : 0;
         }
@@ -90,6 +96,12 @@ namespace FantasyRealm.Systems
         void SetHp(int hp) {
             if (hpBar) hpBar.value = _curMaxHp > 0 ? (float)hp / _curMaxHp : 0;
             if (hpText) hpText.text = hp + "/" + _curMaxHp;
+        }
+
+        int _curMaxMp = 50;
+        void SetMp(int mp) {
+            if (mpBar) mpBar.value = _curMaxMp > 0 ? (float)mp / _curMaxMp : 0;
+            if (mpText) mpText.text = mp + "/" + _curMaxMp;
         }
 
         void RequestRespawn() {

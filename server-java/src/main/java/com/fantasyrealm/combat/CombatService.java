@@ -92,6 +92,11 @@ public class CombatService {
     }
 
     private void onMobKilled(PlayerSession s, Mob mob) {
+        rewardKill(s, mob);
+    }
+
+    /** Thưởng khi hạ quái — dùng chung cho đánh thường và skill. */
+    public void rewardKill(PlayerSession s, Mob mob) {
         // Thưởng exp + gold
         s.setExp(s.getExp() + mob.expReward);
         s.setGold(s.getGold() + mob.goldReward);
@@ -133,6 +138,7 @@ public class CombatService {
         if (s.isAlive()) return;
         s.setMaxHp(s.hpForLevel());
         s.setHp(s.getMaxHp());
+        s.setMp(s.getMaxMp());
         s.send(new Packet(PacketType.S_PLAYER_RESPAWN)
             .writeLong(s.getPlayerId()).writeInt(s.getHp())
             .writeFloat(100).writeFloat(100)); // điểm hồi sinh (làng)
@@ -147,6 +153,8 @@ public class CombatService {
             s.setLevel(s.getLevel() + 1);
             s.setMaxHp(s.hpForLevel());
             s.setHp(s.getMaxHp()); // hồi đầy khi lên cấp
+            s.setMaxMp(s.mpForLevel());
+            s.setMp(s.getMaxMp());
             leveled = true;
         }
         if (leveled) {
@@ -159,9 +167,26 @@ public class CombatService {
 
     private long expForNextLevel(int level) { return level * 100L; }
 
+    /** Hồi máu + mana định kỳ cho người chơi còn sống (5%/giây). */
+    @org.springframework.scheduling.annotation.Scheduled(fixedRate = 3000)
+    public void regenTick() {
+        for (PlayerSession s : sessions.getAll()) {
+            if (!s.isAlive()) continue;
+            boolean changed = false;
+            if (s.getHp() < s.getMaxHp()) {
+                s.setHp(s.getHp() + Math.max(1, s.getMaxHp() / 20)); changed = true;
+            }
+            if (s.getMp() < s.getMaxMp()) {
+                s.setMp(s.getMp() + Math.max(1, s.getMaxMp() / 10)); changed = true;
+            }
+            if (changed) sendStats(s);
+        }
+    }
+
     public void sendStats(PlayerSession s) {
         s.send(new Packet(PacketType.S_PLAYER_STATS)
             .writeInt(s.getLevel()).writeInt(s.getHp()).writeInt(s.getMaxHp())
+            .writeInt(s.getMp()).writeInt(s.getMaxMp())
             .writeLong(s.getExp()).writeLong(expForNextLevel(s.getLevel())).writeLong(s.getGold()));
     }
 }

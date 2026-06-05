@@ -25,6 +25,7 @@ public class PacketDispatcher {
     @Autowired private WorldHandler        world;
     @Autowired private com.fantasyrealm.combat.CombatService combat;
     @Autowired private com.fantasyrealm.combat.MobManager     mobManager;
+    @Autowired private com.fantasyrealm.combat.SkillService   skills;
 
     @FunctionalInterface
     interface Handler { void handle(PlayerSession s, Packet p); }
@@ -92,6 +93,8 @@ public class PacketDispatcher {
         // Combat
         handlers.put(PacketType.C_ATTACK_MOB,      combat::onAttackMob);
         handlers.put(PacketType.C_PLAYER_RESPAWN,  combat::onPlayerRespawn);
+        handlers.put(PacketType.C_USE_SKILL,       skills::onUseSkill);
+        handlers.put(PacketType.C_SKILL_LIST_REQ,  skills::onSkillListReq);
     }
 
     private static final java.util.Set<PacketType> NO_AUTH = java.util.Set.of(
