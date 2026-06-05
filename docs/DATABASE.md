@@ -333,3 +333,20 @@ DELETE FROM admin_action_logs WHERE created_at < NOW() - INTERVAL '90 days';
 ```
 
 Có thể đưa vào cron chạy hàng tuần.
+
+---
+
+## 10. Seed Character Creation (màn tạo nhân vật)
+
+Sau khi import asset nhân vật vào bảng `assets`, chạy seed để tạo sẵn các lựa chọn (chủng tộc, da, mắt, tóc, áo quần):
+
+```bash
+psql -U fro -d fantasyrealm -f deploy/sql/04-seed-charcreation.sql
+```
+
+Script này:
+- Tạo 6 chủng tộc/giới tính mẫu (Con Người ♂♀, Ma Tộc ♂♀, Yêu Tinh ♂♀)
+- Tạo 14 tông da, 11 màu mắt (Mana Seed), 7 kiểu tóc, 2 outfit khởi đầu
+- **Tự động map `asset_id`** theo tên file nếu asset đã import (vd `0bas_humn_v03` → option da humn_v03)
+
+Sau đó vào Admin Panel → **Tạo nhân vật** để chỉnh, gắn asset còn thiếu, bật/tắt lựa chọn. Client đọc cấu hình qua `/charcreation/export/json`.

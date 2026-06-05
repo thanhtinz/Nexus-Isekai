@@ -1,0 +1,36 @@
+
+<% const SLOT_NAMES={skin:'Da / Body',eyes:'Mắt',hair:'Tóc',outfit:'Áo quần cơ bản'}; %>
+<div class="card" style="max-width:620px">
+  <div class="card-header">
+    <h3><i class="fas fa-palette"></i> <%= option?'Sửa':'Thêm' %> lựa chọn — <%= SLOT_NAMES[slot] %></h3>
+    <a href="/charcreation" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  </div>
+  <form method="POST" action="/charcreation/option<%= option?'/'+option.id:'' %>">
+    <input type="hidden" name="slot" value="<%= slot %>">
+    <div class="form-row">
+      <div class="form-group"><label>Mã code *</label><input name="code" value="<%= option?.code||'' %>" placeholder="<%= slot==='eyes'?'eye_blue':slot==='skin'?'humn_v03':'bob1_v02' %>" required></div>
+      <div class="form-group"><label>Tên hiển thị (VN)</label><input name="name_vn" value="<%= option?.name_vn||'' %>" placeholder="<%= slot==='eyes'?'Mắt xanh':slot==='skin'?'Da sáng':'Tóc bob' %>"></div>
+    </div>
+    <div class="form-group"><label>Sprite asset</label>
+      <select name="asset_id"><option value="">— chọn asset —</option>
+      <% assets.forEach(a=>{ %><option value="<%= a.id %>" <%= option?.asset_id===a.id?'selected':'' %>><%= a.name %></option><% }) %>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Color index <small style="color:var(--muted)">(mắt: 0-10)</small></label><input name="color_index" type="number" value="<%= option?.color_index??'' %>" placeholder="<%= slot==='eyes'?'2 (Blue)':'' %>"></div>
+      <div class="form-group"><label>Màu preview (hex)</label><input name="hex_preview" value="<%= option?.hex_preview||'' %>" placeholder="#4488ff" type="text"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Khóa theo chủng tộc <small style="color:var(--muted)">(trống = mọi)</small></label><input name="race_filter" value="<%= option?.race_filter||'' %>" placeholder="humn,elf"></div>
+      <div class="form-group"><label>Khóa theo giới tính</label>
+        <select name="gender_filter"><option value="">Mọi giới</option><option value="male" <%= option?.gender_filter==='male'?'selected':'' %>>Chỉ Nam</option><option value="female" <%= option?.gender_filter==='female'?'selected':'' %>>Chỉ Nữ</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label>Thứ tự hiển thị</label><input name="sort_order" type="number" value="<%= option?.sort_order||0 %>" style="max-width:120px"></div>
+    <div style="display:flex;gap:24px;margin-bottom:14px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="is_default" value="1" <%= option?.is_default?'checked':'' %>> Mặc định khi mở màn tạo</label>
+      <% if(option){ %><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="is_enabled" value="1" <%= option.is_enabled?'checked':'' %>> Bật</label><% } %>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Lưu</button>
+  </form>
+</div>

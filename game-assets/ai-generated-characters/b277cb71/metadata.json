@@ -1,0 +1,94 @@
+{
+  "group_id": "42737b0a-21bb-4b14-a3f4-dcc0b0503d48",
+  "states": [
+    {
+      "character": {
+        "id": "4c1ba4db-5ad3-47c3-a78e-57166c3576d0",
+        "name": "Run, walking, die, s",
+        "prompt": "MASTERPIECE, BEST QUALITY, ULTRA DETAILED, AAA GAME CHARACTER DESIGN, ANIME FANTASY RPG, FULL BODY CHARACTER CONCEPT SHEET, MALE SWORDSMAN HERO, PROFESSIONAL CHARACTER REFERENCE SHEET, FRONT VIEW, SIDE VIEW, BACK VIEW, THREE QUARTER VIEW, CHARACTER TURNAROUND.\n\nA handsome young male swordsman, age 22, athletic build, lean muscular physique, 185cm tall, noble appearance, sharp facial features, determined expression, heroic fantasy protagonist. Medium-length black hair with silver highlights, layered anime hairstyle moving naturally in the wind, bright blue eyes with strong determination, light skin tone, confident posture.\n\nWearing an elegant fantasy swordsman outfit inspired by high fantasy RPG games and anime isekai worlds. Dark navy and silver armored coat with intricate engraved metal details. Lightweight shoulder armor designed for mobility. Long battle coat with flowing fabric pieces. Reinforced leather belts crossing the torso. Decorative silver insignias representing a legendary knight order.\n\nEquipped with a legendary longsword forged from celestial steel. The blade emits a faint blue magical aura. Intricate runes engraved along the blade. Ornate crossguard with glowing magical crystals embedded near the hilt. Detailed leather grip wrapping.\n\nArmor design includes:\n- Silver chest armor\n- Reinforced gauntlets\n- Layered shoulder guards\n- Armored boots\n- Tactical belt system\n- Cloth cape flowing behind the character\n- Battle-worn but polished appearance\n\nFantasy RPG class: Swordmaster.\nRole: Frontline melee fighter.\nSpecialization: Speed, precision strikes, sword techniques.\n\nPose variations:\n- Neutral standing pose\n- Battle ready stance\n- Sword drawn stance\n- Heroic victory pose\n\nExpression sheet:\n- Calm\n- Serious\n- Smiling\n- Angry\n- Determined\n\nAnime art style, JRPG protagonist design, highly detailed costume, fantasy world aesthetic, beautiful linework, professional concept art, game-ready character design, clean background, white background, character sheet layout, full body visible, symmetrical design, official game art, detailed fabric folds, realistic armor materials, dramatic fantasy lighting, high detail sword, iconic hero design.\n\nNo cropped body, no extra limbs, no blurry details, no watermark, no text, no logo, no low quality, no deformed anatomy.",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T05:58:50.772693+00:00"
+      },
+      "folder": "Run_walking_die_s",
+      "frames": {
+        "rotations": {
+          "south": "Run_walking_die_s/rotations/south.png",
+          "south-east": "Run_walking_die_s/rotations/south-east.png",
+          "east": "Run_walking_die_s/rotations/east.png",
+          "north-east": "Run_walking_die_s/rotations/north-east.png",
+          "north": "Run_walking_die_s/rotations/north.png",
+          "north-west": "Run_walking_die_s/rotations/north-west.png",
+          "west": "Run_walking_die_s/rotations/west.png",
+          "south-west": "Run_walking_die_s/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "b277cb71-fcfa-4fd5-b24d-0781821b6a77",
+        "name": "Run",
+        "prompt": "MASTERPIECE, BEST QUALITY, ULTRA DETAILED, AAA GAME CHARACTER DESIGN, ANIME FANTASY RPG, FULL BODY CHARACTER CONCEPT SHEET, MALE SWORDSMAN HERO, PROFESSIONAL CHARACTER REFERENCE SHEET, FRONT VIEW, SIDE VIEW, BACK VIEW, THREE QUARTER VIEW, CHARACTER TURNAROUND.\n\nA handsome young male swordsman, age 22, athletic build, lean muscular physique, 185cm tall, noble appearance, sharp facial features, determined expression, heroic fantasy protagonist. Medium-length black hair with silver highlights, layered anime hairstyle moving naturally in the wind, bright blue eyes with strong determination, light skin tone, confident posture.\n\nWearing an elegant fantasy swordsman outfit inspired by high fantasy RPG games and anime isekai worlds. Dark navy and silver armored coat with intricate engraved metal details. Lightweight shoulder armor designed for mobility. Long battle coat with flowing fabric pieces. Reinforced leather belts crossing the torso. Decorative silver insignias representing a legendary knight order.\n\nEquipped with a legendary longsword forged from celestial steel. The blade emits a faint blue magical aura. Intricate runes engraved along the blade. Ornate crossguard with glowing magical crystals embedded near the hilt. Detailed leather grip wrapping.\n\nArmor design includes:\n- Silver chest armor\n- Reinforced gauntlets\n- Layered shoulder guards\n- Armored boots\n- Tactical belt system\n- Cloth cape flowing behind the character\n- Battle-worn but polished appearance\n\nFantasy RPG class: Swordmaster.\nRole: Frontline melee fighter.\nSpecialization: Speed, precision strikes, sword techniques.\n\nPose variations:\n- Neutral standing pose\n- Battle ready stance\n- Sword drawn stance\n- Heroic victory pose\n\nExpression sheet:\n- Calm\n- Serious\n- Smiling\n- Angry\n- Determined\n\nAnime art style, JRPG protagonist design, highly detailed costume, fantasy world aesthetic, beautiful linework, professional concept art, game-ready character design, clean background, white background, character sheet layout, full body visible, symmetrical design, official game art, detailed fabric folds, realistic armor materials, dramatic fantasy lighting, high detail sword, iconic hero design.\n\nNo cropped body, no extra limbs, no blurry details, no watermark, no text, no logo, no low quality, no deformed anatomy.",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T06:01:57.971179+00:00"
+      },
+      "folder": "b277cb71",
+      "frames": {
+        "rotations": {
+          "south": "b277cb71/rotations/south.png",
+          "south-east": "b277cb71/rotations/south-east.png",
+          "east": "b277cb71/rotations/east.png",
+          "north-east": "b277cb71/rotations/north-east.png",
+          "north": "b277cb71/rotations/north.png",
+          "north-west": "b277cb71/rotations/north-west.png",
+          "west": "b277cb71/rotations/west.png",
+          "south-west": "b277cb71/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "44a13ddf-2a9a-47b1-9221-b1d580dd576d",
+        "name": "MASTERPIECE, BEST QUALITY, ULTRA DETAILED, AAA GAME CHARACTER DESIGN, ANIME FANTASY RPG, FULL BODY CHARACTER CONCEPT SHEET, MALE SWORDSMAN HERO, PROFESSIONAL CHARACTER REFERENCE SHEET, FRONT VIEW, SIDE VIEW, BACK VIEW, THREE QUARTER VIEW, CHARACTER TURNAROUND.\n\nA handsome young male swordsman, age 22, athletic build, lean muscular physique, 185cm tall, noble appearance, sharp facial features, determined expression, heroic fantasy protagonist. Medium-length black hair with silver highlights, layered anime hairstyle moving naturally in the wind, bright blue eyes with strong determination, light skin tone, confident posture.\n\nWearing an elegant fantasy swordsman outfit inspired by high fantasy RPG games and anime isekai worlds. Dark navy and silver armored coat with intricate engraved metal details. Lightweight shoulder armor designed for mobility. Long battle coat with flowing fabric pieces. Reinforced leather belts crossing the torso. Decorative silver insignias representing a legendary knight order.\n\nEquipped with a legendary longsword forged from celestial steel. The blade emits a faint blue magical aura. Intricate runes engraved along the blade. Ornate crossguard with glowing magical crystals embedded near the hilt. Detailed leather grip wrapping.\n\nArmor design includes:\n- Silver chest armor\n- Reinforced gauntlets\n- Layered shoulder guards\n- Armored boots\n- Tactical belt system\n- Cloth cape flowing behind the character\n- Battle-worn but polished appearance\n\nFantasy RPG class: Swordmaster.\nRole: Frontline melee fighter.\nSpecialization: Speed, precision strikes, sword techniques.\n\nPose variations:\n- Neutral standing pose\n- Battle ready stance\n- Sword drawn stance\n- Heroic victory pose\n\nExpression sheet:\n- Calm\n- Serious\n- Smiling\n- Angry\n- Determined\n\nAnime art style, JRPG protagonist design, highly detailed costume, fantasy world aesthetic, beautiful linework, professional concept art, game-ready character design, clean background, white background, character sheet layout, full body visible, symmetrical design, official game art, detailed fabric folds, realistic armor materials, dramatic fantasy lighting, high detail sword, iconic hero design.\n\nNo cropped body, no extra limbs, no blurry details, no watermark, no text, no logo, no low quality, no deformed anatomy. (copy 2)",
+        "prompt": "MASTERPIECE, BEST QUALITY, ULTRA DETAILED, AAA GAME CHARACTER DESIGN, ANIME FANTASY RPG, FULL BODY CHARACTER CONCEPT SHEET, MALE SWORDSMAN HERO, PROFESSIONAL CHARACTER REFERENCE SHEET, FRONT VIEW, SIDE VIEW, BACK VIEW, THREE QUARTER VIEW, CHARACTER TURNAROUND.\n\nA handsome young male swordsman, age 22, athletic build, lean muscular physique, 185cm tall, noble appearance, sharp facial features, determined expression, heroic fantasy protagonist. Medium-length black hair with silver highlights, layered anime hairstyle moving naturally in the wind, bright blue eyes with strong determination, light skin tone, confident posture.\n\nWearing an elegant fantasy swordsman outfit inspired by high fantasy RPG games and anime isekai worlds. Dark navy and silver armored coat with intricate engraved metal details. Lightweight shoulder armor designed for mobility. Long battle coat with flowing fabric pieces. Reinforced leather belts crossing the torso. Decorative silver insignias representing a legendary knight order.\n\nEquipped with a legendary longsword forged from celestial steel. The blade emits a faint blue magical aura. Intricate runes engraved along the blade. Ornate crossguard with glowing magical crystals embedded near the hilt. Detailed leather grip wrapping.\n\nArmor design includes:\n- Silver chest armor\n- Reinforced gauntlets\n- Layered shoulder guards\n- Armored boots\n- Tactical belt system\n- Cloth cape flowing behind the character\n- Battle-worn but polished appearance\n\nFantasy RPG class: Swordmaster.\nRole: Frontline melee fighter.\nSpecialization: Speed, precision strikes, sword techniques.\n\nPose variations:\n- Neutral standing pose\n- Battle ready stance\n- Sword drawn stance\n- Heroic victory pose\n\nExpression sheet:\n- Calm\n- Serious\n- Smiling\n- Angry\n- Determined\n\nAnime art style, JRPG protagonist design, highly detailed costume, fantasy world aesthetic, beautiful linework, professional concept art, game-ready character design, clean background, white background, character sheet layout, full body visible, symmetrical design, official game art, detailed fabric folds, realistic armor materials, dramatic fantasy lighting, high detail sword, iconic hero design.\n\nNo cropped body, no extra limbs, no blurry details, no watermark, no text, no logo, no low quality, no deformed anatomy.",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T06:04:30.855129+00:00"
+      },
+      "folder": "MASTERPIECE_BEST_QUALITY_ULTRA_DETAILED_AAA_GAME_C",
+      "frames": {
+        "rotations": {
+          "south": "MASTERPIECE_BEST_QUALITY_ULTRA_DETAILED_AAA_GAME_C/rotations/south.png",
+          "south-east": "MASTERPIECE_BEST_QUALITY_ULTRA_DETAILED_AAA_GAME_C/rotations/south-east.png",
+          "east": "MASTERPIECE_BEST_QUALITY_ULTRA_DETAILED_AAA_GAME_C/rotations/east.png",
+          "north-east": "MASTERPIECE_BEST_QUALITY_ULTRA_DETAILED_AAA_GAME_C/rotations/north-east.png",
+          "north": "MASTERPIECE_BEST_QUALITY_ULTRA_DETAILED_AAA_GAME_C/rotations/north.png",
+          "north-west": "MASTERPIECE_BEST_QUALITY_ULTRA_DETAILED_AAA_GAME_C/rotations/north-west.png",
+          "west": "MASTERPIECE_BEST_QUALITY_ULTRA_DETAILED_AAA_GAME_C/rotations/west.png",
+          "south-west": "MASTERPIECE_BEST_QUALITY_ULTRA_DETAILED_AAA_GAME_C/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.0",
+  "export_date": "2026-05-29T06:06:14.125027"
+}

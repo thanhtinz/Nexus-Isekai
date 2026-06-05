@@ -1,0 +1,413 @@
+{
+  "group_id": "b86532e5-3068-4f17-bde6-7bc4ef83156e",
+  "states": [
+    {
+      "character": {
+        "id": "77afdd3a-e0d9-4ace-969b-2fd867de3da7",
+        "name": "Ki\u1ebfm s\u0129 (n\u1eef)",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T14:41:39.904494+00:00"
+      },
+      "folder": "77afdd3a",
+      "frames": {
+        "rotations": {
+          "south": "77afdd3a/rotations/south.png",
+          "south-east": "77afdd3a/rotations/south-east.png",
+          "east": "77afdd3a/rotations/east.png",
+          "north-east": "77afdd3a/rotations/north-east.png",
+          "north": "77afdd3a/rotations/north.png",
+          "north-west": "77afdd3a/rotations/north-west.png",
+          "west": "77afdd3a/rotations/west.png",
+          "south-west": "77afdd3a/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "c3631f5b-6f57-4282-92fd-7ba3e6ac4582",
+        "name": "Running",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T14:43:54.143778+00:00"
+      },
+      "folder": "Running",
+      "frames": {
+        "rotations": {
+          "south": "Running/rotations/south.png",
+          "south-east": "Running/rotations/south-east.png",
+          "east": "Running/rotations/east.png",
+          "north-east": "Running/rotations/north-east.png",
+          "north": "Running/rotations/north.png",
+          "north-west": "Running/rotations/north-west.png",
+          "west": "Running/rotations/west.png",
+          "south-west": "Running/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "d3924232-d84e-4bd4-84bb-1e915f675e6c",
+        "name": "Sleep",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T14:44:03.364697+00:00"
+      },
+      "folder": "d3924232",
+      "frames": {
+        "rotations": {
+          "south": "d3924232/rotations/south.png",
+          "south-east": "d3924232/rotations/south-east.png",
+          "east": "d3924232/rotations/east.png",
+          "north-east": "d3924232/rotations/north-east.png",
+          "north": "d3924232/rotations/north.png",
+          "north-west": "d3924232/rotations/north-west.png",
+          "west": "d3924232/rotations/west.png",
+          "south-west": "d3924232/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "8c1c6062-d54c-4ae4-8b5c-d4c6a5052f2e",
+        "name": "Walking",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T14:44:14.688582+00:00"
+      },
+      "folder": "Walking",
+      "frames": {
+        "rotations": {
+          "south": "Walking/rotations/south.png",
+          "south-east": "Walking/rotations/south-east.png",
+          "east": "Walking/rotations/east.png",
+          "north-east": "Walking/rotations/north-east.png",
+          "north": "Walking/rotations/north.png",
+          "north-west": "Walking/rotations/north-west.png",
+          "west": "Walking/rotations/west.png",
+          "south-west": "Walking/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "59061a85-daff-4f46-8a09-cd4cbd23079f",
+        "name": "Eating",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T14:47:21.684167+00:00"
+      },
+      "folder": "Eating",
+      "frames": {
+        "rotations": {
+          "south": "Eating/rotations/south.png",
+          "south-east": "Eating/rotations/south-east.png",
+          "east": "Eating/rotations/east.png",
+          "north-east": "Eating/rotations/north-east.png",
+          "north": "Eating/rotations/north.png",
+          "north-west": "Eating/rotations/north-west.png",
+          "west": "Eating/rotations/west.png",
+          "south-west": "Eating/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "eacd41cd-1a64-432f-afb6-ddc274d18999",
+        "name": "Drinking",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T14:47:31.221179+00:00"
+      },
+      "folder": "Drinking",
+      "frames": {
+        "rotations": {
+          "south": "Drinking/rotations/south.png",
+          "south-east": "Drinking/rotations/south-east.png",
+          "east": "Drinking/rotations/east.png",
+          "north-east": "Drinking/rotations/north-east.png",
+          "north": "Drinking/rotations/north.png",
+          "north-west": "Drinking/rotations/north-west.png",
+          "west": "Drinking/rotations/west.png",
+          "south-west": "Drinking/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "0dd460db-729c-4469-aecf-770b46d7fc99",
+        "name": "Fighting pose",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T14:47:43.365062+00:00"
+      },
+      "folder": "Fighting_pose",
+      "frames": {
+        "rotations": {
+          "south": "Fighting_pose/rotations/south.png",
+          "south-east": "Fighting_pose/rotations/south-east.png",
+          "east": "Fighting_pose/rotations/east.png",
+          "north-east": "Fighting_pose/rotations/north-east.png",
+          "north": "Fighting_pose/rotations/north.png",
+          "north-west": "Fighting_pose/rotations/north-west.png",
+          "west": "Fighting_pose/rotations/west.png",
+          "south-west": "Fighting_pose/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "55ef13cb-a921-44f7-a481-1ec838f90540",
+        "name": "SKILL 2 \u2014 AEGIS STOR",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T14:53:53.391023+00:00"
+      },
+      "folder": "SKILL_2_AEGIS_STOR",
+      "frames": {
+        "rotations": {
+          "south": "SKILL_2_AEGIS_STOR/rotations/south.png",
+          "south-east": "SKILL_2_AEGIS_STOR/rotations/south-east.png",
+          "east": "SKILL_2_AEGIS_STOR/rotations/east.png",
+          "north-east": "SKILL_2_AEGIS_STOR/rotations/north-east.png",
+          "north": "SKILL_2_AEGIS_STOR/rotations/north.png",
+          "north-west": "SKILL_2_AEGIS_STOR/rotations/north-west.png",
+          "west": "SKILL_2_AEGIS_STOR/rotations/west.png",
+          "south-west": "SKILL_2_AEGIS_STOR/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "8d108c8f-7bd0-43f6-920a-bc888c75322b",
+        "name": "SKILL 1 \u2014 SHIELD STR",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T14:56:21.400627+00:00"
+      },
+      "folder": "SKILL_1_SHIELD_STR",
+      "frames": {
+        "rotations": {
+          "south": "SKILL_1_SHIELD_STR/rotations/south.png",
+          "south-east": "SKILL_1_SHIELD_STR/rotations/south-east.png",
+          "east": "SKILL_1_SHIELD_STR/rotations/east.png",
+          "north-east": "SKILL_1_SHIELD_STR/rotations/north-east.png",
+          "north": "SKILL_1_SHIELD_STR/rotations/north.png",
+          "north-west": "SKILL_1_SHIELD_STR/rotations/north-west.png",
+          "west": "SKILL_1_SHIELD_STR/rotations/west.png",
+          "south-west": "SKILL_1_SHIELD_STR/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "87c2f18b-ff80-456b-8708-507728cf1db3",
+        "name": "SKILL 3 \u2014 VALKYRIE R",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T14:57:30.415083+00:00"
+      },
+      "folder": "SKILL_3_VALKYRIE_R",
+      "frames": {
+        "rotations": {
+          "south": "SKILL_3_VALKYRIE_R/rotations/south.png",
+          "south-east": "SKILL_3_VALKYRIE_R/rotations/south-east.png",
+          "east": "SKILL_3_VALKYRIE_R/rotations/east.png",
+          "north-east": "SKILL_3_VALKYRIE_R/rotations/north-east.png",
+          "north": "SKILL_3_VALKYRIE_R/rotations/north.png",
+          "north-west": "SKILL_3_VALKYRIE_R/rotations/north-west.png",
+          "west": "SKILL_3_VALKYRIE_R/rotations/west.png",
+          "south-west": "SKILL_3_VALKYRIE_R/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "e5e40105-e8d2-4c7d-b73a-ac1f71ff5915",
+        "name": "Sitting down",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T15:04:32.318723+00:00"
+      },
+      "folder": "Sitting_down",
+      "frames": {
+        "rotations": {
+          "south": "Sitting_down/rotations/south.png",
+          "south-east": "Sitting_down/rotations/south-east.png",
+          "east": "Sitting_down/rotations/east.png",
+          "north-east": "Sitting_down/rotations/north-east.png",
+          "north": "Sitting_down/rotations/north.png",
+          "north-west": "Sitting_down/rotations/north-west.png",
+          "west": "Sitting_down/rotations/west.png",
+          "south-west": "Sitting_down/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "a0c87f22-57ae-41a2-b43d-ff00eea14126",
+        "name": "Die",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T15:16:47.939073+00:00"
+      },
+      "folder": "a0c87f22",
+      "frames": {
+        "rotations": {
+          "south": "a0c87f22/rotations/south.png",
+          "south-east": "a0c87f22/rotations/south-east.png",
+          "east": "a0c87f22/rotations/east.png",
+          "north-east": "a0c87f22/rotations/north-east.png",
+          "north": "a0c87f22/rotations/north.png",
+          "north-west": "a0c87f22/rotations/north-west.png",
+          "west": "a0c87f22/rotations/west.png",
+          "south-west": "a0c87f22/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "21066379-e3bd-4417-8aa4-59861f3c3b03",
+        "name": "Jump",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T15:17:49.485317+00:00"
+      },
+      "folder": "21066379",
+      "frames": {
+        "rotations": {
+          "south": "21066379/rotations/south.png",
+          "south-east": "21066379/rotations/south-east.png",
+          "east": "21066379/rotations/east.png",
+          "north-east": "21066379/rotations/north-east.png",
+          "north": "21066379/rotations/north.png",
+          "north-west": "21066379/rotations/north-west.png",
+          "west": "21066379/rotations/west.png",
+          "south-west": "21066379/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "200950c0-8a57-4ffa-a246-55e81fe1bd04",
+        "name": "Hurt",
+        "prompt": "FEMALE KNIGHT \u2014 GREATSWORD & SHIELD VERSION\n\nmasterpiece, ultra detailed anime female knight, fantasy armored swordswoman, ONLY ONE GIANT GREATSWORD AND ONE SHIELD, no second sword, no dual wield, no extra weapon, no dagger, no spear, no bow, no floating weapon, no weapon on waist, no weapon on back\n\nfull body female knight character, long blonde hair, glowing amber eyes, mature anime face, confident expression, athletic body, elegant fantasy warrior\n\nwearing royal blue and silver heavy knight armor, detailed breastplate, giant pauldrons, armored gauntlets, armored boots, layered metal armor, blue crystal decorations, royal blue cape flowing behind\n\nRIGHT HAND holding one massive fantasy greatsword, giant silver blade with glowing blue crystal core, golden cross guard, holy knight aesthetic, sword almost as tall as the character\n\nLEFT HAND holding a large royal knight shield, detailed silver and gold shield, blue glowing crystal in center, holy emblem engraved on shield, heavy fantasy defense shield, elegant but powerful design\n\nstanding battle-ready pose, shield positioned on left side, giant sword positioned on right side, strong knight stance, balanced composition\n\npremium Korean MMORPG art style, Blue Protocol style, Granblue Fantasy style, Lost Ark style, AAA anime game character design, cinematic lighting, ultra detailed armor textures, sharp anime eyes, clean lineart\n\nsimple white or soft gradient background, character focus only, no environment, no buildings, no extra objects, no UI, no logo, no text\n\nNEGATIVE PROMPT:\nmultiple swords, extra sword, dual swords, floating weapons, dagger, spear, axe, gun, cropped weapon, extra arms, blurry, low quality, chibi, sci-fi armor, background clutter",
+        "size": {
+          "width": 68,
+          "height": 68
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T15:18:17.904805+00:00"
+      },
+      "folder": "200950c0",
+      "frames": {
+        "rotations": {
+          "south": "200950c0/rotations/south.png",
+          "south-east": "200950c0/rotations/south-east.png",
+          "east": "200950c0/rotations/east.png",
+          "north-east": "200950c0/rotations/north-east.png",
+          "north": "200950c0/rotations/north.png",
+          "north-west": "200950c0/rotations/north-west.png",
+          "west": "200950c0/rotations/west.png",
+          "south-west": "200950c0/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.0",
+  "export_date": "2026-05-29T15:22:23.356350"
+}

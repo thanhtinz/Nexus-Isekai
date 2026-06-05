@@ -1,0 +1,413 @@
+{
+  "group_id": "77c455ad-da49-41f4-ade9-43f98faa1138",
+  "states": [
+    {
+      "character": {
+        "id": "7f656cde-cf03-4053-9ffb-ac38e2dfa171",
+        "name": "Ph\u00e1p s\u01b0 (n\u1eef)",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T21:45:14.98318+00:00"
+      },
+      "folder": "7f656cde",
+      "frames": {
+        "rotations": {
+          "south": "7f656cde/rotations/south.png",
+          "south-east": "7f656cde/rotations/south-east.png",
+          "east": "7f656cde/rotations/east.png",
+          "north-east": "7f656cde/rotations/north-east.png",
+          "north": "7f656cde/rotations/north.png",
+          "north-west": "7f656cde/rotations/north-west.png",
+          "west": "7f656cde/rotations/west.png",
+          "south-west": "7f656cde/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "792a5302-40d5-4ee0-a5d4-3efe8eb421a3",
+        "name": "Die",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T21:56:12.124101+00:00"
+      },
+      "folder": "792a5302",
+      "frames": {
+        "rotations": {
+          "south": "792a5302/rotations/south.png",
+          "south-east": "792a5302/rotations/south-east.png",
+          "east": "792a5302/rotations/east.png",
+          "north-east": "792a5302/rotations/north-east.png",
+          "north": "792a5302/rotations/north.png",
+          "north-west": "792a5302/rotations/north-west.png",
+          "west": "792a5302/rotations/west.png",
+          "south-west": "792a5302/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "ece69921-f89c-45f1-a8cc-cbc896bf7de1",
+        "name": "Hurt",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T21:56:30.592595+00:00"
+      },
+      "folder": "ece69921",
+      "frames": {
+        "rotations": {
+          "south": "ece69921/rotations/south.png",
+          "south-east": "ece69921/rotations/south-east.png",
+          "east": "ece69921/rotations/east.png",
+          "north-east": "ece69921/rotations/north-east.png",
+          "north": "ece69921/rotations/north.png",
+          "north-west": "ece69921/rotations/north-west.png",
+          "west": "ece69921/rotations/west.png",
+          "south-west": "ece69921/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "84400606-b185-403b-8001-6e0f4c13d03d",
+        "name": "Jump",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T21:56:39.252892+00:00"
+      },
+      "folder": "84400606",
+      "frames": {
+        "rotations": {
+          "south": "84400606/rotations/south.png",
+          "south-east": "84400606/rotations/south-east.png",
+          "east": "84400606/rotations/east.png",
+          "north-east": "84400606/rotations/north-east.png",
+          "north": "84400606/rotations/north.png",
+          "north-west": "84400606/rotations/north-west.png",
+          "west": "84400606/rotations/west.png",
+          "south-west": "84400606/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "2ead7b9e-441e-4afb-8da9-80f76e713d04",
+        "name": "Eat",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T22:04:34.852092+00:00"
+      },
+      "folder": "2ead7b9e",
+      "frames": {
+        "rotations": {
+          "south": "2ead7b9e/rotations/south.png",
+          "south-east": "2ead7b9e/rotations/south-east.png",
+          "east": "2ead7b9e/rotations/east.png",
+          "north-east": "2ead7b9e/rotations/north-east.png",
+          "north": "2ead7b9e/rotations/north.png",
+          "north-west": "2ead7b9e/rotations/north-west.png",
+          "west": "2ead7b9e/rotations/west.png",
+          "south-west": "2ead7b9e/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "b76e9957-26ff-4d82-b7a8-2eca943f14ab",
+        "name": "Drink",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T22:04:43.577075+00:00"
+      },
+      "folder": "b76e9957",
+      "frames": {
+        "rotations": {
+          "south": "b76e9957/rotations/south.png",
+          "south-east": "b76e9957/rotations/south-east.png",
+          "east": "b76e9957/rotations/east.png",
+          "north-east": "b76e9957/rotations/north-east.png",
+          "north": "b76e9957/rotations/north.png",
+          "north-west": "b76e9957/rotations/north-west.png",
+          "west": "b76e9957/rotations/west.png",
+          "south-west": "b76e9957/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "839b6d50-b3c9-493d-9cfc-4c818455a217",
+        "name": "Sleep",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T22:04:51.36878+00:00"
+      },
+      "folder": "839b6d50",
+      "frames": {
+        "rotations": {
+          "south": "839b6d50/rotations/south.png",
+          "south-east": "839b6d50/rotations/south-east.png",
+          "east": "839b6d50/rotations/east.png",
+          "north-east": "839b6d50/rotations/north-east.png",
+          "north": "839b6d50/rotations/north.png",
+          "north-west": "839b6d50/rotations/north-west.png",
+          "west": "839b6d50/rotations/west.png",
+          "south-west": "839b6d50/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "8f2bd05a-c1fe-45e7-be13-9a77992e1bf6",
+        "name": "Run",
+        "prompt": "masterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T22:12:23.783283+00:00"
+      },
+      "folder": "8f2bd05a",
+      "frames": {
+        "rotations": {
+          "south": "8f2bd05a/rotations/south.png",
+          "south-east": "8f2bd05a/rotations/south-east.png",
+          "east": "8f2bd05a/rotations/east.png",
+          "north-east": "8f2bd05a/rotations/north-east.png",
+          "north": "8f2bd05a/rotations/north.png",
+          "north-west": "8f2bd05a/rotations/north-west.png",
+          "west": "8f2bd05a/rotations/west.png",
+          "south-west": "8f2bd05a/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "fa944bed-ffa9-4f0f-9597-7b4be6796ea0",
+        "name": "Walk",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T22:12:35.21706+00:00"
+      },
+      "folder": "fa944bed",
+      "frames": {
+        "rotations": {
+          "south": "fa944bed/rotations/south.png",
+          "south-east": "fa944bed/rotations/south-east.png",
+          "east": "fa944bed/rotations/east.png",
+          "north-east": "fa944bed/rotations/north-east.png",
+          "north": "fa944bed/rotations/north.png",
+          "north-west": "fa944bed/rotations/north-west.png",
+          "west": "fa944bed/rotations/west.png",
+          "south-west": "fa944bed/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "a7d61ad1-0777-49a1-8dbf-334a0d03df60",
+        "name": "Fighting pose",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T22:12:47.706049+00:00"
+      },
+      "folder": "Fighting_pose",
+      "frames": {
+        "rotations": {
+          "south": "Fighting_pose/rotations/south.png",
+          "south-east": "Fighting_pose/rotations/south-east.png",
+          "east": "Fighting_pose/rotations/east.png",
+          "north-east": "Fighting_pose/rotations/north-east.png",
+          "north": "Fighting_pose/rotations/north.png",
+          "north-west": "Fighting_pose/rotations/north-west.png",
+          "west": "Fighting_pose/rotations/west.png",
+          "south-west": "Fighting_pose/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "b891cde0-5576-4a69-8a57-4048d5df645b",
+        "name": "Sitting down",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T22:16:22.189411+00:00"
+      },
+      "folder": "Sitting_down",
+      "frames": {
+        "rotations": {
+          "south": "Sitting_down/rotations/south.png",
+          "south-east": "Sitting_down/rotations/south-east.png",
+          "east": "Sitting_down/rotations/east.png",
+          "north-east": "Sitting_down/rotations/north-east.png",
+          "north": "Sitting_down/rotations/north.png",
+          "north-west": "Sitting_down/rotations/north-west.png",
+          "west": "Sitting_down/rotations/west.png",
+          "south-west": "Sitting_down/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "762ca608-5a97-423b-820b-d06431f1f9a3",
+        "name": "SKILL 2 \u2014 FORBIDDEN ARCANE PRISON ",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T22:27:33.944731+00:00"
+      },
+      "folder": "SKILL_2_FORBIDDEN_ARCANE_PRISON",
+      "frames": {
+        "rotations": {
+          "south": "SKILL_2_FORBIDDEN_ARCANE_PRISON/rotations/south.png",
+          "south-east": "SKILL_2_FORBIDDEN_ARCANE_PRISON/rotations/south-east.png",
+          "east": "SKILL_2_FORBIDDEN_ARCANE_PRISON/rotations/east.png",
+          "north-east": "SKILL_2_FORBIDDEN_ARCANE_PRISON/rotations/north-east.png",
+          "north": "SKILL_2_FORBIDDEN_ARCANE_PRISON/rotations/north.png",
+          "north-west": "SKILL_2_FORBIDDEN_ARCANE_PRISON/rotations/north-west.png",
+          "west": "SKILL_2_FORBIDDEN_ARCANE_PRISON/rotations/west.png",
+          "south-west": "SKILL_2_FORBIDDEN_ARCANE_PRISON/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "bda76af2-c31c-4ae7-a1fd-58198f3972cc",
+        "name": "SKILL 1 \u2014 ARCANE PAGE BURST",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T22:28:51.709731+00:00"
+      },
+      "folder": "SKILL_1_ARCANE_PAGE_BURST",
+      "frames": {
+        "rotations": {
+          "south": "SKILL_1_ARCANE_PAGE_BURST/rotations/south.png",
+          "south-east": "SKILL_1_ARCANE_PAGE_BURST/rotations/south-east.png",
+          "east": "SKILL_1_ARCANE_PAGE_BURST/rotations/east.png",
+          "north-east": "SKILL_1_ARCANE_PAGE_BURST/rotations/north-east.png",
+          "north": "SKILL_1_ARCANE_PAGE_BURST/rotations/north.png",
+          "north-west": "SKILL_1_ARCANE_PAGE_BURST/rotations/north-west.png",
+          "west": "SKILL_1_ARCANE_PAGE_BURST/rotations/west.png",
+          "south-west": "SKILL_1_ARCANE_PAGE_BURST/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "9527e9a5-e2fc-4c1b-b1c4-f4353ae41446",
+        "name": "SKILL 3 \u2014 CELESTIAL VOID EXECUTION",
+        "prompt": "\nmasterpiece, ultra detailed anime female mage, elegant fantasy spellcaster, long silver white hair, glowing purple blue eyes, white and dark blue fantasy mage outfit, ancient magical grimoire, large glowing spellbook physically held in the RIGHT HAND, right hand tightly gripping the side edge of the book, fingers clearly wrapped around the grimoire cover, the magic book NOT floating away from the hand, the book attached directly to the right hand, left hand completely empty and relaxed naturally beside the body, left hand not holding anything, no magic object in left hand, floating magical pages around the book, purple and cyan magical effects, cinematic anime lighting, premium Korean MMORPG art style, fantasy RPG female mage character, no staff, no wand, no swords, no daggers, no extra weapons, elegant magical pose, clean background, character focus only, no environment, no UI, no logo, AAA game concept art",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T22:29:08.206005+00:00"
+      },
+      "folder": "SKILL_3_CELESTIAL_VOID_EXECUTION",
+      "frames": {
+        "rotations": {
+          "south": "SKILL_3_CELESTIAL_VOID_EXECUTION/rotations/south.png",
+          "south-east": "SKILL_3_CELESTIAL_VOID_EXECUTION/rotations/south-east.png",
+          "east": "SKILL_3_CELESTIAL_VOID_EXECUTION/rotations/east.png",
+          "north-east": "SKILL_3_CELESTIAL_VOID_EXECUTION/rotations/north-east.png",
+          "north": "SKILL_3_CELESTIAL_VOID_EXECUTION/rotations/north.png",
+          "north-west": "SKILL_3_CELESTIAL_VOID_EXECUTION/rotations/north-west.png",
+          "west": "SKILL_3_CELESTIAL_VOID_EXECUTION/rotations/west.png",
+          "south-west": "SKILL_3_CELESTIAL_VOID_EXECUTION/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.0",
+  "export_date": "2026-05-29T22:33:21.750413"
+}

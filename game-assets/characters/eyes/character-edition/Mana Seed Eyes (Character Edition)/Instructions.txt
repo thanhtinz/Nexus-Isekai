@@ -1,0 +1,68 @@
+==================
+= Mana Seed Eyes =
+==================
+Author: DirePixel
+Author Website: https://direpixel.itch.io/
+
+Current Version: 2.0
+
+======================
+= Index-Color Lookup =
+======================
+00 = Silver
+01 = Mako
+02 = Blue
+03 = Green
+04 = Red
+05 = Brown
+06 = Pink
+07 = Purple
+08 = Steel
+09 = Hazel
+10 = Amber
+
+==========================
+= INCOMPATABILITY NOTICE =
+==========================
+Mana Seed Eyes v2 is not backwards compatible with earlier versions of Mana Seed Eyes due to changes in
+file names. Additionally, the upside down eyes (v11+) included in previous versions have been removed.
+
+===================================================
+= INSTRUCTIONS FOR MASTER SHEET USE CONSIDERATION =
+===================================================
+
+There are pros and cons to everything, and master sheet usage is no different. Still, I highly recommend
+their use especially as it will reduce your file count overhead in the long run. However, if you are using
+a Paper Doll system like this tileset is honestly built for, you'll need to copy such a design change across
+your entire system. This means using master sheets for the base sprites, tools, etc. So that is one such
+con.  The other con is large file sizes. You would need a roughly 2048 x 2048 sprite sheet for each base, eye,
+etc. These dimensions mean larger file sizes which creates more memory load overhead, in simple terms, takes a
+longer time to load into memory. However, this con is offset by the speed and efficiency of modern technology
+and should not pose a problem for you, especially if you are using memory wisely with your game engine.
+
+===========
+= Support =
+===========
+
+If you have any questions or concerns, you can post a comment on my Mana Seed Eyes asset located at:
+https://direpixel.itch.io/mana-seed-eyes
+
+=====================================
+= MANA SEED EYES HAS BEEN FINALIZED =
+=====================================
+Recently, Seliel the Shaper indicated he plans to move in a different direction from the base asset and
+their weapon (BOW, ONE, POL) counterparts. As such, we should not expect many more updates on these
+assets going forward, and thus there should be no reason to further update Mana Seed Eyes. So unless that
+changes or people find bugs in the system, this will likely be the final version.
+
+==============
+= Change Log =
+==============
+DATE: 01/06/2023
+- [v1.1]{REG} Removed the secondary version of the eyes (they just looked goofy).
+- [v1.1]{REG} Reformatted ASEPRITE files
+- [v1.1]{REG} Implemented a new master spritesheet set for the various eye colors.
+- [v1.1]{REG} Renamed sprite files to reduce the unnecessarily long naming system implemented in Mana Seed.
+- [v1.1]{UNI} Further diversified the Unity edition from the regular edition by adding new shader/material assets.
+DATE: 03/20/2021
+- [v1.0]{REG}{UNI} First Commit

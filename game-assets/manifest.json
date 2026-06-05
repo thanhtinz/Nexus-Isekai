@@ -1,0 +1,89 @@
+{
+  "generated": "2026-06-05",
+  "project": "Fantasy Realm Online",
+  "note": "Asset sprite 2D đã phân loại. Toàn bộ là asset thương mại do chủ dự án mua hợp lệ. Asset 3D đã loại bỏ (game là 2D). Xem README.md để biết cách dùng.",
+  "license_summary": "Tất cả asset trong thư mục này là bản quyền thương mại đã mua hợp lệ (Seliel the Shaper, Mana Seed/DirePixel). Dùng trong dự án game này. Không redistribute/bán lại sprite gốc dưới dạng asset pack.",
+  "categories": {
+    "characters/base": {
+      "type": "sprite",
+      "category": "character",
+      "source": "Seliel the Shaper - Character Base 2.5c",
+      "format": "LPC-style paperdoll, layers: 1out/2clo/3fac/4har/5hat/6tla/7tlb",
+      "desc": "Body base mannequin nhiều part-slot, nền nhân vật cho hệ thống paperdoll.",
+      "png_count": 267
+    },
+    "characters/hairstyles": {
+      "type": "sprite",
+      "category": "character",
+      "source": "Seliel the Shaper - Hairstyle Pack 0.5.3",
+      "desc": "Kiểu tóc cho slot 4har.",
+      "png_count": 416
+    },
+    "characters/eyes": {
+      "type": "sprite",
+      "category": "character",
+      "source": "Mana Seed Eyes (DirePixel) - basic + Character Edition",
+      "format": "slot 3fac, 11 màu mắt (Silver/Blue/Green/Red/Brown/Pink/Purple/Steel/Hazel/Amber/Mako)",
+      "desc": "Mắt nhân vật, gồm bản basic và Character Edition (kèm .meta cho Unity).",
+      "png_count": 334
+    },
+    "characters/outfits": {
+      "type": "sprite",
+      "category": "character",
+      "source": "Seliel Peasant Farmer + Mana Seed Farmer System",
+      "desc": "Trang phục: nông dân, mũ, bộ Mana Seed Farmer đầy đủ animation.",
+      "png_count": 173
+    },
+    "combat/bow": {
+      "type": "animation",
+      "category": "character",
+      "source": "Seliel - Bow Combat 3.2",
+      "desc": "Animation bắn cung + sprite vũ khí cung tên.",
+      "png_count": 224
+    },
+    "combat/spear": {
+      "type": "animation",
+      "category": "character",
+      "source": "Seliel - Spear Combat 3.3",
+      "desc": "Animation đâm giáo/thương (polearm) + sprite vũ khí.",
+      "png_count": 204
+    },
+    "combat/sword-shield": {
+      "type": "animation",
+      "category": "character",
+      "source": "Seliel - Sword & Shield Combat 2.3a",
+      "desc": "Animation kiếm + khiên + sprite vũ khí/hiệu ứng.",
+      "png_count": 265
+    },
+    "npcs": {
+      "type": "sprite",
+      "category": "npc",
+      "source": "Seliel - NPC Pack 1 & 2",
+      "desc": "NPC: bard, dancer, king, merchant, chef, nun, boy, cat, dog, fortune teller...",
+      "png_count": 210
+    },
+    "monsters": {
+      "type": "sprite",
+      "category": "mob",
+      "source": "Monster Battler Set 1.0a",
+      "desc": "Sprite sheet quái vật (battler style).",
+      "png_count": 1
+    },
+    "ai-generated-characters": {
+      "type": "sprite",
+      "category": "character",
+      "source": "AI-generated (8-direction rotation sheets)",
+      "format": "8 hướng + animation state (Walking/Running/Fighting/Skills), 68x68px",
+      "desc": "Nhân vật swordsman/mage 8 hướng xoay, có sẵn skill animations.",
+      "png_count": 360
+    }
+  },
+  "tools_not_committed": {
+    "note": "Binary lớn — giữ local, không push Git. Xem _tools/README.md",
+    "items": [
+      "Mana Seed Farmer Sprite Customizer (PC .exe, 37MB)",
+      "Mana Seed Farmer Sprite Customizer (Mac .app, 62MB)",
+      "Mana Seed Eyes v1.1 (.unitypackage, 1.2MB)"
+    ]
+  }
+}

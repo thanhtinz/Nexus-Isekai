@@ -1,1 +1,10 @@
 node_modules/
+
+# Asset 3D không dùng (game là 2D)
+game-assets/environment/
+
+# Tool binary lớn (giữ local, xem game-assets/_tools/README.md)
+game-assets/_tools/*.exe
+game-assets/_tools/*.app
+game-assets/_tools/*.unitypackage
+game-assets/_tools/*.zip

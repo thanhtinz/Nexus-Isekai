@@ -1,0 +1,80 @@
+
+<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap">
+  <a href="/charcreation/race/new" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm chủng tộc/giới tính</a>
+  <a href="/charcreation/export/json" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export JSON (cho client)</a>
+  <span style="color:var(--muted);font-size:.85rem;margin-left:auto">Cấu hình màn tạo nhân vật đầu game — client đọc qua Export JSON</span>
+</div>
+
+<!-- RACES / GENDER -->
+<div class="card">
+  <div class="card-header"><h3><i class="fas fa-venus-mars"></i> Chủng tộc & Giới tính</h3></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
+  <% races.forEach(r=>{ %>
+    <div class="card" style="margin:0;padding:14px;<%= r.is_enabled?'':'opacity:.5' %>">
+      <div style="display:flex;gap:12px;align-items:start">
+        <div style="width:56px;height:56px;background:#0f0f1a;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <% if(r.preview_url||r.base_url){ %><img src="<%= r.preview_url||r.base_url %>" style="max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated">
+          <% } else { %><i class="fas fa-user" style="color:var(--muted)"></i><% } %>
+        </div>
+        <div style="flex:1;min-width:0">
+          <strong><%= r.race_name_vn||r.race %></strong>
+          <div style="margin-top:3px"><span class="badge <%= r.gender==='male'?'badge-blue':'badge-purple' %>"><%= r.gender==='male'?'♂ Nam':'♀ Nữ' %></span></div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:3px;font-family:monospace"><%= r.code %></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:10px">
+        <a href="/charcreation/race/<%= r.id %>/edit" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+        <button class="btn btn-warn btn-sm" onclick="toggle('race',<%= r.id %>)"><i class="fas fa-power-off"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="del('race',<%= r.id %>)"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+  <% }) %>
+  <% if(!races.length){ %><div style="grid-column:1/-1;color:var(--muted);text-align:center;padding:24px">Chưa có chủng tộc nào. Thêm chủng tộc + giới tính trước.</div><% } %>
+  </div>
+</div>
+
+<!-- OPTIONS: skin / eyes / hair / outfit -->
+<% SLOTS.forEach(slot=>{ %>
+<div class="card">
+  <div class="card-header">
+    <h3>
+      <i class="fas fa-<%= {skin:'user',eyes:'eye',hair:'cut',outfit:'tshirt'}[slot] %>"></i>
+      <%= SLOT_NAMES[slot] %>
+    </h3>
+    <a href="/charcreation/option/new?slot=<%= slot %>" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Thêm</a>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">
+  <% (optionsBySlot[slot]||[]).forEach(o=>{ %>
+    <div class="card" style="margin:0;padding:10px;text-align:center;<%= o.is_enabled?'':'opacity:.45' %>">
+      <div style="height:56px;display:flex;align-items:center;justify-content:center;background:#0f0f1a;border-radius:6px;margin-bottom:6px;position:relative">
+        <% if(o.asset_url){ %><img src="<%= o.asset_url %>" style="max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated">
+        <% } else if(o.hex_preview){ %><div style="width:32px;height:32px;border-radius:50%;background:<%= o.hex_preview %>"></div>
+        <% } else { %><i class="fas fa-image" style="color:var(--muted)"></i><% } %>
+        <% if(o.is_default){ %><span class="badge badge-green" style="position:absolute;top:2px;right:2px;font-size:.6rem">mặc định</span><% } %>
+      </div>
+      <div style="font-size:.78rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= o.name_vn||o.code %>"><%= o.name_vn||o.code %></div>
+      <% if(o.color_index!=null){ %><div style="font-size:.68rem;color:var(--muted)">color #<%= o.color_index %></div><% } %>
+      <% if(o.race_filter){ %><div style="font-size:.62rem;color:var(--muted)">🔒 <%= o.race_filter %></div><% } %>
+      <div style="display:flex;gap:3px;margin-top:6px;justify-content:center">
+        <a href="/charcreation/option/<%= o.id %>/edit" class="btn btn-ghost btn-sm" style="padding:3px 7px"><i class="fas fa-edit"></i></a>
+        <button class="btn btn-warn btn-sm" style="padding:3px 7px" onclick="toggle('option',<%= o.id %>)"><i class="fas fa-power-off"></i></button>
+        <button class="btn btn-danger btn-sm" style="padding:3px 7px" onclick="del('option',<%= o.id %>)"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+  <% }) %>
+  <% if(!(optionsBySlot[slot]||[]).length){ %><div style="grid-column:1/-1;color:var(--muted);font-size:.83rem;padding:16px">Chưa có lựa chọn <%= SLOT_NAMES[slot].toLowerCase() %>.</div><% } %>
+  </div>
+</div>
+<% }) %>
+
+<script>
+async function del(kind,id){
+  if(!confirm('Xóa mục này?'))return;
+  const r=await api('DELETE',`/charcreation/${kind}/${id}`);
+  toast(r.ok?'Đã xóa':r.error,r.ok); if(r.ok)location.reload();
+}
+async function toggle(kind,id){
+  const r=await api('POST',`/charcreation/${kind}/${id}/toggle`);
+  toast(r.ok?'Đã đổi trạng thái':r.error,r.ok); if(r.ok)location.reload();
+}
+</script>

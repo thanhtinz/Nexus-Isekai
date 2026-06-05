@@ -1,0 +1,413 @@
+{
+  "group_id": "dca90674-588e-4f10-b0c8-c982df2dc669",
+  "states": [
+    {
+      "character": {
+        "id": "2dbe1203-1c51-48cf-a64c-fcf627349171",
+        "name": "S\u00e1t th\u1ee7 (n\u1eef)",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-29T23:37:41.34029+00:00"
+      },
+      "folder": "2dbe1203",
+      "frames": {
+        "rotations": {
+          "south": "2dbe1203/rotations/south.png",
+          "south-east": "2dbe1203/rotations/south-east.png",
+          "east": "2dbe1203/rotations/east.png",
+          "north-east": "2dbe1203/rotations/north-east.png",
+          "north": "2dbe1203/rotations/north.png",
+          "north-west": "2dbe1203/rotations/north-west.png",
+          "west": "2dbe1203/rotations/west.png",
+          "south-west": "2dbe1203/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "ccad9ff4-325b-4e6a-b205-57e56eaf3acb",
+        "name": "Eat",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T00:52:01.758856+00:00"
+      },
+      "folder": "ccad9ff4",
+      "frames": {
+        "rotations": {
+          "south": "ccad9ff4/rotations/south.png",
+          "south-east": "ccad9ff4/rotations/south-east.png",
+          "east": "ccad9ff4/rotations/east.png",
+          "north-east": "ccad9ff4/rotations/north-east.png",
+          "north": "ccad9ff4/rotations/north.png",
+          "north-west": "ccad9ff4/rotations/north-west.png",
+          "west": "ccad9ff4/rotations/west.png",
+          "south-west": "ccad9ff4/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "c37808ae-e8c7-4b22-9b47-30c9eed46dd7",
+        "name": "Drink",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T00:52:07.705516+00:00"
+      },
+      "folder": "c37808ae",
+      "frames": {
+        "rotations": {
+          "south": "c37808ae/rotations/south.png",
+          "south-east": "c37808ae/rotations/south-east.png",
+          "east": "c37808ae/rotations/east.png",
+          "north-east": "c37808ae/rotations/north-east.png",
+          "north": "c37808ae/rotations/north.png",
+          "north-west": "c37808ae/rotations/north-west.png",
+          "west": "c37808ae/rotations/west.png",
+          "south-west": "c37808ae/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "af0dbe21-cad6-448b-8ecf-5b991e32a775",
+        "name": "Sleep",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T00:52:14.348459+00:00"
+      },
+      "folder": "af0dbe21",
+      "frames": {
+        "rotations": {
+          "south": "af0dbe21/rotations/south.png",
+          "south-east": "af0dbe21/rotations/south-east.png",
+          "east": "af0dbe21/rotations/east.png",
+          "north-east": "af0dbe21/rotations/north-east.png",
+          "north": "af0dbe21/rotations/north.png",
+          "north-west": "af0dbe21/rotations/north-west.png",
+          "west": "af0dbe21/rotations/west.png",
+          "south-west": "af0dbe21/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "6a2795a3-58c8-40cb-a459-1f055969f264",
+        "name": "Die",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T01:07:06.807298+00:00"
+      },
+      "folder": "6a2795a3",
+      "frames": {
+        "rotations": {
+          "south": "6a2795a3/rotations/south.png",
+          "south-east": "6a2795a3/rotations/south-east.png",
+          "east": "6a2795a3/rotations/east.png",
+          "north-east": "6a2795a3/rotations/north-east.png",
+          "north": "6a2795a3/rotations/north.png",
+          "north-west": "6a2795a3/rotations/north-west.png",
+          "west": "6a2795a3/rotations/west.png",
+          "south-west": "6a2795a3/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "65414d53-c9ae-4ea8-b613-8bf3c31079aa",
+        "name": "Hurt",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T01:07:15.179889+00:00"
+      },
+      "folder": "65414d53",
+      "frames": {
+        "rotations": {
+          "south": "65414d53/rotations/south.png",
+          "south-east": "65414d53/rotations/south-east.png",
+          "east": "65414d53/rotations/east.png",
+          "north-east": "65414d53/rotations/north-east.png",
+          "north": "65414d53/rotations/north.png",
+          "north-west": "65414d53/rotations/north-west.png",
+          "west": "65414d53/rotations/west.png",
+          "south-west": "65414d53/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "e2aa885a-e882-4fac-8b02-a4dfcebacbb0",
+        "name": "Sitting down",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T01:07:43.43823+00:00"
+      },
+      "folder": "Sitting_down",
+      "frames": {
+        "rotations": {
+          "south": "Sitting_down/rotations/south.png",
+          "south-east": "Sitting_down/rotations/south-east.png",
+          "east": "Sitting_down/rotations/east.png",
+          "north-east": "Sitting_down/rotations/north-east.png",
+          "north": "Sitting_down/rotations/north.png",
+          "north-west": "Sitting_down/rotations/north-west.png",
+          "west": "Sitting_down/rotations/west.png",
+          "south-west": "Sitting_down/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "3c4932f6-49d1-4126-a136-4902747d03a7",
+        "name": "Jump",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T01:11:23.051898+00:00"
+      },
+      "folder": "3c4932f6",
+      "frames": {
+        "rotations": {
+          "south": "3c4932f6/rotations/south.png",
+          "south-east": "3c4932f6/rotations/south-east.png",
+          "east": "3c4932f6/rotations/east.png",
+          "north-east": "3c4932f6/rotations/north-east.png",
+          "north": "3c4932f6/rotations/north.png",
+          "north-west": "3c4932f6/rotations/north-west.png",
+          "west": "3c4932f6/rotations/west.png",
+          "south-west": "3c4932f6/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "984142ca-765d-421a-b950-1e5007b17641",
+        "name": "Run",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T01:11:30.832001+00:00"
+      },
+      "folder": "984142ca",
+      "frames": {
+        "rotations": {
+          "south": "984142ca/rotations/south.png",
+          "south-east": "984142ca/rotations/south-east.png",
+          "east": "984142ca/rotations/east.png",
+          "north-east": "984142ca/rotations/north-east.png",
+          "north": "984142ca/rotations/north.png",
+          "north-west": "984142ca/rotations/north-west.png",
+          "west": "984142ca/rotations/west.png",
+          "south-west": "984142ca/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "f0711842-1e02-4b03-9896-7bbc0b652083",
+        "name": "Walk",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T01:11:38.239904+00:00"
+      },
+      "folder": "f0711842",
+      "frames": {
+        "rotations": {
+          "south": "f0711842/rotations/south.png",
+          "south-east": "f0711842/rotations/south-east.png",
+          "east": "f0711842/rotations/east.png",
+          "north-east": "f0711842/rotations/north-east.png",
+          "north": "f0711842/rotations/north.png",
+          "north-west": "f0711842/rotations/north-west.png",
+          "west": "f0711842/rotations/west.png",
+          "south-west": "f0711842/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "53956201-9004-4c53-8e9f-1d9060a34631",
+        "name": "Fighting pose",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T01:14:28.171748+00:00"
+      },
+      "folder": "Fighting_pose",
+      "frames": {
+        "rotations": {
+          "south": "Fighting_pose/rotations/south.png",
+          "south-east": "Fighting_pose/rotations/south-east.png",
+          "east": "Fighting_pose/rotations/east.png",
+          "north-east": "Fighting_pose/rotations/north-east.png",
+          "north": "Fighting_pose/rotations/north.png",
+          "north-west": "Fighting_pose/rotations/north-west.png",
+          "west": "Fighting_pose/rotations/west.png",
+          "south-west": "Fighting_pose/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "a46f302f-2411-436b-b8be-59797b3ec37d",
+        "name": "SKILL 1 \u2014 CRIMSON BLOSSOM STRIKE",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T01:14:59.651614+00:00"
+      },
+      "folder": "SKILL_1_CRIMSON_BLOSSOM_STRIKE",
+      "frames": {
+        "rotations": {
+          "south": "SKILL_1_CRIMSON_BLOSSOM_STRIKE/rotations/south.png",
+          "south-east": "SKILL_1_CRIMSON_BLOSSOM_STRIKE/rotations/south-east.png",
+          "east": "SKILL_1_CRIMSON_BLOSSOM_STRIKE/rotations/east.png",
+          "north-east": "SKILL_1_CRIMSON_BLOSSOM_STRIKE/rotations/north-east.png",
+          "north": "SKILL_1_CRIMSON_BLOSSOM_STRIKE/rotations/north.png",
+          "north-west": "SKILL_1_CRIMSON_BLOSSOM_STRIKE/rotations/north-west.png",
+          "west": "SKILL_1_CRIMSON_BLOSSOM_STRIKE/rotations/west.png",
+          "south-west": "SKILL_1_CRIMSON_BLOSSOM_STRIKE/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "3db0481e-c4cc-4fcd-8c0f-1e51946bec55",
+        "name": "SKILL 2 \u2014 PHANTOM LOTUS DANCE",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T01:15:20.952869+00:00"
+      },
+      "folder": "SKILL_2_PHANTOM_LOTUS_DANCE",
+      "frames": {
+        "rotations": {
+          "south": "SKILL_2_PHANTOM_LOTUS_DANCE/rotations/south.png",
+          "south-east": "SKILL_2_PHANTOM_LOTUS_DANCE/rotations/south-east.png",
+          "east": "SKILL_2_PHANTOM_LOTUS_DANCE/rotations/east.png",
+          "north-east": "SKILL_2_PHANTOM_LOTUS_DANCE/rotations/north-east.png",
+          "north": "SKILL_2_PHANTOM_LOTUS_DANCE/rotations/north.png",
+          "north-west": "SKILL_2_PHANTOM_LOTUS_DANCE/rotations/north-west.png",
+          "west": "SKILL_2_PHANTOM_LOTUS_DANCE/rotations/west.png",
+          "south-west": "SKILL_2_PHANTOM_LOTUS_DANCE/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "6eec3810-1f3b-42bc-8037-deb918fc0a32",
+        "name": "SKILL 3 \u2014 ECLIPSE SHADOW REQUIEM",
+        "prompt": "anime female assassin character, premium Korean MMORPG style, beautiful female assassin with long black hair and crimson highlights, glowing crimson eyes, dark fantasy assassin leather armor, dual curved daggers ONLY, one dagger in each hand, elegant assassin combat stance, black smoke particles, crimson shadow aura, cinematic anime lighting, ultra detailed fantasy RPG character design, high quality anime rendering, dark assassin atmosphere, lightweight tactical armor, no swords, no shields, no bows, no guns, character focus only",
+        "size": {
+          "width": 96,
+          "height": 96
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-05-30T01:21:01.120932+00:00"
+      },
+      "folder": "SKILL_3_ECLIPSE_SHADOW_REQUIEM",
+      "frames": {
+        "rotations": {
+          "south": "SKILL_3_ECLIPSE_SHADOW_REQUIEM/rotations/south.png",
+          "south-east": "SKILL_3_ECLIPSE_SHADOW_REQUIEM/rotations/south-east.png",
+          "east": "SKILL_3_ECLIPSE_SHADOW_REQUIEM/rotations/east.png",
+          "north-east": "SKILL_3_ECLIPSE_SHADOW_REQUIEM/rotations/north-east.png",
+          "north": "SKILL_3_ECLIPSE_SHADOW_REQUIEM/rotations/north.png",
+          "north-west": "SKILL_3_ECLIPSE_SHADOW_REQUIEM/rotations/north-west.png",
+          "west": "SKILL_3_ECLIPSE_SHADOW_REQUIEM/rotations/west.png",
+          "south-west": "SKILL_3_ECLIPSE_SHADOW_REQUIEM/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.0",
+  "export_date": "2026-05-30T03:24:07.730295"
+}

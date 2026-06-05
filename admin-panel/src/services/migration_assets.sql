@@ -162,3 +162,43 @@ CREATE INDEX IF NOT EXISTS idx_mobs_zone     ON mobs USING GIN(zone_ids);
 CREATE INDEX IF NOT EXISTS idx_dialogs_npc   ON npc_dialogs(npc_id);
 CREATE INDEX IF NOT EXISTS idx_audio_type    ON audio(type,category);
 CREATE INDEX IF NOT EXISTS idx_assets_type   ON assets(type,category);
+-- ============================================================
+-- CHARACTER CREATION — cấu hình màn tạo nhân vật đầu game
+-- ============================================================
+
+-- Chủng tộc + giới tính (mỗi tổ hợp = 1 option base)
+CREATE TABLE IF NOT EXISTS char_races (
+  id SERIAL PRIMARY KEY,
+  code VARCHAR(32) UNIQUE NOT NULL,     -- humn_male, humn_female, demn_male...
+  race VARCHAR(32) NOT NULL,            -- humn / demn / gbln / elf
+  race_name_vn VARCHAR(64),            -- Con Người / Ma Tộc...
+  gender VARCHAR(8) NOT NULL,           -- male / female
+  faction_id INT DEFAULT 0,             -- 0 = mọi phe; hoặc khóa theo phe
+  base_asset_id INT REFERENCES assets(id),  -- sprite body base (0bas)
+  preview_asset_id INT REFERENCES assets(id),
+  is_enabled BOOLEAN DEFAULT TRUE,
+  sort_order INT DEFAULT 0,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Các lựa chọn ngoại hình cơ bản (da, mắt, tóc, áo quần khởi đầu)
+CREATE TABLE IF NOT EXISTS char_options (
+  id SERIAL PRIMARY KEY,
+  slot VARCHAR(16) NOT NULL,            -- skin | eyes | hair | outfit
+  code VARCHAR(48) NOT NULL,            -- humn_v03, eye_blue, bob1_v02...
+  name_vn VARCHAR(64),                 -- "Da sáng", "Mắt xanh", "Tóc bob"
+  asset_id INT REFERENCES assets(id),  -- sprite layer tương ứng
+  color_index INT,                      -- index màu (cho eyes: 0-10)
+  hex_preview VARCHAR(9),               -- màu hiển thị nhanh (vd #4488ff)
+  race_filter VARCHAR(64),              -- để trống = mọi chủng tộc; hoặc 'humn,elf'
+  gender_filter VARCHAR(16),            -- để trống = mọi giới; 'male'/'female'
+  is_default BOOLEAN DEFAULT FALSE,     -- lựa chọn mặc định khi mở màn tạo
+  is_enabled BOOLEAN DEFAULT TRUE,
+  sort_order INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(slot, code)
+);
+
+CREATE INDEX IF NOT EXISTS idx_charopt_slot ON char_options(slot, is_enabled);
+CREATE INDEX IF NOT EXISTS idx_charrace_enabled ON char_races(is_enabled, sort_order);
