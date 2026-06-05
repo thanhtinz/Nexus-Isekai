@@ -164,4 +164,51 @@ router.get('/export/json', async (req, res) => {
   });
 });
 
+
+// ── PREVIEW: ghép layer paperdoll → PNG ────────────────────────
+const CharPreview = require('../services/CharPreview');
+const fsp = require('fs');
+const pathp = require('path');
+
+function assetAbsPath(file_path) {
+  // file_path dạng /uploads/game-assets/... → public/uploads/...
+  if (!file_path) return null;
+  const pub = pathp.resolve(__dirname, '../public');
+  return pathp.join(pub, file_path.replace(/^\//, ''));
+}
+
+router.get('/preview', async (req, res) => {
+  const { skin, eyes, hair, outfit, frame } = req.query;
+  const frameIdx = parseInt(frame) || 0;
+
+  // Lấy asset path cho mỗi slot đã chọn (theo code)
+  async function pathFor(slot, code) {
+    if (!code) return null;
+    const o = await getOne(
+      `SELECT a.file_path FROM char_options o LEFT JOIN assets a ON o.asset_id=a.id
+       WHERE o.slot=$1 AND o.code=$2`, [slot, code]);
+    return o ? assetAbsPath(o.file_path) : null;
+  }
+
+  // Thứ tự: skin → outfit → eyes → hair (dưới lên trên)
+  const layers = [
+    { slot: 'skin',   absPath: await pathFor('skin', skin) },
+    { slot: 'outfit', absPath: await pathFor('outfit', outfit) },
+    { slot: 'eyes',   absPath: await pathFor('eyes', eyes) },
+    { slot: 'hair',   absPath: await pathFor('hair', hair) },
+  ].filter(l => l.absPath);
+
+  const png = await CharPreview.compose(layers, frameIdx);
+  if (png) {
+    res.set('Content-Type', 'image/png');
+    return res.send(png);
+  }
+  // Không có sharp → trả JSON layer để client tự ghép
+  res.json({
+    composable: false,
+    note: 'sharp chưa cài — client tự ghép. Cài: npm i sharp',
+    layers: layers.map(l => ({ slot: l.slot, path: l.absPath }))
+  });
+});
+
 module.exports = router;

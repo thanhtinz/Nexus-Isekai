@@ -5,6 +5,52 @@
   <span style="color:var(--muted);font-size:.85rem;margin-left:auto">Cấu hình màn tạo nhân vật đầu game — client đọc qua Export JSON</span>
 </div>
 
+
+<!-- LIVE PREVIEW ghép layer -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header"><h3><i class="fas fa-eye"></i> Xem trước nhân vật (ghép layer)</h3></div>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+    <div style="text-align:center">
+      <div style="background:#0f0f1a;border-radius:12px;padding:16px;display:inline-block">
+        <img id="cc-preview" src="" alt="preview"
+             style="width:128px;height:128px;image-rendering:pixelated;background:repeating-conic-gradient(#1a1a2e 0% 25%,#15152a 0% 50%) 50%/16px 16px">
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn btn-ghost btn-sm" onclick="ccFrame(0)">⬇ Nam</button>
+        <button class="btn btn-ghost btn-sm" onclick="ccFrame(16)">➡ Đông</button>
+        <button class="btn btn-ghost btn-sm" onclick="ccFrame(32)">⬆ Bắc</button>
+      </div>
+    </div>
+    <div style="flex:1;min-width:240px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+      <div><label style="font-size:.8rem;color:var(--muted)">Da / Body</label>
+        <select id="cc-skin" onchange="ccUpdate()" style="width:100%">
+          <option value="">— chọn —</option>
+          <% (optionsBySlot['skin']||[]).filter(o=>o.is_enabled).forEach(o=>{ %><option value="<%= o.code %>" <%= o.is_default?'selected':'' %>><%= o.name_vn||o.code %></option><% }) %>
+        </select>
+      </div>
+      <div><label style="font-size:.8rem;color:var(--muted)">Mắt</label>
+        <select id="cc-eyes" onchange="ccUpdate()" style="width:100%">
+          <option value="">— chọn —</option>
+          <% (optionsBySlot['eyes']||[]).filter(o=>o.is_enabled).forEach(o=>{ %><option value="<%= o.code %>" <%= o.is_default?'selected':'' %>><%= o.name_vn||o.code %></option><% }) %>
+        </select>
+      </div>
+      <div><label style="font-size:.8rem;color:var(--muted)">Tóc</label>
+        <select id="cc-hair" onchange="ccUpdate()" style="width:100%">
+          <option value="">— chọn —</option>
+          <% (optionsBySlot['hair']||[]).filter(o=>o.is_enabled).forEach(o=>{ %><option value="<%= o.code %>" <%= o.is_default?'selected':'' %>><%= o.name_vn||o.code %></option><% }) %>
+        </select>
+      </div>
+      <div><label style="font-size:.8rem;color:var(--muted)">Áo quần</label>
+        <select id="cc-outfit" onchange="ccUpdate()" style="width:100%">
+          <option value="">— chọn —</option>
+          <% (optionsBySlot['outfit']||[]).filter(o=>o.is_enabled).forEach(o=>{ %><option value="<%= o.code %>" <%= o.is_default?'selected':'' %>><%= o.name_vn||o.code %></option><% }) %>
+        </select>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:.78rem;color:var(--muted);margin-top:12px">Đây là ảnh ghép thật từ asset đã gắn. Nếu trống → option chưa gắn asset (chạy import + seed, hoặc gắn thủ công).</p>
+</div>
+
 <!-- RACES / GENDER -->
 <div class="card">
   <div class="card-header"><h3><i class="fas fa-venus-mars"></i> Chủng tộc & Giới tính</h3></div>
@@ -77,4 +123,19 @@ async function toggle(kind,id){
   const r=await api('POST',`/charcreation/${kind}/${id}/toggle`);
   toast(r.ok?'Đã đổi trạng thái':r.error,r.ok); if(r.ok)location.reload();
 }
+
+let ccCurFrame = 0;
+function ccFrame(f){ ccCurFrame=f; ccUpdate(); }
+function ccUpdate(){
+  const p = new URLSearchParams({
+    skin: document.getElementById('cc-skin').value,
+    eyes: document.getElementById('cc-eyes').value,
+    hair: document.getElementById('cc-hair').value,
+    outfit: document.getElementById('cc-outfit').value,
+    frame: ccCurFrame, _t: Date.now()
+  });
+  document.getElementById('cc-preview').src = '/charcreation/preview?' + p.toString();
+}
+ccUpdate();
+
 </script>

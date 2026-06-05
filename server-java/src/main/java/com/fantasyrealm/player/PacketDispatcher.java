@@ -20,6 +20,7 @@ public class PacketDispatcher {
     @Autowired private GameplayHandler    gameplay;
     @Autowired private com.fantasyrealm.npc.NpcHandler npcHandler;
     @Autowired private com.fantasyrealm.leaderboard.LeaderboardHandler leaderboard;
+    @Autowired private CharCreationHandler charCreation;
 
     @FunctionalInterface
     interface Handler { void handle(PlayerSession s, Packet p); }
@@ -75,6 +76,8 @@ public class PacketDispatcher {
         handlers.put(PacketType.C_PONG, (s, p) -> s.touch());
 
         // Character info
+        handlers.put(PacketType.C_CHAR_CREATE_OPTIONS, charCreation::onRequestOptions);
+        handlers.put(PacketType.C_CHAR_CREATE,         charCreation::onCreate);
         handlers.put(PacketType.C_CHAR_INFO_REQ, (s, p) -> {
             s.send(new Packet(PacketType.S_CHAR_INFO)
                 .writeLong(s.getPlayerId())
