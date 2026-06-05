@@ -81,6 +81,7 @@ public class CombatService {
 
     /** Quái đánh trả người chơi. */
     private void mobCounterAttack(PlayerSession s, Mob mob) {
+        if (s.isGodMode()) return; // GM bất tử không nhận damage
         int dmg = Math.max(1, mob.atk - s.getDefense());
         dmg += ThreadLocalRandom.current().nextInt(Math.max(1, mob.atk / 4));
         s.setHp(s.getHp() - dmg);

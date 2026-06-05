@@ -52,7 +52,8 @@ public class AuthHandler {
             .writeString(r.outfitJson() != null ? r.outfitJson() : "{}")
             .writeInt(r.zoneId())
             .writeFloat(r.posX())
-            .writeFloat(r.posY()));
+            .writeFloat(r.posY())
+            .writeBool(r.isAdmin())); // client biết để hiện/ẩn panel GM
 
         // Place player in zone
         zoneManager.transferPlayer(s, r.zoneId(), r.posX(), r.posY());

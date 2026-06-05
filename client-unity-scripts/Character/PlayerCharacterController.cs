@@ -39,14 +39,29 @@ namespace FantasyRealm.Character
 
         void Start() {
             PacketRouter.Instance.Register(PacketType.S_LOGIN_OK, OnLoginOk);
+            PacketRouter.Instance.Register(PacketType.S_GM_STATE,  OnGmState);
+            PacketRouter.Instance.Register(PacketType.S_GM_FREEZE, OnGmFreeze);
             // Áp ngoại hình đã chọn lúc tạo nhân vật (lưu trong PlayerPrefs)
             string saved = PlayerPrefs.GetString("char_outfit", "");
             if (!string.IsNullOrEmpty(saved)) ApplyOutfit(saved);
         }
 
+        void OnGmState(Packet p) {
+            bool flying = p.ReadBool(); float speed = p.ReadFloat(); bool god = p.ReadBool();
+            _flying = flying;
+            walkSpeed = 3f * speed; runSpeed = 6f * speed;
+        }
+        void OnGmFreeze(Packet p) {
+            bool frozen = p.ReadBool();
+            LockInput(frozen);
+        }
+        private bool _flying;
+
         void OnDestroy() {
             if (PacketRouter.Instance != null)
                 PacketRouter.Instance.Unregister(PacketType.S_LOGIN_OK, OnLoginOk);
+                PacketRouter.Instance.Unregister(PacketType.S_GM_STATE, OnGmState);
+                PacketRouter.Instance.Unregister(PacketType.S_GM_FREEZE, OnGmFreeze);
         }
 
         void OnLoginOk(Packet p) {
@@ -59,8 +74,14 @@ namespace FantasyRealm.Character
             int zoneId    = p.ReadInt();
             float x       = p.ReadFloat();
             float y       = p.ReadFloat();
+            bool isGm     = p.ReadBool();
             transform.position = new Vector3(x, y, 0);
             ApplyOutfit(OutfitJson);
+            // Chỉ bật panel GM nếu tài khoản là admin (user thường không thấy)
+            if (isGm) {
+                var gmPanel = FindObjectOfType<FantasyRealm.UI.GMPanel>();
+                if (gmPanel != null) gmPanel.EnableGm();
+            }
         }
 
         public void ApplyOutfit(string json) {

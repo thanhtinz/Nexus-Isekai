@@ -14,6 +14,11 @@ public class PlayerSession {
     private volatile int     invisibleLevel = 0; // 0=hiện, 1=ẩn khỏi list+no aggro, 2=tàng hình hoàn toàn
     private volatile long    possessTargetId = 0; // id NPC/mob đang điều khiển (0 = không)
     private volatile String  possessType = null;   // "npc" | "mob" | null
+    private volatile boolean flying = false;
+    private volatile boolean godMode = false;
+    private volatile boolean frozen = false;
+    private volatile boolean muted = false;
+    private volatile float   speedMultiplier = 1f;
     private final AtomicLong lastActivity = new AtomicLong(System.currentTimeMillis());
 
     // character data (volatile for thread safety)
@@ -64,6 +69,16 @@ public class PlayerSession {
     public void      setPossess(String type, long id) { possessType = type; possessTargetId = id; }
     public void      clearPossess()          { possessType = null; possessTargetId = 0; }
     public boolean   isPossessing()          { return possessTargetId != 0; }
+    public boolean   isFlying()              { return flying; }
+    public void      setFlying(boolean v)    { flying = v; }
+    public boolean   isGodMode()             { return godMode; }
+    public void      setGodMode(boolean v)   { godMode = v; }
+    public boolean   isFrozen()              { return frozen; }
+    public void      setFrozen(boolean v)    { frozen = v; }
+    public boolean   isMuted()               { return muted; }
+    public void      setMuted(boolean v)     { muted = v; }
+    public float     getSpeedMultiplier()    { return speedMultiplier; }
+    public void      setSpeedMultiplier(float v){ speedMultiplier = Math.max(0.1f, Math.min(10f, v)); }
     public long      getCharacterId() { return characterId; }
     public void      setCharacterId(long v){ characterId = v; }
     public long      getPlayerId()    { return playerId; }

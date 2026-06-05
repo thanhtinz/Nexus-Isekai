@@ -27,6 +27,11 @@ public class ChatHandler {
             return;
         }
 
+        if (s.isMuted()) {
+            s.send(new Packet(PacketType.S_NOTIFY).writeString("Bạn đang bị cấm chat"));
+            return;
+        }
+
         long now = System.currentTimeMillis();
         Long last = lastChat.put(s.getPlayerId(), now);
         if (last != null && now - last < COOLDOWN_MS) return;

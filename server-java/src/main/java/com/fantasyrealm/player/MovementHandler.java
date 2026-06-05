@@ -17,6 +17,8 @@ public class MovementHandler {
         float y   = p.readFloat();
         int   dir = p.readByte();
 
+        if (s.isFrozen()) return; // bị GM đóng băng, không di chuyển được
+
         // Anti-cheat: distance check
         Position old = s.getPosition();
         if (old != null) {
