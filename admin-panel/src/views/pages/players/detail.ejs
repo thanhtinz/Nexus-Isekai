@@ -1,0 +1,85 @@
+<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+  <a href="/players?server_id=<%= server.id %>" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  <h2><%= player.name || 'Người chơi' %></h2>
+  <% if(player.online){ %><span class="badge badge-green"><i class="fas fa-circle"></i> Online</span>
+  <% } else { %><span class="badge badge-gray">Offline</span><% } %>
+  <span style="color:var(--muted);font-size:.85rem">Server: <%= server.name %></span>
+</div>
+
+<% if(player.error){ %>
+<div class="card" style="border-color:#991b1b;color:#f87171"><i class="fas fa-exclamation-triangle"></i> <%= player.error %></div>
+<% } else { %>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="card">
+    <h3 style="margin-bottom:16px"><i class="fas fa-id-card"></i> Thông tin nhân vật</h3>
+    <table>
+      <tr><td style="color:var(--muted)">Player ID</td><td><strong>#<%= player.playerId %></strong></td></tr>
+      <tr><td style="color:var(--muted)">Tên</td><td><strong><%= player.name %></strong></td></tr>
+      <tr><td style="color:var(--muted)">Phe phái</td><td><span class="badge badge-purple"><%= player.faction %></span></td></tr>
+      <tr><td style="color:var(--muted)">Tôn giáo</td><td><%= player.religion %></td></tr>
+      <tr><td style="color:var(--muted)">Level</td><td>Lv.<strong><%= player.level %></strong></td></tr>
+      <tr><td style="color:var(--muted)">Gold</td><td style="color:#fbbf24"><strong>💰 <%= (player.gold||0).toLocaleString() %></strong></td></tr>
+      <tr><td style="color:var(--muted)">Premium Coins</td><td>💎 <%= (player.premiumCoins||0).toLocaleString() %></td></tr>
+      <tr><td style="color:var(--muted)">Followers</td><td>⭐ <%= player.followers||0 %></td></tr>
+      <tr><td style="color:var(--muted)">Vị trí</td><td>Zone <%= player.zoneId %> @ (<%= Math.round(player.posX||0) %>, <%= Math.round(player.posY||0) %>)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-bottom:16px"><i class="fas fa-tools"></i> Thao tác GM</h3>
+    <div class="form-group">
+      <label>Tặng Gold</label>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="gold-amt" value="10000" placeholder="Số gold">
+        <button class="btn btn-success" onclick="giveGold()"><i class="fas fa-coins"></i> Tặng</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Teleport</label>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="tp-zone" value="<%= player.zoneId %>" placeholder="Zone" style="width:80px">
+        <input type="number" id="tp-x" value="100" placeholder="X" style="width:80px">
+        <input type="number" id="tp-y" value="100" placeholder="Y" style="width:80px">
+        <button class="btn btn-primary" onclick="teleport()"><i class="fas fa-map-marker-alt"></i> TP</button>
+      </div>
+    </div>
+    <hr style="border-color:var(--border);margin:16px 0">
+    <button class="btn btn-danger" onclick="kickPlayer()" style="width:100%"><i class="fas fa-ban"></i> Kick người chơi</button>
+  </div>
+</div>
+
+<% if(player.outfitJson){ %>
+<div class="card">
+  <h3 style="margin-bottom:12px"><i class="fas fa-tshirt"></i> Trang phục (JSON)</h3>
+  <pre style="background:#0f0f1a;padding:12px;border-radius:8px;font-size:.78rem;overflow-x:auto"><%= player.outfitJson %></pre>
+</div>
+<% } %>
+
+<% } %>
+
+<script>
+const PID = '<%= player.playerId %>';
+const SID = '<%= server.id %>';
+async function giveGold(){
+  const amt = parseInt(document.getElementById('gold-amt').value);
+  const r = await api('POST', `/players/${PID}/give-gold`, { server_id: SID, amount: amt });
+  toast(r.ok ? (r.message||'Đã tặng gold!') : r.error, r.ok);
+  if(r.ok) setTimeout(()=>location.reload(), 1200);
+}
+async function teleport(){
+  const r = await api('POST', `/players/${PID}/teleport`, {
+    server_id: SID,
+    zoneId: parseInt(document.getElementById('tp-zone').value),
+    x: parseFloat(document.getElementById('tp-x').value),
+    y: parseFloat(document.getElementById('tp-y').value)
+  });
+  toast(r.ok ? 'Đã teleport!' : r.error, r.ok);
+}
+async function kickPlayer(){
+  if(!confirm('Kick người chơi này?')) return;
+  const r = await api('DELETE', `/players/${PID}/kick`, { server_id: SID });
+  toast(r.ok ? 'Đã kick!' : r.error, r.ok);
+  if(r.ok) setTimeout(()=>location.href='/players?server_id='+SID, 1200);
+}
+</script>

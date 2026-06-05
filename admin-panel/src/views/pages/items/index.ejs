@@ -8,12 +8,12 @@
     <select name="type" onchange="this.form.submit()">
       <option value="">Tất cả loại</option>
       <% ['weapon','armor','consumable','material','seed','fish','tool','accessory','pet_food','special'].forEach(t=>{ %>
-      <option value="<%= t %>" <%=type===t?'selected':''>><%= t %></option><% }) %>
+      <option value="<%= t %>" <%=type===t?'selected':''%>><%= t %></option><% }) %>
     </select>
     <select name="rarity" onchange="this.form.submit()">
       <option value="">Tất cả rarity</option>
       <% ['0','1','2','3','4'].forEach((r,i)=>{ %>
-      <option value="<%= r %>" <%=rarity===r?'selected':''>><%= ['Common','Uncommon','Rare','Epic','Legendary'][i] %></option><% }) %>
+      <option value="<%= r %>" <%=rarity===r?'selected':''%>><%= ['Common','Uncommon','Rare','Epic','Legendary'][i] %></option><% }) %>
     </select>
     <input name="search" value="<%= search %>" placeholder="Tìm tên..." style="width:180px">
     <button type="submit" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i></button>

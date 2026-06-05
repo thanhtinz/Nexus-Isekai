@@ -52,6 +52,30 @@ public class AdminController {
         return Map.of("count", list.size(), "players", list);
     }
 
+    @GetMapping("/players/{pid}")
+    public ResponseEntity<?> playerDetail(@PathVariable long pid) {
+        var s = sessions.getByPlayerId(pid);
+        if (s == null) return ResponseEntity.ok(Map.of("error", "Player not online: " + pid));
+        var pos = s.getPosition();
+        return ResponseEntity.ok(new java.util.HashMap<String,Object>() {{
+            put("playerId", s.getPlayerId());
+            put("characterId", s.getCharacterId());
+            put("name", s.getCharacterName());
+            put("faction", s.getFaction() != null ? s.getFaction().displayName : "none");
+            put("factionId", s.getFaction() != null ? s.getFaction().id : 0);
+            put("religion", s.getReligion() != null ? s.getReligion().name() : "NONE");
+            put("level", s.getLevel());
+            put("gold", s.getGold());
+            put("premiumCoins", s.getPremiumCoins());
+            put("zoneId", s.getCurrentZoneId());
+            put("posX", pos != null ? pos.x() : 0);
+            put("posY", pos != null ? pos.y() : 0);
+            put("outfitJson", s.getOutfitJson());
+            put("followers", s.getFollowers());
+            put("online", true);
+        }});
+    }
+
     @PostMapping("/players/{pid}/teleport")
     public ResponseEntity<String> teleport(@PathVariable long pid, @RequestBody Map<String,Object> body) {
         var s = sessions.getByPlayerId(pid);

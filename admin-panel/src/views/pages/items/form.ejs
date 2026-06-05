@@ -10,7 +10,7 @@
       <div class="form-group"><label>Loại *</label>
         <select name="type">
           <% ['weapon','armor','consumable','material','seed','fish','tool','accessory','pet_food','special'].forEach(t=>{ %>
-          <option value="<%= t %>" <%=item?.type===t?'selected':''>><%= t %></option><% }) %>
+          <option value="<%= t %>" <%=item?.type===t?'selected':''%>><%= t %></option><% }) %>
         </select>
       </div>
     </div>
@@ -22,7 +22,7 @@
       <div class="form-group"><label>Rarity</label>
         <select name="rarity">
           <% [['0','Common'],['1','Uncommon'],['2','Rare'],['3','Epic'],['4','Legendary']].forEach(([v,l])=>{ %>
-          <option value="<%= v %>" <%=String(item?.rarity)===v?'selected':''>><%= l %></option><% }) %>
+          <option value="<%= v %>" <%=String(item?.rarity)===v?'selected':''%>><%= l %></option><% }) %>
         </select>
       </div>
       <div class="form-group"><label>Giá gốc</label><input name="base_price" type="number" value="<%= item?.base_price||100 %>"></div>
@@ -32,13 +32,13 @@
       <div class="form-group"><label>Icon (Asset ID)</label>
         <select name="icon_asset_id">
           <option value="">Không có icon</option>
-          <% icons.forEach(i=>{ %><option value="<%= i.id %>" <%=item?.icon_asset_id===i.id?'selected':''>><%= i.name %></option><% }) %>
+          <% icons.forEach(i=>{ %><option value="<%= i.id %>" <%=item?.icon_asset_id===i.id?'selected':''%>><%= i.name %></option><% }) %>
         </select>
       </div>
       <div class="form-group"><label>Server</label>
         <select name="server_id">
           <option value="">Tất cả server</option>
-          <% servers.forEach(s=>{ %><option value="<%= s.id %>" <%=item?.server_id===s.id?'selected':''>><%= s.name %></option><% }) %>
+          <% servers.forEach(s=>{ %><option value="<%= s.id %>" <%=item?.server_id===s.id?'selected':''%>><%= s.name %></option><% }) %>
         </select>
       </div>
     </div>

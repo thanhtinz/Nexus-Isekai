@@ -1,110 +1,199 @@
-# Fantasy Realm Online (FRO)
+# ⚔️ Fantasy Realm Online
 
-MMORPG xã hội fantasy — Avatar Zing Me + Animal Crossing + Stardew Valley  
-Giữ chân bằng **thời trang · nghề nghiệp · cộng đồng · kinh tế** — không phải cày level.
+MMORPG xã hội fantasy phong cách Avatar/Zing Me — full-stack, đa server, đa nền tảng (PC Unity, Mobile, J2ME).
 
-## Kiến trúc
+![Java](https://img.shields.io/badge/Java-21-orange)
+![Node](https://img.shields.io/badge/Node-20-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
+![Docker](https://img.shields.io/badge/Docker-Compose-blueviolet)
+
+---
+
+## 📋 Mục lục
+
+- [Kiến trúc tổng quan](#-kiến-trúc-tổng-quan)
+- [Cấu trúc thư mục](#-cấu-trúc-thư-mục)
+- [Chạy nhanh (Local)](#-chạy-nhanh-local-với-docker)
+- [Tài liệu chi tiết](#-tài-liệu)
+- [Tính năng game](#-tính-năng-game)
+- [Tài khoản mặc định](#-tài-khoản-mặc-định)
+
+---
+
+## 🏗️ Kiến trúc tổng quan
 
 ```
-client-unity-scripts/   Unity 2D client (desktop/mobile)
-client-j2me/            J2ME mobile client (Nokia/Java phone)
-server-java/            Game server (Java 21 + Netty + Spring Boot)
-tools-gm/               GM Dashboard (browser-based)
-deploy/                 nginx config, scripts
-docker-compose.yml      Full stack orchestration
+                    ┌─────────────────────────────────────────┐
+                    │              NGINX (80/443)              │
+                    │         Reverse Proxy + SSL              │
+                    └──────────┬───────────────┬──────────────┘
+                               │               │
+                ┌──────────────▼──┐      ┌─────▼────────────┐
+                │   Website        │      │  Admin Panel     │
+                │  (landing-page)  │      │  (admin-panel)   │
+                │  Node.js :4000   │      │  Node.js :3000   │
+                └──────────────┬───┘      └─────┬────────────┘
+                               │                │ Docker API
+                               │ REST API       │ (start/stop server)
+                               └────────┬───────┘
+                                        │
+        ┌───────────────────────────────┼──────────────────────────┐
+        │                                │                          │
+  ┌─────▼─────┐                   ┌──────▼─────┐            ┌───────▼──────┐
+  │ Game SV1   │                   │ Game Beta  │            │  Game Test   │
+  │ Java :7777 │                   │ Java :7778 │            │  Java :7779  │
+  │ HTTP :8080 │                   │ HTTP :8081 │            │  HTTP :8082  │
+  └─────┬──────┘                   └──────┬─────┘            └───────┬──────┘
+        │                                 │                          │
+        └─────────────────┬───────────────┴──────────────────────────┘
+                          │
+              ┌───────────▼──────────┐        ┌──────────────┐
+              │   PostgreSQL :5432    │        │  Redis :6379  │
+              │ (1 DB / server)       │        │  (cache/pub) │
+              └──────────────────────┘        └──────────────┘
+                          ▲
+        ┌─────────────────┼──────────────────┐
+   ┌────┴─────┐    ┌──────┴──────┐    ┌───────┴──────┐
+   │ Unity PC  │    │ Unity Mobile│    │ J2ME Mobile  │
+   │ Client    │    │ Client      │    │ Client       │
+   └───────────┘    └─────────────┘    └──────────────┘
+        Kết nối TCP :7777 (game protocol nhị phân)
 ```
 
-## Quick Start (Docker)
+**Điểm nổi bật:**
+- **Đa server**: chạy nhiều server game song song (live / beta / test), mỗi server có DB riêng
+- **Quản lý server trực tiếp trong Admin**: tạo/khởi động/dừng server qua Docker API, không cần SSH
+- **Liên server**: ban chéo server, giftcode dùng chung, tin tức/sự kiện toàn hệ thống
+- **3 client cùng protocol**: Unity (PC + Mobile) và J2ME (điện thoại Java) kết nối cùng server
+
+---
+
+## 📁 Cấu trúc thư mục
+
+```
+fantasy-realm/
+├── server-java/              # Game server (Java 21 + Netty + Spring Boot)
+│   ├── src/main/java/com/fantasyrealm/
+│   │   ├── protocol/         # PacketType, codec, dispatcher
+│   │   ├── player/           # Session, auth, character
+│   │   ├── zone/ npc/ economy/ events/ profession/ pet/ inventory/
+│   │   ├── social/ leaderboard/ security/ world/
+│   │   ├── admin/            # REST API cho admin panel (/api/admin/*)
+│   │   ├── repository/ model/
+│   │   └── server/           # GameServer (Netty bootstrap)
+│   ├── src/main/resources/
+│   │   ├── schema.sql        # DB schema (25 bảng)
+│   │   └── application.yml
+│   └── Dockerfile            # Multi-stage Maven build
+│
+├── admin-panel/              # Admin Panel (Node.js + Express + EJS + Socket.IO)
+│   ├── src/
+│   │   ├── routes/           # dashboard, players, servers, economy, events,
+│   │   │                     # giftcode, news, leaderboard, config, logs,
+│   │   │                     # items, npcs, dialogs, mobs, maps, professions,
+│   │   │                     # audio, assets
+│   │   ├── services/         # db.js, ServerManager.js (Docker integration)
+│   │   ├── views/            # EJS templates
+│   │   └── app.js
+│   └── Dockerfile
+│
+├── landing-page/             # Website công khai (Node.js + EJS)
+│   ├── src/views/pages/      # home, news, events, leaderboard, giftcode, download
+│   └── Dockerfile
+│
+├── client-unity-scripts/     # Unity client (C#) — PC + Mobile
+│   ├── Network/              # Packet.cs, GameNetworkManager.cs
+│   ├── Character/ Systems/ UI/
+│
+├── client-j2me/              # J2ME client (điện thoại Java cũ)
+│   └── src/                  # MIDlet, GameCanvas, net/, ui/
+│
+├── deploy/
+│   ├── nginx.conf            # Cấu hình reverse proxy
+│   └── sql/                  # Scripts SQL setup (00→03)
+│
+├── docs/                     # 📚 Tài liệu chi tiết
+│   ├── DEPLOY.md             # Deploy VPS (cơ bản → nâng cao)
+│   ├── DATABASE.md           # Cấu trúc DB, backup, migration
+│   ├── DOMAIN-SSL.md         # Cấu hình domain + SSL
+│   ├── BUILD-JAVA.md         # Build game server Java
+│   └── BUILD-UNITY.md        # Build Unity client (PC + Android/iOS)
+│
+└── docker-compose.yml        # Toàn bộ stack
+```
+
+---
+
+## 🚀 Chạy nhanh (Local với Docker)
+
+**Yêu cầu:** Docker + Docker Compose
 
 ```bash
-# 1. Clone và cấu hình
-cp .env.example .env
-# Sửa .env: DB_PASS, JWT_SECRET, ADMIN_PASS
+# 1. Clone
+git clone https://github.com/thanhtinz/Nexus-Isekai.git
+cd Nexus-Isekai
 
-# 2. Khởi động
+# 2. Tạo file .env
+cp .env.example .env
+nano .env          # đổi mật khẩu DB, JWT secret, session secret
+
+# 3. Khởi động toàn bộ stack
 docker compose up -d
 
-# 3. Kiểm tra
-curl http://localhost:8080/api/admin/status \
-     -u gm:gm_secret_2024
-
-# 4. GM Dashboard
-open http://localhost:9090
+# 4. Xem log
+docker compose logs -f
 ```
 
-## Ports
+**Truy cập:**
 
-| Port | Service |
-|------|---------|
-| 7777 | Game TCP (Netty) |
-| 8080 | Admin REST API (Spring Boot) |
-| 9090 | GM Dashboard (nginx) |
-| 5432 | PostgreSQL |
-| 6379 | Redis |
+| Dịch vụ | URL | Ghi chú |
+|---------|-----|---------|
+| Website | http://localhost:4000 | Trang chủ công khai |
+| Admin Panel | http://localhost:3000 | `admin` / `Admin@2024!` |
+| Game SV1 | TCP `localhost:7777` | Client kết nối vào đây |
+| Game SV1 API | http://localhost:8080/api/admin/status | REST cho admin |
 
-## Game Design
+> ⚠️ **Đổi mật khẩu admin mặc định ngay sau lần đăng nhập đầu tiên** (Cài đặt → Đổi mật khẩu).
 
-### 4 Phe phái
-| Phe | Bonus |
-|-----|-------|
-| Đế Quốc Ánh Sáng | -10% phí chợ, +10% doanh thu |
-| Liên Minh Elf     | Bonus kỹ năng phép thuật |
-| Vương Quốc Thú Nhân | +30% tỉ lệ thuần hóa thú |
-| Ma Tộc            | Mở khóa nghề **Trộm** (đêm +50%) |
+---
 
-### Nghề nghiệp (15 loại)
-Ngư Dân · Đầu Bếp · Nông Dân · Thợ Rèn · Thợ May · Nhà Giả Kim  
-Nhạc Sĩ · Họa Sĩ · Botanist · Nhà Khảo Cổ  
-**Đặc biệt:** Trộm · Bác Sĩ · Phóng Viên · Thị Trưởng · Nghệ Sĩ
+## 📚 Tài liệu
 
-### Hệ thống chính
-- **Câu cá**: 13 loại cá Common→Legendary, tỉ lệ theo giờ/mùa/trăng tròn
-- **Nông trại**: 8 loại cây, mùa vụ, tưới nước, phân bón
-- **Chế tạo**: 9+ recipe (nấu ăn/rèn/may/giả kim), craft timer async
-- **Thú cưng**: 12 template, faction-exclusive pets, tame/equip/feed
-- **Bảo tàng**: Hiến tặng cá/hóa thạch/cổ vật, gold reward
-- **Chợ**: Player stalls, NPC shops, dynamic pricing theo mùa
-- **Bầu cử**: Thị trưởng vote mỗi tuần, thưởng 100,000G
-- **Báo chí**: Publish article, like/view, weekly feature 50,000G reward
-- **Sự kiện**: 8 loại event tự động (rồng/meteor/boss/kho báu...)
+| Tài liệu | Nội dung |
+|----------|----------|
+| [docs/DEPLOY.md](docs/DEPLOY.md) | Deploy lên VPS từ A→Z: cài đặt, Docker, không-Docker, systemd, scaling, monitoring |
+| [docs/DATABASE.md](docs/DATABASE.md) | Setup PostgreSQL, multi-server DB, backup tự động, migration |
+| [docs/DOMAIN-SSL.md](docs/DOMAIN-SSL.md) | Trỏ domain, cấu hình Nginx, SSL Let's Encrypt, subdomain |
+| [docs/BUILD-JAVA.md](docs/BUILD-JAVA.md) | Build game server Java bằng Maven + Docker |
+| [docs/BUILD-UNITY.md](docs/BUILD-UNITY.md) | Build Unity client cho PC, Android, iOS bài bản |
 
-### Packet Protocol
-```
-[4-byte length][2-byte typeId][payload]
-```
-All packets big-endian. Strings: `[2-byte length][UTF-8 bytes]`.
+---
 
-### C_ACTION (0x90) — Gameplay sub-actions
-| Byte | Action |
-|------|--------|
-| 10-12 | Fishing (cast/reel/cancel) |
-| 20-22 | Pet (tame/equip/feed) |
-| 30-32 | Farming (plant/water/harvest) |
-| 40-41 | Crafting (start/list) |
-| 50-52 | Inventory (view/use/drop) |
-| 60-61 | Museum (donate/catalog) |
-| 70    | Thief (steal) |
-| 80-83 | NPC (dialog/choice/buy/shop) |
-| 90    | Leaderboard |
+## 🎮 Tính năng game
 
-## Build Server
+- **4 phe phái**: Đế Quốc Ánh Sáng, Liên Minh Elf, Vương Quốc Thú Nhân, Ma Tộc
+- **15 nghề nghiệp**: Ngư Dân, Đầu Bếp, Nông Dân, Thợ Rèn, Nhà Giả Kim, Tên Trộm...
+- **Câu cá**: 13 loại cá, tỉ lệ theo giờ/mùa/trăng tròn
+- **Trồng trọt**: 8 loại cây, bonus theo mùa
+- **Chế tạo**: 9 công thức, timer bất đồng bộ
+- **Thú cưng**: 12+ loại, thuần hóa theo phe
+- **Bảo tàng**: 5 danh mục sưu tầm
+- **Sự kiện**: Rồng xuất hiện, mưa sao băng, boss cộng đồng, lễ hội trăng...
+- **Chính trị**: bầu cử Thị Trưởng, đọc/viết báo
+- **Thời trang**: tùy biến trang phục, bảng xếp hạng fashion
 
-```bash
-cd server-java
-mvn package -DskipTests
-java -jar target/fantasy-realm-server-1.0.0.jar
-```
+---
 
-## Environment Variables
+## 🔑 Tài khoản mặc định
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DB_URL` | `jdbc:postgresql://localhost:5432/fantasyrealm` | PostgreSQL URL |
-| `DB_USER` | `fro` | DB username |
-| `DB_PASS` | `fro123` | DB password |
-| `REDIS_HOST` | `localhost` | Redis host |
-| `GAME_PORT` | `7777` | TCP game port |
-| `HTTP_PORT` | `8080` | Admin API port |
-| `JWT_SECRET` | _(required)_ | Min 32 chars |
-| `ADMIN_USER` | `gm` | GM Dashboard user |
-| `ADMIN_PASS` | `gm_secret_2024` | GM Dashboard password |
+| Loại | Tài khoản | Mật khẩu | Ghi chú |
+|------|-----------|----------|---------|
+| Admin Panel | `admin` | `Admin@2024!` | **Đổi ngay** sau khi đăng nhập |
+| Game API (GM) | `gm` | `gm_secret_2024` | Đổi trong `.env` |
+| PostgreSQL | `fro` | (trong `.env`) | Đổi trước production |
+
+---
+
+## 📄 License
+
+Dự án cá nhân. Vui lòng không phân phối lại mà không có sự cho phép.

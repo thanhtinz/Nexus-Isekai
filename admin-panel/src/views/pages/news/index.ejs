@@ -6,12 +6,12 @@
       <select name="category" onchange="this.form.submit()">
         <option value="">Tất cả danh mục</option>
         <% ['general','update','event','maintenance','notice'].forEach(c=>{ %>
-        <option value="<%= c %>" <%=category===c?'selected':''>><%= c %></option>
+        <option value="<%= c %>" <%=category===c?'selected':''%>><%= c %></option>
         <% }) %>
       </select>
       <select name="server_id" onchange="this.form.submit()">
         <option value="">Tất cả server</option>
-        <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=selectedServer==sv.id?'selected':''>><%= sv.name %></option><% }) %>
+        <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=selectedServer==sv.id?'selected':''%>><%= sv.name %></option><% }) %>
       </select>
     </form>
   </div>

@@ -24,7 +24,7 @@
     <div class="form-group"><label>Sprite</label>
       <select id="edit-sprite">
         <option value="">Không có</option>
-        <% sprites.forEach(s=>{ %><option value="<%= s.id %>" <%=npc.sprite_asset_id===s.id?'selected':''>><%= s.name %></option><% }) %>
+        <% sprites.forEach(s=>{ %><option value="<%= s.id %>" <%=npc.sprite_asset_id===s.id?'selected':''%>><%= s.name %></option><% }) %>
       </select>
     </div>
     <div class="form-group"><label>Shop Items (JSON)</label>

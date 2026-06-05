@@ -8,11 +8,11 @@
     <select name="type" onchange="this.form.submit()">
       <option value="">Tất cả loại</option>
       <% ['merchant','quest','banker','guard','trainer','special'].forEach(t=>{ %>
-      <option value="<%= t %>" <%=type===t?'selected':''>><%= t %></option><% }) %>
+      <option value="<%= t %>" <%=type===t?'selected':''%>><%= t %></option><% }) %>
     </select>
     <select name="zone_id" onchange="this.form.submit()">
       <option value="">Tất cả zone</option>
-      <% for(let i=1;i<=10;i++){ %><option value="<%= i %>" <%=zone_id==i?'selected':'%>''>Zone <%= i %></option><% } %>
+      <% for(let i=1;i<=10;i++){ %><option value="<%= i %>" <%=zone_id==i?'selected':''%>>Zone <%= i %></option><% } %>
     </select>
     <input name="search" value="<%= search %>" placeholder="Tìm tên NPC..." style="width:180px">
     <button type="submit" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i></button>

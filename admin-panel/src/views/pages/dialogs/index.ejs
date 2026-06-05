@@ -3,12 +3,12 @@
   <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap">
     <select name="npc_id" onchange="this.form.submit()">
       <option value="">Tất cả NPC</option>
-      <% npcList.forEach(n=>{ %><option value="<%= n.id %>" <%=npc_id==n.id?'selected':''>><%= n.name %> (#<%= n.template_id %>)</option><% }) %>
+      <% npcList.forEach(n=>{ %><option value="<%= n.id %>" <%=npc_id==n.id?'selected':''%>><%= n.name %> (#<%= n.template_id %>)</option><% }) %>
     </select>
     <select name="lang" onchange="this.form.submit()">
       <option value="">Tất cả ngôn ngữ</option>
-      <option value="vi" <%=lang==='vi'?'selected':'%>''>Tiếng Việt</option>
-      <option value="en" <%=lang==='en'?'selected':'%>''>English</option>
+      <option value="vi" <%=lang==='vi'?'selected':''%>>Tiếng Việt</option>
+      <option value="en" <%=lang==='en'?'selected':''%>>English</option>
     </select>
     <a href="/dialogs/export/vi" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export VI</a>
     <a href="/dialogs/export/en" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export EN</a>

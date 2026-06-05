@@ -10,17 +10,17 @@
     <h3 style="margin-bottom:14px">Thông tin cơ bản</h3>
     <div class="form-group"><label>Tileset</label>
       <select id="e-tile"><option value="">Không có</option>
-      <% tilesets.forEach(t=>{ %><option value="<%= t.id %>" <%=map.tileset_asset_id===t.id?'selected':''>><%= t.name %></option><% }) %>
+      <% tilesets.forEach(t=>{ %><option value="<%= t.id %>" <%=map.tileset_asset_id===t.id?'selected':''%>><%= t.name %></option><% }) %>
       </select>
     </div>
     <div class="form-group"><label>Nhạc nền (BGM)</label>
       <select id="e-bgm"><option value="">Không có</option>
-      <% musics.forEach(m=>{ %><option value="<%= m.id %>" <%=map.bg_music_id===m.id?'selected':''>><%= m.name %></option><% }) %>
+      <% musics.forEach(m=>{ %><option value="<%= m.id %>" <%=map.bg_music_id===m.id?'selected':''%>><%= m.name %></option><% }) %>
       </select>
     </div>
     <div class="form-group"><label>Âm thanh môi trường</label>
       <select id="e-amb"><option value="">Không có</option>
-      <% ambients.forEach(a=>{ %><option value="<%= a.id %>" <%=map.ambient_sound_id===a.id?'selected':''>><%= a.name %></option><% }) %>
+      <% ambients.forEach(a=>{ %><option value="<%= a.id %>" <%=map.ambient_sound_id===a.id?'selected':''%>><%= a.name %></option><% }) %>
       </select>
     </div>
     <button class="btn btn-primary" onclick="saveMap()"><i class="fas fa-save"></i> Lưu</button>

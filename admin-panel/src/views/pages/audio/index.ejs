@@ -30,11 +30,11 @@
   <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap">
     <select name="type" onchange="this.form.submit()">
       <option value="">Tất cả loại</option>
-      <% ['bgm','sfx','voice','ambient'].forEach(t=>{ %><option value="<%= t %>" <%=type===t?'selected':''>><%= {'bgm':'🎵 BGM','sfx':'🔊 SFX','voice':'🎤 Voice','ambient':'🌿 Ambient'}[t] %></option><% }) %>
+      <% ['bgm','sfx','voice','ambient'].forEach(t=>{ %><option value="<%= t %>" <%=type===t?'selected':''%>><%= {'bgm':'🎵 BGM','sfx':'🔊 SFX','voice':'🎤 Voice','ambient':'🌿 Ambient'}[t] %></option><% }) %>
     </select>
     <select name="category" onchange="this.form.submit()">
       <option value="">Tất cả danh mục</option>
-      <% ['combat','ui','nature','npc','event','zone','misc'].forEach(c=>{ %><option value="<%= c %>" <%=category===c?'selected':''>><%= c %></option><% }) %>
+      <% ['combat','ui','nature','npc','event','zone','misc'].forEach(c=>{ %><option value="<%= c %>" <%=category===c?'selected':''%>><%= c %></option><% }) %>
     </select>
     <input name="search" value="<%= search %>" placeholder="Tìm tên..." style="width:180px">
     <button type="submit" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i></button>

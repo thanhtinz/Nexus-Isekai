@@ -2,7 +2,7 @@
 <div class="filter-bar">
   <form method="GET" style="display:flex;gap:10px">
     <select name="server_id" onchange="this.form.submit()">
-      <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=selectedServer?.id==sv.id?'selected':''>><%= sv.name %></option><% }) %>
+      <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=selectedServer?.id==sv.id?'selected':''%>><%= sv.name %></option><% }) %>
     </select>
     <% boards.forEach(b=>{ %>
     <a href="?server_id=<%= selectedServer?.id %>&board=<%= b %>" class="btn <%= selectedBoard===b?'btn-primary':'btn-ghost' %> btn-sm"><%= b %></a>

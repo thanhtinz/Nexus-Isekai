@@ -4,12 +4,12 @@
     <select name="action" onchange="this.form.submit()">
       <option value="">Tất cả hành động</option>
       <% ['kick','give_gold','broadcast','trigger_event','create_giftcode','add_server','start_server','stop_server'].forEach(a=>{ %>
-      <option value="<%= a %>" <%=action===a?'selected':''>><%= a %></option>
+      <option value="<%= a %>" <%=action===a?'selected':''%>><%= a %></option>
       <% }) %>
     </select>
     <select name="server_id" onchange="this.form.submit()">
       <option value="">Server logs</option>
-      <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=selectedServer==sv.id?'selected':''>><%= sv.name %></option><% }) %>
+      <% servers.forEach(sv=>{ %><option value="<%= sv.id %>" <%=selectedServer==sv.id?'selected':''%>><%= sv.name %></option><% }) %>
     </select>
     <select name="limit" onchange="this.form.submit()">
       <option>100</option><option>200</option><option>500</option>

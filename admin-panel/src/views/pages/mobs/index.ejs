@@ -12,7 +12,7 @@
   <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap">
     <select name="type" onchange="this.form.submit()">
       <option value="">Tất cả loại</option>
-      <% ['normal','elite','boss','miniboss','passive'].forEach(t=>{ %><option value="<%= t %>" <%=type===t?'selected':''>><%= t %></option><% }) %>
+      <% ['normal','elite','boss','miniboss','passive'].forEach(t=>{ %><option value="<%= t %>" <%=type===t?'selected':''%>><%= t %></option><% }) %>
     </select>
     <input name="search" value="<%= search %>" placeholder="Tìm tên mob..." style="width:180px">
     <button type="submit" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i></button>

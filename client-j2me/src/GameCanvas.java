@@ -71,7 +71,7 @@ public class GameCanvas extends javax.microedition.lcdui.game.GameCanvas impleme
             posX += dx; posY += dy;
             try {
                 PacketBuilder pb = new PacketBuilder();
-                pb.writeByte(0x10); // C_MOVE
+                pb.writeShort(0x10); // C_MOVE (packet ID = 2 bytes)
                 pb.writeFloat(posX); pb.writeFloat(posY); pb.writeByte(0);
                 GameConnection.getInstance().send(pb.toBytes());
             } catch (IOException e) {}
