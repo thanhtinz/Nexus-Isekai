@@ -74,9 +74,46 @@ public class InventoryManager {
         player.send(p);
     }
 
+    /** Bảng hiệu ứng item: itemId -> loại hiệu ứng. Mở rộng khi thêm item. */
+    private record ItemEffect(String type, long value) {}
+    private static final Map<Long, ItemEffect> EFFECTS = Map.ofEntries(
+        // Item tiền: cộng gold khi dùng
+        Map.entry(9002L, new ItemEffect("GOLD", 100L)),   // Túi vàng nhỏ
+        Map.entry(9003L, new ItemEffect("GOLD", 1000L)),  // Túi vàng lớn
+        // Thức ăn / thuốc: hiện chỉ tiêu thụ + thông báo (HP/energy chưa có trong session)
+        Map.entry(2001L, new ItemEffect("CONSUME", 0L)),  // Bình máu
+        Map.entry(2010L, new ItemEffect("CONSUME", 0L))   // Đồ ăn
+    );
+
     public void useItem(PlayerSession player, long itemId, int qty) {
-        // TODO: item-effect table
-        log.debug("Use item {} x{} by {}", itemId, qty, player.getCharacterName());
+        if (qty <= 0) qty = 1;
+        // Phải có đủ item mới dùng được
+        if (!has(player.getPlayerId(), itemId, qty)) {
+            player.send(new Packet(PacketType.S_NOTIFY).writeString("Bạn không có vật phẩm này"));
+            return;
+        }
+        ItemEffect fx = EFFECTS.get(itemId);
+        if (fx == null) {
+            player.send(new Packet(PacketType.S_NOTIFY).writeString("Vật phẩm này không thể sử dụng"));
+            return;
+        }
+
+        // Áp hiệu ứng
+        switch (fx.type()) {
+            case "GOLD" -> {
+                long gain = fx.value() * qty;
+                player.setGold(player.getGold() + gain);
+                remove(player.getPlayerId(), itemId, qty);
+                player.send(new Packet(PacketType.S_NOTIFY).writeString("Nhận " + gain + " gold"));
+            }
+            case "CONSUME" -> {
+                remove(player.getPlayerId(), itemId, qty);
+                player.send(new Packet(PacketType.S_NOTIFY).writeString("Đã sử dụng vật phẩm"));
+            }
+            default -> log.debug("Hiệu ứng chưa hỗ trợ: {}", fx.type());
+        }
+        sendInventory(player);
+        log.debug("Use item {} x{} ({}) by {}", itemId, qty, fx.type(), player.getCharacterName());
     }
 
     public void dropItem(PlayerSession player, long itemId, int qty) {

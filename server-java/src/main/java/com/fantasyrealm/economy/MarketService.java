@@ -58,7 +58,16 @@ public class MarketService {
 
     @Transactional
     public long createListing(long sellerId, long itemId, int quantity, long price) {
-        // TODO: check inventory
+        if (quantity <= 0 || price < 0) return -1L;
+        // Kiểm tra người bán có đủ vật phẩm
+        if (!inventory.has(sellerId, itemId, quantity)) {
+            log.warn("Listing rejected: seller {} không đủ item {} x{}", sellerId, itemId, quantity);
+            return -1L;
+        }
+        // Trừ vật phẩm khỏi túi (ký gửi lên chợ)
+        if (!inventory.remove(sellerId, itemId, quantity)) {
+            return -1L;
+        }
         MarketListingEntity e = new MarketListingEntity();
         e.setSellerId(sellerId); e.setItemId(itemId);
         e.setQuantity(quantity); e.setPrice(price);

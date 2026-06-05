@@ -21,6 +21,7 @@ public class PacketDispatcher {
     @Autowired private com.fantasyrealm.npc.NpcHandler npcHandler;
     @Autowired private com.fantasyrealm.leaderboard.LeaderboardHandler leaderboard;
     @Autowired private CharCreationHandler charCreation;
+    @Autowired private CharacterHandler    character;
 
     @FunctionalInterface
     interface Handler { void handle(PlayerSession s, Packet p); }
@@ -49,7 +50,7 @@ public class PacketDispatcher {
         handlers.put(PacketType.C_MAIL_SEND,  social::onMailSend);
         handlers.put(PacketType.C_GIFT_SEND,  social::onGiftSend);
         handlers.put(PacketType.C_DONATE,     social::onDonate);
-        handlers.put(PacketType.C_MARRY_PROPOSE, (s,p) -> {});
+        handlers.put(PacketType.C_MARRY_PROPOSE, (s,p) -> s.send(new Packet(PacketType.S_NOTIFY).writeString("Tính năng kết hôn đang phát triển")));
 
         // Economy
         handlers.put(PacketType.C_MARKET_LIST,  economy::onMarketList);
@@ -78,27 +79,11 @@ public class PacketDispatcher {
         // Character info
         handlers.put(PacketType.C_CHAR_CREATE_OPTIONS, charCreation::onRequestOptions);
         handlers.put(PacketType.C_CHAR_CREATE,         charCreation::onCreate);
-        handlers.put(PacketType.C_CHAR_INFO_REQ, (s, p) -> {
-            s.send(new Packet(PacketType.S_CHAR_INFO)
-                .writeLong(s.getPlayerId())
-                .writeString(s.getCharacterName())
-                .writeInt(s.getFaction() != null ? s.getFaction().id : 0)
-                .writeInt(s.getLevel())
-                .writeLong(s.getGold())
-                .writeString(s.getOutfitJson()));
-        });
+        handlers.put(PacketType.C_CHAR_INFO_REQ,       character::onCharInfoReq);
+        handlers.put(PacketType.C_CHANGE_OUTFIT,       character::onChangeOutfit);
 
-        handlers.put(PacketType.C_CHANGE_OUTFIT, (s, p) -> {
-            String outfit = p.readString();
-            s.setOutfitJson(outfit);
-            Packet b = new Packet(PacketType.S_CHANGE_OUTFIT)
-                .writeLong(s.getPlayerId()).writeString(outfit);
-            com.fantasyrealm.zone.ZoneManager zm = null;
-            // broadcast via spring context; but to keep this file compile-clean we inline
-        });
-
-        handlers.put(PacketType.C_EVENT_JOIN,   (s, p) -> {});
-        handlers.put(PacketType.C_TREASURE_FIND,(s, p) -> {});
+        handlers.put(PacketType.C_EVENT_JOIN,   (s, p) -> s.send(new Packet(PacketType.S_NOTIFY).writeString("Tính năng sự kiện đang phát triển")));
+        handlers.put(PacketType.C_TREASURE_FIND,(s, p) -> s.send(new Packet(PacketType.S_NOTIFY).writeString("Tính năng săn kho báu đang phát triển")));
     }
 
     private static final java.util.Set<PacketType> NO_AUTH = java.util.Set.of(

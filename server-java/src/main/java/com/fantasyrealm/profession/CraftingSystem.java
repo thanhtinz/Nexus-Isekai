@@ -75,21 +75,30 @@ public class CraftingSystem {
         timer.schedule(() -> {
             inventory.add(player.getPlayerId(), r.resultItem(), r.resultQty());
             profService.addExp(player.getPlayerId(), r.profession(), r.levelReq() * 10);
-            player.send(new Packet(PacketType.S_ACHIEVEMENT)
-                .writeString("craft_done").writeString("Chế tạo xong: " + r.name())
-                .writeString("x" + r.resultQty()).writeLong(0));
+            player.send(new Packet(PacketType.S_CRAFT_DONE)
+                .writeString(r.name())
+                .writeLong(r.resultItem())
+                .writeInt(r.resultQty()));
             log.info("Craft done: {} -> {} by {}", r.name(), r.resultQty(), player.getCharacterName());
         }, r.craftSecs(), TimeUnit.SECONDS);
     }
 
     public void sendRecipeList(PlayerSession player) {
-        Packet p = new Packet(PacketType.S_NOTIFY); // Reuse NOTIFY with recipe list prefix
-        int count = 0;
+        // Gửi danh sách công thức người chơi đủ cấp độ làm
+        java.util.List<Recipe> available = new java.util.ArrayList<>();
         for (Recipe r : recipes.values()) {
-            if (profService.getLevel(player.getPlayerId(), r.profession()) >= r.levelReq()) count++;
+            if (profService.getLevel(player.getPlayerId(), r.profession()) >= r.levelReq())
+                available.add(r);
         }
-        // TODO: dedicated packet type; for now just notify
-        player.send(new Packet(PacketType.S_ERROR).writeString(count + " recipe available. Open Craft UI."));
+        Packet p = new Packet(PacketType.S_CRAFT_LIST).writeInt(available.size());
+        for (Recipe r : available) {
+            p.writeString(r.name())
+             .writeLong(r.resultItem())
+             .writeInt(r.resultQty())
+             .writeInt(r.levelReq())
+             .writeInt(r.craftSecs());
+        }
+        player.send(p);
     }
 
     public Collection<Recipe> getAllRecipes() { return recipes.values(); }

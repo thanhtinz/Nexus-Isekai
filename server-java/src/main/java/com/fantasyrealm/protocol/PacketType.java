@@ -54,6 +54,7 @@ public enum PacketType {
     // Gameplay Actions (0x90-0x9F)  — sub-action byte inside payload
     C_ACTION(0x90), S_ACTION_RESULT(0x91),
     S_INVENTORY(0x92),
+    S_CRAFT_LIST(0x93), S_CRAFT_DONE(0x94),
 
     // World/Time (0xA0-0xAF)
     S_TIME_UPDATE(0xA0), S_SEASON_CHANGE(0xA1),
