@@ -1,0 +1,66 @@
+
+<div class="card" style="max-width:680px">
+  <div class="card-header">
+    <h3><i class="fas fa-wand-sparkles"></i> <%= skill?'Sửa':'Thêm' %> kỹ năng</h3>
+    <a href="/skills" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  </div>
+  <form method="POST" action="/skills<%= skill?'/'+skill.id:'' %>">
+    <div class="form-row">
+      <div class="form-group"><label>Mã code *</label><input name="skill_code" value="<%= skill?.skill_code||'' %>" placeholder="power_strike" required></div>
+      <div class="form-group"><label>Phân loại *</label>
+        <select name="category">
+          <% Object.keys(CATEGORIES).forEach(k=>{ %><option value="<%= k %>" <%= (skill?.category||(typeof query!=='undefined'&&query.category))===k?'selected':'' %>><%= CATEGORIES[k] %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Tên (EN) *</label><input name="name" value="<%= skill?.name||'' %>" required></div>
+      <div class="form-group"><label>Tên (VN)</label><input name="name_vn" value="<%= skill?.name_vn||'' %>"></div>
+    </div>
+    <div class="form-group"><label>Mô tả</label><textarea name="description" rows="2"><%= skill?.description||'' %></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Class / Nghề <small style="color:var(--muted)">(trống = mọi)</small></label>
+        <select name="class_code"><option value="">— Mọi class —</option>
+        <% professions.forEach(pr=>{ %><option value="<%= pr.code %>" <%= skill?.class_code===pr.code?'selected':'' %>><%= pr.name_vn||pr.name %></option><% }) %>
+        </select>
+      </div>
+      <div class="form-group"><label>Phe</label>
+        <select name="faction_id">
+          <option value="0" <%= !skill||skill.faction_id===0?'selected':'' %>>Mọi phe</option>
+          <option value="1" <%= skill?.faction_id===1?'selected':'' %>>Đế Quốc Ánh Sáng</option>
+          <option value="2" <%= skill?.faction_id===2?'selected':'' %>>Liên Minh Elf</option>
+          <option value="3" <%= skill?.faction_id===3?'selected':'' %>>Vương Quốc Thú Nhân</option>
+          <option value="4" <%= skill?.faction_id===4?'selected':'' %>>Ma Tộc</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Loại hiệu ứng</label>
+        <select name="effect_type">
+          <% Object.keys(EFFECT_TYPES).forEach(k=>{ %><option value="<%= k %>" <%= skill?.effect_type===k?'selected':'' %>><%= EFFECT_TYPES[k] %></option><% }) %>
+        </select>
+      </div>
+      <div class="form-group"><label>Hệ số (power)</label><input name="power" type="number" step="0.1" value="<%= skill?.power??1.0 %>"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Cấp mở</label><input name="level_req" type="number" value="<%= skill?.level_req??1 %>"></div>
+      <div class="form-group"><label>Mana</label><input name="mana_cost" type="number" value="<%= skill?.mana_cost??10 %>"></div>
+      <div class="form-group"><label>Cooldown (ms)</label><input name="cooldown_ms" type="number" value="<%= skill?.cooldown_ms??3000 %>"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Tầm / bán kính (px)</label><input name="range_px" type="number" value="<%= skill?.range_px??48 %>"></div>
+      <div class="form-group"><label>Thời gian buff (ms)</label><input name="buff_duration_ms" type="number" value="<%= skill?.buff_duration_ms??10000 %>"></div>
+      <div class="form-group"><label>Thứ tự</label><input name="sort_order" type="number" value="<%= skill?.sort_order??0 %>"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Icon</label>
+        <select name="icon_asset_id"><option value="">— không —</option>
+        <% icons.forEach(a=>{ %><option value="<%= a.id %>" <%= skill?.icon_asset_id===a.id?'selected':'' %>><%= a.name %></option><% }) %>
+        </select>
+      </div>
+      <div class="form-group"><label>Mã animation</label><input name="anim_code" value="<%= skill?.anim_code||'' %>" placeholder="skill_phantom_lotus"></div>
+    </div>
+    <% if(skill){ %><div class="form-group"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" name="is_enabled" value="1" <%= skill.is_enabled?'checked':'' %>> Bật</label></div><% } %>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Lưu</button>
+  </form>
+</div>

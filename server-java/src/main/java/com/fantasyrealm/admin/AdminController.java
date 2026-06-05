@@ -18,6 +18,8 @@ public class AdminController {
     @Autowired private EventService      events;
     @Autowired private WorldClock        worldClock;
     @Autowired private LeaderboardService leaderboard;
+    @Autowired private com.fantasyrealm.combat.SkillService skillService;
+    @Autowired private com.fantasyrealm.combat.MobManager   mobManager;
 
     @GetMapping("/status")
     public Map<String,Object> status() {
@@ -130,6 +132,20 @@ public class AdminController {
         sessions.broadcastAll(new Packet(PacketType.S_CHAT)
             .writeLong(0L).writeString("[GM]").writeString(msg).writeByte(3));
         return ResponseEntity.ok("Sent to " + sessions.onlineCount() + " players");
+    }
+
+    /** Nạp lại skill từ DB sau khi admin thêm/sửa (không cần restart server). */
+    @PostMapping("/reload/skills")
+    public ResponseEntity<String> reloadSkills() {
+        skillService.reload();
+        return ResponseEntity.ok("Skills reloaded");
+    }
+
+    /** Nạp lại quái từ template DB. */
+    @PostMapping("/reload/mobs")
+    public ResponseEntity<String> reloadMobs() {
+        mobManager.spawnFromTemplates();
+        return ResponseEntity.ok("Mobs respawned from templates");
     }
 
     @GetMapping("/leaderboard/{type}")

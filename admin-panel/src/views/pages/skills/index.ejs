@@ -1,0 +1,52 @@
+
+<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap">
+  <a href="/skills/new" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm kỹ năng</a>
+  <a href="/skills/export/json" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export JSON</a>
+  <span style="color:var(--muted);font-size:.85rem;margin-left:auto">Thêm tới đâu hệ thống lưu tới đó — game server đọc động qua Export JSON</span>
+</div>
+
+<% const FAC={0:'Mọi phe',1:'Ánh Sáng',2:'Elf',3:'Thú Nhân',4:'Ma Tộc'}; %>
+<% Object.keys(CATEGORIES).forEach(cat=>{ const list=skills.filter(s=>s.category===cat); %>
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-<%= {main:'star',sub:'circle',special:'bolt',unique:'gem'}[cat] %>"></i> Kỹ năng <%= CATEGORIES[cat] %> <span style="color:var(--muted);font-size:.8rem">(<%= list.length %>)</span></h3>
+    <a href="/skills/new?category=<%= cat %>" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i></a>
+  </div>
+  <% if(!list.length){ %><div style="color:var(--muted);font-size:.85rem;padding:12px">Chưa có kỹ năng <%= CATEGORIES[cat].toLowerCase() %>.</div>
+  <% } else { %>
+  <table style="width:100%;border-collapse:collapse;font-size:.86rem">
+    <thead><tr style="text-align:left;color:var(--muted);border-bottom:1px solid var(--border)">
+      <th style="padding:6px">Tên</th><th>Class</th><th>Phe</th><th>Hiệu ứng</th><th>Cấp</th><th>Mana</th><th>CD</th><th></th>
+    </tr></thead>
+    <tbody>
+    <% list.forEach(s=>{ %>
+      <tr style="border-bottom:1px solid var(--border);<%= s.is_enabled?'':'opacity:.45' %>">
+        <td style="padding:6px">
+          <% if(s.icon_url){ %><img src="<%= s.icon_url %>" style="width:24px;height:24px;vertical-align:middle;image-rendering:pixelated;margin-right:6px"><% } %>
+          <strong><%= s.name_vn||s.name %></strong>
+          <div style="font-size:.72rem;color:var(--muted);font-family:monospace"><%= s.skill_code %></div>
+        </td>
+        <td><%= s.class_code||'—' %></td>
+        <td><%= FAC[s.faction_id]||'?' %></td>
+        <td><%= EFFECT_TYPES[s.effect_type]||s.effect_type %> <span style="color:var(--muted)">×<%= s.power %></span></td>
+        <td><%= s.level_req %></td>
+        <td><%= s.mana_cost %></td>
+        <td><%= (s.cooldown_ms/1000).toFixed(1) %>s</td>
+        <td style="white-space:nowrap">
+          <a href="/skills/<%= s.id %>/edit" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+          <button class="btn btn-warn btn-sm" onclick="tog(<%= s.id %>)"><i class="fas fa-power-off"></i></button>
+          <button class="btn btn-danger btn-sm" onclick="del(<%= s.id %>)"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+<% }) %>
+
+<script>
+async function del(id){ if(!confirm('Xóa kỹ năng này?'))return;
+  const r=await api('DELETE','/skills/'+id); toast(r.ok?'Đã xóa':r.error,r.ok); if(r.ok)location.reload(); }
+async function tog(id){ const r=await api('POST','/skills/'+id+'/toggle'); if(r.ok)location.reload(); }
+</script>

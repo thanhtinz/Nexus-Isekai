@@ -16,11 +16,11 @@ namespace FantasyRealm.UI
         public GameObject skillSlotPrefab;  // Button + Text(tên) + Image(cooldown overlay)
 
         [System.Serializable]
-        public class SkillInfo { public int id; public string name; public int mana, cooldownMs, type; }
+        public class SkillInfo { public string code; public string name; public int mana, cooldownMs; public string type; }
 
         private readonly List<SkillInfo> _skills = new();
-        private readonly Dictionary<int, GameObject> _slots = new();
-        private readonly Dictionary<int, float> _cooldownEnd = new(); // skillId -> Time.time hết cd
+        private readonly Dictionary<string, GameObject> _slots = new();
+        private readonly Dictionary<string, float> _cooldownEnd = new(); // skillCode -> Time.time hết cd
 
         // mob đang được nhắm (set từ MobView khi click) — 0 nếu skill AoE/self
         public long SelectedTargetId { get; set; }
@@ -47,8 +47,8 @@ namespace FantasyRealm.UI
             _skills.Clear();
             for (int i = 0; i < count; i++) {
                 _skills.Add(new SkillInfo {
-                    id = p.ReadInt(), name = p.ReadString(),
-                    mana = p.ReadInt(), cooldownMs = p.ReadInt(), type = p.ReadByte()
+                    code = p.ReadString(), name = p.ReadString(),
+                    mana = p.ReadInt(), cooldownMs = p.ReadInt(), type = p.ReadString()
                 });
             }
             Rebuild();
@@ -63,30 +63,29 @@ namespace FantasyRealm.UI
                 var go = Instantiate(skillSlotPrefab, slotContainer);
                 var label = go.GetComponentInChildren<Text>();
                 if (label) label.text = sk.name;
-                int id = sk.id;
+                string code = sk.code;
                 var btn = go.GetComponent<Button>();
-                if (btn) btn.onClick.AddListener(() => UseSkill(id));
-                _slots[id] = go;
+                if (btn) btn.onClick.AddListener(() => UseSkill(code));
+                _slots[code] = go;
             }
         }
 
-        void UseSkill(int skillId) {
+        void UseSkill(string skillCode) {
             // còn cooldown?
-            if (_cooldownEnd.TryGetValue(skillId, out float end) && Time.time < end) return;
+            if (_cooldownEnd.TryGetValue(skillCode, out float end) && Time.time < end) return;
             GameNetworkManager.Instance?.Send(new Packet(PacketType.C_USE_SKILL)
-                .WriteInt(skillId).WriteLong(SelectedTargetId));
+                .WriteString(skillCode).WriteLong(SelectedTargetId));
         }
 
         void OnSkillResult(Packet p) {
-            int skillId = p.ReadInt(); int mp = p.ReadInt(); int hp = p.ReadInt();
-            // bắt đầu cooldown hiển thị
-            var sk = _skills.Find(x => x.id == skillId);
-            if (sk != null) _cooldownEnd[skillId] = Time.time + sk.cooldownMs / 1000f;
+            string code = p.ReadString(); int mp = p.ReadInt(); int hp = p.ReadInt();
+            var sk = _skills.Find(x => x.code == code);
+            if (sk != null) _cooldownEnd[code] = Time.time + sk.cooldownMs / 1000f;
         }
 
         void OnSkillCooldown(Packet p) {
-            int skillId = p.ReadInt(); int remainMs = p.ReadInt();
-            _cooldownEnd[skillId] = Time.time + remainMs / 1000f;
+            string code = p.ReadString(); int remainMs = p.ReadInt();
+            _cooldownEnd[code] = Time.time + remainMs / 1000f;
         }
 
         void Update() {
@@ -95,7 +94,7 @@ namespace FantasyRealm.UI
                 if (!_cooldownEnd.TryGetValue(kv.Key, out float end)) continue;
                 var overlay = kv.Value.transform.Find("Cooldown")?.GetComponent<Image>();
                 if (overlay == null) continue;
-                var sk = _skills.Find(x => x.id == kv.Key);
+                var sk = _skills.Find(x => x.code == kv.Key);
                 float total = sk != null ? sk.cooldownMs / 1000f : 1f;
                 float remain = end - Time.time;
                 overlay.fillAmount = remain > 0 ? Mathf.Clamp01(remain / total) : 0;

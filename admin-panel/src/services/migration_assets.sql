@@ -202,3 +202,35 @@ CREATE TABLE IF NOT EXISTS char_options (
 
 CREATE INDEX IF NOT EXISTS idx_charopt_slot ON char_options(slot, is_enabled);
 CREATE INDEX IF NOT EXISTS idx_charrace_enabled ON char_races(is_enabled, sort_order);
+
+-- ============================================================
+-- SKILLS — quản lý kỹ năng động (thêm tới đâu lưu tới đó)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS skills (
+  id SERIAL PRIMARY KEY,
+  skill_code VARCHAR(48) UNIQUE NOT NULL,   -- power_strike, holy_smite...
+  name VARCHAR(64) NOT NULL,
+  name_vn VARCHAR(64),
+  description TEXT,
+  -- Phân loại
+  category VARCHAR(16) DEFAULT 'main',       -- main(chính) | sub(phụ) | special(đặc biệt) | unique(riêng)
+  class_code VARCHAR(32),                    -- gắn theo class/nghề; trống = mọi class
+  faction_id INT DEFAULT 0,                  -- 0 = mọi phe; 1-4 theo phe
+  -- Hiệu ứng
+  effect_type VARCHAR(16) DEFAULT 'damage',  -- damage | aoe_damage | heal | buff_atk | buff_def | drain
+  power REAL DEFAULT 1.0,                     -- hệ số sát thương / tỉ lệ hồi
+  -- Tham số dùng
+  level_req INT DEFAULT 1,
+  mana_cost INT DEFAULT 10,
+  cooldown_ms INT DEFAULT 3000,
+  range_px INT DEFAULT 48,                    -- tầm dùng (aoe = bán kính)
+  buff_duration_ms INT DEFAULT 10000,
+  -- Hiển thị
+  icon_asset_id INT REFERENCES assets(id),
+  anim_code VARCHAR(48),                      -- mã animation skill (sprite)
+  sort_order INT DEFAULT 0,
+  is_enabled BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_skills_class ON skills(class_code, faction_id, is_enabled);
+CREATE INDEX IF NOT EXISTS idx_skills_cat ON skills(category, sort_order);

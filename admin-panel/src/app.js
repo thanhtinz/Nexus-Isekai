@@ -66,6 +66,7 @@ app.use('/api/v1',     require('./routes/api'));
 // ── Content Management
 app.use('/assets',     require('./middleware/auth'), require('./routes/assets'));
 app.use('/charcreation',require('./middleware/auth'), require('./routes/charcreation'));
+app.use('/skills',      require('./middleware/auth'), require('./routes/skills'));
 app.use('/items',      require('./middleware/auth'), require('./routes/items'));
 app.use('/npcs',       require('./middleware/auth'), require('./routes/npcs'));
 app.use('/dialogs',    require('./middleware/auth'), require('./routes/dialogs'));
