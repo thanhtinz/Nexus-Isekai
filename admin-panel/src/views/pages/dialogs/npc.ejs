@@ -1,0 +1,96 @@
+
+<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+  <a href="/dialogs" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  <a href="/npcs/<%= npc?.id %>" class="btn btn-ghost btn-sm"><i class="fas fa-user-tie"></i> <%= npc?.name %></a>
+  <h2>Lời thoại NPC: <%= npc?.name_vn||npc?.name %></h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <!-- Dialog editor -->
+  <div class="card">
+    <h3 style="margin-bottom:16px"><i class="fas fa-pen"></i> Thêm / Sửa node</h3>
+    <div class="form-group"><label>Node Key *</label>
+      <input id="d-key" placeholder="start, shop, quest1, goodbye..." list="node-suggestions">
+      <datalist id="node-suggestions">
+        <option value="start"><option value="shop"><option value="quest1"><option value="quest2"><option value="story1"><option value="story2"><option value="goodbye">
+      </datalist>
+    </div>
+    <div class="form-group"><label>Ngôn ngữ</label>
+      <select id="d-lang"><option value="vi">Tiếng Việt</option><option value="en">English</option></select>
+    </div>
+    <div class="form-group"><label>Lời thoại *</label>
+      <textarea id="d-text" rows="4" placeholder="Chào phiêu khách! Tôi có thể giúp gì cho bạn?"></textarea>
+    </div>
+    <div class="form-group"><label>Điều kiện <small style="color:var(--muted)">(VD: level>=10, faction==2)</small></label>
+      <input id="d-cond" placeholder="Không bắt buộc">
+    </div>
+    <div class="form-group"><label>Voice Audio</label>
+      <select id="d-voice">
+        <option value="">Không có voice</option>
+        <% voices.forEach(v=>{ %><option value="<%= v.id %>"><%= v.name %></option><% }) %>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Lựa chọn <small style="color:var(--muted)">(JSON array)</small></label>
+      <textarea id="d-choices" rows="8" style="font-family:monospace;font-size:.78rem" placeholder='[
+  {"text": "Mua hàng", "nextNode": "shop", "action": "SHOP:1001"},
+  {"text": "Kể chuyện", "nextNode": "story1", "action": null},
+  {"text": "Tạm biệt", "nextNode": null, "action": "CLOSE"}
+]'></textarea>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="saveNode()"><i class="fas fa-save"></i> Lưu node</button>
+      <button class="btn btn-ghost" onclick="clearForm()"><i class="fas fa-times"></i> Clear</button>
+    </div>
+  </div>
+
+  <!-- Existing nodes -->
+  <div class="card">
+    <h3 style="margin-bottom:14px"><i class="fas fa-list"></i> Nodes hiện tại (<%= dialogs.length %>)</h3>
+    <% dialogs.forEach(d=>{ %>
+    <div style="padding:10px;background:#0f0f1a;border-radius:8px;margin-bottom:8px;border:1px solid var(--border)" onclick="loadNode('<%= d.node_key %>','<%= d.lang %>',`<%= d.text?.replace(/`/g,'\`') %>`,`<%= JSON.stringify(d.choices||[]).replace(/`/g,'\`') %>`,<%= d.voice_asset_id||'null' %>,`<%= d.condition||'' %>`)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <code style="color:#c4b5fd"><%= d.node_key %></code>
+        <div style="display:flex;gap:4px">
+          <span class="badge badge-blue"><%= d.lang %></span>
+          <% if(d.voice_url){ %><span class="badge badge-green">🔊</span><% } %>
+        </div>
+      </div>
+      <div style="font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= d.text?.substring(0,60) %></div>
+      <% if(d.voice_url){ %><audio controls src="<%= d.voice_url %>" style="height:22px;width:100%;margin-top:4px" onclick="event.stopPropagation()"></audio><% } %>
+      <div style="display:flex;gap:4px;margin-top:6px" onclick="event.stopPropagation()">
+        <button class="btn btn-danger btn-sm" onclick="delDialog(<%= d.id %>)"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+    <% }) %>
+    <% if(!dialogs.length){ %><p style="color:var(--muted);font-size:.85rem">Chưa có node nào. Tạo node "start" trước.</p><% } %>
+  </div>
+</div>
+
+<script>
+const NPC_ID = <%= npc?.id||0 %>;
+async function saveNode(){
+  const key=document.getElementById('d-key').value.trim();
+  const text=document.getElementById('d-text').value.trim();
+  if(!key||!text)return toast('Nhập node key và lời thoại',false);
+  let choices='[]';
+  try{choices=document.getElementById('d-choices').value.trim()||'[]';JSON.parse(choices);}
+  catch(e){return toast('JSON lựa chọn không hợp lệ: '+e.message,false);}
+  const r=await api('POST',`/dialogs/npc/${NPC_ID}/save`,{
+    node_key:key, text, choices, lang:document.getElementById('d-lang').value,
+    voice_asset_id:document.getElementById('d-voice').value||null,
+    condition:document.getElementById('d-cond').value||null
+  });
+  toast(r.ok?'Đã lưu node: '+key:r.error,r.ok);
+  if(r.ok)setTimeout(()=>location.reload(),800);
+}
+function loadNode(key,lang,text,choices,voice,cond){
+  document.getElementById('d-key').value=key;
+  document.getElementById('d-lang').value=lang;
+  document.getElementById('d-text').value=text;
+  try{document.getElementById('d-choices').value=JSON.stringify(JSON.parse(choices),null,2);}catch(e){document.getElementById('d-choices').value=choices;}
+  document.getElementById('d-voice').value=voice||'';
+  document.getElementById('d-cond').value=cond||'';
+}
+function clearForm(){['d-key','d-text','d-choices','d-cond'].forEach(id=>document.getElementById(id).value='');}
+async function delDialog(id){if(!confirm('Xóa node này?'))return;const r=await api('DELETE','/dialogs/'+id);toast(r.ok?'Đã xóa':r.error,r.ok);if(r.ok)location.reload();}
+</script>

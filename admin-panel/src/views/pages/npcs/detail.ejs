@@ -1,0 +1,75 @@
+
+<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+  <a href="/npcs" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  <h2><%= npc.name_vn||npc.name %></h2>
+  <span class="badge badge-blue"><%= npc.type %></span>
+  <% if(npc.has_shop){ %><span class="badge badge-yellow">🏪 Shop</span><% } %>
+  <% if(npc.has_dialog){ %><span class="badge badge-green">💬 Dialog</span><% } %>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <!-- Basic info edit -->
+  <div class="card">
+    <h3 style="margin-bottom:16px">Thông tin cơ bản</h3>
+    <div style="display:flex;gap:16px;align-items:start;margin-bottom:16px">
+      <div style="width:72px;height:72px;background:#0f0f1a;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <% if(npc.sprite_url){ %><img src="<%= npc.sprite_url %>" style="max-width:100%;max-height:100%;object-fit:contain">
+        <% } else { %><i class="fas fa-user-tie" style="font-size:2rem;color:var(--muted)"></i><% } %>
+      </div>
+      <div>
+        <strong style="font-size:1.1rem"><%= npc.name_vn||npc.name %></strong><br>
+        <small style="color:var(--muted)"><%= npc.name %> | Template #<%= npc.template_id %></small><br>
+        <small style="color:var(--muted)">Zone <%= npc.zone_id %> @ (<%= npc.default_x %>, <%= npc.default_y %>)</small>
+      </div>
+    </div>
+    <div class="form-group"><label>Sprite</label>
+      <select id="edit-sprite">
+        <option value="">Không có</option>
+        <% sprites.forEach(s=>{ %><option value="<%= s.id %>" <%=npc.sprite_asset_id===s.id?'selected':''>><%= s.name %></option><% }) %>
+      </select>
+    </div>
+    <div class="form-group"><label>Shop Items (JSON)</label>
+      <textarea id="edit-shop" rows="6" style="font-family:monospace;font-size:.78rem"><%= JSON.stringify(npc.shop_items||[],null,2) %></textarea>
+      <small style="color:var(--muted)">[{itemId:1001, price:100, stock:-1}]</small>
+    </div>
+    <div class="form-group"><label>Lịch trình (JSON)</label>
+      <textarea id="edit-sched" rows="6" style="font-family:monospace;font-size:.78rem"><%= JSON.stringify(npc.schedule||[],null,2) %></textarea>
+      <small style="color:var(--muted)">[{time:"DAY", tx:110, ty:80, activity:"selling"}]</small>
+    </div>
+    <button class="btn btn-primary" onclick="saveNpc()"><i class="fas fa-save"></i> Lưu thay đổi</button>
+  </div>
+
+  <!-- Dialog nodes -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-comments"></i> Lời thoại (<%= dialogs.length %> node)</h3>
+      <a href="/dialogs/npc/<%= npc.id %>" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Sửa lời thoại</a>
+    </div>
+    <% dialogs.slice(0,10).forEach(d=>{ %>
+    <div style="padding:8px;background:#0f0f1a;border-radius:6px;margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <code style="color:#c4b5fd;font-size:.8rem"><%= d.node_key %></code>
+        <span class="badge badge-gray"><%= d.lang %></span>
+      </div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= d.text?.substring(0,60) %>...</div>
+      <% if(d.voice_url){ %><div style="margin-top:4px"><audio controls src="<%= d.voice_url %>" style="height:24px;width:100%"></audio></div><% } %>
+    </div>
+    <% }) %>
+    <% if(!dialogs.length){ %><p style="color:var(--muted);font-size:.85rem">Chưa có lời thoại nào</p><% } %>
+  </div>
+</div>
+<script>
+const NPC_ID = <%= npc.id %>;
+async function saveNpc(){
+  const r=await api('POST',`/npcs/${NPC_ID}/edit`,{
+    name:'<%= npc.name %>',name_vn:'<%= npc.name_vn||'' %>',
+    type:'<%= npc.type %>',faction_id:<%= npc.faction_id||0 %>,
+    zone_id:<%= npc.zone_id %>,default_x:<%= npc.default_x %>,default_y:<%= npc.default_y %>,
+    has_shop:<%= npc.has_shop %>,has_dialog:<%= npc.has_dialog %>,
+    description:'<%= (npc.description||'').replace(/'/g,"\'")||'' %>',
+    sprite_asset_id:document.getElementById('edit-sprite').value||null,
+    shop_items:document.getElementById('edit-shop').value,
+    schedule:document.getElementById('edit-sched').value,
+  });
+  toast(r.ok?'Đã lưu!':r.error,r.ok);
+}
+</script>

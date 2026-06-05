@@ -1,0 +1,55 @@
+
+<div style="display:flex;gap:12px;margin-bottom:16px;align-items:center">
+  <a href="/maps" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  <h2><%= map.name_vn||map.name %></h2>
+  <span class="badge badge-blue"><%= map.type %></span>
+  <span style="color:var(--muted);font-size:.85rem">Zone <%= map.zone_id %> | <%= map.width %>×<%= map.height %></span>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="card">
+    <h3 style="margin-bottom:14px">Thông tin cơ bản</h3>
+    <div class="form-group"><label>Tileset</label>
+      <select id="e-tile"><option value="">Không có</option>
+      <% tilesets.forEach(t=>{ %><option value="<%= t.id %>" <%=map.tileset_asset_id===t.id?'selected':''>><%= t.name %></option><% }) %>
+      </select>
+    </div>
+    <div class="form-group"><label>Nhạc nền (BGM)</label>
+      <select id="e-bgm"><option value="">Không có</option>
+      <% musics.forEach(m=>{ %><option value="<%= m.id %>" <%=map.bg_music_id===m.id?'selected':''>><%= m.name %></option><% }) %>
+      </select>
+    </div>
+    <div class="form-group"><label>Âm thanh môi trường</label>
+      <select id="e-amb"><option value="">Không có</option>
+      <% ambients.forEach(a=>{ %><option value="<%= a.id %>" <%=map.ambient_sound_id===a.id?'selected':''>><%= a.name %></option><% }) %>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="saveMap()"><i class="fas fa-save"></i> Lưu</button>
+  </div>
+  <div class="card">
+    <h3 style="margin-bottom:14px">NPC Spawns</h3>
+    <textarea id="e-npc" rows="6" style="font-family:monospace;font-size:.78rem;width:100%"><%= JSON.stringify(JSON.parse(map.npc_spawns||'[]'),null,2) %></textarea>
+    <small style="color:var(--muted)">[{templateId, x, y}]</small>
+    <h3 style="margin:14px 0 8px">Mob Spawns</h3>
+    <textarea id="e-mob" rows="6" style="font-family:monospace;font-size:.78rem;width:100%"><%= JSON.stringify(JSON.parse(map.mob_spawns||'[]'),null,2) %></textarea>
+    <small style="color:var(--muted)">[{templateId, x, y, count, radius}]</small>
+    <h3 style="margin:14px 0 8px">Portals</h3>
+    <textarea id="e-portal" rows="4" style="font-family:monospace;font-size:.78rem;width:100%"><%= JSON.stringify(JSON.parse(map.portals||'[]'),null,2) %></textarea>
+    <small style="color:var(--muted)">[{x, y, radius, toZone, toX, toY, label}]</small>
+  </div>
+</div>
+<script>
+async function saveMap(){
+  const r=await api('POST','/maps/<%= map.id %>/save',{
+    name:'<%= map.name %>',name_vn:'<%= map.name_vn||'' %>',type:'<%= map.type %>',
+    width:<%= map.width %>,height:<%= map.height %>,
+    tileset_asset_id:document.getElementById('e-tile').value||null,
+    bg_music_id:document.getElementById('e-bgm').value||null,
+    ambient_sound_id:document.getElementById('e-amb').value||null,
+    npc_spawns:document.getElementById('e-npc').value,
+    mob_spawns:document.getElementById('e-mob').value,
+    portals:document.getElementById('e-portal').value,
+    properties:'{}',spawn_points:'[]'
+  });
+  toast(r.ok?'Đã lưu bản đồ!':r.error,r.ok);
+}
+</script>

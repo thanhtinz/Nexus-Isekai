@@ -92,6 +92,15 @@ async function initAdminTables() {
       await client.query("INSERT INTO game_servers(name,slug,type,game_port,admin_port,db_name,description)VALUES('Server Test','test','test',7779,8082,'fantasyrealm_test','Nội bộ dev — không ổn định')");
     }
     console.log('[DB] Admin tables ready');
+    // Run asset/content migration
+    const fs = require('fs');
+    const migPath = __dirname + '/migration_assets.sql';
+    if(fs.existsSync(migPath)){
+      const migSql = fs.readFileSync(migPath,'utf8');
+      await client.query(migSql);
+      console.log('[DB] Asset tables ready');
+    }
+
   } finally { client.release(); }
 }
 module.exports = { pool, query, getOne, getAll, initAdminTables };

@@ -152,6 +152,18 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
   </div>
 
   <div class="nav-section">
+    <div class="nav-section-title">Nội dung Game</div>
+    <a href="/items"       class="nav-item <%= activePage==='items'?'active':'' %>"><i class="fas fa-box-open"></i> Vật phẩm</a>
+    <a href="/npcs"        class="nav-item <%= activePage==='npcs'?'active':'' %>"><i class="fas fa-user-tie"></i> NPC</a>
+    <a href="/dialogs"     class="nav-item <%= activePage==='dialogs'?'active':'' %>"><i class="fas fa-comments"></i> Lời thoại</a>
+    <a href="/mobs"        class="nav-item <%= activePage==='mobs'?'active':'' %>"><i class="fas fa-dragon"></i> Quái vật</a>
+    <a href="/maps"        class="nav-item <%= activePage==='maps'?'active':'' %>"><i class="fas fa-map"></i> Bản đồ</a>
+    <a href="/professions" class="nav-item <%= activePage==='professions'?'active':'' %>"><i class="fas fa-hammer"></i> Nghề nghiệp</a>
+    <a href="/audio"       class="nav-item <%= activePage==='audio'?'active':'' %>"><i class="fas fa-music"></i> Âm thanh</a>
+    <a href="/assets"      class="nav-item <%= activePage==='assets'?'active':'' %>"><i class="fas fa-images"></i> Asset Manager</a>
+  </div>
+
+  <div class="nav-section">
     <div class="nav-section-title">Hệ thống</div>
     <a href="/config"     class="nav-item <%= activePage==='config'?'active':'' %>"><i class="fas fa-cog"></i> Cài đặt</a>
     <a href="/logs"       class="nav-item <%= activePage==='logs'?'active':'' %>"><i class="fas fa-scroll"></i> Nhật ký</a>

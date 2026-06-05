@@ -1,0 +1,41 @@
+
+<div class="card" style="max-width:680px">
+  <div class="card-header">
+    <h3><i class="fas fa-user-tie"></i> <%= npc?'Sửa NPC':'Tạo NPC mới' %></h3>
+    <a href="/npcs" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  </div>
+  <form method="POST" action="/npcs/<%= npc?npc.id+'/edit':'create' %>">
+    <div class="form-row">
+      <div class="form-group"><label>Template ID *</label><input name="template_id" type="number" value="<%= npc?.template_id||1001 %>" required <%= npc?'readonly':'' %>></div>
+      <div class="form-group"><label>Loại NPC</label>
+        <select name="type">
+          <% ['merchant','quest','banker','guard','trainer','special'].forEach(t=>{ %><option value="<%= t %>" <%=npc?.type===t?'selected':''>><%= t %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Tên tiếng Anh *</label><input name="name" value="<%= npc?.name||'' %>" required></div>
+      <div class="form-group"><label>Tên tiếng Việt</label><input name="name_vn" value="<%= npc?.name_vn||'' %>"></div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group"><label>Zone ID</label><input name="zone_id" type="number" value="<%= npc?.zone_id||1 %>"></div>
+      <div class="form-group"><label>Vị trí X</label><input name="default_x" type="number" value="<%= npc?.default_x||100 %>"></div>
+      <div class="form-group"><label>Vị trí Y</label><input name="default_y" type="number" value="<%= npc?.default_y||100 %>"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Faction (0=tất cả)</label><input name="faction_id" type="number" value="<%= npc?.faction_id||0 %>" min="0" max="4"></div>
+      <div class="form-group"><label>Sprite Asset</label>
+        <select name="sprite_asset_id">
+          <option value="">Không có sprite</option>
+          <% sprites.forEach(s=>{ %><option value="<%= s.id %>" <%=npc?.sprite_asset_id===s.id?'selected':''>><%= s.name %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:24px;margin-bottom:14px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="has_shop" value="1" <%= npc?.has_shop?'checked':'' %>> Có cửa hàng</label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="has_dialog" value="1" <%= npc?.has_dialog!==false?'checked':'' %>> Có lời thoại</label>
+    </div>
+    <div class="form-group"><label>Mô tả</label><textarea name="description" rows="3"><%= npc?.description||'' %></textarea></div>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Lưu</button>
+  </form>
+</div>

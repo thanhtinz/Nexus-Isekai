@@ -1,0 +1,53 @@
+
+<div class="card" style="max-width:760px">
+  <div class="card-header">
+    <h3><i class="fas fa-dragon"></i> <%= mob?'Sửa Mob: '+mob.name:'Tạo Mob mới' %></h3>
+    <a href="/mobs" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  </div>
+  <form method="POST" action="/mobs/<%= mob?mob.id+'/edit':'create' %>">
+    <div class="form-row">
+      <div class="form-group"><label>Template ID *</label><input name="template_id" type="number" value="<%= mob?.template_id||'' %>" required <%= mob?'readonly':'' %>></div>
+      <div class="form-group"><label>Loại Mob</label>
+        <select name="type">
+          <% ['normal','elite','boss','miniboss','passive'].forEach(t=>{ %><option value="<%= t %>" <%=mob?.type===t?'selected':''>><%= t %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Tên *</label><input name="name" value="<%= mob?.name||'' %>" required></div>
+      <div class="form-group"><label>Tên tiếng Việt</label><input name="name_vn" value="<%= mob?.name_vn||'' %>"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Zones <small style="color:var(--muted)">(1,2,3)</small></label><input name="zone_ids" value="<%= mob?.zone_ids?.join(',') %>" placeholder="1,2,3"></div>
+      <div class="form-group"><label>AI Type</label>
+        <select name="ai_type">
+          <% ['passive','aggressive','patrol','boss'].forEach(t=>{ %><option value="<%= t %>" <%=mob?.ai_type===t?'selected':''>><%= t %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+      <% [['level_min','Level Min',1],['level_max','Level Max',5],['hp','HP',100],['atk','ATK',10],['def','DEF',5],['exp_reward','EXP',50]].forEach(([n,l,d])=>{ %>
+      <div class="form-group"><label><%= l %></label><input name="<%= n %>" type="number" value="<%= mob?.[n]||d %>"></div>
+      <% }) %>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group"><label>Gold Min</label><input name="gold_min" type="number" value="<%= mob?.gold_reward_min||10 %>"></div>
+      <div class="form-group"><label>Gold Max</label><input name="gold_max" type="number" value="<%= mob?.gold_reward_max||50 %>"></div>
+      <div class="form-group"><label>Respawn (giây)</label><input name="respawn_secs" type="number" value="<%= mob?.respawn_secs||300 %>"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Sprite</label>
+        <select name="sprite_asset_id">
+          <option value="">Không có sprite</option>
+          <% sprites.forEach(s=>{ %><option value="<%= s.id %>" <%=mob?.sprite_asset_id===s.id?'selected':''>><%= s.name %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Drop Table <small style="color:var(--muted)">(JSON)</small></label>
+      <textarea name="drop_table" rows="8" style="font-family:monospace;font-size:.78rem"><%= mob?.drop_table ? JSON.stringify(JSON.parse(mob.drop_table||'[]'),null,2) : '[\n  {"itemId": 1001, "chance": 0.5, "minQty": 1, "maxQty": 3},\n  {"itemId": 10001, "chance": 0.1, "minQty": 1, "maxQty": 1}\n]' %></textarea>
+    </div>
+    <div class="form-group"><label>Mô tả</label><textarea name="description" rows="2"><%= mob?.description||'' %></textarea></div>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Lưu Mob</button>
+  </form>
+</div>

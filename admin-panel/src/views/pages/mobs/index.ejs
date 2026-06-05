@@ -1,0 +1,54 @@
+
+<div style="display:flex;gap:12px;margin-bottom:16px">
+  <a href="/mobs/create" class="btn btn-primary"><i class="fas fa-plus"></i> Tạo Mob mới</a>
+  <a href="/mobs/export/json" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export JSON</a>
+  <div style="margin-left:auto;display:flex;gap:10px;font-size:.85rem">
+    <div class="stat-card" style="padding:8px 16px"><span class="stat-value" style="font-size:1.3rem"><%= stats?.normal||0 %></span> <span style="color:var(--muted)">Normal</span></div>
+    <div class="stat-card" style="padding:8px 16px"><span class="stat-value" style="font-size:1.3rem;color:#fbbf24"><%= stats?.elite||0 %></span> <span style="color:var(--muted)">Elite</span></div>
+    <div class="stat-card" style="padding:8px 16px"><span class="stat-value" style="font-size:1.3rem;color:#f87171"><%= stats?.boss||0 %></span> <span style="color:var(--muted)">Boss</span></div>
+  </div>
+</div>
+<div class="filter-bar">
+  <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap">
+    <select name="type" onchange="this.form.submit()">
+      <option value="">Tất cả loại</option>
+      <% ['normal','elite','boss','miniboss','passive'].forEach(t=>{ %><option value="<%= t %>" <%=type===t?'selected':''>><%= t %></option><% }) %>
+    </select>
+    <input name="search" value="<%= search %>" placeholder="Tìm tên mob..." style="width:180px">
+    <button type="submit" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i></button>
+  </form>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+<% mobs.forEach(mob=>{ %>
+<div class="card">
+  <div style="display:flex;gap:12px;align-items:start;margin-bottom:12px">
+    <div style="width:52px;height:52px;background:#0f0f1a;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <% if(mob.sprite_url){ %><img src="<%= mob.sprite_url %>" style="max-width:100%;max-height:100%;object-fit:contain">
+      <% } else { %><i class="fas fa-dragon" style="color:var(--muted);font-size:1.3rem"></i><% } %>
+    </div>
+    <div>
+      <strong><%= mob.name_vn||mob.name %></strong>
+      <div style="display:flex;gap:4px;margin-top:4px">
+        <span class="badge <%= mob.type==='boss'?'badge-red':mob.type==='elite'?'badge-yellow':'badge-gray' %>"><%= mob.type %></span>
+        <span class="badge badge-blue">Lv.<%= mob.level_min %>-<%= mob.level_max %></span>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:.75rem;margin-bottom:10px">
+    <div style="background:#0f0f1a;padding:6px;border-radius:6px;text-align:center"><div style="color:#f87171;font-weight:700"><%= mob.hp %></div><div style="color:var(--muted)">HP</div></div>
+    <div style="background:#0f0f1a;padding:6px;border-radius:6px;text-align:center"><div style="color:#fbbf24;font-weight:700"><%= mob.atk %></div><div style="color:var(--muted)">ATK</div></div>
+    <div style="background:#0f0f1a;padding:6px;border-radius:6px;text-align:center"><div style="color:#60a5fa;font-weight:700"><%= mob.def %></div><div style="color:var(--muted)">DEF</div></div>
+    <div style="background:#0f0f1a;padding:6px;border-radius:6px;text-align:center"><div style="color:#34d399;font-weight:700"><%= mob.exp_reward %></div><div style="color:var(--muted)">EXP</div></div>
+  </div>
+  <div style="font-size:.75rem;color:var(--muted);margin-bottom:10px">
+    Zones: <%= Array.isArray(mob.zone_ids)?mob.zone_ids.join(', '):'N/A' %> | Respawn: <%= mob.respawn_secs %>s
+  </div>
+  <div style="display:flex;gap:6px">
+    <a href="/mobs/<%= mob.id %>/edit" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> Sửa</a>
+    <button class="btn btn-danger btn-sm" onclick="delMob(<%= mob.id %>)"><i class="fas fa-trash"></i></button>
+  </div>
+</div>
+<% }) %>
+<% if(!mobs.length){ %><div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:48px"><i class="fas fa-dragon" style="font-size:2rem;display:block;margin-bottom:12px"></i>Chưa có mob nào</div><% } %>
+</div>
+<script>async function delMob(id){if(!confirm('Xóa mob này?'))return;const r=await api('DELETE','/mobs/'+id);toast(r.ok?'Đã xóa':r.error,r.ok);if(r.ok)location.reload();}</script>

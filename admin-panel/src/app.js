@@ -63,6 +63,16 @@ app.use('/config',     require('./middleware/auth'), require('./routes/config'))
 app.use('/logs',       require('./middleware/auth'), require('./routes/logs'));
 app.use('/api/v1',     require('./routes/api'));
 
+// ── Content Management
+app.use('/assets',     require('./middleware/auth'), require('./routes/assets'));
+app.use('/items',      require('./middleware/auth'), require('./routes/items'));
+app.use('/npcs',       require('./middleware/auth'), require('./routes/npcs'));
+app.use('/dialogs',    require('./middleware/auth'), require('./routes/dialogs'));
+app.use('/mobs',       require('./middleware/auth'), require('./routes/mobs'));
+app.use('/maps',       require('./middleware/auth'), require('./routes/maps'));
+app.use('/professions',require('./middleware/auth'), require('./routes/professions'));
+app.use('/audio',      require('./middleware/auth'), require('./routes/audio'));
+
 // ── 404
 app.use((req, res) => res.status(404).render('pages/404', { title: '404' }));
 

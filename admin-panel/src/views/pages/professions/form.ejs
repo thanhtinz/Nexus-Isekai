@@ -1,0 +1,44 @@
+
+<div class="card" style="max-width:720px">
+  <div class="card-header">
+    <h3><i class="fas fa-hammer"></i> <%= prof?'Sửa nghề: '+prof.name:'Tạo nghề mới' %></h3>
+    <a href="/professions" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  </div>
+  <form method="POST" action="/professions/<%= prof?prof.id+'/edit':'create' %>">
+    <div class="form-row">
+      <div class="form-group"><label>Mã nghề (CODE) *</label><input name="code" value="<%= prof?.code||'' %>" placeholder="FISHER" required style="text-transform:uppercase" <%= prof?'readonly':'' %>></div>
+      <div class="form-group"><label>Danh mục</label>
+        <select name="category">
+          <% ['civilian','combat','special'].forEach(c=>{ %><option value="<%= c %>" <%=prof?.category===c?'selected':''>><%= c %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Tên *</label><input name="name" value="<%= prof?.name||'' %>" required placeholder="Fisher"></div>
+      <div class="form-group"><label>Tên tiếng Việt</label><input name="name_vn" value="<%= prof?.name_vn||'' %>" placeholder="Ngư Dân"></div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group"><label>Max Level</label><input name="max_level" type="number" value="<%= prof?.max_level||10 %>" min="1" max="100"></div>
+      <div class="form-group"><label>Faction yêu cầu (0=tất cả)</label><input name="faction_required" type="number" value="<%= prof?.faction_required||0 %>" min="0" max="4"></div>
+      <div class="form-group"><label>Icon</label>
+        <select name="icon_asset_id">
+          <option value="">Không có icon</option>
+          <% icons.forEach(i=>{ %><option value="<%= i.id %>" <%=prof?.icon_asset_id===i.id?'selected':''>><%= i.name %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" name="is_special" value="1" <%= prof?.is_special?'checked':'' %>> Nghề đặc biệt (unlock bằng quest/điều kiện)
+      </label>
+    </div>
+    <div class="form-group"><label>Điều kiện mở khóa</label><input name="unlock_condition" value="<%= prof?.unlock_condition||'' %>" placeholder="VD: faction==4 hoặc level>=20"></div>
+    <div class="form-group"><label>Mô tả</label><textarea name="description" rows="3"><%= prof?.description||'' %></textarea></div>
+    <div class="form-group">
+      <label>Kỹ năng theo cấp độ (JSON)</label>
+      <textarea name="skills" rows="12" style="font-family:monospace;font-size:.78rem"><%= prof?.skills ? JSON.stringify(JSON.parse(prof.skills||'[]'),null,2) : '[\n  {"level": 1, "name": "Câu Cơ Bản", "description": "Câu cá thường", "effect": "unlock_common_fish"},\n  {"level": 5, "name": "Câu Nâng Cao", "description": "+30% tỉ lệ cá hiếm", "effect": "rare_fish_bonus:0.3"},\n  {"level": 10, "name": "Câu Huyền Thoại", "description": "Có thể câu cá legendary", "effect": "unlock_legendary_fish"}\n]' %></textarea>
+      <small style="color:var(--muted)">[{level, name, description, effect}]</small>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Lưu nghề</button>
+  </form>
+</div>

@@ -1,0 +1,39 @@
+
+<div style="display:flex;gap:12px;margin-bottom:16px">
+  <a href="/maps/create" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm bản đồ</a>
+  <a href="/maps/export/json" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export JSON</a>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+<% maps.forEach(m=>{ %>
+<div class="card">
+  <% if(m.thumb_url){ %>
+  <div style="height:120px;border-radius:8px;overflow:hidden;margin-bottom:12px;background:#0f0f1a">
+    <img src="<%= m.thumb_url %>" style="width:100%;height:100%;object-fit:cover">
+  </div>
+  <% } else { %>
+  <div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:12px;background:#0f0f1a;border-radius:8px">🗺️</div>
+  <% } %>
+  <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+    <div>
+      <strong><%= m.name_vn||m.name %></strong>
+      <div style="font-size:.75rem;color:var(--muted)">Zone ID: <%= m.zone_id %> | <%= m.width %>×<%= m.height %></div>
+    </div>
+    <span class="badge badge-blue"><%= m.type %></span>
+  </div>
+  <div style="font-size:.75rem;color:var(--muted);margin-bottom:10px">
+    <% const sp=m.spawn_points?JSON.parse(m.spawn_points||'[]'):[];%>
+    <% const portals=m.portals?JSON.parse(m.portals||'[]'):[];%>
+    <% const nspawns=m.npc_spawns?JSON.parse(m.npc_spawns||'[]'):[];%>
+    <% const mspawns=m.mob_spawns?JSON.parse(m.mob_spawns||'[]'):[];%>
+    🏁 <%= sp.length %> spawn | 🚪 <%= portals.length %> portal | 👤 <%= nspawns.length %> NPC | 👾 <%= mspawns.length %> mob
+  </div>
+  <% if(m.bg_music_name){ %><div style="font-size:.75rem;color:var(--muted);margin-bottom:6px">🎵 <%= m.bg_music_name %></div><% } %>
+  <div style="display:flex;gap:6px">
+    <a href="/maps/<%= m.id %>" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> Sửa</a>
+    <button class="btn btn-danger btn-sm" onclick="delMap(<%= m.id %>)"><i class="fas fa-trash"></i></button>
+  </div>
+</div>
+<% }) %>
+<% if(!maps.length){ %><div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:48px"><i class="fas fa-map" style="font-size:2rem;display:block;margin-bottom:12px"></i>Chưa có bản đồ nào</div><% } %>
+</div>
+<script>async function delMap(id){if(!confirm('Xóa bản đồ?'))return;const r=await api('DELETE','/maps/'+id);toast(r.ok?'Đã xóa':r.error,r.ok);if(r.ok)location.reload();}</script>

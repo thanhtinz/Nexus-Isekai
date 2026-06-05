@@ -1,0 +1,53 @@
+
+<div class="card" style="max-width:720px">
+  <div class="card-header">
+    <h3><i class="fas fa-<%= item?'edit':'plus' %>"></i> <%= item?'Sửa':'Tạo' %> vật phẩm</h3>
+    <a href="/items" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i></a>
+  </div>
+  <form method="POST" action="/items/<%= item?item.id+'/edit':'create' %>">
+    <div class="form-row">
+      <div class="form-group"><label>Item ID (số) *</label><input name="item_id" type="number" value="<%= item?.item_id||'' %>" required <%= item?'readonly':'' %>></div>
+      <div class="form-group"><label>Loại *</label>
+        <select name="type">
+          <% ['weapon','armor','consumable','material','seed','fish','tool','accessory','pet_food','special'].forEach(t=>{ %>
+          <option value="<%= t %>" <%=item?.type===t?'selected':''>><%= t %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Tên tiếng Anh *</label><input name="name" value="<%= item?.name||'' %>" required placeholder="Dragon Scale Armor"></div>
+      <div class="form-group"><label>Tên tiếng Việt</label><input name="name_vn" value="<%= item?.name_vn||'' %>" placeholder="Giáp Vảy Rồng"></div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group"><label>Rarity</label>
+        <select name="rarity">
+          <% [['0','Common'],['1','Uncommon'],['2','Rare'],['3','Epic'],['4','Legendary']].forEach(([v,l])=>{ %>
+          <option value="<%= v %>" <%=String(item?.rarity)===v?'selected':''>><%= l %></option><% }) %>
+        </select>
+      </div>
+      <div class="form-group"><label>Giá gốc</label><input name="base_price" type="number" value="<%= item?.base_price||100 %>"></div>
+      <div class="form-group"><label>Giá bán lại</label><input name="sell_price" type="number" value="<%= item?.sell_price||50 %>"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Icon (Asset ID)</label>
+        <select name="icon_asset_id">
+          <option value="">Không có icon</option>
+          <% icons.forEach(i=>{ %><option value="<%= i.id %>" <%=item?.icon_asset_id===i.id?'selected':''>><%= i.name %></option><% }) %>
+        </select>
+      </div>
+      <div class="form-group"><label>Server</label>
+        <select name="server_id">
+          <option value="">Tất cả server</option>
+          <% servers.forEach(s=>{ %><option value="<%= s.id %>" <%=item?.server_id===s.id?'selected':''>><%= s.name %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:24px;margin-bottom:14px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="stackable" value="1" <%= item?.stackable!==false?'checked':'' %>> Stack được</label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="tradeable" value="1" <%= item?.tradeable!==false?'checked':'' %>> Có thể trade</label>
+    </div>
+    <div class="form-group"><label>Mô tả</label><textarea name="description" rows="3"><%= item?.description||'' %></textarea></div>
+    <div class="form-group"><label>Nguồn drop <small style="color:var(--muted)">(mob IDs, phân cách bởi dấu phẩy)</small></label><input name="drop_sources" value="<%= item?.drop_sources||'' %>" placeholder="1001, 1002, boss_001"></div>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Lưu</button>
+  </form>
+</div>

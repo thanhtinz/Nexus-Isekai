@@ -1,0 +1,93 @@
+
+<div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
+  <div class="stat-card"><div class="stat-value"><%= stats?.total||0 %></div><div class="stat-label">Tổng assets</div></div>
+  <div class="stat-card"><div class="stat-value"><%= stats?.sprites||0 %></div><div class="stat-label">Sprites</div></div>
+  <div class="stat-card"><div class="stat-value"><%= stats?.animations||0 %></div><div class="stat-label">Animations</div></div>
+  <div class="stat-card"><div class="stat-value"><%= stats?.tiles||0 %></div><div class="stat-label">Tilesets</div></div>
+  <div class="stat-card"><div class="stat-value" style="font-size:1rem"><%= stats?.total_size ? (stats.total_size/1024/1024).toFixed(1)+'MB' : '0MB' %></div><div class="stat-label">Dung lượng</div></div>
+</div>
+
+<!-- Upload -->
+<div class="card">
+  <div class="card-header"><h3><i class="fas fa-upload"></i> Upload Asset</h3></div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+    <div class="form-group" style="margin:0;min-width:150px"><label>Loại</label>
+      <select id="up-type"><option value="sprite">Sprite</option><option value="animation">Animation</option><option value="tile">Tileset</option><option value="ui">UI</option><option value="effect">Effect</option></select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:150px"><label>Danh mục</label>
+      <select id="up-cat"><option value="character">Character</option><option value="npc">NPC</option><option value="mob">Mob</option><option value="item">Item</option><option value="environment">Environment</option><option value="ui">UI</option><option value="map_thumb">Map Thumbnail</option></select>
+    </div>
+    <div class="form-group" style="margin:0;flex:1;min-width:200px"><label>Files (chọn nhiều)</label>
+      <input type="file" id="up-files" multiple accept="image/*,.png,.jpg,.gif,.webp,.svg">
+    </div>
+    <button class="btn btn-primary" onclick="uploadAssets()"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
+  </div>
+  <div id="upload-progress" style="display:none;margin-top:12px">
+    <div style="background:#0f0f1a;border-radius:8px;height:8px;overflow:hidden">
+      <div id="progress-bar" style="height:100%;background:var(--accent);width:0;transition:.3s"></div>
+    </div>
+    <div id="progress-text" style="font-size:.8rem;color:var(--muted);margin-top:4px">Đang upload...</div>
+  </div>
+</div>
+
+<!-- Filter -->
+<div class="filter-bar">
+  <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap">
+    <select name="type" onchange="this.form.submit()">
+      <option value="">Tất cả loại</option>
+      <% ['sprite','animation','tile','ui','effect','audio'].forEach(t=>{ %><option value="<%= t %>" <%=type===t?'selected':''>><%= t %></option><% }) %>
+    </select>
+    <select name="category" onchange="this.form.submit()">
+      <option value="">Tất cả category</option>
+      <% ['character','npc','mob','item','environment','ui','map_thumb','misc'].forEach(c=>{ %><option value="<%= c %>" <%=category===c?'selected':''>><%= c %></option><% }) %>
+    </select>
+    <input name="search" value="<%= search %>" placeholder="Tìm tên..." style="width:180px">
+    <button type="submit" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i></button>
+  </form>
+</div>
+
+<!-- Grid -->
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px">
+<% assets.forEach(a=>{ %>
+<div class="card" style="padding:12px;text-align:center">
+  <% const isImg=/\.(png|jpg|gif|webp|svg)/i.test(a.file_path||''); %>
+  <% if(isImg && a.file_path){ %>
+  <img src="<%= a.file_path %>" style="max-height:80px;max-width:100%;border-radius:6px;margin-bottom:8px;object-fit:contain;background:#0f0f1a">
+  <% } else { %>
+  <div style="height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:8px">
+    <i class="fas fa-<%= a.type==='tile'?'map':'image' %>" style="color:var(--muted)"></i>
+  </div>
+  <% } %>
+  <div style="font-size:.75rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= a.name %>"><%= a.name %></div>
+  <div style="font-size:.7rem;color:var(--muted)"><%= a.type %> / <%= a.category %></div>
+  <div style="font-size:.7rem;color:var(--muted)"><%= a.file_size?(a.file_size/1024).toFixed(1)+'KB':'' %></div>
+  <div style="display:flex;gap:4px;margin-top:8px;justify-content:center">
+    <button class="btn btn-ghost btn-sm" onclick="copyPath('<%= a.file_path||'' %>')"><i class="fas fa-copy"></i></button>
+    <button class="btn btn-danger btn-sm" onclick="deleteAsset(<%= a.id %>)"><i class="fas fa-trash"></i></button>
+  </div>
+</div>
+<% }) %>
+</div>
+<% if(!assets.length){ %><div class="card" style="text-align:center;color:var(--muted);padding:48px"><i class="fas fa-images" style="font-size:2rem;margin-bottom:12px;display:block"></i>Chưa có asset nào</div><% } %>
+
+<script>
+async function uploadAssets(){
+  const files=document.getElementById('up-files').files;
+  if(!files.length)return toast('Chọn file trước',false);
+  const fd=new FormData();
+  for(const f of files) fd.append('files',f);
+  fd.append('type',document.getElementById('up-type').value);
+  fd.append('category',document.getElementById('up-cat').value);
+  document.getElementById('upload-progress').style.display='block';
+  document.getElementById('progress-bar').style.width='40%';
+  try{
+    const r=await fetch('/assets/upload',{method:'POST',body:fd});
+    const d=await r.json();
+    document.getElementById('progress-bar').style.width='100%';
+    document.getElementById('progress-text').textContent=d.ok?`Đã upload ${d.count} file!`:'Lỗi: '+d.error;
+    if(d.ok)setTimeout(()=>location.reload(),1000);
+  }catch(e){toast('Upload thất bại: '+e.message,false);}
+}
+function copyPath(p){navigator.clipboard.writeText(p||'');toast('Đã copy path!');}
+async function deleteAsset(id){if(!confirm('Xóa asset này?'))return;const r=await api('DELETE','/assets/'+id);toast(r.ok?'Đã xóa':r.error,r.ok);if(r.ok)location.reload();}
+</script>

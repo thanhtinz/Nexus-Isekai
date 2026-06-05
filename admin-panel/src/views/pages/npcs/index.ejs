@@ -1,0 +1,48 @@
+
+<div style="display:flex;gap:12px;margin-bottom:16px">
+  <a href="/npcs/create" class="btn btn-primary"><i class="fas fa-plus"></i> Tạo NPC mới</a>
+  <a href="/npcs/export/json" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export JSON</a>
+</div>
+<div class="filter-bar">
+  <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap">
+    <select name="type" onchange="this.form.submit()">
+      <option value="">Tất cả loại</option>
+      <% ['merchant','quest','banker','guard','trainer','special'].forEach(t=>{ %>
+      <option value="<%= t %>" <%=type===t?'selected':''>><%= t %></option><% }) %>
+    </select>
+    <select name="zone_id" onchange="this.form.submit()">
+      <option value="">Tất cả zone</option>
+      <% for(let i=1;i<=10;i++){ %><option value="<%= i %>" <%=zone_id==i?'selected':'%>''>Zone <%= i %></option><% } %>
+    </select>
+    <input name="search" value="<%= search %>" placeholder="Tìm tên NPC..." style="width:180px">
+    <button type="submit" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i></button>
+  </form>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+<% npcs.forEach(npc=>{ %>
+<div class="card">
+  <div style="display:flex;gap:12px;align-items:start">
+    <div style="width:56px;height:56px;background:#0f0f1a;border-radius:8px;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center">
+      <% if(npc.sprite_url){ %><img src="<%= npc.sprite_url %>" style="max-width:100%;max-height:100%;object-fit:contain">
+      <% } else { %><i class="fas fa-user-tie" style="color:var(--muted);font-size:1.5rem"></i><% } %>
+    </div>
+    <div style="flex:1;min-width:0">
+      <strong><%= npc.name_vn||npc.name %></strong>
+      <div style="font-size:.75rem;color:var(--muted)">Template #<%= npc.template_id %> | Zone <%= npc.zone_id %></div>
+      <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">
+        <span class="badge badge-blue"><%= npc.type %></span>
+        <% if(npc.has_shop){ %><span class="badge badge-yellow">🏪 Shop</span><% } %>
+        <% if(npc.has_dialog){ %><span class="badge badge-green">💬 Dialog</span><% } %>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;margin-top:12px">
+    <a href="/npcs/<%= npc.id %>" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> Sửa</a>
+    <a href="/dialogs/npc/<%= npc.id %>" class="btn btn-ghost btn-sm"><i class="fas fa-comments"></i> Dialog</a>
+    <button class="btn btn-danger btn-sm" onclick="delNpc(<%= npc.id %>)"><i class="fas fa-trash"></i></button>
+  </div>
+</div>
+<% }) %>
+<% if(!npcs.length){ %><div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:48px"><i class="fas fa-user-tie" style="font-size:2rem;display:block;margin-bottom:12px"></i>Chưa có NPC nào</div><% } %>
+</div>
+<script>async function delNpc(id){if(!confirm('Xóa NPC này?'))return;const r=await api('DELETE','/npcs/'+id);toast(r.ok?'Đã xóa':r.error,r.ok);if(r.ok)location.reload();}</script>

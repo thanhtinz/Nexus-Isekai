@@ -1,0 +1,35 @@
+
+<div style="display:flex;gap:12px;margin-bottom:16px">
+  <a href="/professions/create" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm nghề mới</a>
+  <a href="/professions/export/json" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export JSON</a>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">
+<% profs.forEach(p=>{ %>
+<div class="card">
+  <div style="display:flex;gap:12px;align-items:start;margin-bottom:10px">
+    <div style="width:48px;height:48px;background:#0f0f1a;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <% if(p.icon_url){ %><img src="<%= p.icon_url %>" style="max-width:100%;max-height:100%;object-fit:contain">
+      <% } else { %><i class="fas fa-hammer" style="color:var(--muted);font-size:1.2rem"></i><% } %>
+    </div>
+    <div>
+      <strong><%= p.name_vn||p.name %></strong>
+      <div style="font-size:.75rem;font-family:monospace;color:var(--muted)"><%= p.code %></div>
+      <div style="display:flex;gap:4px;margin-top:4px">
+        <span class="badge badge-blue"><%= p.category %></span>
+        <span class="badge badge-gray">Max Lv.<%= p.max_level %></span>
+        <% if(p.is_special){ %><span class="badge badge-yellow">✨ Đặc biệt</span><% } %>
+      </div>
+    </div>
+  </div>
+  <% if(p.description){ %><p style="font-size:.8rem;color:var(--muted);margin-bottom:10px"><%= p.description?.substring(0,80) %>...</p><% } %>
+  <% const skills=JSON.parse(p.skills||'[]'); %>
+  <div style="font-size:.75rem;color:var(--muted);margin-bottom:10px"><%= skills.length %> kỹ năng</div>
+  <div style="display:flex;gap:6px">
+    <a href="/professions/<%= p.id %>/edit" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> Sửa</a>
+    <button class="btn btn-danger btn-sm" onclick="delProf(<%= p.id %>)"><i class="fas fa-trash"></i></button>
+  </div>
+</div>
+<% }) %>
+<% if(!profs.length){ %><div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:48px"><i class="fas fa-hammer" style="font-size:2rem;display:block;margin-bottom:12px"></i>Chưa có nghề nào. <a href="/professions/create" style="color:#c4b5fd">Tạo nghề đầu tiên</a></div><% } %>
+</div>
+<script>async function delProf(id){if(!confirm('Xóa nghề này?'))return;const r=await api('DELETE','/professions/'+id);toast(r.ok?'Đã xóa':r.error,r.ok);if(r.ok)location.reload();}</script>

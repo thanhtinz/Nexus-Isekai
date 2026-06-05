@@ -1,0 +1,46 @@
+
+<div style="display:flex;gap:12px;margin-bottom:16px">
+  <a href="/items/create" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm vật phẩm</a>
+  <a href="/items/export/json" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export JSON</a>
+</div>
+<div class="filter-bar">
+  <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap">
+    <select name="type" onchange="this.form.submit()">
+      <option value="">Tất cả loại</option>
+      <% ['weapon','armor','consumable','material','seed','fish','tool','accessory','pet_food','special'].forEach(t=>{ %>
+      <option value="<%= t %>" <%=type===t?'selected':''>><%= t %></option><% }) %>
+    </select>
+    <select name="rarity" onchange="this.form.submit()">
+      <option value="">Tất cả rarity</option>
+      <% ['0','1','2','3','4'].forEach((r,i)=>{ %>
+      <option value="<%= r %>" <%=rarity===r?'selected':''>><%= ['Common','Uncommon','Rare','Epic','Legendary'][i] %></option><% }) %>
+    </select>
+    <input name="search" value="<%= search %>" placeholder="Tìm tên..." style="width:180px">
+    <button type="submit" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i></button>
+  </form>
+</div>
+<div class="card" style="padding:0;overflow:hidden">
+<table>
+  <thead><tr><th>ID</th><th>Icon</th><th>Tên</th><th>Loại</th><th>Rarity</th><th>Giá</th><th>Stack</th><th>Trade</th><th></th></tr></thead>
+  <tbody>
+  <% items.forEach(item=>{ %>
+  <tr>
+    <td style="font-family:monospace;color:var(--muted)">#<%= item.item_id %></td>
+    <td><% if(item.icon_url){ %><img src="<%= item.icon_url %>" style="width:32px;height:32px;object-fit:contain;background:#0f0f1a;border-radius:4px"><% } else { %><div style="width:32px;height:32px;background:#0f0f1a;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.75rem">📦</div><% } %></td>
+    <td><strong><%= item.name_vn||item.name %></strong><br><small style="color:var(--muted)"><%= item.name %></small></td>
+    <td><span class="badge badge-blue"><%= item.type %></span></td>
+    <td><span class="badge <%= ['badge-gray','badge-green','badge-blue','badge-purple','badge-yellow'][item.rarity]||'badge-gray' %>"><%= ['Common','Uncommon','Rare','Epic','Legendary'][item.rarity]||item.rarity %></span></td>
+    <td style="font-size:.8rem">💰 <%= item.base_price?.toLocaleString() %>G</td>
+    <td style="color:<%= item.stackable?'#34d399':'#f87171' %>"><i class="fas fa-<%= item.stackable?'check':'times' %>"></i></td>
+    <td style="color:<%= item.tradeable?'#34d399':'#f87171' %>"><i class="fas fa-<%= item.tradeable?'check':'times' %>"></i></td>
+    <td style="display:flex;gap:4px">
+      <a href="/items/<%= item.id %>/edit" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+      <button class="btn btn-danger btn-sm" onclick="delItem(<%= item.id %>)"><i class="fas fa-trash"></i></button>
+    </td>
+  </tr>
+  <% }) %>
+  <% if(!items.length){ %><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px">Không có vật phẩm nào</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+<script>async function delItem(id){if(!confirm('Xóa?'))return;const r=await api('DELETE','/items/'+id);toast(r.ok?'Đã xóa':r.error,r.ok);if(r.ok)location.reload();}</script>

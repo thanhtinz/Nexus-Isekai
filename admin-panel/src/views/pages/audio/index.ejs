@@ -1,0 +1,90 @@
+
+<div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
+  <div class="stat-card"><div class="stat-value"><%= stats?.total||0 %></div><div class="stat-label">Tổng tracks</div></div>
+  <div class="stat-card"><div class="stat-value"><%= stats?.bgm||0 %></div><div class="stat-label">🎵 BGM</div></div>
+  <div class="stat-card"><div class="stat-value"><%= stats?.sfx||0 %></div><div class="stat-label">🔊 SFX</div></div>
+  <div class="stat-card"><div class="stat-value"><%= stats?.voice||0 %></div><div class="stat-label">🎤 Voice</div></div>
+  <div class="stat-card"><div class="stat-value" style="font-size:1rem"><%= stats?.total_size?(stats.total_size/1024/1024).toFixed(0)+'MB':'0MB' %></div><div class="stat-label">Dung lượng</div></div>
+</div>
+
+<!-- Upload -->
+<div class="card">
+  <div class="card-header"><h3><i class="fas fa-upload"></i> Upload Audio</h3></div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+    <div class="form-group" style="margin:0"><label>Loại</label>
+      <select id="up-type"><option value="bgm">BGM (nhạc nền)</option><option value="sfx">SFX (hiệu ứng)</option><option value="voice">Voice (lời thoại NPC)</option><option value="ambient">Ambient (môi trường)</option></select>
+    </div>
+    <div class="form-group" style="margin:0"><label>Danh mục</label>
+      <select id="up-cat"><option value="combat">Combat</option><option value="ui">UI</option><option value="nature">Nature</option><option value="npc">NPC</option><option value="event">Event</option><option value="zone">Zone</option><option value="misc">Misc</option></select>
+    </div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:.82rem"><input type="checkbox" id="up-loop"> Loop</label>
+    <div class="form-group" style="margin:0;flex:1;min-width:200px"><label>Files (mp3/ogg/wav)</label>
+      <input type="file" id="up-files" multiple accept="audio/*,.mp3,.ogg,.wav,.aac">
+    </div>
+    <button class="btn btn-primary" onclick="uploadAudio()"><i class="fas fa-upload"></i> Upload</button>
+  </div>
+</div>
+
+<!-- Filter -->
+<div class="filter-bar">
+  <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap">
+    <select name="type" onchange="this.form.submit()">
+      <option value="">Tất cả loại</option>
+      <% ['bgm','sfx','voice','ambient'].forEach(t=>{ %><option value="<%= t %>" <%=type===t?'selected':''>><%= {'bgm':'🎵 BGM','sfx':'🔊 SFX','voice':'🎤 Voice','ambient':'🌿 Ambient'}[t] %></option><% }) %>
+    </select>
+    <select name="category" onchange="this.form.submit()">
+      <option value="">Tất cả danh mục</option>
+      <% ['combat','ui','nature','npc','event','zone','misc'].forEach(c=>{ %><option value="<%= c %>" <%=category===c?'selected':''>><%= c %></option><% }) %>
+    </select>
+    <input name="search" value="<%= search %>" placeholder="Tìm tên..." style="width:180px">
+    <button type="submit" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i></button>
+  </form>
+</div>
+
+<!-- List -->
+<div class="card" style="padding:0;overflow:hidden">
+<table>
+  <thead><tr><th>Tên</th><th>Loại</th><th>Danh mục</th><th>Format</th><th>Dung lượng</th><th>Loop</th><th>Nghe thử</th><th></th></tr></thead>
+  <tbody>
+  <% tracks.forEach(t=>{ %>
+  <tr>
+    <td><strong><%= t.name %></strong></td>
+    <td><span class="badge <%= t.type==='bgm'?'badge-purple':t.type==='sfx'?'badge-blue':t.type==='voice'?'badge-green':'badge-gray' %>"><%= t.type %></span></td>
+    <td style="color:var(--muted);font-size:.8rem"><%= t.category %></td>
+    <td><code style="font-size:.75rem"><%= t.format||'-' %></code></td>
+    <td style="font-size:.78rem;color:var(--muted)"><%= t.file_size?(t.file_size/1024).toFixed(0)+'KB':'-' %></td>
+    <td style="color:<%= t.loop?'#34d399':'var(--muted)' %>"><i class="fas fa-<%= t.loop?'redo':'minus' %>"></i></td>
+    <td><% if(t.file_path){ %><audio controls src="<%= t.file_path %>" style="height:28px;width:160px"></audio><% } %></td>
+    <td style="display:flex;gap:4px">
+      <button class="btn btn-warn btn-sm" onclick="editAudio(<%= t.id %>,'<%= t.name %>','<%= t.type %>','<%= t.category %>',<%= t.loop %>)"><i class="fas fa-edit"></i></button>
+      <button class="btn btn-danger btn-sm" onclick="delAudio(<%= t.id %>)"><i class="fas fa-trash"></i></button>
+    </td>
+  </tr>
+  <% }) %>
+  <% if(!tracks.length){ %><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px"><i class="fas fa-music" style="font-size:2rem;display:block;margin-bottom:12px"></i>Chưa có audio nào</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+
+<script>
+async function uploadAudio(){
+  const files=document.getElementById('up-files').files;
+  if(!files.length)return toast('Chọn file trước',false);
+  const fd=new FormData();
+  for(const f of files) fd.append('files',f);
+  fd.append('type',document.getElementById('up-type').value);
+  fd.append('category',document.getElementById('up-cat').value);
+  fd.append('loop_track',document.getElementById('up-loop').checked?'1':'');
+  toast('Đang upload...');
+  const r=await fetch('/audio/upload',{method:'POST',body:fd});
+  const d=await r.json();
+  toast(d.ok?`Đã upload ${d.count} file!`:d.error,d.ok);
+  if(d.ok)setTimeout(()=>location.reload(),1000);
+}
+async function delAudio(id){if(!confirm('Xóa audio này?'))return;const r=await api('DELETE','/audio/'+id);toast(r.ok?'Đã xóa':r.error,r.ok);if(r.ok)location.reload();}
+function editAudio(id,name,type,cat,loop){
+  const n=prompt('Tên:',name);
+  if(!n)return;
+  api('POST','/audio/'+id+'/edit',{name:n,type,category:cat,loop}).then(r=>toast(r.ok?'Đã lưu':r.error,r.ok));
+}
+</script>

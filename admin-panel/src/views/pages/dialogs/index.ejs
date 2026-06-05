@@ -1,0 +1,39 @@
+
+<div class="filter-bar">
+  <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap">
+    <select name="npc_id" onchange="this.form.submit()">
+      <option value="">Tất cả NPC</option>
+      <% npcList.forEach(n=>{ %><option value="<%= n.id %>" <%=npc_id==n.id?'selected':''>><%= n.name %> (#<%= n.template_id %>)</option><% }) %>
+    </select>
+    <select name="lang" onchange="this.form.submit()">
+      <option value="">Tất cả ngôn ngữ</option>
+      <option value="vi" <%=lang==='vi'?'selected':'%>''>Tiếng Việt</option>
+      <option value="en" <%=lang==='en'?'selected':'%>''>English</option>
+    </select>
+    <a href="/dialogs/export/vi" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export VI</a>
+    <a href="/dialogs/export/en" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export EN</a>
+  </form>
+</div>
+<div class="card" style="padding:0;overflow:hidden">
+  <table>
+    <thead><tr><th>NPC</th><th>Node</th><th>Lang</th><th>Lời thoại</th><th>Số lựa chọn</th><th>Voice</th><th></th></tr></thead>
+    <tbody>
+    <% dialogs.forEach(d=>{ %>
+    <tr>
+      <td><strong><%= d.npc_name %></strong><br><small style="color:var(--muted)">#<%= d.template_id %></small></td>
+      <td><code style="background:#0f0f1a;padding:2px 6px;border-radius:4px;color:#c4b5fd;font-size:.8rem"><%= d.node_key %></code></td>
+      <td><span class="badge badge-blue"><%= d.lang %></span></td>
+      <td style="max-width:320px;font-size:.83rem"><%= d.text?.substring(0,80) %><%= d.text?.length>80?'...':'' %></td>
+      <td style="text-align:center"><%= Array.isArray(d.choices)?d.choices.length:(d.choices?JSON.parse(d.choices).length:0) %></td>
+      <td><% if(d.voice_url){ %><audio controls src="<%= d.voice_url %>" style="height:24px;width:140px"></audio><% } else { %><span style="color:var(--muted);font-size:.75rem">Không có</span><% } %></td>
+      <td>
+        <a href="/dialogs/npc/<%= d.npc_id %>" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+        <button class="btn btn-danger btn-sm" onclick="delDialog(<%= d.id %>)"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>
+    <% }) %>
+    <% if(!dialogs.length){ %><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">Không có lời thoại nào</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+<script>async function delDialog(id){if(!confirm('Xóa lời thoại này?'))return;const r=await api('DELETE','/dialogs/'+id);toast(r.ok?'Đã xóa':r.error,r.ok);if(r.ok)location.reload();}</script>
