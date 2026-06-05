@@ -33,6 +33,8 @@ public class AuthHandler {
         s.setCharacterName(r.characterName());
         s.setFaction(Faction.fromId(r.factionId()));
         s.setLevel(r.level());
+        s.setMaxHp(s.hpForLevel());
+        s.setHp(s.getMaxHp());
         s.setGold(r.gold());
         s.setOutfitJson(r.outfitJson() != null ? r.outfitJson() : "{}");
         s.setAuthenticated(true);

@@ -32,6 +32,7 @@ namespace FantasyRealm.UI
             PacketRouter.Instance.Register(PacketType.S_MAIL_RECEIVE,   OnMailReceive);
             PacketRouter.Instance.Register(PacketType.S_GIFT_RECEIVE,   OnGiftReceive);
             PacketRouter.Instance.Register(PacketType.S_FRIEND_STATUS,  OnFriendStatus);
+            PacketRouter.Instance.Register(PacketType.S_MARRY_PROPOSE,  OnMarryPropose);
             addFriendButton?.onClick.AddListener(SendFriendRequest);
         }
         void OnDestroy() {
@@ -41,6 +42,7 @@ namespace FantasyRealm.UI
             PacketRouter.Instance.Unregister(PacketType.S_MAIL_RECEIVE,   OnMailReceive);
             PacketRouter.Instance.Unregister(PacketType.S_GIFT_RECEIVE,   OnGiftReceive);
             PacketRouter.Instance.Unregister(PacketType.S_FRIEND_STATUS,  OnFriendStatus);
+            PacketRouter.Instance.Unregister(PacketType.S_MARRY_PROPOSE,  OnMarryPropose);
         }
 
         // ── Gửi lời mời kết bạn ─────────────────────────────────────
@@ -80,6 +82,25 @@ namespace FantasyRealm.UI
             long pid = p.ReadLong();
             bool online = p.ReadBool();
             Debug.Log($"[Social] friend {pid} online={online}");
+        }
+
+        // ── Cầu hôn: nhận lời → hiện nút Đồng ý ─────────────────────
+        void OnMarryPropose(Packet p) {
+            long fromId = p.ReadLong();
+            string name = p.ReadString();
+            if (requestItemPrefab == null || requestContainer == null) {
+                Debug.Log($"[Social] {name} cầu hôn bạn"); return;
+            }
+            var go = Instantiate(requestItemPrefab, requestContainer);
+            var txt = go.GetComponentInChildren<Text>();
+            if (txt) txt.text = "💍 " + name + " cầu hôn bạn!";
+            var btn = go.GetComponentInChildren<Button>();
+            if (btn) btn.onClick.AddListener(() => {
+                GameNetworkManager.Instance?.Send(
+                    new Packet(PacketType.C_MARRY_ACCEPT).WriteLong(fromId));
+                Destroy(go);
+                Notify("Bạn đã đồng ý kết hôn với " + name);
+            });
         }
 
         // ── Hòm thư ─────────────────────────────────────────────────

@@ -24,6 +24,11 @@ public class PlayerSession {
     private volatile long   premiumCoins = 0;
     private volatile String outfitJson = "{}";
     private volatile int    followers = 0;
+    // Combat stats
+    private volatile int    hp = 100;
+    private volatile int    maxHp = 100;
+    private volatile long   exp = 0;
+    private volatile long   lastAttackMs = 0;
 
     public PlayerSession(long sessionId, Channel channel) {
         this.sessionId = sessionId;
@@ -57,6 +62,23 @@ public class PlayerSession {
     public void      setCurrentZoneId(int v){ currentZoneId = v; }
     public int       getLevel()       { return level; }
     public void      setLevel(int v)  { level = v; }
+
+    public int       getHp()          { return hp; }
+    public void      setHp(int v)     { hp = Math.max(0, Math.min(v, maxHp)); }
+    public int       getMaxHp()       { return maxHp; }
+    public void      setMaxHp(int v)  { maxHp = Math.max(1, v); }
+    public long      getExp()         { return exp; }
+    public void      setExp(long v)   { exp = Math.max(0, v); }
+    public long      getLastAttackMs(){ return lastAttackMs; }
+    public void      setLastAttackMs(long v){ lastAttackMs = v; }
+    public boolean   isAlive()        { return hp > 0; }
+
+    /** Sát thương cơ bản theo cấp (đơn giản, có thể mở rộng theo trang bị/nghề). */
+    public int       getAttackPower() { return 8 + level * 2; }
+    /** Phòng thủ cơ bản theo cấp. */
+    public int       getDefense()     { return 2 + level; }
+    /** Máu tối đa theo cấp. */
+    public int       hpForLevel()     { return 100 + (level - 1) * 20; }
     public long      getGold()        { return gold; }
     public void      setGold(long v)  { gold = v; }
     public long      getPremiumCoins(){ return premiumCoins; }

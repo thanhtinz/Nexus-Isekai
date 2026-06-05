@@ -22,6 +22,9 @@ public class PacketDispatcher {
     @Autowired private com.fantasyrealm.leaderboard.LeaderboardHandler leaderboard;
     @Autowired private CharCreationHandler charCreation;
     @Autowired private CharacterHandler    character;
+    @Autowired private WorldHandler        world;
+    @Autowired private com.fantasyrealm.combat.CombatService combat;
+    @Autowired private com.fantasyrealm.combat.MobManager     mobManager;
 
     @FunctionalInterface
     interface Handler { void handle(PlayerSession s, Packet p); }
@@ -50,7 +53,8 @@ public class PacketDispatcher {
         handlers.put(PacketType.C_MAIL_SEND,  social::onMailSend);
         handlers.put(PacketType.C_GIFT_SEND,  social::onGiftSend);
         handlers.put(PacketType.C_DONATE,     social::onDonate);
-        handlers.put(PacketType.C_MARRY_PROPOSE, (s,p) -> s.send(new Packet(PacketType.S_NOTIFY).writeString("Tính năng kết hôn đang phát triển")));
+        handlers.put(PacketType.C_MARRY_PROPOSE, world::onMarryPropose);
+        handlers.put(PacketType.C_MARRY_ACCEPT,  world::onMarryAccept);
 
         // Economy
         handlers.put(PacketType.C_MARKET_LIST,  economy::onMarketList);
@@ -82,8 +86,12 @@ public class PacketDispatcher {
         handlers.put(PacketType.C_CHAR_INFO_REQ,       character::onCharInfoReq);
         handlers.put(PacketType.C_CHANGE_OUTFIT,       character::onChangeOutfit);
 
-        handlers.put(PacketType.C_EVENT_JOIN,   (s, p) -> s.send(new Packet(PacketType.S_NOTIFY).writeString("Tính năng sự kiện đang phát triển")));
-        handlers.put(PacketType.C_TREASURE_FIND,(s, p) -> s.send(new Packet(PacketType.S_NOTIFY).writeString("Tính năng săn kho báu đang phát triển")));
+        handlers.put(PacketType.C_EVENT_JOIN,    world::onEventJoin);
+        handlers.put(PacketType.C_TREASURE_FIND, world::onTreasureFind);
+
+        // Combat
+        handlers.put(PacketType.C_ATTACK_MOB,      combat::onAttackMob);
+        handlers.put(PacketType.C_PLAYER_RESPAWN,  combat::onPlayerRespawn);
     }
 
     private static final java.util.Set<PacketType> NO_AUTH = java.util.Set.of(

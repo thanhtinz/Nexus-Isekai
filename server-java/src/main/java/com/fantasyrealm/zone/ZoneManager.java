@@ -10,6 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ZoneManager {
+    @org.springframework.context.annotation.Lazy
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.fantasyrealm.combat.MobManager mobManager;
     private static final Logger log = LoggerFactory.getLogger(ZoneManager.class);
     private final ConcurrentHashMap<Integer,Zone> zones = new ConcurrentHashMap<>();
 
@@ -57,6 +60,8 @@ public class ZoneManager {
 
         // Send zone snapshot to joining player
         s.send(buildZoneData(target, s.getPlayerId()));
+        // Send danh sách quái trong zone
+        if (mobManager != null) s.send(mobManager.buildMobListPacket(targetZoneId));
 
         // Announce arrival to zone
         Packet arrive = new Packet(PacketType.S_PLAYER_MOVE)
