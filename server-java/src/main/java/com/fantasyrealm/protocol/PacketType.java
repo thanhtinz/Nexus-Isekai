@@ -74,6 +74,11 @@ public enum PacketType {
     C_ATTACK_PLAYER(0xD0), S_WANTED_UPDATE(0xD1), S_KARMA_UPDATE(0xD2),
     C_RP_EMOTE(0xD3), S_RP_EMOTE(0xD4), C_RP_STATUS(0xD5), S_RP_STATUS(0xD6),
     C_RP_JOB_START(0xD7), S_RP_JOB_RESULT(0xD8), S_ZONE_RULE(0xD9),
+    C_BIZ_LIST(0xDA), S_BIZ_LIST(0xDB), C_BIZ_BUY(0xDC), S_BIZ_RESULT(0xDD),
+    C_BIZ_APPLY(0xDE), C_BIZ_WORK(0xDF),
+
+    // Voice proximity (0xEB-0xEF) — hạ tầng cho voice service ngoài
+    C_VOICE_JOIN(0xEB), S_VOICE_PEERS(0xEC), C_VOICE_LEAVE(0xED),
 
     // GM/Admin (0xE0-0xEF)
     C_GM_COMMAND(0xE0), S_GM_RESULT(0xE1),

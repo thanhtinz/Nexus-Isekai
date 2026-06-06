@@ -234,3 +234,53 @@ CREATE TABLE IF NOT EXISTS skills (
 );
 CREATE INDEX IF NOT EXISTS idx_skills_class ON skills(class_code, faction_id, is_enabled);
 CREATE INDEX IF NOT EXISTS idx_skills_cat ON skills(category, sort_order);
+
+-- ============================================================
+-- BUSINESS — ngành nghề & cơ sở kinh doanh (RP, quản lý động)
+-- ============================================================
+-- Loại ngành nghề (admin thêm tới đâu game có tới đó)
+CREATE TABLE IF NOT EXISTS business_types (
+  id SERIAL PRIMARY KEY,
+  type_code VARCHAR(48) UNIQUE NOT NULL,    -- tavern, clinic, guard_post...
+  name VARCHAR(64) NOT NULL,
+  name_vn VARCHAR(64),
+  description TEXT,
+  category VARCHAR(32) DEFAULT 'service',   -- food|service|medical|security|craft|trade|finance|entertainment
+  -- Vào vai làm việc
+  job_action VARCHAR(48),                   -- mã hành động khi làm việc (cook, heal, patrol...)
+  base_pay INT DEFAULT 50,                  -- lương cơ bản mỗi lượt làm
+  -- Thầu/sở hữu
+  purchase_price BIGINT DEFAULT 100000,     -- giá thầu cơ sở loại này
+  daily_income BIGINT DEFAULT 5000,         -- thu nhập thụ động/ngày cho chủ
+  max_employees INT DEFAULT 5,              -- số nhân viên tối đa
+  icon_asset_id INT REFERENCES assets(id),
+  sort_order INT DEFAULT 0,
+  is_enabled BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Cơ sở cụ thể (đặt trên bản đồ, có thể được thầu)
+CREATE TABLE IF NOT EXISTS businesses (
+  id SERIAL PRIMARY KEY,
+  type_code VARCHAR(48) NOT NULL REFERENCES business_types(type_code),
+  name VARCHAR(96) NOT NULL,                -- "Quán Trọ Rồng Vàng"
+  zone_id INT DEFAULT 1,
+  pos_x REAL DEFAULT 100, pos_y REAL DEFAULT 100,
+  owner_char_id BIGINT,                     -- chủ sở hữu (NULL = chưa thầu, mua được)
+  treasury BIGINT DEFAULT 0,                -- quỹ cơ sở (tiền khách trả)
+  level INT DEFAULT 1,                      -- cấp nâng cấp cơ sở
+  is_open BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Nhân viên làm thuê tại cơ sở
+CREATE TABLE IF NOT EXISTS business_employees (
+  id SERIAL PRIMARY KEY,
+  business_id INT NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+  char_id BIGINT NOT NULL,
+  hired_at TIMESTAMPTZ DEFAULT NOW(),
+  shifts_worked INT DEFAULT 0,
+  UNIQUE(business_id, char_id)
+);
+CREATE INDEX IF NOT EXISTS idx_biz_owner ON businesses(owner_char_id);
+CREATE INDEX IF NOT EXISTS idx_biz_emp ON business_employees(char_id);

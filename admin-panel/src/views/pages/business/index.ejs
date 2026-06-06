@@ -1,0 +1,34 @@
+<div style="display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap">
+  <a href="/business/new" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm ngành</a>
+  <a href="/business/places" class="btn btn-ghost"><i class="fas fa-map-marker-alt"></i> Quản lý cơ sở</a>
+  <a href="/business/export/json" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export JSON</a>
+  <span style="color:var(--muted);font-size:.85rem;margin-left:auto">Thêm ngành tới đâu game có tới đó</span>
+</div>
+<% Object.keys(CATEGORIES).forEach(cat=>{ const list=types.filter(t=>t.category===cat); if(!list.length) return; %>
+<div class="card">
+  <div class="card-header"><h3><i class="fas fa-tag"></i> <%= CATEGORIES[cat] %> <span style="color:var(--muted);font-size:.8rem">(<%= list.length %>)</span></h3></div>
+  <table style="width:100%;border-collapse:collapse;font-size:.86rem">
+    <thead><tr style="text-align:left;color:var(--muted);border-bottom:1px solid var(--border)">
+      <th style="padding:6px">Tên</th><th>Hành động</th><th>Lương</th><th>Giá thầu</th><th>Thu/ngày</th><th>NV tối đa</th><th>Cơ sở</th><th></th>
+    </tr></thead><tbody>
+    <% list.forEach(t=>{ %>
+    <tr style="border-bottom:1px solid var(--border);<%= t.is_enabled?'':'opacity:.45' %>">
+      <td style="padding:6px"><strong><%= t.name_vn||t.name %></strong><div style="font-size:.72rem;color:var(--muted);font-family:monospace"><%= t.type_code %></div></td>
+      <td><%= t.job_action||'—' %></td><td><%= t.base_pay %></td>
+      <td><%= Number(t.purchase_price).toLocaleString() %></td><td><%= Number(t.daily_income).toLocaleString() %></td>
+      <td><%= t.max_employees %></td><td><%= t.biz_count %></td>
+      <td style="white-space:nowrap">
+        <a href="/business/<%= t.id %>/edit" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+        <button class="btn btn-warn btn-sm" onclick="tog(<%= t.id %>)"><i class="fas fa-power-off"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="del(<%= t.id %>)"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</div>
+<% }) %>
+<script>
+async function del(id){if(!confirm('Xóa ngành này?'))return;const r=await api('DELETE','/business/'+id);if(r.ok)location.reload();}
+async function tog(id){const r=await api('POST','/business/'+id+'/toggle');if(r.ok)location.reload();}
+</script>

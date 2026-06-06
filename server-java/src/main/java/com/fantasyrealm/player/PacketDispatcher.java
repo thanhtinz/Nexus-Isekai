@@ -28,6 +28,8 @@ public class PacketDispatcher {
     @Autowired private com.fantasyrealm.combat.SkillService   skills;
     @Autowired private com.fantasyrealm.gm.GmService          gm;
     @Autowired private com.fantasyrealm.rp.RpHandler          rp;
+    @Autowired private com.fantasyrealm.rp.BusinessService    business;
+    @Autowired private com.fantasyrealm.voice.VoiceProximityService voice;
 
     @FunctionalInterface
     interface Handler { void handle(PlayerSession s, Packet p); }
@@ -119,6 +121,16 @@ public class PacketDispatcher {
         handlers.put(PacketType.C_RP_EMOTE,      rp::onEmote);
         handlers.put(PacketType.C_RP_STATUS,     rp::onStatus);
         handlers.put(PacketType.C_RP_JOB_START,  rp::onJobStart);
+
+        // Business / cơ sở kinh doanh
+        handlers.put(PacketType.C_BIZ_LIST,  business::onListBusiness);
+        handlers.put(PacketType.C_BIZ_BUY,   business::onBuyBusiness);
+        handlers.put(PacketType.C_BIZ_APPLY, business::onApply);
+        handlers.put(PacketType.C_BIZ_WORK,  business::onWork);
+
+        // Voice proximity (hạ tầng cho voice service ngoài)
+        handlers.put(PacketType.C_VOICE_JOIN,  voice::onVoiceJoin);
+        handlers.put(PacketType.C_VOICE_LEAVE, voice::onVoiceLeave);
     }
 
     private static final java.util.Set<PacketType> NO_AUTH = java.util.Set.of(
