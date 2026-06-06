@@ -27,6 +27,7 @@ public class PacketDispatcher {
     @Autowired private com.fantasyrealm.combat.MobManager     mobManager;
     @Autowired private com.fantasyrealm.combat.SkillService   skills;
     @Autowired private com.fantasyrealm.gm.GmService          gm;
+    @Autowired private com.fantasyrealm.rp.RpHandler          rp;
 
     @FunctionalInterface
     interface Handler { void handle(PlayerSession s, Packet p); }
@@ -112,6 +113,12 @@ public class PacketDispatcher {
             s.send(new Packet(PacketType.S_GM_RESULT).writeString(gm.executeCommand(s, "release"))));
         handlers.put(PacketType.C_GM_INVISIBLE, (s, p) ->
             s.send(new Packet(PacketType.S_GM_RESULT).writeString(gm.executeCommand(s, "invis " + p.readInt()))));
+
+        // Roleplay
+        handlers.put(PacketType.C_ATTACK_PLAYER, rp::onAttackPlayer);
+        handlers.put(PacketType.C_RP_EMOTE,      rp::onEmote);
+        handlers.put(PacketType.C_RP_STATUS,     rp::onStatus);
+        handlers.put(PacketType.C_RP_JOB_START,  rp::onJobStart);
     }
 
     private static final java.util.Set<PacketType> NO_AUTH = java.util.Set.of(

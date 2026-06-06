@@ -45,6 +45,12 @@ public class ZoneManager {
         if (target == null) { log.warn("Zone {} not found", targetZoneId); return false; }
         if (target.isFull())  { return false; }
         if (target.getType().isPvp && s.getLevel() < 10) return false;
+        // Tội phạm bị truy nã cao không vào được vùng an toàn (trừ GM)
+        if (target.getType().isSafe && !s.isGm() && s.getWantedLevel() >= 3) {
+            s.send(new Packet(PacketType.S_NOTIFY)
+                .writeString("Bạn đang bị truy nã, không thể vào vùng an toàn!"));
+            return false;
+        }
 
         // Remove from old zone
         Zone old = zones.get(s.getCurrentZoneId());
@@ -62,6 +68,9 @@ public class ZoneManager {
         s.send(buildZoneData(target, s.getPlayerId()));
         // Send danh sách quái trong zone
         if (mobManager != null) s.send(mobManager.buildMobListPacket(targetZoneId));
+        // Báo luật vùng cho client (an toàn / PvP)
+        s.send(new Packet(PacketType.S_ZONE_RULE)
+            .writeBool(target.getType().isSafe).writeBool(target.getType().isPvp));
 
         // Announce arrival to zone
         Packet arrive = new Packet(PacketType.S_PLAYER_MOVE)

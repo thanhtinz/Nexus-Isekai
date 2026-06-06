@@ -35,6 +35,11 @@ namespace FantasyRealm.Character
             }
         }
 
+        /// <summary>Gửi yêu cầu tấn công người chơi khác (PvP).</summary>
+        public void AttackPlayer(long playerId) {
+            GameNetworkManager.Instance?.Send(new Packet(PacketType.C_ATTACK_PLAYER).WriteLong(playerId));
+        }
+
         void OnPlayerMove(Packet p) {
             long id = p.ReadLong(); float x = p.ReadFloat(); float y = p.ReadFloat();
             int dir = p.ReadByte();

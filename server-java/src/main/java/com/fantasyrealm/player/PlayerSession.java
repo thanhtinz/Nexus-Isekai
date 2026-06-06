@@ -19,6 +19,12 @@ public class PlayerSession {
     private volatile boolean frozen = false;
     private volatile boolean muted = false;
     private volatile float   speedMultiplier = 1f;
+    // RP state
+    private volatile int     wantedLevel = 0;     // 0-5 sao truy nã
+    private volatile int     karma = 0;           // danh tiếng: âm=ác, dương=thiện
+    private volatile long    lastCrimeMs = 0;
+    private volatile String  rpJob = null;        // nghề RP đang làm
+    private volatile String  rpStatus = null;     // trạng thái RP tự đặt (vd "đang câu cá")
     private final AtomicLong lastActivity = new AtomicLong(System.currentTimeMillis());
 
     // character data (volatile for thread safety)
@@ -79,6 +85,17 @@ public class PlayerSession {
     public void      setMuted(boolean v)     { muted = v; }
     public float     getSpeedMultiplier()    { return speedMultiplier; }
     public void      setSpeedMultiplier(float v){ speedMultiplier = Math.max(0.1f, Math.min(10f, v)); }
+
+    public int       getWantedLevel()        { return wantedLevel; }
+    public void      setWantedLevel(int v)   { wantedLevel = Math.max(0, Math.min(5, v)); }
+    public int       getKarma()              { return karma; }
+    public void      setKarma(int v)         { karma = v; }
+    public long      getLastCrimeMs()        { return lastCrimeMs; }
+    public void      setLastCrimeMs(long v)  { lastCrimeMs = v; }
+    public String    getRpJob()              { return rpJob; }
+    public void      setRpJob(String v)      { rpJob = v; }
+    public String    getRpStatus()           { return rpStatus; }
+    public void      setRpStatus(String v)   { rpStatus = v; }
     public long      getCharacterId() { return characterId; }
     public void      setCharacterId(long v){ characterId = v; }
     public long      getPlayerId()    { return playerId; }
