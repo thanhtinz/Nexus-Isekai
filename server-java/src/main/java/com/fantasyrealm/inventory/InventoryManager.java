@@ -10,7 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class InventoryManager {
     private static final Logger log = LoggerFactory.getLogger(InventoryManager.class);
-    private static final int MAX_SLOTS = 200;
+    // Túi đồ giới hạn — người chơi mở rộng kho bằng rương trong nhà/phòng trọ
+    private static final int MAX_SLOTS = 30;
 
     public record Slot(long itemId, int quantity, String meta) {}
 
@@ -22,9 +23,13 @@ public class InventoryManager {
         return inventories.computeIfAbsent(pid, k -> new ConcurrentHashMap<>());
     }
 
+    public int getMaxSlots() { return MAX_SLOTS; }
+    public int usedSlots(long playerId) { return inv(playerId).size(); }
+    public boolean isFull(long playerId) { return inv(playerId).size() >= MAX_SLOTS; }
+
     public boolean add(long playerId, long itemId, int qty) {
         var i = inv(playerId);
-        if (!i.containsKey(itemId) && i.size() >= MAX_SLOTS) return false;
+        if (!i.containsKey(itemId) && i.size() >= MAX_SLOTS) return false; // túi đầy
         i.merge(itemId, new Slot(itemId, qty, "{}"),
             (old, n) -> new Slot(itemId, old.quantity() + qty, old.meta()));
         return true;

@@ -339,3 +339,50 @@ CREATE TABLE IF NOT EXISTS furniture_catalog (
 );
 CREATE INDEX IF NOT EXISTS idx_house_owner ON houses(owner_char_id);
 CREATE INDEX IF NOT EXISTS idx_house_furn ON house_furniture(house_id);
+
+-- ============================================================
+-- PHÒNG TRỌ & KHO RƯƠNG (mở rộng housing)
+-- ============================================================
+-- Phòng trọ cho thuê (người mới): nội thất cố định, có rương mặc định
+CREATE TABLE IF NOT EXISTS rental_rooms (
+  id SERIAL PRIMARY KEY,
+  room_code VARCHAR(48) UNIQUE NOT NULL,    -- inn_basic, inn_cozy...
+  name VARCHAR(64) NOT NULL, name_vn VARCHAR(64),
+  zone_id INT DEFAULT 1,
+  rent_per_day BIGINT DEFAULT 500,          -- tiền thuê mỗi ngày
+  default_storage_slots INT DEFAULT 15,     -- ô rương mặc định có sẵn
+  fixed_layout_json TEXT DEFAULT '{}',      -- nội thất cố định (không sửa được)
+  is_enabled BOOLEAN DEFAULT TRUE
+);
+
+-- Người chơi đang thuê phòng
+CREATE TABLE IF NOT EXISTS room_rentals (
+  id SERIAL PRIMARY KEY,
+  room_code VARCHAR(48) NOT NULL REFERENCES rental_rooms(room_code),
+  char_id BIGINT NOT NULL,
+  rented_until TIMESTAMPTZ,                  -- hết hạn thuê
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(char_id)                            -- mỗi người thuê 1 phòng
+);
+
+-- Rương kho (trong nhà mua hoặc phòng thuê) — mở rộng túi đồ
+CREATE TABLE IF NOT EXISTS storage_chests (
+  id SERIAL PRIMARY KEY,
+  owner_char_id BIGINT NOT NULL,
+  location_type VARCHAR(16) NOT NULL,        -- house | rental
+  location_id INT NOT NULL,                  -- house_id hoặc rental room id
+  slots INT DEFAULT 20,                      -- số ô của rương này
+  label VARCHAR(48) DEFAULT 'Rương',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Đồ trong rương kho
+CREATE TABLE IF NOT EXISTS chest_items (
+  id SERIAL PRIMARY KEY,
+  chest_id INT NOT NULL REFERENCES storage_chests(id) ON DELETE CASCADE,
+  item_id BIGINT NOT NULL,
+  quantity INT DEFAULT 1,
+  UNIQUE(chest_id, item_id)
+);
+CREATE INDEX IF NOT EXISTS idx_chest_owner ON storage_chests(owner_char_id);
+CREATE INDEX IF NOT EXISTS idx_chest_items ON chest_items(chest_id);

@@ -31,6 +31,7 @@ public class PacketDispatcher {
     @Autowired private com.fantasyrealm.rp.BusinessService    business;
     @Autowired private com.fantasyrealm.voice.VoiceProximityService voice;
     @Autowired private com.fantasyrealm.housing.HousingService     housing;
+    @Autowired private com.fantasyrealm.housing.RentalStorageService rental;
 
     @FunctionalInterface
     interface Handler { void handle(PlayerSession s, Packet p); }
@@ -140,6 +141,15 @@ public class PacketDispatcher {
         handlers.put(PacketType.C_HOUSE_LOCK,      housing::onLockHouse);
         handlers.put(PacketType.C_FURNITURE_BUY,   housing::onBuyFurniture);
         handlers.put(PacketType.C_FURNITURE_PLACE, housing::onPlaceFurniture);
+
+        // Phòng trọ & kho rương
+        handlers.put(PacketType.C_RENTAL_LIST, rental::onListRentals);
+        handlers.put(PacketType.C_RENTAL_RENT, rental::onRentRoom);
+        handlers.put(PacketType.C_CHEST_LIST,  rental::onListChests);
+        handlers.put(PacketType.C_CHEST_BUY,   rental::onBuyChest);
+        handlers.put(PacketType.C_CHEST_OPEN, rental::onChestContent);
+        handlers.put(PacketType.C_CHEST_STORE, rental::onStore);
+        handlers.put(PacketType.C_CHEST_TAKE,  rental::onTake);
     }
 
     private static final java.util.Set<PacketType> NO_AUTH = java.util.Set.of(

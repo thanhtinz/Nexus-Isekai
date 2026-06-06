@@ -29,3 +29,31 @@ Nhà Tranh (basic) → Nhà Phố → Trang Viên → Dinh Thự → Hội Quán
 | C_HOUSE_LEAVE | FD | rời nhà |
 
 Client: HousingPanel.cs (phím H) — danh sách nhà, mua/vào/khóa, hiển thị + đặt nội thất.
+
+---
+
+## Phòng trọ (người mới) & Kho rương
+
+### Phòng trọ cho thuê
+Người mới chưa đủ tiền mua nhà → thuê phòng trọ theo ngày:
+- Nội thất **cố định** (không sửa), định nghĩa trong fixed_layout_json
+- Có **rương mặc định** (10-25 ô tùy phòng) để chứa đồ ngay
+- 3 phòng mẫu: Bình Dân (200/ngày) → Ấm Cúng → Cao Cấp
+
+### Túi đồ giới hạn + rương mở rộng
+- **Túi nhân vật: 30 ô** (giới hạn). Đầy túi → cất vào rương.
+- **Rương kho**: đặt trong nhà mua hoặc phòng thuê, mỗi rương thêm ô chứa
+- Mua rương mới (5000 vàng, 20 ô) để mở rộng kho
+- Cất/lấy đồ giữa túi ↔ rương
+
+### Packet (0x95-0x9E, 0x84)
+| Packet | ID | |
+|--------|----|---|
+| C_RENTAL_LIST/S_RENTAL_LIST | 95/96 | danh sách phòng trọ |
+| C_RENTAL_RENT/S_RENTAL_RESULT | 97/98 | thuê phòng |
+| C_CHEST_LIST/S_CHEST_LIST | 99/9A | danh sách rương |
+| C_CHEST_STORE/C_CHEST_TAKE | 9B/9C | cất/lấy đồ |
+| C_CHEST_BUY | 9D | mua rương |
+| C_CHEST_OPEN/S_CHEST_CONTENT | 84/9E | xem đồ trong rương |
+
+Client: StorageUI.cs — thuê phòng, quản lý rương (cất/lấy/mua).
