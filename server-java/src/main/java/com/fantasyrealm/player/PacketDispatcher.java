@@ -141,6 +141,7 @@ public class PacketDispatcher {
         handlers.put(PacketType.C_HOUSE_LOCK,      housing::onLockHouse);
         handlers.put(PacketType.C_FURNITURE_BUY,   housing::onBuyFurniture);
         handlers.put(PacketType.C_FURNITURE_PLACE, housing::onPlaceFurniture);
+        handlers.put(PacketType.C_FURNITURE_USE,   housing::onUseFurniture);
 
         // Phòng trọ & kho rương
         handlers.put(PacketType.C_RENTAL_LIST, rental::onListRentals);

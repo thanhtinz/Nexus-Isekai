@@ -57,3 +57,22 @@ Người mới chưa đủ tiền mua nhà → thuê phòng trọ theo ngày:
 | C_CHEST_OPEN/S_CHEST_CONTENT | 84/9E | xem đồ trong rương |
 
 Client: StorageUI.cs — thuê phòng, quản lý rương (cất/lấy/mua).
+
+---
+
+## Nhà chung khi kết hôn
+
+Khi 2 người chơi kết hôn (RelationshipService.acceptMarriage), hôn nhân được lưu DB
+(bảng marriages theo charId). Vợ/chồng được coi là **đồng sở hữu** mọi nhà của bạn đời:
+- Vào được nhà kể cả khi khóa cửa
+- Khóa/mở cửa, đặt nội thất như chủ
+- HousingService.isOwnerOrSpouse() kiểm tra cả chủ lẫn vợ/chồng
+
+## Nội thất tương tác
+
+Click nội thất trong nhà → C_FURNITURE_USE → hiệu ứng theo loại:
+- **Giường (bed):** ngủ → hồi đầy máu + mana
+- **Ghế/sofa (chair/sofa):** ngồi (animation)
+- **Rương (chest):** mở UI kho ngay tại chỗ
+
+Packet: C_FURNITURE_USE (0x85), S_FURNITURE_EFFECT (0x86).

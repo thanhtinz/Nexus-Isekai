@@ -5,6 +5,7 @@ import com.fantasyrealm.protocol.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RelationshipService {
     private static final Logger log = LoggerFactory.getLogger(RelationshipService.class);
     @Autowired private SessionManager sessions;
+    @Autowired(required = false) private JdbcTemplate jdbc;
 
     public enum RelType { FRIEND, BEST_FRIEND, MARRIED, BLOCKED }
 
@@ -46,12 +48,36 @@ public class RelationshipService {
 
     public void acceptMarriage(long a, long b) {
         rels.put(key(a,b), RelType.MARRIED);
+        // Lưu hôn nhân vào DB theo charId (cho nhà chung, bền vững qua restart)
+        if (jdbc != null) {
+            PlayerSession sa = sessions.getByPlayerId(a), sb = sessions.getByPlayerId(b);
+            if (sa != null && sb != null) {
+                long ca = Math.min(sa.getCharacterId(), sb.getCharacterId());
+                long cb = Math.max(sa.getCharacterId(), sb.getCharacterId());
+                try {
+                    jdbc.update("INSERT INTO marriages (char_a,char_b) VALUES(?,?) " +
+                        "ON CONFLICT (char_a,char_b) DO NOTHING", ca, cb);
+                } catch (Exception e) { log.warn("Lưu hôn nhân lỗi: {}", e.getMessage()); }
+            }
+        }
         Packet announce = new Packet(PacketType.S_CHAT)
             .writeLong(0L).writeString("[Hệ thống]")
             .writeString("Chúc mừng đám cưới! " + a + " & " + b + " đã kết hôn! 🎉")
             .writeByte(3);
         sessions.broadcastAll(announce);
         log.info("Marriage: {} <-> {}", a, b);
+    }
+
+    /** Lấy charId của vợ/chồng (theo charId). 0 nếu chưa kết hôn. */
+    public long getSpouseCharId(long charId) {
+        if (jdbc == null) return 0;
+        try {
+            List<Long> r = jdbc.query(
+                "SELECT CASE WHEN char_a=? THEN char_b ELSE char_a END AS spouse " +
+                "FROM marriages WHERE char_a=? OR char_b=?",
+                (rs, i) -> rs.getLong("spouse"), charId, charId, charId);
+            return r.isEmpty() ? 0 : r.get(0);
+        } catch (Exception e) { return 0; }
     }
 
     public void addIntimacy(long a, long b, int amount) {

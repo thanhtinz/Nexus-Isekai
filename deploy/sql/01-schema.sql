@@ -393,3 +393,15 @@ INSERT INTO system_config(key,value) VALUES
   ('crosssv_enabled','true'),
   ('new_server_open','false')
 ON CONFLICT DO NOTHING;
+
+-- Hôn nhân (vợ chồng — dùng cho nhà chung)
+CREATE TABLE IF NOT EXISTS marriages (
+  id SERIAL PRIMARY KEY,
+  char_a BIGINT NOT NULL,
+  char_b BIGINT NOT NULL,
+  married_at TIMESTAMPTZ DEFAULT NOW(),
+  shared_house_id INT,                  -- nhà chung (NULL nếu chưa có)
+  UNIQUE(char_a, char_b)
+);
+CREATE INDEX IF NOT EXISTS idx_marriage_a ON marriages(char_a);
+CREATE INDEX IF NOT EXISTS idx_marriage_b ON marriages(char_b);

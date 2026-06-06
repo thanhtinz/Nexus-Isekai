@@ -35,6 +35,7 @@ namespace FantasyRealm.UI
             PacketRouter.Instance.Register(PacketType.S_HOUSE_RESULT,     OnResult);
             PacketRouter.Instance.Register(PacketType.S_HOUSE_INTERIOR,   OnInterior);
             PacketRouter.Instance.Register(PacketType.S_FURNITURE_UPDATE, OnFurnitureUpdate);
+            PacketRouter.Instance.Register(PacketType.S_FURNITURE_EFFECT, OnFurnitureEffect);
             if (panel) panel.SetActive(false);
             if (interiorRoot) interiorRoot.SetActive(false);
         }
@@ -44,6 +45,29 @@ namespace FantasyRealm.UI
             PacketRouter.Instance.Unregister(PacketType.S_HOUSE_RESULT,     OnResult);
             PacketRouter.Instance.Unregister(PacketType.S_HOUSE_INTERIOR,   OnInterior);
             PacketRouter.Instance.Unregister(PacketType.S_FURNITURE_UPDATE, OnFurnitureUpdate);
+            PacketRouter.Instance.Unregister(PacketType.S_FURNITURE_EFFECT, OnFurnitureEffect);
+        }
+
+        /// <summary>Tương tác nội thất (ngồi/ngủ/mở rương) — gọi khi click nội thất trong nhà.</summary>
+        public void UseFurniture(string furnitureCode) {
+            GameNetworkManager.Instance?.Send(new Packet(PacketType.C_FURNITURE_USE).WriteString(furnitureCode));
+        }
+
+        void OnFurnitureEffect(Packet p) {
+            string code = p.ReadString(); string effect = p.ReadString();
+            int hpGain = p.ReadInt(); int mpGain = p.ReadInt();
+            switch (effect) {
+                case "sleep":      Debug.Log($"[House] ngủ hồi +{hpGain}HP +{mpGain}MP"); break;
+                case "sit":        Debug.Log("[House] ngồi"); break;
+                case "open_chest": RequestChestsForInterior(); break; // mở UI rương tại chỗ
+            }
+            // (Editor: phát animation nhân vật theo effect — sit/sleep)
+        }
+
+        void RequestChestsForInterior() {
+            // mở StorageUI hiển thị rương trong nhà này
+            var storage = FindObjectOfType<StorageUI>();
+            if (storage != null) storage.RequestChests();
         }
 
         void Update() {

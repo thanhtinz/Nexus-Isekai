@@ -24,6 +24,16 @@ public class HousingService {
 
     @Autowired(required = false) private JdbcTemplate jdbc;
     @Autowired private com.fantasyrealm.inventory.InventoryManager inventory;
+    @Autowired private com.fantasyrealm.social.RelationshipService relationships;
+
+    /** Char là chủ hoặc vợ/chồng của chủ → coi như đồng sở hữu. */
+    private boolean isOwnerOrSpouse(com.fantasyrealm.player.PlayerSession s, long ownerCharId) {
+        if (ownerCharId == 0) return false;
+        if (ownerCharId == s.getCharacterId()) return true;
+        // vợ/chồng của mình có sở hữu nhà này không
+        long spouse = relationships.getSpouseCharId(s.getCharacterId());
+        return spouse != 0 && spouse == ownerCharId;
+    }
 
     /** Danh sách nhà (đang bán + của mình). */
     public void onListHouses(PlayerSession s, Packet p) {
@@ -71,7 +81,7 @@ public class HousingService {
             "SELECT owner_char_id, locked, layout_json, address FROM houses WHERE id=?", houseId);
         if (rows.isEmpty()) { s.send(notify("Nhà không tồn tại")); return; }
         Map<String,Object> r = rows.get(0);
-        boolean isOwner = lnum(r,"owner_char_id") == s.getCharacterId();
+        boolean isOwner = isOwnerOrSpouse(s, lnum(r,"owner_char_id"));
         if (bool(r,"locked") && !isOwner) { s.send(notify("Cửa đang khóa")); return; }
 
         // Gửi nội thất trong nhà
@@ -92,7 +102,7 @@ public class HousingService {
         boolean lock = p.readBool();
         if (jdbc == null) return;
         Long owner = jdbc.queryForObject("SELECT owner_char_id FROM houses WHERE id=?", Long.class, houseId);
-        if (owner == null || owner != s.getCharacterId()) { s.send(notify("Bạn không phải chủ nhà")); return; }
+        if (owner == null || !isOwnerOrSpouse(s, owner)) { s.send(notify("Bạn không phải chủ nhà")); return; }
         jdbc.update("UPDATE houses SET locked=? WHERE id=?", lock, houseId);
         s.send(notify(lock ? "Đã khóa cửa" : "Đã mở khóa cửa"));
     }
@@ -118,7 +128,7 @@ public class HousingService {
         int rot = p.readByte();
         if (jdbc == null) return;
         Long owner = jdbc.queryForObject("SELECT owner_char_id FROM houses WHERE id=?", Long.class, houseId);
-        if (owner == null || owner != s.getCharacterId()) { s.send(notify("Bạn không phải chủ nhà")); return; }
+        if (owner == null || !isOwnerOrSpouse(s, owner)) { s.send(notify("Bạn không phải chủ nhà")); return; }
 
         // Giới hạn số nội thất theo loại nhà
         Integer cur = jdbc.queryForObject("SELECT COUNT(*) FROM house_furniture WHERE house_id=?", Integer.class, houseId);
@@ -132,6 +142,36 @@ public class HousingService {
         // Báo mọi người trong nhà cập nhật
         s.send(new Packet(PacketType.S_FURNITURE_UPDATE)
             .writeInt(houseId).writeString(code).writeFloat(x).writeFloat(y).writeInt(rot));
+    }
+
+    /** Tương tác với nội thất: ngồi ghế, ngủ giường (hồi máu), mở rương... */
+    public void onUseFurniture(PlayerSession s, Packet p) {
+        String furnitureCode = p.readString();
+        // Phân loại hành động theo loại nội thất
+        String effect; int hpGain = 0, mpGain = 0;
+        if (furnitureCode.contains("bed")) {
+            // Ngủ giường: hồi đầy máu + mana
+            hpGain = s.getMaxHp() - s.getHp();
+            mpGain = s.getMaxMp() - s.getMp();
+            s.setHp(s.getMaxHp());
+            s.setMp(s.getMaxMp());
+            effect = "sleep"; // client phát animation ngủ
+            s.send(notify("Bạn nghỉ ngơi, hồi đầy máu và mana"));
+            // Cập nhật HUD máu/mana
+            s.send(new Packet(PacketType.S_PLAYER_STATS)
+                .writeInt(s.getLevel()).writeInt(s.getHp()).writeInt(s.getMaxHp())
+                .writeInt(s.getMp()).writeInt(s.getMaxMp())
+                .writeLong(s.getExp()).writeLong(s.getLevel()*100L).writeLong(s.getGold()));
+        } else if (furnitureCode.contains("chair") || furnitureCode.contains("sofa")) {
+            effect = "sit"; // ngồi
+        } else if (furnitureCode.contains("chest")) {
+            effect = "open_chest"; // client mở UI rương
+        } else {
+            effect = "none";
+        }
+        s.send(new Packet(PacketType.S_FURNITURE_EFFECT)
+            .writeString(furnitureCode).writeString(effect)
+            .writeInt(hpGain).writeInt(mpGain));
     }
 
     private Packet houseResult(String msg, boolean ok) {
