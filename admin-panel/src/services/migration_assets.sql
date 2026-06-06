@@ -284,3 +284,58 @@ CREATE TABLE IF NOT EXISTS business_employees (
 );
 CREATE INDEX IF NOT EXISTS idx_biz_owner ON businesses(owner_char_id);
 CREATE INDEX IF NOT EXISTS idx_biz_emp ON business_employees(char_id);
+
+-- ============================================================
+-- HOUSING — nhà ở & tài sản sở hữu (RP)
+-- ============================================================
+-- Loại nhà (admin định nghĩa động)
+CREATE TABLE IF NOT EXISTS house_types (
+  id SERIAL PRIMARY KEY,
+  type_code VARCHAR(48) UNIQUE NOT NULL,    -- cottage, manor, guild_hall...
+  name VARCHAR(64) NOT NULL,
+  name_vn VARCHAR(64),
+  description TEXT,
+  tier VARCHAR(16) DEFAULT 'basic',         -- basic|comfort|luxury|estate
+  purchase_price BIGINT DEFAULT 50000,
+  storage_slots INT DEFAULT 20,             -- ô kho chứa đồ trong nhà
+  max_furniture INT DEFAULT 30,             -- số nội thất tối đa
+  icon_asset_id INT REFERENCES assets(id),
+  sort_order INT DEFAULT 0,
+  is_enabled BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Nhà cụ thể (lô đất trên bản đồ, có thể mua)
+CREATE TABLE IF NOT EXISTS houses (
+  id SERIAL PRIMARY KEY,
+  type_code VARCHAR(48) NOT NULL REFERENCES house_types(type_code),
+  address VARCHAR(96) NOT NULL,             -- "Số 12 Đường Hoa Anh Đào"
+  zone_id INT DEFAULT 1,
+  pos_x REAL DEFAULT 100, pos_y REAL DEFAULT 100,
+  owner_char_id BIGINT,                     -- NULL = chưa bán
+  locked BOOLEAN DEFAULT TRUE,              -- khóa cửa (chỉ chủ + khách mời vào)
+  layout_json TEXT DEFAULT '{}',            -- bố trí nội thất {furnitureId:{x,y,rot}}
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Nội thất đặt trong nhà
+CREATE TABLE IF NOT EXISTS house_furniture (
+  id SERIAL PRIMARY KEY,
+  house_id INT NOT NULL REFERENCES houses(id) ON DELETE CASCADE,
+  furniture_code VARCHAR(48) NOT NULL,      -- bed, table, chair, chest...
+  pos_x REAL, pos_y REAL, rotation INT DEFAULT 0,
+  placed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Catalog nội thất mua được (admin định nghĩa)
+CREATE TABLE IF NOT EXISTS furniture_catalog (
+  id SERIAL PRIMARY KEY,
+  furniture_code VARCHAR(48) UNIQUE NOT NULL,
+  name VARCHAR(64) NOT NULL, name_vn VARCHAR(64),
+  category VARCHAR(32) DEFAULT 'decor',     -- bed|seating|table|storage|decor|lighting
+  price BIGINT DEFAULT 1000,
+  asset_id INT REFERENCES assets(id),
+  is_enabled BOOLEAN DEFAULT TRUE
+);
+CREATE INDEX IF NOT EXISTS idx_house_owner ON houses(owner_char_id);
+CREATE INDEX IF NOT EXISTS idx_house_furn ON house_furniture(house_id);

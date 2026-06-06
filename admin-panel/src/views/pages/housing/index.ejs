@@ -1,0 +1,18 @@
+<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+  <a href="/housing/new" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm loại nhà</a>
+  <a href="/housing/lots" class="btn btn-ghost"><i class="fas fa-map-marker-alt"></i> Lô đất</a>
+  <a href="/housing/furniture" class="btn btn-ghost"><i class="fas fa-couch"></i> Nội thất</a>
+  <a href="/housing/export/json" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> JSON</a>
+</div>
+<div class="card"><div class="card-header"><h3><i class="fas fa-house"></i> Loại nhà (<%= types.length %>)</h3></div>
+<table style="width:100%;border-collapse:collapse;font-size:.86rem">
+<thead><tr style="text-align:left;color:var(--muted);border-bottom:1px solid var(--border)">
+<th style="padding:6px">Tên</th><th>Hạng</th><th>Giá</th><th>Kho</th><th>Nội thất tối đa</th><th>Đã tạo</th><th></th></tr></thead><tbody>
+<% types.forEach(t=>{ %><tr style="border-bottom:1px solid var(--border);<%= t.is_enabled?'':'opacity:.45' %>">
+<td style="padding:6px"><strong><%= t.name_vn||t.name %></strong><div style="font-size:.72rem;color:var(--muted);font-family:monospace"><%= t.type_code %></div></td>
+<td><%= TIERS[t.tier]||t.tier %></td><td><%= Number(t.purchase_price).toLocaleString() %></td>
+<td><%= t.storage_slots %></td><td><%= t.max_furniture %></td><td><%= t.house_count %></td>
+<td style="white-space:nowrap"><a href="/housing/<%= t.id %>/edit" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+<button class="btn btn-danger btn-sm" onclick="del(<%= t.id %>)"><i class="fas fa-trash"></i></button></td></tr><% }) %>
+</tbody></table></div>
+<script>async function del(id){if(!confirm('Xóa?'))return;const r=await api('DELETE','/housing/'+id);if(r.ok)location.reload();}</script>

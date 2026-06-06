@@ -68,6 +68,7 @@ app.use('/assets',     require('./middleware/auth'), require('./routes/assets'))
 app.use('/charcreation',require('./middleware/auth'), require('./routes/charcreation'));
 app.use('/skills',      require('./middleware/auth'), require('./routes/skills'));
 app.use('/business',    require('./middleware/auth'), require('./routes/business'));
+app.use('/housing',     require('./middleware/auth'), require('./routes/housing'));
 app.use('/items',      require('./middleware/auth'), require('./routes/items'));
 app.use('/npcs',       require('./middleware/auth'), require('./routes/npcs'));
 app.use('/dialogs',    require('./middleware/auth'), require('./routes/dialogs'));

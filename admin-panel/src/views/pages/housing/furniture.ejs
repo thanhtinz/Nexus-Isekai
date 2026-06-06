@@ -1,0 +1,15 @@
+<div style="margin-bottom:20px"><a href="/housing" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i> Loại nhà</a></div>
+<div class="card" style="max-width:560px;margin-bottom:20px"><div class="card-header"><h3><i class="fas fa-plus"></i> Thêm nội thất</h3></div>
+<form method="POST" action="/housing/furniture">
+<div class="form-row"><div class="form-group"><label>Mã *</label><input name="furniture_code" placeholder="wooden_bed" required></div>
+<div class="form-group"><label>Loại</label><select name="category"><% Object.keys(FURN_CATS).forEach(k=>{ %><option value="<%= k %>"><%= FURN_CATS[k] %></option><% }) %></select></div></div>
+<div class="form-row"><div class="form-group"><label>Tên (EN) *</label><input name="name" required></div>
+<div class="form-group"><label>Tên (VN)</label><input name="name_vn"></div></div>
+<div class="form-group"><label>Giá</label><input name="price" type="number" value="1000"></div>
+<button type="submit" class="btn btn-primary">Lưu</button></form></div>
+<div class="card"><div class="card-header"><h3>Catalog nội thất (<%= items.length %>)</h3></div>
+<table style="width:100%;border-collapse:collapse;font-size:.86rem">
+<thead><tr style="text-align:left;color:var(--muted)"><th style="padding:6px">Tên</th><th>Loại</th><th>Giá</th></tr></thead>
+<tbody><% items.forEach(it=>{ %><tr style="border-bottom:1px solid var(--border)">
+<td style="padding:6px"><%= it.name_vn||it.name %> <span style="font-size:.72rem;color:var(--muted);font-family:monospace"><%= it.furniture_code %></span></td>
+<td><%= FURN_CATS[it.category]||it.category %></td><td><%= Number(it.price).toLocaleString() %></td></tr><% }) %></tbody></table></div>

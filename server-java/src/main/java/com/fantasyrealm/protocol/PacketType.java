@@ -80,6 +80,11 @@ public enum PacketType {
     // Voice proximity (0xEB-0xEF) — hạ tầng cho voice service ngoài
     C_VOICE_JOIN(0xEB), S_VOICE_PEERS(0xEC), C_VOICE_LEAVE(0xED),
 
+    // Housing (0xF3-0xFD)
+    C_HOUSE_LIST(0xF3), S_HOUSE_LIST(0xF4), C_HOUSE_BUY(0xF5), S_HOUSE_RESULT(0xF6),
+    C_HOUSE_ENTER(0xF7), S_HOUSE_INTERIOR(0xF8), C_HOUSE_LOCK(0xF9),
+    C_FURNITURE_PLACE(0xFA), S_FURNITURE_UPDATE(0xFB), C_FURNITURE_BUY(0xFC), C_HOUSE_LEAVE(0xFD),
+
     // GM/Admin (0xE0-0xEF)
     C_GM_COMMAND(0xE0), S_GM_RESULT(0xE1),
     C_GM_POSSESS(0xE2), S_GM_POSSESS_OK(0xE3),
